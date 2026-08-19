@@ -1,0 +1,14 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "三次反转",
+    "原地交换"
+  ],
+  "difficulty": "medium",
+  "status": "solved"
+}

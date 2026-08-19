@@ -1,0 +1,7 @@
+{
+  "structures": ["array"],
+  "paradigms": ["two-pointer"],
+  "techniques": ["从后往前归并"],
+  "difficulty": "easy",
+  "status": "solved"
+}

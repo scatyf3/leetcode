@@ -1,0 +1,14 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "greedy"
+  ],
+  "techniques": [
+    "逐日差",
+    "伸缩求和"
+  ],
+  "difficulty": "easy",
+  "status": "solved"
+}
