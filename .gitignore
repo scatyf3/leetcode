@@ -1,0 +1,6 @@
+# dashboard SQLite index (rebuilt from each folder's meta.json via /api/sync)
+dashboard/data.db
+
+# python
+__pycache__/
+*.pyc

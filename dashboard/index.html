@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LeetCode 看板</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <h1>LeetCode 看板 <span class="sub">数据结构 × 算法范式</span></h1>
+    <div class="actions">
+      <span id="count" class="count"></span>
+      <button id="sync">↻ Sync</button>
+    </div>
+  </header>
+
+  <main id="panel"></main>
+
+  <!-- detail overlay -->
+  <div id="overlay" class="overlay hidden">
+    <div class="detail">
+      <div class="detail-head">
+        <div>
+          <span id="d-id" class="pill"></span>
+          <span id="d-title" class="d-title"></span>
+        </div>
+        <button id="close">✕</button>
+      </div>
+
+      <div class="tags-editor">
+        <div class="tf"><span class="tf-label">结构</span>
+          <div class="chipfield" data-field="structures"></div></div>
+        <div class="tf"><span class="tf-label">范式</span>
+          <div class="chipfield" data-field="paradigms"></div></div>
+        <div class="tf"><span class="tf-label">技巧 trick</span>
+          <div class="chipfield" data-field="techniques"></div></div>
+        <label class="tf sel">难度
+          <select id="e-difficulty">
+            <option value="">-</option><option>easy</option><option>medium</option><option>hard</option>
+          </select>
+        </label>
+        <label class="tf sel">状态
+          <select id="e-status">
+            <option>solved</option><option>review</option><option>todo</option>
+          </select>
+        </label>
+        <span id="meta-msg" class="msg">改动自动保存</span>
+      </div>
+
+      <div class="split">
+        <section class="pane code-pane">
+          <div id="sol-tabs" class="tabs"></div>
+          <pre id="sol-code"><code></code></pre>
+        </section>
+        <section class="pane note-pane">
+          <div class="note-head">
+            <span id="note-file" class="mono"></span>
+            <div>
+              <span id="note-mode" class="hint">双击渲染区编辑</span>
+              <button id="save-note" class="hidden">保存 (Ctrl+S)</button>
+              <span id="note-msg" class="msg"></span>
+            </div>
+          </div>
+          <textarea id="note-edit" class="hidden" spellcheck="false" placeholder="源码编辑中… Ctrl+S 保存，Esc / 点开返回渲染"></textarea>
+          <div id="note-preview" class="note-preview" title="双击进入源码编辑"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- data-structure trick doc overlay -->
+  <div id="doc-overlay" class="overlay hidden">
+    <div class="detail doc">
+      <div class="detail-head">
+        <div>
+          <span class="pill">结构</span>
+          <span id="doc-title" class="d-title"></span>
+          <span class="hint">通用 trick 速查</span>
+        </div>
+        <button id="doc-close">✕</button>
+      </div>
+      <div class="note-pane doc-pane">
+        <div class="note-head">
+          <span id="doc-file" class="mono"></span>
+          <div>
+            <span id="doc-mode" class="hint">双击渲染区编辑</span>
+            <button id="doc-save" class="hidden">保存 (Ctrl+S)</button>
+            <span id="doc-msg" class="msg"></span>
+          </div>
+        </div>
+        <textarea id="doc-edit" class="hidden" spellcheck="false" placeholder="写这个数据结构的通用套路 / trick…"></textarea>
+        <div id="doc-preview" class="note-preview" title="双击进入源码编辑"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>
