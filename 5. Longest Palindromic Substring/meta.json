@@ -1,0 +1,7 @@
+{
+  "structures": ["string"],
+  "paradigms": ["two-pointer", "dp"],
+  "techniques": ["中心扩展", "奇偶双中心", "区间DP按长度递增", "Manacher"],
+  "difficulty": "medium",
+  "status": "solved"
+}
