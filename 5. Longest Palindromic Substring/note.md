@@ -112,7 +112,7 @@ reverse  = "abacdgfdcaba"
 
 ### 下一题
 
-`expand` 这 5 行值得背成肌肉记忆，因为跨题复用：
-- **LC647 回文子串计数**：几乎同一份代码，把"取最长"换成"每扩成功一次 `cnt += 1`"
+`expand` 这 5 行值得背成肌肉记忆，因为跨题复用（全家地图见 [notes/palindrome-family.md](../notes/palindrome-family.md)）：
+- **[LC647 回文子串计数](../647.%20Palindromic%20Substrings/note.md)** ✅ 已做：几乎同一份代码，把"取最长"换成"每扩成功一次 `cnt += 1`"。附带发现：计数版在循环**内**结算，所以一个 ±1 都不需要
 - **LC516 最长回文子序列**：换成 sol2 的区间 DP 状态
 - **LC214 最短回文串**：Manacher / KMP

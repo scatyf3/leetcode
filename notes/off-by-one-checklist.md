@@ -151,7 +151,9 @@ while l >= 0 and r < n and s[l] == s[r]:
 
 配套的第二招:**让非法输入自然退化成空区间,而不是写 if 特判**。LC5 里偶中心传 `(i, i+1)`,即使 `s[i] != s[i+1]` 或 `i+1` 越界,while 首轮就退出并返回 `""`,不需要任何守卫。特判写得越少,能写错的地方越少。
 
-完整复盘见 [5. Longest Palindromic Substring/note.md](../5.%20Longest%20Palindromic%20Substring/note.md)。
+**第三招(最强,但不总是可用):把结算搬进循环里。** LC647 数回文子串个数时,`cnt += 1` 写在指针移动**之前** —— 此刻指针还合法,于是「退出时停在第一个不合法位置」这件事根本不用管,±1 直接归零。**能循环内结算的就别留到循环外。**
+
+完整复盘见 [5. Longest Palindromic Substring/note.md](../5.%20Longest%20Palindromic%20Substring/note.md) 和 [647. Palindromic Substrings/note.md](../647.%20Palindromic%20Substrings/note.md);回文题全家见 [palindrome-family.md](palindrome-family.md)。
 
 ---
 
