@@ -1,0 +1,1 @@
+一些小东西，记得edge case处理，还有dp init
