@@ -1,0 +1,7 @@
+{
+  "structures": ["graph"],
+  "paradigms": ["dfs", "bfs"],
+  "techniques": ["哈希表兼任visited与映射", "先占位后填充", "显式栈替代递归"],
+  "difficulty": "medium",
+  "status": "solved"
+}
