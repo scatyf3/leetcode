@@ -1,0 +1,7 @@
+{
+  "structures": ["linked-list"],
+  "paradigms": ["two-pointer"],
+  "techniques": ["快慢指针提前量", "dummy哨兵", "一趟扫描", "删除靠前驱"],
+  "difficulty": "medium",
+  "status": "solved"
+}
