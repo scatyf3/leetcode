@@ -1,0 +1,7 @@
+{
+  "structures": ["linked-list"],
+  "paradigms": ["two-pointer"],
+  "techniques": ["快慢指针找中点", "左中点vs右中点", "原地反转后半段", "交替合并", "指针即存储", "不变式消特判"],
+  "difficulty": "medium",
+  "status": "solved"
+}
