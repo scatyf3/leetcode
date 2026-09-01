@@ -1,0 +1,24 @@
+/* 只读静态站专用: 把所有写入口藏掉。本地 server.py 不加载这个文件。 */
+.ro #sync,
+.ro .todo-wrap,                 /* 📋 TODO: 加一条会去 scaffold 建文件夹 */
+.ro .scratch-box,               /* 随想速记 */
+.ro #note-new,
+.ro .tab-new,                   /* + 新解法 */
+.ro #save-note, .ro #sol-save, .ro #nt-save, .ro #doc-save,
+.ro .ce-x, .ro .ce-input,       /* 标签的 ✕ 和 + tag 输入框 */
+.ro #meta-msg,                  /* "改动自动保存" */
+.ro #note-mode, .ro #nt-mode, .ro #doc-mode, .ro #sol-mode {
+  display: none !important;
+}
+
+/* 熟练度徽章原本点开是改熟练度的菜单; 让点击穿透到整行 = 打开详情 */
+.ro .row .fam { pointer-events: none; }
+
+.ro-badge {
+  font-size: 12px;
+  color: var(--dim);
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.ro-badge a { color: inherit; }

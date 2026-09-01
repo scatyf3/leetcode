@@ -7,3 +7,6 @@ dashboard/.lc_index.json
 # python
 __pycache__/
 *.pyc
+
+# 静态站导出产物 (export_static.py, CI 里现建现扔)
+dist/
