@@ -1,6 +1,7 @@
 /* 只读静态站专用: 把所有写入口藏掉。本地 server.py 不加载这个文件。 */
 .ro #sync,
 .ro .todo-wrap,                 /* 📋 TODO: 加一条会去 scaffold 建文件夹 */
+.ro #open-notes,                /* 📓 笔记: notes/*.md 整个不上线, 见 export_static.py */
 .ro .scratch-box,               /* 随想速记 */
 .ro #note-new,
 .ro .tab-new,                   /* + 新解法 */
