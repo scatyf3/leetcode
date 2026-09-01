@@ -78,6 +78,23 @@ dashboard/
 | POST | `/api/problems`          | `{"query": "105"}` 或 `{"query": "word break"}` → 建题目文件夹并入表 |
 | POST | `/api/sync`              | 重扫文件夹、重建索引 |
 
+## 线上部署（只读）
+
+`main` 一 push，GitHub Actions 就把看板烤成静态站发到
+**https://scatyf3.github.io/leetcode/** —— 别人只能看，只有你能改。
+
+```bash
+python dashboard/export_static.py dist   # 本地预览同一份产物
+python -m http.server -d dist 8000
+```
+
+- `export_static.py` 复用 `server.py` 的那几个 GET 函数，把响应烤成同名 JSON
+  （`/api/problems/98` → `api/problems/98.json`），题目详情点开才拉，首屏只有列表。
+- `static-shim.js` 把 `fetch` 改道到这些 JSON，写请求就地拒绝；`ro.css` 把编辑入口藏掉。
+  **`app.js` 一行没改**，本地跑 `server.py` 还是完整的可写看板。
+- `notes/scratch.md` 和 `notes/todo.md` 不上线（`PRIVATE_NOTES`）。
+- 线上没有任何写接口存在 —— 不是关掉，是压根没导出。
+
 ## 端口
 
 默认 `8765`，改 `server.py` 顶部的 `PORT`。
