@@ -1,7 +1,18 @@
 {
-  "structures": ["string"],
-  "paradigms": ["two-pointer", "dp"],
-  "techniques": ["中心扩展", "奇偶双中心", "区间DP按长度递增", "Manacher"],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "2d-dp"
+  ],
+  "techniques": [
+    "中心扩展",
+    "奇偶双中心",
+    "区间DP按长度递增",
+    "Manacher"
+  ],
   "difficulty": "medium",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2
 }

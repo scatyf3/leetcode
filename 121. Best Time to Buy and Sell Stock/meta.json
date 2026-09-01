@@ -1,7 +1,16 @@
 {
-  "structures": ["array"],
-  "paradigms": ["greedy", "dp"],
-  "techniques": ["滚动最小值", "状态压缩"],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "greedy",
+    "1d-dp"
+  ],
+  "techniques": [
+    "滚动最小值",
+    "状态压缩"
+  ],
   "difficulty": "easy",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 3
 }

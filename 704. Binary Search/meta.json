@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "半开区间 [l, r) 模板",
+    "循环不变量: 答案始终在 [l, r) 内",
+    "找第一个满足条件的位置,而不是找目标本身"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "recursion"
+  ],
+  "techniques": [
+    "prev/curr/next 三指针翻转",
+    "尾递归传 prev 等价迭代",
+    "后序回溯 head.next.next=head"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

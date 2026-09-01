@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "string",
+    "stack"
+  ],
+  "paradigms": [
+    "stack"
+  ],
+  "techniques": [
+    "反向映射表 右→左",
+    "栈顶配对",
+    "收尾查栈空"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1
+}

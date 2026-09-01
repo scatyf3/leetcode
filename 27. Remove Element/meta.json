@@ -1,7 +1,15 @@
 {
-  "structures": ["array"],
-  "paradigms": ["two-pointer"],
-  "techniques": ["快慢指针", "原地覆盖"],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "快慢指针",
+    "原地覆盖"
+  ],
   "difficulty": "easy",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2
 }

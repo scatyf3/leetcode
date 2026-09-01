@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "tree",
+    "string"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "外层递归提供回溯点",
+    "序列化把子树关系转成子串关系",
+    "^ 分隔 + # 占位缺一不可"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 3
+}

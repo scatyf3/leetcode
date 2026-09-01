@@ -1,0 +1,19 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
+  "techniques": [
+    "选择-递归-撤销三步骨架",
+    "start 指针防组合重复",
+    "传 i 而非 i+1 实现可重复选",
+    "remain 递减代替 cur_sum 累加",
+    "排序后 break 剪枝"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4
+}

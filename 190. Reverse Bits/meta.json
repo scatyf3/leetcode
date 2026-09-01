@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "bit"
+  ],
+  "paradigms": [
+    "bit-manipulation"
+  ],
+  "techniques": [
+    "位宽固定 32 轮不能 while n",
+    "res<<1 | n&1 逐位搬运",
+    "f-string 补零"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

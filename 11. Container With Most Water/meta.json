@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "greedy"
+  ],
+  "techniques": [
+    "相向双指针",
+    "短板支配论证",
+    "先结算再移动指针"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
+}

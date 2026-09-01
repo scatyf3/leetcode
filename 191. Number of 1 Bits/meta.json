@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "bit"
+  ],
+  "paradigms": [
+    "bit-manipulation"
+  ],
+  "techniques": [
+    "Brian Kernighan: n &= n-1",
+    "循环次数 = 1 的个数",
+    "零位算不算数决定循环条件"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

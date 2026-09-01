@@ -9,6 +9,7 @@
     "逐日差",
     "伸缩求和"
   ],
-  "difficulty": "easy",
-  "status": "solved"
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
 }

@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "上下界沿路径向下传递",
+    "中序遍历必严格递增",
+    "None base case 吸收叶子/单边分支"
+  ],
+  "difficulty": "medium",
+  "status": "review",
+  "familiarity": 3
+}

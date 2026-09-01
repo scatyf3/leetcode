@@ -8,9 +8,25 @@
 </head>
 <body>
   <header>
-    <h1>LeetCode 看板 <span class="sub">数据结构 × 算法范式</span></h1>
+    <h1>LeetCode 看板 <span class="sub" id="sub">数据结构 × 算法范式</span></h1>
     <div class="actions">
+      <div class="groupby">
+        <button class="gb-btn on" data-by="structures">按结构</button><button class="gb-btn" data-by="paradigms">按范式</button>
+      </div>
+      <div id="fam-filter" class="fam-filter"></div>
       <span id="count" class="count"></span>
+      <div class="todo-wrap">
+        <button id="open-todo" class="ghost">📋 TODO<span id="todo-n" class="todo-n hidden"></span></button>
+        <div id="todo-pop" class="todo-pop hidden">
+          <div class="todo-head">
+            <span class="mono">notes/todo.md</span>
+            <span id="todo-msg" class="msg"></span>
+          </div>
+          <input id="todo-in" placeholder="题号或题名… 如 34 / word break,Enter 添加并建文件夹" spellcheck="false">
+          <div id="todo-list" class="todo-list"></div>
+        </div>
+      </div>
+      <button id="open-notes" class="ghost">📓 笔记</button>
       <button id="sync">↻ Sync</button>
     </div>
   </header>
@@ -45,13 +61,32 @@
             <option>solved</option><option>review</option><option>todo</option>
           </select>
         </label>
+        <label class="tf sel">熟练度
+          <select id="e-familiarity">
+            <option value="0">— 未评</option>
+            <option value="1">L1 已经熟悉</option>
+            <option value="2">L2 思路会 · 细节易写错</option>
+            <option value="3">L3 思路大概知道 · 不熟</option>
+            <option value="4">L4 思路都不知道</option>
+          </select>
+        </label>
         <span id="meta-msg" class="msg">改动自动保存</span>
       </div>
 
       <div class="split">
         <section class="pane code-pane">
-          <div id="sol-tabs" class="tabs"></div>
+          <div class="sol-head">
+            <div id="sol-tabs" class="tabs"></div>
+            <div class="sol-tools">
+              <span id="sol-mode" class="hint"></span>
+              <button id="sol-save" class="hidden">保存 (Ctrl+S)</button>
+              <span id="sol-msg" class="msg"></span>
+            </div>
+          </div>
+          <textarea id="sol-edit" class="hidden" spellcheck="false"
+            placeholder="写解法… Ctrl+S 保存，Esc / 点开返回高亮视图"></textarea>
           <pre id="sol-code"><code></code></pre>
+          <div id="sol-desc" class="lc-desc hidden"></div>
         </section>
         <section class="pane note-pane">
           <div class="note-head">
@@ -69,12 +104,48 @@
     </div>
   </div>
 
+  <!-- cross-cutting notes overlay: notes/*.md + 随想速记 -->
+  <div id="notes-overlay" class="overlay hidden">
+    <div class="detail notes-detail">
+      <div class="detail-head">
+        <div>
+          <span class="pill">笔记</span>
+          <span class="d-title">notes/</span>
+          <span class="hint">不属于任何单题的东西 —— 方法论、模板、随想</span>
+        </div>
+        <button id="notes-close">✕</button>
+      </div>
+      <div class="notes-body">
+        <aside class="notes-side">
+          <div class="scratch-box">
+            <input id="scratch-in" placeholder="随想… (Enter 存进 scratch.md)" spellcheck="false">
+            <span id="scratch-msg" class="msg"></span>
+          </div>
+          <div id="notes-list" class="notes-list"></div>
+          <button id="note-new" class="ghost note-new">+ 新建笔记</button>
+        </aside>
+        <section class="pane note-pane">
+          <div class="note-head">
+            <span id="nt-file" class="mono"></span>
+            <div>
+              <span id="nt-mode" class="hint">双击渲染区编辑</span>
+              <button id="nt-save" class="hidden">保存 (Ctrl+S)</button>
+              <span id="nt-msg" class="msg"></span>
+            </div>
+          </div>
+          <textarea id="nt-edit" class="hidden" spellcheck="false"></textarea>
+          <div id="nt-preview" class="note-preview" title="双击进入源码编辑"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
   <!-- data-structure trick doc overlay -->
   <div id="doc-overlay" class="overlay hidden">
     <div class="detail doc">
       <div class="detail-head">
         <div>
-          <span class="pill">结构</span>
+          <span class="pill" id="doc-kind">结构</span>
           <span id="doc-title" class="d-title"></span>
           <span class="hint">通用 trick 速查</span>
         </div>

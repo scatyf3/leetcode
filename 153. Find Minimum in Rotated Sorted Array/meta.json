@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "和 nums[r] 比而不是 nums[l]",
+    "r = mid 不能 mid-1",
+    "已升序早退"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
+}

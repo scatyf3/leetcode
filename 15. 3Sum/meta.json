@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "hash"
+  ],
+  "techniques": [
+    "排序建立单调性",
+    "跳相邻重复去重",
+    "固定一个数 + 相向双指针"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
+}

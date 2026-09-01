@@ -1,0 +1,15 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "原地交换左右子树",
+    "靠副作用传信息不用返回值"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

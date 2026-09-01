@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "先找旋转点再二分",
+    "两段值域不重叠",
+    "复用 153 的找最小值"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
+}

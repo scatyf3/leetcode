@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "bit",
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp",
+    "bit-manipulation"
+  ],
+  "techniques": [
+    "dp[i>>1] + (i&1)",
+    "复用已算过的答案而非闭式公式"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 3
+}
