@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp",
+    "greedy"
+  ],
+  "techniques": [
+    "同时维护最大与最小",
+    "滚动变量压掉数组",
+    "三候选转移"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4
+}

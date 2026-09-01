@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "快慢指针",
+    "is 比身份不比值",
+    "边界塞进循环条件"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1
+}

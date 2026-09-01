@@ -1,0 +1,15 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp"
+  ],
+  "techniques": [
+    "一维递推 f(n)=f(n-1)+f(n-2)",
+    "dp 初始化与 edge case"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1
+}

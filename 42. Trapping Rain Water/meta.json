@@ -1,7 +1,16 @@
 {
-  "structures": ["array"],
-  "paradigms": ["two-pointer", "dp"],
-  "techniques": ["左右夹逼", "前缀最大/后缀最大"],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "1d-dp"
+  ],
+  "techniques": [
+    "左右夹逼",
+    "前缀最大/后缀最大"
+  ],
   "difficulty": "hard",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 3
 }

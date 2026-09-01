@@ -1,0 +1,21 @@
+{
+  "structures": [
+    "array",
+    "heap"
+  ],
+  "paradigms": [
+    "binary-search",
+    "heap",
+    "design"
+  ],
+  "techniques": [
+    "二分找插入位(搜索缝: r 取 n 不取 n-1)",
+    "中位数下标是 n 的纯函数 (n-1)//2 与 n//2",
+    "冗余状态不要存,能算就算",
+    "对顶堆: 大顶堆存小的一半 + 小顶堆存大的一半",
+    "先推后弹再平衡,避开分类讨论"
+  ],
+  "difficulty": "hard",
+  "status": "review",
+  "familiarity": 4
+}

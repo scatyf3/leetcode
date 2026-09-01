@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "counting"
+  ],
+  "techniques": [
+    "Boyer-Moore 投票",
+    "不同元素配对抵消",
+    "计数哈希"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 4
+}

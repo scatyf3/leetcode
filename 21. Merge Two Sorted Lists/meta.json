@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "哨兵节点消灭空表特例",
+    "剩余链整段接上",
+    "return head.next"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1
+}

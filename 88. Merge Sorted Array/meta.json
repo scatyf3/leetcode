@@ -1,7 +1,14 @@
 {
-  "structures": ["array"],
-  "paradigms": ["two-pointer"],
-  "techniques": ["从后往前归并"],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "从后往前归并"
+  ],
   "difficulty": "easy",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2
 }

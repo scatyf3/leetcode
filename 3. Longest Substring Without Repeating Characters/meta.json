@@ -1,0 +1,18 @@
+{
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "sliding-window",
+    "greedy"
+  ],
+  "techniques": [
+    "last 表直接跳 l",
+    "l 单调不减",
+    "合法性向下封闭"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2
+}

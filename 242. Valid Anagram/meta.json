@@ -1,7 +1,17 @@
 {
-  "structures": ["string", "hash-table"],
-  "paradigms": ["counting"],
-  "techniques": ["dict.get 默认值消灭 if-else", "一张表 +1/-1 抵消", "先比长度剪枝"],
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "counting"
+  ],
+  "techniques": [
+    "dict.get 默认值消灭 if-else",
+    "一张表 +1/-1 抵消",
+    "先比长度剪枝"
+  ],
   "difficulty": "easy",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2
 }

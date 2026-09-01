@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "set 去重比长度",
+    "边扫边查提前返回"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

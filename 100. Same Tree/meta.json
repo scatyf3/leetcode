@@ -1,0 +1,16 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "双树同步递归",
+    "空节点 base case 覆盖叶子分支",
+    "and 短路先比 val"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2
+}

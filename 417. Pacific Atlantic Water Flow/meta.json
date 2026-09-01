@@ -1,0 +1,19 @@
+{
+  "structures": [
+    "grid",
+    "graph"
+  ],
+  "paradigms": [
+    "dfs",
+    "bfs"
+  ],
+  "techniques": [
+    "反向搜索",
+    "多源BFS",
+    "逆流单调切环",
+    "两次搜索取交集"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4
+}

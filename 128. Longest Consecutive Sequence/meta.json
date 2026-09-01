@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "set 代替显式哈希表",
+    "入口剪枝: 只从链头 x-1∉s 出发",
+    "每条链只走一次"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
+}

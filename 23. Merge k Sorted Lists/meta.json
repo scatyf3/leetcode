@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "linked-list",
+    "heap"
+  ],
+  "paradigms": [
+    "heap"
+  ],
+  "techniques": [
+    "k 路归并最小堆",
+    "元组塞下标破平局, 避免比 ListNode",
+    "堆内恒 k 个 → O(N log k)"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 2
+}

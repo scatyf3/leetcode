@@ -2,6 +2,7 @@
   --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
   --fg:#e6e8ee; --dim:#9aa3b2; --accent:#6ea8fe; --accent2:#7ee0a8;
   --easy:#54c78b; --medium:#e2b04a; --hard:#e06c75; --chip:#242a35;
+  --fam1:#54c78b; --fam2:#6ea8fe; --fam3:#e2b04a; --fam4:#e06c75;
 }
 @media (prefers-color-scheme:light){
   :root{
@@ -64,6 +65,44 @@ main{padding:18px 20px;overflow:auto}
 .tag.trick{background:color-mix(in srgb,var(--accent2) 16%,transparent);
   color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 30%,transparent)}
 
+/* ---- familiarity 熟练度: L1 熟 → L4 完全不会, 方块标签(和难度圆点区分) ---- */
+.fam{flex:none;width:26px;text-align:center;font:700 10.5px/1.6 Consolas,monospace;
+  border-radius:5px;background:var(--chip);color:var(--dim)}
+.fam.f1{background:color-mix(in srgb,var(--fam1) 18%,transparent);color:var(--fam1)}
+.fam.f2{background:color-mix(in srgb,var(--fam2) 18%,transparent);color:var(--fam2)}
+.fam.f3{background:color-mix(in srgb,var(--fam3) 20%,transparent);color:var(--fam3)}
+.fam.f4{background:color-mix(in srgb,var(--fam4) 20%,transparent);color:var(--fam4)}
+
+.fam-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:1100px;
+  margin:0 0 14px;color:var(--dim);font-size:12px}
+.fam-legend .sep{opacity:.4;margin:0 4px}
+
+.row .fam{cursor:pointer}
+.row .fam:hover{outline:1.5px solid currentColor;outline-offset:1px}
+.fam-menu{position:fixed;z-index:20;min-width:212px;display:flex;flex-direction:column;gap:2px;
+  background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:5px;
+  box-shadow:0 10px 28px rgba(0,0,0,.38)}
+.fam-opt{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
+  background:transparent;color:var(--fg);border:0;border-radius:6px;padding:6px 8px;font-size:12.5px}
+.fam-opt:hover{background:var(--panel2);filter:none}
+.fam-opt.on{background:var(--chip);font-weight:600}
+
+.groupby{display:flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.gb-btn{background:transparent;color:var(--dim);border:0;border-radius:0;padding:5px 10px;
+  font-size:12px}
+.gb-btn:hover{background:var(--panel2);filter:none}
+.gb-btn.on{background:var(--accent);color:#fff}
+
+.fam-filter{display:flex;gap:5px}
+.fam-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;
+  border:1px solid var(--line);border-radius:7px;padding:4px 8px;
+  font:600 12px/1 Consolas,monospace;color:var(--dim)}
+.fam-btn:hover{filter:none;background:var(--panel2)}
+.fam-btn.f1{color:var(--fam1)}.fam-btn.f2{color:var(--fam2)}
+.fam-btn.f3{color:var(--fam3)}.fam-btn.f4{color:var(--fam4)}
+.fam-btn.on{border-color:currentColor;background:color-mix(in srgb,currentColor 14%,transparent)}
+.fam-n{font-weight:400;opacity:.65;font-size:11px}
+
 /* ---- detail overlay ---- */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;
   align-items:center;justify-content:center;padding:24px;z-index:10}
@@ -108,9 +147,34 @@ main{padding:18px 20px;overflow:auto}
 .tab{padding:5px 10px;font-size:12px;border-radius:6px 6px 0 0;cursor:pointer;
   color:var(--dim);background:transparent;white-space:nowrap}
 .tab.active{background:var(--panel2);color:var(--fg)}
+/* tab 条 + 右侧编辑工具栏同一行 */
+.sol-head{display:flex;align-items:flex-end;gap:10px;background:var(--panel);padding-right:12px}
+.sol-head .tabs{flex:1;min-width:0}
+.sol-tools{display:flex;gap:8px;align-items:center;padding-bottom:6px;white-space:nowrap}
+.tab-new{color:var(--accent);opacity:.75}
+.tab-new:hover{opacity:1}
+.sol-new-in{border:0;outline:none;background:var(--panel2);color:var(--fg);
+  border-radius:6px 6px 0 0;padding:5px 10px;font:12px Consolas,monospace;min-width:200px}
+#sol-edit{flex:1;min-height:0;border:0;resize:none;background:var(--panel2);color:var(--fg);
+  padding:14px 16px;font:12.5px/1.55 "SF Mono",Consolas,"Cascadia Code",monospace;
+  outline:none;tab-size:4;white-space:pre}
 #sol-code{margin:0;flex:1;overflow:auto;background:var(--panel2);padding:14px 16px;
   font:12.5px/1.55 "SF Mono",Consolas,"Cascadia Code",monospace;white-space:pre}
 #sol-code code{white-space:pre}
+
+/* ---- LeetCode 题面 (problem.html, 原样的 HTML) ---- */
+.lc-desc{flex:1;min-height:0;overflow:auto;padding:14px 18px;background:var(--panel2);
+  font-size:13.5px;line-height:1.65}
+.lc-desc pre{background:var(--bg);border:1px solid var(--line);border-radius:8px;
+  padding:10px 12px;overflow:auto;font:12.5px/1.5 Consolas,monospace;white-space:pre-wrap}
+.lc-desc code{background:var(--bg);border-radius:4px;padding:1px 5px;
+  font:12.5px Consolas,monospace}
+.lc-desc pre code{background:none;padding:0}
+.lc-desc img{max-width:100%;border-radius:6px}
+.lc-desc ul,.lc-desc ol{padding-left:22px}
+.lc-desc strong{color:var(--fg)}
+.lc-desc a{color:var(--accent)}
+.lc-desc p{margin:.7em 0}
 
 .note-head{display:flex;justify-content:space-between;align-items:center;
   padding:8px 12px;background:var(--panel);gap:10px}
@@ -135,6 +199,26 @@ main{padding:18px 20px;overflow:auto}
 .note-preview blockquote{border-left:3px solid var(--accent);margin:0;
   padding-left:12px;color:var(--dim)}
 
+/* ---- notes overlay: 左边文件列表, 右边正文 ---- */
+.notes-detail{width:min(1100px,95vw);height:min(820px,92vh)}
+.notes-body{display:grid;grid-template-columns:250px 1fr;flex:1;min-height:0}
+.notes-side{display:flex;flex-direction:column;min-height:0;background:var(--panel);
+  border-right:1px solid var(--line)}
+.scratch-box{display:flex;flex-direction:column;gap:4px;padding:10px;
+  border-bottom:1px solid var(--line)}
+#scratch-in{background:var(--panel2);border:1px solid var(--line);border-radius:7px;
+  padding:7px 9px;color:var(--fg);font-size:13px;outline:none}
+#scratch-in:focus{border-color:var(--accent)}
+.notes-list{flex:1;min-height:0;overflow:auto;padding:6px}
+.note-item{display:flex;flex-direction:column;gap:2px;padding:7px 9px;border-radius:7px;
+  cursor:pointer}
+.note-item:hover{background:var(--panel2)}
+.note-item.active{background:var(--chip)}
+.ni-file{font:12px Consolas,monospace;color:var(--fg)}
+.ni-head{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.note-new{margin:8px 10px 10px;flex:none}
+
 /* ---- python syntax highlight tokens ---- */
 .t-kw{color:#c678dd;font-weight:600}   /* keywords */
 .t-fn{color:#61afef}                    /* def/class names */
@@ -147,3 +231,32 @@ main{padding:18px 20px;overflow:auto}
   .t-kw{color:#a626a4}.t-fn{color:#4078f2}.t-bi{color:#0184bc}
   .t-str{color:#50a14f}.t-num{color:#b76b01}.t-com{color:#9aa0a6}.t-dec{color:#986801}
 }
+
+/* ---- 📋 TODO 浮层: 数据源是 notes/todo.md ---- */
+.todo-wrap{position:relative}
+.todo-n{display:inline-block;min-width:17px;margin-left:6px;padding:0 5px;border-radius:9px;
+  background:var(--accent);color:#fff;font-size:11px;line-height:17px;text-align:center}
+.todo-n.hidden{display:none}
+.todo-pop{position:absolute;right:0;top:calc(100% + 8px);width:330px;z-index:20;
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);padding:10px;display:flex;flex-direction:column;gap:8px}
+.todo-pop.hidden{display:none}
+.todo-head{display:flex;justify-content:space-between;align-items:center;
+  color:var(--dim);font-size:12px}
+#todo-in{background:var(--panel2);border:1px solid var(--line);border-radius:7px;
+  padding:7px 9px;color:var(--fg);font-size:13px;outline:none}
+#todo-in:focus{border-color:var(--accent)}
+.todo-list{max-height:340px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.todo-empty{color:var(--dim);font-size:12.5px;padding:8px 4px}
+.todo-item{display:flex;align-items:center;gap:8px;padding:5px 6px;border-radius:7px}
+.todo-item:hover{background:var(--panel2)}
+.todo-item.done .todo-text{text-decoration:line-through;color:var(--dim)}
+.todo-cb{accent-color:var(--accent);cursor:pointer;flex:none;margin:0}
+.todo-item .dot.ghosted{opacity:.35}
+.todo-text{flex:1;min-width:0;font-size:13px;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+.todo-text.openable{cursor:pointer}
+.todo-text.openable:hover{color:var(--accent)}
+.todo-x{flex:none;color:var(--dim);cursor:pointer;opacity:0;font-size:12px;padding:0 2px}
+.todo-item:hover .todo-x{opacity:1}
+.todo-x:hover{color:var(--hard)}

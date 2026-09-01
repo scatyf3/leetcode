@@ -1,6 +1,9 @@
 # dashboard SQLite index (rebuilt from each folder's meta.json via /api/sync)
 dashboard/data.db
 
+# LeetCode 全量题目清单缓存 (scaffold.py 用来把题号翻成 slug, 一周重抓一次)
+dashboard/.lc_index.json
+
 # python
 __pycache__/
 *.pyc

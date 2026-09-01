@@ -1,0 +1,19 @@
+{
+  "structures": [
+    "string",
+    "graph",
+    "hash-table"
+  ],
+  "paradigms": [
+    "dfs",
+    "1d-dp"
+  ],
+  "techniques": [
+    "节点是缝不是字符",
+    "布尔DP转可达性搜索",
+    "显式栈替代递归"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3
+}
