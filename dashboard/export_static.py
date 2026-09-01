@@ -27,7 +27,10 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 DEFAULT_OUT = REPO / "dist"
 
-# 不上线的笔记: 随想收件箱和 todo 清单是给自己看的
+# notes/*.md 暂时整个不上线 —— 里面有私人内容(methodology.md 那种自述)。
+# 想放出来就把 EXPORT_NOTES 改回 True, 再用 PRIVATE_NOTES 逐个排除。
+# 注意这只挡住看板; 仓库是 public 的, notes/ 在 GitHub 上照样能直接看到。
+EXPORT_NOTES = False
 PRIVATE_NOTES = {"scratch.md", "todo.md"}
 
 SITE_FILES = ["app.js", "styles.css", "static-shim.js", "ro.css"]
@@ -71,7 +74,7 @@ def export(out: Path) -> dict:
     # list_notes 是按 mtime 排的, 但 CI 里全是 checkout 的时间 -> 顺序随机且每次构建都变。
     # 按文件名排, 并丢掉 mtime(前端不用), 这样同一个 commit 构建出来的产物是确定的。
     notes = sorted((x for x in server.list_notes() if x["file"] not in PRIVATE_NOTES),
-                   key=lambda x: x["file"])
+                   key=lambda x: x["file"]) if EXPORT_NOTES else []
     for x in notes:
         x.pop("mtime", None)
     write_json(api / "notes.json", notes)
