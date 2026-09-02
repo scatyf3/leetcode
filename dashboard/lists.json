@@ -1,0 +1,1428 @@
+{
+  "lists": {
+    "Blind 75": {
+      "source": "https://gist.github.com/krishnadey30/88c4e2f601e96597974c00185e479532",
+      "note": "经典 75 题, 覆盖面最广、题量最小。",
+      "categories": {
+        "数组": [
+          [
+            1,
+            "Two Sum"
+          ],
+          [
+            121,
+            "Best Time to Buy and Sell Stock"
+          ],
+          [
+            217,
+            "Contains Duplicate"
+          ],
+          [
+            238,
+            "Product of Array Except Self"
+          ],
+          [
+            53,
+            "Maximum Subarray"
+          ],
+          [
+            152,
+            "Maximum Product Subarray"
+          ],
+          [
+            153,
+            "Find Minimum in Rotated Sorted Array"
+          ],
+          [
+            33,
+            "Search in Rotated Sorted Array"
+          ],
+          [
+            15,
+            "3Sum"
+          ],
+          [
+            11,
+            "Container With Most Water"
+          ]
+        ],
+        "位运算": [
+          [
+            371,
+            "Sum of Two Integers"
+          ],
+          [
+            191,
+            "Number of 1 Bits"
+          ],
+          [
+            338,
+            "Counting Bits"
+          ],
+          [
+            268,
+            "Missing Number"
+          ],
+          [
+            190,
+            "Reverse Bits"
+          ]
+        ],
+        "动态规划": [
+          [
+            70,
+            "Climbing Stairs"
+          ],
+          [
+            322,
+            "Coin Change"
+          ],
+          [
+            300,
+            "Longest Increasing Subsequence"
+          ],
+          [
+            1143,
+            "Longest Common Subsequence"
+          ],
+          [
+            139,
+            "Word Break"
+          ],
+          [
+            39,
+            "Combination Sum"
+          ],
+          [
+            198,
+            "House Robber"
+          ],
+          [
+            213,
+            "House Robber II"
+          ],
+          [
+            91,
+            "Decode Ways"
+          ],
+          [
+            62,
+            "Unique Paths"
+          ],
+          [
+            55,
+            "Jump Game"
+          ]
+        ],
+        "图": [
+          [
+            133,
+            "Clone Graph"
+          ],
+          [
+            207,
+            "Course Schedule"
+          ],
+          [
+            417,
+            "Pacific Atlantic Water Flow"
+          ],
+          [
+            200,
+            "Number of Islands"
+          ],
+          [
+            128,
+            "Longest Consecutive Sequence"
+          ],
+          [
+            269,
+            "Alien Dictionary"
+          ],
+          [
+            261,
+            "Graph Valid Tree"
+          ],
+          [
+            323,
+            "Number of Connected Components in an Undirected Graph"
+          ]
+        ],
+        "区间": [
+          [
+            57,
+            "Insert Interval"
+          ],
+          [
+            56,
+            "Merge Intervals"
+          ],
+          [
+            435,
+            "Non-overlapping Intervals"
+          ],
+          [
+            252,
+            "Meeting Rooms"
+          ],
+          [
+            253,
+            "Meeting Rooms II"
+          ]
+        ],
+        "链表": [
+          [
+            206,
+            "Reverse Linked List"
+          ],
+          [
+            141,
+            "Linked List Cycle"
+          ],
+          [
+            21,
+            "Merge Two Sorted Lists"
+          ],
+          [
+            23,
+            "Merge k Sorted Lists"
+          ],
+          [
+            19,
+            "Remove Nth Node From End of List"
+          ],
+          [
+            143,
+            "Reorder List"
+          ]
+        ],
+        "矩阵": [
+          [
+            73,
+            "Set Matrix Zeroes"
+          ],
+          [
+            54,
+            "Spiral Matrix"
+          ],
+          [
+            48,
+            "Rotate Image"
+          ],
+          [
+            79,
+            "Word Search"
+          ]
+        ],
+        "字符串": [
+          [
+            3,
+            "Longest Substring Without Repeating Characters"
+          ],
+          [
+            424,
+            "Longest Repeating Character Replacement"
+          ],
+          [
+            76,
+            "Minimum Window Substring"
+          ],
+          [
+            242,
+            "Valid Anagram"
+          ],
+          [
+            49,
+            "Group Anagrams"
+          ],
+          [
+            20,
+            "Valid Parentheses"
+          ],
+          [
+            125,
+            "Valid Palindrome"
+          ],
+          [
+            5,
+            "Longest Palindromic Substring"
+          ],
+          [
+            647,
+            "Palindromic Substrings"
+          ],
+          [
+            271,
+            "Encode and Decode Strings"
+          ]
+        ],
+        "树": [
+          [
+            104,
+            "Maximum Depth of Binary Tree"
+          ],
+          [
+            100,
+            "Same Tree"
+          ],
+          [
+            226,
+            "Invert Binary Tree"
+          ],
+          [
+            124,
+            "Binary Tree Maximum Path Sum"
+          ],
+          [
+            102,
+            "Binary Tree Level Order Traversal"
+          ],
+          [
+            297,
+            "Serialize and Deserialize Binary Tree"
+          ],
+          [
+            572,
+            "Subtree of Another Tree"
+          ],
+          [
+            105,
+            "Construct Binary Tree from Preorder and Inorder Traversal"
+          ],
+          [
+            98,
+            "Validate Binary Search Tree"
+          ],
+          [
+            230,
+            "Kth Smallest Element in a BST"
+          ],
+          [
+            235,
+            "Lowest Common Ancestor of a Binary Search Tree"
+          ],
+          [
+            208,
+            "Implement Trie (Prefix Tree)"
+          ],
+          [
+            211,
+            "Design Add and Search Words Data Structure"
+          ],
+          [
+            212,
+            "Word Search II"
+          ]
+        ],
+        "堆": [
+          [
+            347,
+            "Top K Frequent Elements"
+          ],
+          [
+            295,
+            "Find Median from Data Stream"
+          ]
+        ]
+      }
+    },
+    "Hot 100": {
+      "source": "https://leetcode.cn/studyplan/top-100-liked/",
+      "note": "LeetCode 官方「热题 100」, 按官方 17 个子主题。抓于 2026-09-01。",
+      "categories": {
+        "哈希": [
+          [
+            1,
+            "Two Sum"
+          ],
+          [
+            49,
+            "Group Anagrams"
+          ],
+          [
+            128,
+            "Longest Consecutive Sequence"
+          ]
+        ],
+        "双指针": [
+          [
+            283,
+            "Move Zeroes"
+          ],
+          [
+            11,
+            "Container With Most Water"
+          ],
+          [
+            15,
+            "3Sum"
+          ],
+          [
+            42,
+            "Trapping Rain Water"
+          ]
+        ],
+        "滑动窗口": [
+          [
+            3,
+            "Longest Substring Without Repeating Characters"
+          ],
+          [
+            438,
+            "Find All Anagrams in a String"
+          ]
+        ],
+        "子串": [
+          [
+            560,
+            "Subarray Sum Equals K"
+          ],
+          [
+            239,
+            "Sliding Window Maximum"
+          ],
+          [
+            76,
+            "Minimum Window Substring"
+          ]
+        ],
+        "普通数组": [
+          [
+            53,
+            "Maximum Subarray"
+          ],
+          [
+            56,
+            "Merge Intervals"
+          ],
+          [
+            189,
+            "Rotate Array"
+          ],
+          [
+            238,
+            "Product of Array Except Self"
+          ],
+          [
+            41,
+            "First Missing Positive"
+          ]
+        ],
+        "矩阵": [
+          [
+            73,
+            "Set Matrix Zeroes"
+          ],
+          [
+            54,
+            "Spiral Matrix"
+          ],
+          [
+            48,
+            "Rotate Image"
+          ],
+          [
+            240,
+            "Search a 2D Matrix II"
+          ]
+        ],
+        "链表": [
+          [
+            160,
+            "Intersection of Two Linked Lists"
+          ],
+          [
+            206,
+            "Reverse Linked List"
+          ],
+          [
+            234,
+            "Palindrome Linked List"
+          ],
+          [
+            141,
+            "Linked List Cycle"
+          ],
+          [
+            142,
+            "Linked List Cycle II"
+          ],
+          [
+            21,
+            "Merge Two Sorted Lists"
+          ],
+          [
+            2,
+            "Add Two Numbers"
+          ],
+          [
+            19,
+            "Remove Nth Node From End of List"
+          ],
+          [
+            24,
+            "Swap Nodes in Pairs"
+          ],
+          [
+            25,
+            "Reverse Nodes in k-Group"
+          ],
+          [
+            138,
+            "Copy List with Random Pointer"
+          ],
+          [
+            148,
+            "Sort List"
+          ],
+          [
+            23,
+            "Merge k Sorted Lists"
+          ],
+          [
+            146,
+            "LRU Cache"
+          ]
+        ],
+        "二叉树": [
+          [
+            94,
+            "Binary Tree Inorder Traversal"
+          ],
+          [
+            104,
+            "Maximum Depth of Binary Tree"
+          ],
+          [
+            226,
+            "Invert Binary Tree"
+          ],
+          [
+            101,
+            "Symmetric Tree"
+          ],
+          [
+            543,
+            "Diameter of Binary Tree"
+          ],
+          [
+            102,
+            "Binary Tree Level Order Traversal"
+          ],
+          [
+            108,
+            "Convert Sorted Array to Binary Search Tree"
+          ],
+          [
+            98,
+            "Validate Binary Search Tree"
+          ],
+          [
+            230,
+            "Kth Smallest Element in a BST"
+          ],
+          [
+            199,
+            "Binary Tree Right Side View"
+          ],
+          [
+            114,
+            "Flatten Binary Tree to Linked List"
+          ],
+          [
+            105,
+            "Construct Binary Tree from Preorder and Inorder Traversal"
+          ],
+          [
+            437,
+            "Path Sum III"
+          ],
+          [
+            236,
+            "Lowest Common Ancestor of a Binary Tree"
+          ],
+          [
+            124,
+            "Binary Tree Maximum Path Sum"
+          ]
+        ],
+        "图论": [
+          [
+            200,
+            "Number of Islands"
+          ],
+          [
+            994,
+            "Rotting Oranges"
+          ],
+          [
+            207,
+            "Course Schedule"
+          ],
+          [
+            208,
+            "Implement Trie (Prefix Tree)"
+          ]
+        ],
+        "回溯": [
+          [
+            46,
+            "Permutations"
+          ],
+          [
+            78,
+            "Subsets"
+          ],
+          [
+            17,
+            "Letter Combinations of a Phone Number"
+          ],
+          [
+            39,
+            "Combination Sum"
+          ],
+          [
+            22,
+            "Generate Parentheses"
+          ],
+          [
+            79,
+            "Word Search"
+          ],
+          [
+            131,
+            "Palindrome Partitioning"
+          ],
+          [
+            51,
+            "N-Queens"
+          ]
+        ],
+        "二分查找": [
+          [
+            35,
+            "Search Insert Position"
+          ],
+          [
+            74,
+            "Search a 2D Matrix"
+          ],
+          [
+            34,
+            "Find First and Last Position of Element in Sorted Array"
+          ],
+          [
+            33,
+            "Search in Rotated Sorted Array"
+          ],
+          [
+            153,
+            "Find Minimum in Rotated Sorted Array"
+          ],
+          [
+            4,
+            "Median of Two Sorted Arrays"
+          ]
+        ],
+        "栈": [
+          [
+            20,
+            "Valid Parentheses"
+          ],
+          [
+            155,
+            "Min Stack"
+          ],
+          [
+            394,
+            "Decode String"
+          ],
+          [
+            739,
+            "Daily Temperatures"
+          ],
+          [
+            84,
+            "Largest Rectangle in Histogram"
+          ]
+        ],
+        "堆": [
+          [
+            215,
+            "Kth Largest Element in an Array"
+          ],
+          [
+            347,
+            "Top K Frequent Elements"
+          ],
+          [
+            295,
+            "Find Median from Data Stream"
+          ]
+        ],
+        "贪心算法": [
+          [
+            121,
+            "Best Time to Buy and Sell Stock"
+          ],
+          [
+            55,
+            "Jump Game"
+          ],
+          [
+            45,
+            "Jump Game II"
+          ],
+          [
+            763,
+            "Partition Labels"
+          ]
+        ],
+        "动态规划": [
+          [
+            70,
+            "Climbing Stairs"
+          ],
+          [
+            118,
+            "Pascal's Triangle"
+          ],
+          [
+            198,
+            "House Robber"
+          ],
+          [
+            279,
+            "Perfect Squares"
+          ],
+          [
+            322,
+            "Coin Change"
+          ],
+          [
+            139,
+            "Word Break"
+          ],
+          [
+            300,
+            "Longest Increasing Subsequence"
+          ],
+          [
+            152,
+            "Maximum Product Subarray"
+          ],
+          [
+            32,
+            "Longest Valid Parentheses"
+          ],
+          [
+            416,
+            "Partition Equal Subset Sum"
+          ]
+        ],
+        "多维动态规划": [
+          [
+            62,
+            "Unique Paths"
+          ],
+          [
+            64,
+            "Minimum Path Sum"
+          ],
+          [
+            5,
+            "Longest Palindromic Substring"
+          ],
+          [
+            1143,
+            "Longest Common Subsequence"
+          ],
+          [
+            72,
+            "Edit Distance"
+          ]
+        ],
+        "技巧": [
+          [
+            136,
+            "Single Number"
+          ],
+          [
+            169,
+            "Majority Element"
+          ],
+          [
+            75,
+            "Sort Colors"
+          ],
+          [
+            31,
+            "Next Permutation"
+          ],
+          [
+            287,
+            "Find the Duplicate Number"
+          ]
+        ]
+      }
+    },
+    "Top Interview 150": {
+      "source": "https://leetcode.com/studyplan/top-interview-150/",
+      "note": "LeetCode 官方「面试经典 150 题」, 分类来自 github.com/logreg-n-coffee/leetcode-top-interview-150。抓于 2026-09-01。",
+      "categories": {
+        "数组 / 字符串": [
+          [
+            88,
+            "Merge Sorted Array"
+          ],
+          [
+            27,
+            "Remove Element"
+          ],
+          [
+            26,
+            "Remove Duplicates from Sorted Array"
+          ],
+          [
+            80,
+            "Remove Duplicates from Sorted Array II"
+          ],
+          [
+            169,
+            "Majority Element"
+          ],
+          [
+            189,
+            "Rotate Array"
+          ],
+          [
+            121,
+            "Best Time to Buy and Sell Stock"
+          ],
+          [
+            122,
+            "Best Time to Buy and Sell Stock II"
+          ],
+          [
+            55,
+            "Jump Game"
+          ],
+          [
+            45,
+            "Jump Game II"
+          ],
+          [
+            274,
+            "H-Index"
+          ],
+          [
+            380,
+            "Insert Delete GetRandom O(1)"
+          ],
+          [
+            238,
+            "Product of Array Except Self"
+          ],
+          [
+            134,
+            "Gas Station"
+          ],
+          [
+            135,
+            "Candy"
+          ],
+          [
+            42,
+            "Trapping Rain Water"
+          ],
+          [
+            13,
+            "Roman to Integer"
+          ],
+          [
+            12,
+            "Integer to Roman"
+          ],
+          [
+            58,
+            "Length of Last Word"
+          ],
+          [
+            14,
+            "Longest Common Prefix"
+          ],
+          [
+            151,
+            "Reverse Words in a String"
+          ],
+          [
+            6,
+            "Zigzag Conversion"
+          ],
+          [
+            28,
+            "Find the Index of the First Occurrence in a String"
+          ],
+          [
+            68,
+            "Text Justification"
+          ]
+        ],
+        "双指针": [
+          [
+            125,
+            "Valid Palindrome"
+          ],
+          [
+            392,
+            "Is Subsequence"
+          ],
+          [
+            11,
+            "Container With Most Water"
+          ],
+          [
+            167,
+            "Two Sum II - Input Array Is Sorted"
+          ],
+          [
+            15,
+            "3Sum"
+          ],
+          [
+            202,
+            "Happy Number"
+          ]
+        ],
+        "滑动窗口": [
+          [
+            3,
+            "Longest Substring Without Repeating Characters"
+          ],
+          [
+            76,
+            "Minimum Window Substring"
+          ],
+          [
+            30,
+            "Substring with Concatenation of All Words"
+          ],
+          [
+            209,
+            "Minimum Size Subarray Sum"
+          ]
+        ],
+        "矩阵": [
+          [
+            36,
+            "Valid Sudoku"
+          ],
+          [
+            54,
+            "Spiral Matrix"
+          ],
+          [
+            48,
+            "Rotate Image"
+          ],
+          [
+            73,
+            "Set Matrix Zeroes"
+          ],
+          [
+            289,
+            "Game of Life"
+          ]
+        ],
+        "哈希表": [
+          [
+            383,
+            "Ransom Note"
+          ],
+          [
+            205,
+            "Isomorphic Strings"
+          ],
+          [
+            290,
+            "Word Pattern"
+          ],
+          [
+            242,
+            "Valid Anagram"
+          ],
+          [
+            49,
+            "Group Anagrams"
+          ],
+          [
+            1,
+            "Two Sum"
+          ],
+          [
+            219,
+            "Contains Duplicate II"
+          ],
+          [
+            128,
+            "Longest Consecutive Sequence"
+          ]
+        ],
+        "区间": [
+          [
+            228,
+            "Summary Ranges"
+          ],
+          [
+            56,
+            "Merge Intervals"
+          ],
+          [
+            57,
+            "Insert Interval"
+          ],
+          [
+            452,
+            "Minimum Number of Arrows to Burst Balloons"
+          ]
+        ],
+        "栈": [
+          [
+            20,
+            "Valid Parentheses"
+          ],
+          [
+            71,
+            "Simplify Path"
+          ],
+          [
+            155,
+            "Min Stack"
+          ],
+          [
+            150,
+            "Evaluate Reverse Polish Notation"
+          ],
+          [
+            224,
+            "Basic Calculator"
+          ]
+        ],
+        "链表": [
+          [
+            141,
+            "Linked List Cycle"
+          ],
+          [
+            2,
+            "Add Two Numbers"
+          ],
+          [
+            21,
+            "Merge Two Sorted Lists"
+          ],
+          [
+            138,
+            "Copy List with Random Pointer"
+          ],
+          [
+            206,
+            "Reverse Linked List"
+          ],
+          [
+            25,
+            "Reverse Nodes in k-Group"
+          ],
+          [
+            19,
+            "Remove Nth Node From End of List"
+          ],
+          [
+            82,
+            "Remove Duplicates from Sorted List II"
+          ],
+          [
+            61,
+            "Rotate List"
+          ],
+          [
+            86,
+            "Partition List"
+          ],
+          [
+            146,
+            "LRU Cache"
+          ]
+        ],
+        "二叉树 通用": [
+          [
+            104,
+            "Maximum Depth of Binary Tree"
+          ],
+          [
+            100,
+            "Same Tree"
+          ],
+          [
+            226,
+            "Invert Binary Tree"
+          ],
+          [
+            101,
+            "Symmetric Tree"
+          ],
+          [
+            105,
+            "Construct Binary Tree from Preorder and Inorder Traversal"
+          ],
+          [
+            106,
+            "Construct Binary Tree from Inorder and Postorder Traversal"
+          ],
+          [
+            117,
+            "Populating Next Right Pointers in Each Node II"
+          ],
+          [
+            114,
+            "Flatten Binary Tree to Linked List"
+          ],
+          [
+            112,
+            "Path Sum"
+          ],
+          [
+            129,
+            "Sum Root to Leaf Numbers"
+          ],
+          [
+            124,
+            "Binary Tree Maximum Path Sum"
+          ],
+          [
+            173,
+            "Binary Search Tree Iterator"
+          ],
+          [
+            222,
+            "Count Complete Tree Nodes"
+          ],
+          [
+            236,
+            "Lowest Common Ancestor of a Binary Tree"
+          ]
+        ],
+        "二叉树 BFS": [
+          [
+            199,
+            "Binary Tree Right Side View"
+          ],
+          [
+            637,
+            "Average of Levels in Binary Tree"
+          ],
+          [
+            102,
+            "Binary Tree Level Order Traversal"
+          ],
+          [
+            103,
+            "Binary Tree Zigzag Level Order Traversal"
+          ],
+          [
+            530,
+            "Minimum Absolute Difference in BST"
+          ],
+          [
+            230,
+            "Kth Smallest Element in a BST"
+          ],
+          [
+            98,
+            "Validate Binary Search Tree"
+          ]
+        ],
+        "图 通用": [
+          [
+            200,
+            "Number of Islands"
+          ],
+          [
+            130,
+            "Surrounded Regions"
+          ],
+          [
+            133,
+            "Clone Graph"
+          ],
+          [
+            399,
+            "Evaluate Division"
+          ],
+          [
+            207,
+            "Course Schedule"
+          ],
+          [
+            210,
+            "Course Schedule II"
+          ]
+        ],
+        "图 BFS": [
+          [
+            909,
+            "Snakes and Ladders"
+          ],
+          [
+            433,
+            "Minimum Genetic Mutation"
+          ],
+          [
+            127,
+            "Word Ladder"
+          ]
+        ],
+        "字典树": [
+          [
+            208,
+            "Implement Trie (Prefix Tree)"
+          ],
+          [
+            211,
+            "Design Add and Search Words Data Structure"
+          ],
+          [
+            212,
+            "Word Search II"
+          ]
+        ],
+        "回溯": [
+          [
+            17,
+            "Letter Combinations of a Phone Number"
+          ],
+          [
+            77,
+            "Combinations"
+          ],
+          [
+            46,
+            "Permutations"
+          ],
+          [
+            39,
+            "Combination Sum"
+          ],
+          [
+            52,
+            "N-Queens II"
+          ],
+          [
+            22,
+            "Generate Parentheses"
+          ],
+          [
+            79,
+            "Word Search"
+          ]
+        ],
+        "分治": [
+          [
+            108,
+            "Convert Sorted Array to Binary Search Tree"
+          ],
+          [
+            148,
+            "Sort List"
+          ],
+          [
+            427,
+            "Construct Quad Tree"
+          ],
+          [
+            23,
+            "Merge k Sorted Lists"
+          ]
+        ],
+        "Kadane": [
+          [
+            53,
+            "Maximum Subarray"
+          ],
+          [
+            918,
+            "Maximum Sum Circular Subarray"
+          ]
+        ],
+        "二分查找": [
+          [
+            35,
+            "Search Insert Position"
+          ],
+          [
+            74,
+            "Search a 2D Matrix"
+          ],
+          [
+            162,
+            "Find Peak Element"
+          ],
+          [
+            33,
+            "Search in Rotated Sorted Array"
+          ],
+          [
+            34,
+            "Find First and Last Position of Element in Sorted Array"
+          ],
+          [
+            153,
+            "Find Minimum in Rotated Sorted Array"
+          ],
+          [
+            4,
+            "Median of Two Sorted Arrays"
+          ]
+        ],
+        "堆": [
+          [
+            215,
+            "Kth Largest Element in an Array"
+          ],
+          [
+            502,
+            "IPO"
+          ],
+          [
+            373,
+            "Find K Pairs with Smallest Sums"
+          ],
+          [
+            295,
+            "Find Median from Data Stream"
+          ]
+        ],
+        "位运算": [
+          [
+            67,
+            "Add Binary"
+          ],
+          [
+            190,
+            "Reverse Bits"
+          ],
+          [
+            191,
+            "Number of 1 Bits"
+          ],
+          [
+            136,
+            "Single Number"
+          ],
+          [
+            137,
+            "Single Number II"
+          ],
+          [
+            201,
+            "Bitwise AND of Numbers Range"
+          ]
+        ],
+        "数学": [
+          [
+            9,
+            "Palindrome Number"
+          ],
+          [
+            66,
+            "Plus One"
+          ],
+          [
+            172,
+            "Factorial Trailing Zeroes"
+          ],
+          [
+            69,
+            "Sqrt(x)"
+          ],
+          [
+            50,
+            "Pow(x, n)"
+          ],
+          [
+            149,
+            "Max Points on a Line"
+          ]
+        ],
+        "一维 DP": [
+          [
+            70,
+            "Climbing Stairs"
+          ],
+          [
+            198,
+            "House Robber"
+          ],
+          [
+            139,
+            "Word Break"
+          ],
+          [
+            322,
+            "Coin Change"
+          ],
+          [
+            300,
+            "Longest Increasing Subsequence"
+          ]
+        ],
+        "多维 DP": [
+          [
+            120,
+            "Triangle"
+          ],
+          [
+            64,
+            "Minimum Path Sum"
+          ],
+          [
+            63,
+            "Unique Paths II"
+          ],
+          [
+            5,
+            "Longest Palindromic Substring"
+          ],
+          [
+            97,
+            "Interleaving String"
+          ],
+          [
+            72,
+            "Edit Distance"
+          ],
+          [
+            123,
+            "Best Time to Buy and Sell Stock III"
+          ],
+          [
+            188,
+            "Best Time to Buy and Sell Stock IV"
+          ],
+          [
+            221,
+            "Maximal Square"
+          ]
+        ]
+      }
+    }
+  },
+  "premium": [
+    252,
+    253,
+    261,
+    269,
+    271,
+    323
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs",
+    "bfs"
+  ],
+  "techniques": [
+    "前序 + null 占位才能唯一还原, 中序不行",
+    "iterator 当消费指针",
+    "层序(BFS)是唯一好读的非递归版, 位置对齐所以不用状态位"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 3
+}

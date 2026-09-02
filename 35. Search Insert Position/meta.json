@@ -12,6 +12,6 @@
     "等价于 bisect_left"
   ],
   "difficulty": "easy",
-  "status": "todo",
-  "familiarity": 0
+  "status": "solved",
+  "familiarity": 2
 }
