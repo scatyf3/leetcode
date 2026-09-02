@@ -26,6 +26,8 @@
           <div id="todo-list" class="todo-list"></div>
         </div>
       </div>
+      <button id="open-review" class="ghost">🧠 复习<span id="review-n" class="todo-n hidden"></span></button>
+      <button id="open-lists" class="ghost">📊 题单</button>
       <button id="open-notes" class="ghost">📓 笔记</button>
       <button id="sync">↻ Sync</button>
     </div>
@@ -101,6 +103,61 @@
           <div id="note-preview" class="note-preview" title="双击进入源码编辑"></div>
         </section>
       </div>
+    </div>
+  </div>
+
+  <!-- FSRS 复习: 看题面 -> 心里过一遍思路 -> 空格揭晓 -> 1-4 自评 -->
+  <div id="review-overlay" class="overlay hidden">
+    <div class="detail review-detail">
+      <div class="detail-head">
+        <div>
+          <span id="rv-id" class="pill"></span>
+          <span id="rv-title" class="d-title"></span>
+          <span id="rv-meta" class="hint"></span>
+        </div>
+        <div class="rv-head-right">
+          <span id="rv-progress" class="hint"></span>
+          <button id="review-close">✕</button>
+        </div>
+      </div>
+
+      <div id="rv-empty" class="rv-empty hidden"></div>
+
+      <div id="rv-card" class="rv-card">
+        <div id="rv-question">
+          <div class="rv-ask">
+            先在心里说清三件事 —— <b>用什么结构 · 什么范式 · 触发条件是什么</b>。不写代码。
+          </div>
+          <div id="rv-desc" class="lc-desc"></div>
+        </div>
+
+        <div id="rv-answer" class="hidden">
+          <div id="rv-tabs" class="tabs"></div>
+          <div id="rv-body" class="rv-body"></div>
+        </div>
+      </div>
+
+      <div class="rv-foot">
+        <button id="rv-reveal" class="rv-reveal">显示答案 <em>空格</em></button>
+        <div id="rv-rate" class="rv-rate hidden"></div>
+        <button id="rv-next" class="rv-next">下一题 <em>空格</em></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- list coverage overlay: dashboard/lists.json 是题单定义, 进度现算 -->
+  <div id="lists-overlay" class="overlay hidden">
+    <div class="detail lists-detail">
+      <div class="detail-head">
+        <div>
+          <span class="pill">题单</span>
+          <span id="lists-title" class="d-title">覆盖进度</span>
+          <span class="hint">按子主题看缺口 · 点条目打开题, 没建的可以一键建</span>
+        </div>
+        <button id="lists-close">✕</button>
+      </div>
+      <div id="lists-tabs" class="tabs lists-tabs"></div>
+      <div id="lists-body" class="lists-body"></div>
     </div>
   </div>
 

@@ -23,3 +23,10 @@
   border-radius: 6px;
 }
 .ro-badge a { color: inherit; }
+
+/* 题单里"没建"的格子在只读站点不动(建文件夹是写操作) */
+.ro .lchip.f-1 { pointer-events: none; }
+
+/* 只读站没有写接口: 藏掉评分按钮, 换成单纯的「下一题」自测模式 */
+.ro #rv-rate { display: none !important; }
+.ro .rv-next { display: inline-block; }

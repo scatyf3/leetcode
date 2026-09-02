@@ -260,3 +260,98 @@ main{padding:18px 20px;overflow:auto}
 .todo-x{flex:none;color:var(--dim);cursor:pointer;opacity:0;font-size:12px;padding:0 2px}
 .todo-item:hover .todo-x{opacity:1}
 .todo-x:hover{color:var(--hard)}
+.todo-undo{cursor:pointer;text-decoration:underline;margin-left:4px}
+.todo-undo:hover{color:var(--accent)}
+
+/* ---- 📊 题单覆盖率 ---- */
+.lists-detail{width:min(1040px,94vw);max-height:88vh;display:flex;flex-direction:column}
+.lists-tabs{padding:0 14px;flex:none}
+.lists-body{overflow:auto;padding:10px 14px 16px}
+.lsum{margin-bottom:14px}
+.lsum-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;font-size:14px}
+.lsum-head b{font-size:20px}
+.lnote{margin-top:6px}
+.lbar{display:flex;height:8px;border-radius:5px;overflow:hidden;background:var(--panel2);
+  border:1px solid var(--line)}
+.lbar i{display:block;height:100%}
+.lcats{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.lcat{border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:var(--panel)}
+.lcat-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+.lcat-name{font-weight:600;font-size:13.5px}
+.lcat-n{font-size:12px;color:var(--dim);font-variant-numeric:tabular-nums}
+.lchips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.lchip{font-size:11.5px;padding:2px 6px;border-radius:5px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel2);color:var(--dim);
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lchip em{font-style:normal;opacity:.75}
+.lchip:hover{border-color:var(--accent)}
+.lchip.busy{opacity:.6;cursor:progress}
+.lchip.failed{border-color:var(--hard)}
+.lprem{color:var(--hard);font-weight:700}
+
+/* 进度条 / 格子按熟练度着色, 复用看板上那套 --fam1..4 */
+.lbar i.f1{background:var(--fam1)}
+.lbar i.f2{background:var(--fam2)}
+.lbar i.f3{background:var(--fam3)}
+.lbar i.f4{background:var(--fam4)}
+.lbar i.f0{background:var(--dim);opacity:.55}      /* 建了但没评熟练度 */
+
+.lkeys{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:7px;font-size:11.5px;color:var(--dim)}
+.lkey{display:inline-flex;align-items:center;gap:5px}
+.lkey i{width:9px;height:9px;border-radius:3px;flex:none}
+.lkey.f1 i{background:var(--fam1)} .lkey.f2 i{background:var(--fam2)}
+.lkey.f3 i{background:var(--fam3)} .lkey.f4 i{background:var(--fam4)}
+.lkey.f0 i{background:var(--dim);opacity:.55}
+.lkey.f-1 i{background:transparent;border:1px dashed var(--line)}
+.lkey b{color:var(--fg);font-variant-numeric:tabular-nums}
+
+.lfam{font-style:normal;font:700 9.5px/1 Consolas,monospace;padding:2px 3px;border-radius:3px;margin-right:3px}
+.lchip.f1{color:var(--fam1);border-color:color-mix(in srgb,var(--fam1) 45%,transparent)}
+.lchip.f2{color:var(--fam2);border-color:color-mix(in srgb,var(--fam2) 45%,transparent)}
+.lchip.f3{color:var(--fam3);border-color:color-mix(in srgb,var(--fam3) 45%,transparent)}
+.lchip.f4{color:var(--fam4);border-color:color-mix(in srgb,var(--fam4) 45%,transparent)}
+.lchip.f1 .lfam{background:color-mix(in srgb,var(--fam1) 18%,transparent)}
+.lchip.f2 .lfam{background:color-mix(in srgb,var(--fam2) 18%,transparent)}
+.lchip.f3 .lfam{background:color-mix(in srgb,var(--fam3) 20%,transparent)}
+.lchip.f4 .lfam{background:color-mix(in srgb,var(--fam4) 20%,transparent)}
+.lchip.f0{color:var(--fg)}                          /* 建了没评 */
+.lchip.f-1{opacity:.45;border-style:dashed}         /* 还没建 */
+.lchip.f-1:hover{opacity:1}
+
+/* ---- 🧠 FSRS 复习 ---- */
+/* ⚠ .hidden{display:none} 在上面第 190 行, 是个单类选择器; 这一段在它**后面**, 同权重后来居上。
+   所以凡是自己设了 display 的、又会被 JS 加 .hidden 的元素, 必须补一条 .x.hidden 守卫,
+   否则 classList.add('hidden') 藏不住它 —— 一个 flex:1 的空盒子会把整页排版顶掉。 */
+.rv-empty.hidden, .rv-foot.hidden { display: none; }
+.review-detail{width:min(1000px,94vw);height:min(780px,90vh);display:flex;flex-direction:column}
+.rv-head-right{display:flex;align-items:center;gap:10px}
+.rv-card{flex:1;min-height:0;overflow:auto;padding:0 2px}
+.rv-empty{flex:1;display:flex;align-items:center;justify-content:center;
+  color:var(--dim);font-size:14px;text-align:center;line-height:1.9}
+.rv-ask{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--accent);
+  border-radius:7px;padding:9px 12px;margin:4px 0 12px;font-size:13px;color:var(--dim)}
+.rv-ask b{color:var(--fg)}
+#rv-answer{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+.rv-body{font-size:13.5px}
+.rv-body pre{margin:0;overflow:auto}
+
+.rv-foot{flex:none;display:flex;align-items:center;gap:10px;padding-top:12px;
+  border-top:1px solid var(--line);margin-top:10px}
+.rv-reveal{font-size:14px;padding:9px 20px}
+.rv-reveal em,.rv-next em{font-style:normal;opacity:.6;font-size:11.5px;margin-left:6px}
+.rv-next{display:none;font-size:14px;padding:9px 20px}
+
+.rv-rate{display:flex;gap:10px;flex-wrap:wrap}
+.rv-rate.hidden{display:none}
+.rv-btn{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:96px;
+  padding:7px 12px;border-radius:8px;background:var(--panel2);color:var(--fg);
+  border:1px solid var(--line);cursor:pointer;line-height:1.35}
+.rv-btn:hover{filter:none;border-color:currentColor}
+.rv-btn b{font-size:13px;font-weight:600}
+.rv-btn i{font-style:normal;font-size:11px;opacity:.7;font-variant-numeric:tabular-nums}
+.rv-btn u{text-decoration:none;font-size:10px;opacity:.45}
+/* 方向和熟练度相反: 评分 1=Again 最差 -> 红, 4=Easy 最好 -> 绿 */
+.rv-btn[data-r="1"]{color:var(--fam4)}
+.rv-btn[data-r="2"]{color:var(--fam3)}
+.rv-btn[data-r="3"]{color:var(--fam2)}
+.rv-btn[data-r="4"]{color:var(--fam1)}

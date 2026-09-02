@@ -59,6 +59,8 @@ def export(out: Path) -> dict:
     for p in problems:
         write_json(api / "problems" / f"{p['id']}.json", server.get_detail(p["id"]))
 
+    write_json(api / "lists.json", server.read_lists())   # 题单定义, 只读站照样能看进度
+
     # 分组标签 = 看板上可点开的通用 trick 文档, 两个维度各导一份
     docs = 0
     for kind, field in (("structures", "structures"), ("paradigms", "paradigms")):

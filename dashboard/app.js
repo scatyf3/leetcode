@@ -674,6 +674,280 @@ function md(src) {
   return out.join('\n');
 }
 
+// ---- 🧠 FSRS 复习: 看题面 -> 心里过思路 -> 揭晓 -> 1-4 自评 --------------------
+// 调度状态在各题 meta.json 的 fsrs 字段里, 算法在 dashboard/fsrs.py。
+// 和 familiarity(L1-L4) 是**两套独立的东西**: 这里只管"什么时候再问一次",
+// familiarity 仍然是手工维护的掌握档位, 复习不会去改它。
+let REVIEW = null;          // {queue:[id], done, total, revealed, d, items, active}
+const isReadOnly = () => document.documentElement.classList.contains('ro');
+
+const todayStr = () => new Date().toLocaleDateString('sv');   // 本地 YYYY-MM-DD
+const isCard = (p) => !!p.due;
+const isDue = (p) => isCard(p) && p.due <= todayStr();
+const rvEligible = (p) => p.status === 'solved' || p.status === 'review';
+const FAM_ORDER = { 4: 0, 3: 1, 2: 2, 0: 3, 1: 4 };            // 越生的越先进队列
+
+function buildQueue() {
+  const due = PROBLEMS.filter(isDue).sort((a, b) =>
+    (a.status === 'review' ? 0 : 1) - (b.status === 'review' ? 0 : 1) ||
+    a.due.localeCompare(b.due) || a.id - b.id);
+  // 还没成为卡片的题, 按熟练度从生到熟排 —— 只是**读** familiarity 定顺序, 不写它
+  const fresh = PROBLEMS.filter((p) => rvEligible(p) && !isCard(p)).sort((a, b) =>
+    FAM_ORDER[famOf(a)] - FAM_ORDER[famOf(b)] || a.id - b.id);
+  return [...due, ...fresh].map((p) => p.id);
+}
+
+function updateReviewBadge() {
+  const n = buildQueue().length;
+  $('#review-n').textContent = n;
+  $('#review-n').classList.toggle('hidden', !n);
+}
+
+function fmtInterval(days) {
+  if (days <= 0) return '今天';
+  if (days === 1) return '明天';
+  if (days < 30) return `${days} 天`;
+  if (days < 365) return `${(days / 30).toFixed(1)} 个月`;
+  return `${(days / 365).toFixed(1)} 年`;
+}
+
+async function openReview() {
+  const queue = buildQueue();
+  REVIEW = { queue, done: 0, total: queue.length, revealed: false, d: null, items: [], active: 0 };
+  $('#review-overlay').classList.remove('hidden');
+  nextCard();
+}
+
+function closeReview() {
+  $('#review-overlay').classList.add('hidden');
+  REVIEW = null;
+}
+
+async function nextCard() {
+  if (!REVIEW) return;
+  const id = REVIEW.queue.shift();
+  if (id === undefined) return showRvEmpty();
+  $('#rv-empty').classList.add('hidden');
+  $('#rv-card').classList.remove('hidden');
+  $('.rv-foot').classList.remove('hidden');
+  REVIEW.d = await api(`/api/problems/${id}`);
+  REVIEW.revealed = false;
+  renderQuestion();
+}
+
+function showRvEmpty() {
+  const done = REVIEW ? REVIEW.done : 0;
+  $('#rv-card').classList.add('hidden');
+  $('.rv-foot').classList.add('hidden');
+  $('#rv-id').textContent = '';
+  $('#rv-title').textContent = '';
+  $('#rv-meta').textContent = '';
+  $('#rv-progress').textContent = '';
+  $('#rv-empty').classList.remove('hidden');
+  $('#rv-empty').innerHTML = done
+    ? `这一轮复习完了 —— 共 ${done} 道 🎉<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>`
+    : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>';
+}
+
+// 只渲染题面。绝不碰 d.note / d.solutions —— 剧透了这个功能就没意义了
+function renderQuestion() {
+  const d = REVIEW.d;
+  $('#rv-id').textContent = d.id;
+  $('#rv-title').textContent = d.title;
+  const reps = d.fsrs && d.fsrs.reps ? `第 ${d.fsrs.reps + 1} 次复习` : '第一次进复习';
+  $('#rv-meta').textContent = `${d.difficulty || '?'} · ${reps}`;
+  $('#rv-progress').textContent = `${REVIEW.done + 1} / ${REVIEW.total}`;
+  $('#rv-desc').innerHTML = d.description
+    || '<p class="hint">这题没有抓到题面(problem.html 是空的)。只能靠标题回忆 —— 或者跑 dashboard/fetch_desc.py 补抓。</p>';
+  $('#rv-card').scrollTop = 0;
+  $('#rv-answer').classList.add('hidden');
+  $('#rv-reveal').classList.remove('hidden');
+  $('#rv-rate').classList.add('hidden');
+  $('#rv-rate').innerHTML = '';
+}
+
+function revealAnswer() {
+  if (!REVIEW || REVIEW.revealed) return;
+  REVIEW.revealed = true;
+  const d = REVIEW.d;
+  REVIEW.items = [{ name: '📝 笔记', md: d.note || '_(还没写笔记)_' },
+                  ...d.solutions.map((x) => ({ name: x.name, code: x.content }))];
+  renderRvTabs(0);
+  $('#rv-answer').classList.remove('hidden');
+  $('#rv-reveal').classList.add('hidden');
+
+  const pv = d.fsrs_preview || {};
+  const LABEL = { 1: ['忘了', '想不起来'], 2: ['勉强', '想了很久'], 3: ['想起来了', '正常'], 4: ['很熟', '秒答'] };
+  $('#rv-rate').innerHTML = [1, 2, 3, 4].map((r) => `
+    <button class="rv-btn" data-r="${r}">
+      <b>${LABEL[r][0]}</b><i>${fmtInterval(pv[r] ?? 0)}</i><u>${r} · ${LABEL[r][1]}</u>
+    </button>`).join('');
+  $('#rv-rate').classList.remove('hidden');
+  $('#rv-rate').querySelectorAll('.rv-btn').forEach((el) =>
+    el.addEventListener('click', () => rate(+el.dataset.r)));
+}
+
+function renderRvTabs(i) {
+  REVIEW.active = i;
+  $('#rv-tabs').innerHTML = REVIEW.items
+    .map((x, k) => `<button class="tab${k === i ? ' on' : ''}" data-i="${k}">${esc(x.name)}</button>`)
+    .join('');
+  $('#rv-tabs').querySelectorAll('.tab').forEach((el) =>
+    el.addEventListener('click', () => renderRvTabs(+el.dataset.i)));
+  const item = REVIEW.items[i];
+  $('#rv-body').innerHTML = item.code !== undefined
+    ? `<pre><code>${highlightPython(item.code)}</code></pre>`
+    : md(item.md);
+}
+
+async function rate(r) {
+  if (!REVIEW || !REVIEW.revealed) return;
+  const id = REVIEW.d.id;
+  let res;
+  try {
+    res = await api(`/api/review/${id}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: r }),
+    });
+  } catch { res = null; }
+  if (!res || !res.ok) {
+    // 只读站的 403 也走这里(static-shim 是 resolve 不是 reject)。写失败就**不推进**——
+    // 假装评过了会让这道题的调度悄悄丢一次, 比停下来更糟。
+    $('#rv-meta').textContent = '⚠ 没记录下来(只读站或服务没起) —— 按「下一题」继续自测';
+    return;
+  }
+  {
+    const p = PROBLEMS.find((x) => x.id === id);
+    if (p) {
+      p.due = res.card.due; p.reps = res.card.reps; p.stability = res.card.stability;
+      p.last_review = res.card.last_review; p.fsrs_state = res.card.state;
+    }
+    if (r === 1) { REVIEW.queue.push(id); REVIEW.total++; }   // 忘了 -> 本次会话末尾再问一遍
+    buildPanel();
+    updateReviewBadge();
+  }
+  REVIEW.done++;
+  nextCard();
+}
+
+// ---- 📊 题单覆盖率: dashboard/lists.json 是定义, 进度拿 PROBLEMS 现算 -------
+// 定义里有仓库还没有的题(那才是缺口的意义), 所以不能只靠 meta.json 反推。
+let LISTS = null;          // {lists: {名字: {source, note, categories}}, premium: [id]}
+let LIST_CUR = null;       // 当前看的是哪个题单
+
+// 一题在题单里的档位: 1..4 = 熟练度, 0 = 建了但没评, -1 = 仓库里压根没有
+const listFam = (id) => {
+  const p = PROBLEMS.find((x) => x.id === id);
+  return p ? famOf(p) : -1;
+};
+const LBUCKETS = [1, 2, 3, 4, 0];                 // 进度条从"最熟"到"最生", 未做是剩下的空白
+
+function barHTML(items) {
+  const n = items.length || 1;
+  const c = { 1: 0, 2: 0, 3: 0, 4: 0, 0: 0, '-1': 0 };
+  for (const [id] of items) c[listFam(id)]++;
+  const tip = LBUCKETS.map((f) => `${f ? FAM[f].short : '未评'} ${c[f]}`).join(' · ')
+    + ` · 未做 ${c['-1']} · 共 ${items.length}`;
+  const seg = LBUCKETS
+    .filter((f) => c[f])
+    .map((f) => `<i class="f${f}" style="width:${(100 * c[f] / n).toFixed(2)}%"></i>`)
+    .join('');
+  return { counts: c, done: items.length - c['-1'], html: `<div class="lbar" title="${esc(tip)}">${seg}</div>` };
+}
+
+function renderLists() {
+  const names = Object.keys(LISTS?.lists || {});
+  if (!names.length) {
+    $('#lists-body').innerHTML = '<p class="empty-hint">dashboard/lists.json 里还没有题单定义。</p>';
+    return;
+  }
+  if (!LIST_CUR || !names.includes(LIST_CUR)) LIST_CUR = names[0];
+
+  $('#lists-tabs').innerHTML = names
+    .map((n) => `<button class="tab${n === LIST_CUR ? ' on' : ''}" data-list="${esc(n)}">${esc(n)}</button>`)
+    .join('');
+  $('#lists-tabs').querySelectorAll('.tab').forEach((el) =>
+    el.addEventListener('click', () => { LIST_CUR = el.dataset.list; renderLists(); }));
+
+  const def = LISTS.lists[LIST_CUR];
+  const premium = new Set(LISTS.premium || []);
+  const all = Object.values(def.categories).flat();
+  const top = barHTML(all);
+
+  const legend = [...LBUCKETS, -1].map((f) => {
+    const label = f === -1 ? '未做' : f ? FAM[f].label : '未评';
+    const short = f === -1 ? '·' : f ? FAM[f].short : '—';
+    return `<span class="lkey f${f}"><i></i>${esc(short)} ${esc(label)} <b>${top.counts[f]}</b></span>`;
+  }).join('');
+
+  let h = `<div class="lsum">
+      <div class="lsum-head"><b>${top.done} / ${all.length}</b> 已建
+        <span class="hint">进度条按熟练度: 越绿越熟, 空白 = 还没建</span></div>
+      ${top.html}
+      <div class="lkeys">${legend}</div>
+      ${def.note ? `<div class="hint lnote">${esc(def.note)}</div>` : ''}
+    </div><div class="lcats">`;
+
+  for (const [cat, items] of Object.entries(def.categories)) {
+    const b = barHTML(items);
+    h += `<div class="lcat">
+      <div class="lcat-head">
+        <span class="lcat-name">${esc(cat)}</span>
+        <span class="lcat-n">${b.done}/${items.length}</span>
+      </div>
+      ${b.html}
+      <div class="lchips">${items.map(([id, title]) => {
+        const f = listFam(id);
+        const star = premium.has(id) ? '<span class="lprem" title="LeetCode 会员题">*</span>' : '';
+        const badge = f > 0 ? `<i class="lfam f${f}">${FAM[f].short}</i>` : '';
+        const act = f === -1
+          ? ` data-add="${id}" title="点一下建文件夹并抓题面"`
+          : ` data-open="${id}" title="${esc(title)} · ${f ? FAM[f].label : '未评熟练度'}"`;
+        return `<span class="lchip f${f}"${act}>${badge}${id}${star} <em>${esc(title)}</em></span>`;
+      }).join('')}</div>
+    </div>`;
+  }
+  h += '</div>';
+  $('#lists-body').innerHTML = h;
+
+  $('#lists-body').querySelectorAll('[data-open]').forEach((el) =>
+    el.addEventListener('click', () => { closeLists(); openDetail(+el.dataset.open); }));
+  $('#lists-body').querySelectorAll('[data-add]').forEach((el) =>
+    el.addEventListener('click', () => addFromList(el, +el.dataset.add)));
+}
+
+// 复用 TODO 那条路: POST /api/problems -> scaffold 建文件夹 + 抓题面 + 进索引
+async function addFromList(el, id) {
+  if (el.classList.contains('busy')) return;
+  el.classList.add('busy');
+  const old = el.innerHTML;
+  el.innerHTML = `${id} <em>建中…</em>`;
+  let r;
+  try {
+    r = await api('/api/problems', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: String(id) }),
+    });
+  } catch { r = null; }
+  if (!r || !r.ok) {
+    el.innerHTML = old;
+    el.classList.remove('busy');
+    el.title = (r && r.error) || '建不了(会员题或离线?)';
+    el.classList.add('failed');
+    return;
+  }
+  PROBLEMS = await api('/api/problems');
+  buildPanel();
+  renderLists();                      // 重画, 那一格会变成"已建待做"
+}
+
+async function openLists() {
+  if (!LISTS) LISTS = await api('/api/lists');
+  $('#lists-overlay').classList.remove('hidden');
+  renderLists();
+}
+function closeLists() { $('#lists-overlay').classList.add('hidden'); }
+
 // ---- TODO: notes/todo.md 就是唯一数据源 ------------------------------------
 // server 早有 GET/PUT /api/notes/<file>, 所以这块纯前端, 后端一行没改。
 // 非 checkbox 行(标题、说明文字)原样保留, 方便在 VSCode 里直接编辑同一个文件。
@@ -697,9 +971,11 @@ function todoItems() {
   return out;
 }
 
-function flashTodo(msg) {
+let TODO_MSG_T = null;
+function flashTodo(msg, ms = 1500) {
+  clearTimeout(TODO_MSG_T);                        // 别让上一条的定时器把这条提前清掉
   $('#todo-msg').textContent = msg;
-  setTimeout(() => ($('#todo-msg').textContent = ''), 1500);
+  TODO_MSG_T = setTimeout(() => ($('#todo-msg').textContent = ''), ms);
 }
 
 async function putTodo() {
@@ -714,17 +990,51 @@ async function putTodo() {
 async function todoMutate(orig, fn) {
   await loadTodo(false);
   const i = TODO_LINES.indexOf(orig);
-  if (i < 0) { renderTodo(); return flashTodo('文件已变, 已刷新'); }
+  if (i < 0) { renderTodo(); flashTodo('文件已变, 已刷新'); return false; }
   fn(i);
   await putTodo();
   renderTodo();
   flashTodo('已存 ✓');
+  return true;
 }
 
+// 勾上 = 做完了, 直接从 todo.md 删掉(留一次撤销), 别攒一堆 [x] 在文件里。
+// 手写在文件里的 [x] 行取消勾选还是还原成 [ ]。
+let TODO_UNDO = null;                              // 最近一次勾掉的 {line, at}
+
 function toggleTodo(orig) {
-  todoMutate(orig, (i) => {
-    const m = TODO_RE.exec(TODO_LINES[i]);
-    TODO_LINES[i] = m[1] + (m[2].toLowerCase() === 'x' ? ' ' : 'x') + m[3] + m[4];
+  const m = TODO_RE.exec(orig);
+  if (m && m[2].toLowerCase() === 'x') {           // [x] -> [ ]
+    return todoMutate(orig, (i) => {
+      const mm = TODO_RE.exec(TODO_LINES[i]);
+      TODO_LINES[i] = mm[1] + ' ' + mm[3] + mm[4];
+    });
+  }
+  return doneTodo(orig);
+}
+
+async function doneTodo(orig) {
+  const ok = await todoMutate(orig, (i) => {
+    TODO_UNDO = { line: TODO_LINES[i], at: i };
+    TODO_LINES.splice(i, 1);
+  });
+  if (ok) flashUndo();
+}
+
+function flashUndo() {
+  clearTimeout(TODO_MSG_T);
+  const el = $('#todo-msg');
+  el.innerHTML = '已完成 ✓ <span class="todo-undo">撤销</span>';
+  TODO_MSG_T = setTimeout(() => (el.textContent = ''), 6000);
+  el.querySelector('.todo-undo').addEventListener('click', async () => {
+    const u = TODO_UNDO;
+    if (!u) return;
+    TODO_UNDO = null;
+    await loadTodo(false);                         // 重读, 别覆盖我在别处的改动
+    TODO_LINES.splice(Math.min(u.at, TODO_LINES.length), 0, u.line);
+    await putTodo();
+    renderTodo();
+    flashTodo('已撤销 ✓');
   });
 }
 
@@ -834,6 +1144,7 @@ async function reload() {
   PROBLEMS = await api('/api/problems');
   buildPanel();
   loadTodo();                          // 刷新 📋 TODO 上的角标
+  updateReviewBadge();                 // 🧠 复习上的到期数
 }
 
 // ---- wire global controls ----
@@ -855,6 +1166,23 @@ document.addEventListener('click', (e) => {
   if (x) removeTag(x.closest('.chipfield').dataset.field, +x.dataset.i);
 });
 document.addEventListener('keydown', (e) => {
+  // 复习模式的单键快捷键。这个全局 handler 原本只处理 Ctrl+S / Esc, 没有任何输入框保护,
+  // 所以这里必须自己挡: 输入框内、组合键、以及中文输入法组字中(isComposing / 229)。
+  if (REVIEW && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing && e.keyCode !== 229
+      && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) {
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (!REVIEW.revealed) revealAnswer();
+      else if (isReadOnly()) nextCard();   // 只读站没有评分按钮, 空格 = 下一题
+      // 本地站揭晓后不响应空格: 必须按 1-4, 防止手滑跳过一道没评分
+      return;
+    }
+    if (REVIEW.revealed && '1234'.includes(e.key)) {
+      e.preventDefault();
+      rate(+e.key);
+      return;
+    }
+  }
   const inp = e.target.closest('.ce-input');
   if (!inp) return;
   const field = inp.dataset.field;
@@ -890,6 +1218,14 @@ $('#todo-in').addEventListener('keydown', (e) => {
 document.addEventListener('click', closeTodoPop);      // 点别处收起
 
 // notes overlay controls
+$('#open-review').addEventListener('click', openReview);
+$('#review-close').addEventListener('click', closeReview);
+$('#review-overlay').addEventListener('click', (e) => { if (e.target.id === 'review-overlay') closeReview(); });
+$('#rv-reveal').addEventListener('click', revealAnswer);
+$('#rv-next').addEventListener('click', () => { REVIEW.done++; nextCard(); });  // 只读站用: 没有评分按钮
+$('#open-lists').addEventListener('click', openLists);
+$('#lists-close').addEventListener('click', closeLists);
+$('#lists-overlay').addEventListener('click', (e) => { if (e.target.id === 'lists-overlay') closeLists(); });
 $('#open-notes').addEventListener('click', () => openNotes());
 $('#notes-close').addEventListener('click', closeNotes);
 $('#note-new').addEventListener('click', newNote);
@@ -925,6 +1261,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!$('#todo-pop').classList.contains('hidden')) { closeTodoPop(); return; }
     if (document.querySelector('.fam-menu')) { closeFamMenu(); return; }
+    if (REVIEW) { closeReview(); return; }
+    if (!$('#lists-overlay').classList.contains('hidden')) { closeLists(); return; }
     if (NOTE) { NOTE_EDITING ? exitNoteEdit(true) : closeNotes(); return; }
     if (DOC) { DOC_EDITING ? exitDocEdit(true) : closeDoc(); return; }
     if (CURRENT) {
