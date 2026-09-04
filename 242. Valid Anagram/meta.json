@@ -13,5 +13,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(|Σ|)"
+  },
+  "quiz": {
+    "idea": "一张计数表 +1 / -1",
+    "wrong": [
+      "两个串各自排序后比较是否相等",
+      "对撞双指针从两端向中间配对",
+      "映射成质数比较乘积"
+    ]
+  }
 }

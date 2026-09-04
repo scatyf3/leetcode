@@ -12,5 +12,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "半开区间 [l, r) 二分",
+    "wrong": [
+      "闭区间 [l, r]，命中就返回",
+      "线性扫描直到找到 target",
+      "三分法切成三段"
+    ]
+  }
 }

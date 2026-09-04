@@ -13,5 +13,17 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "set + 只从链头出发",
+    "wrong": [
+      "排序后一遍扫描数最长连续段",
+      "对每个元素往两边扩",
+      "哈希记链长，两端合并"
+    ]
+  }
 }

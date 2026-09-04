@@ -12,5 +12,27 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 1
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "快慢指针，一步 / 两步",
+    "wrong": [
+      "哈希存走过的节点判重",
+      "快慢指针拉开固定间隔一起走",
+      "步数超过节点总数即有环"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-03",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
 }

@@ -3,7 +3,8 @@
     "array"
   ],
   "paradigms": [
-    "two-pointer"
+    "two-pointer",
+    "read-write-pointer"
   ],
   "techniques": [
     "快慢指针",
@@ -11,5 +12,27 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "读写双指针，不同才写入",
+    "wrong": [
+      "用 set 去重后重新写回数组",
+      "从后往前扫，遇到重复就整体左移",
+      "对撞双指针，把重复的换到末尾"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

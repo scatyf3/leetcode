@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "intervals",
+    "greedy"
+  ],
+  "techniques": [
+    "删最少 = 留最多 (活动选择)",
+    "按 end 排, 交换论证保证不错过最优解",
+    "端点相碰不算重叠: s >= end"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "按 end 排, 能留就留, 答案 = n - 留下的个数",
+    "wrong": [
+      "按 start 排, 冲突就删掉后面那个",
+      "按区间长度排, 优先留短的",
+      "按 end 排, 每次删掉右端点最大的那个"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 1.8867876195204154,
+    "difficulty": 6.402115069296838,
+    "reps": 2,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

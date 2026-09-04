@@ -11,5 +11,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "把所有上坡的差值加起来",
+    "wrong": [
+      "一次扫描维护历史最低价，只做一笔",
+      "DP 维护持有/未持有状态",
+      "找局部极小极大再配对"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }

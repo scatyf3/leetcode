@@ -15,5 +15,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n^(T/min))",
+    "space": "O(T/min)"
+  },
+  "quiz": {
+    "idea": "回溯，下一层仍从 i 开始",
+    "wrong": [
+      "每层从 0 开始，最后去重",
+      "完全背包 DP 求方案数",
+      "先排序再用双指针凑目标和"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-08",
+    "last_review": "2026-09-03",
+    "stability": 4.546029441066125,
+    "difficulty": 5.102286904192293,
+    "reps": 2,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }

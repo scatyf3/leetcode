@@ -339,7 +339,11 @@ main{padding:18px 20px;overflow:auto}
   border-top:1px solid var(--line);margin-top:10px}
 .rv-reveal{font-size:14px;padding:9px 20px}
 .rv-reveal em,.rv-next em{font-style:normal;opacity:.6;font-size:11.5px;margin-left:6px}
-.rv-next{display:none;font-size:14px;padding:9px 20px}
+.rv-next{font-size:14px;padding:9px 20px}      /* 显示与否归 Vue 的 v-if 管 */
+
+.rv-defer{margin-left:auto;font-size:12.5px;padding:7px 12px}
+.rv-defer em{font-style:normal;opacity:.55;font-size:11.5px;margin-left:6px}
+.rv-defer.off{opacity:.3;pointer-events:none}        /* 已经是队尾, 挪了还是它 */
 
 .rv-rate{display:flex;gap:10px;flex-wrap:wrap}
 .rv-rate.hidden{display:none}
@@ -355,3 +359,113 @@ main{padding:18px 20px;overflow:auto}
 .rv-btn[data-r="2"]{color:var(--fam3)}
 .rv-btn[data-r="3"]{color:var(--fam2)}
 .rv-btn[data-r="4"]{color:var(--fam1)}
+
+/* 答案卡: 揭晓后最先看到的东西 —— 标签 + 复杂度 + 一句话思路 */
+.rv-acard{border:1px solid var(--line);border-left:3px solid var(--accent2);border-radius:8px;
+  background:var(--panel2);padding:10px 12px;margin-bottom:14px}
+.rv-acard-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.rv-tagline{font-size:12px;color:var(--dim)}
+.rv-tagline b{color:var(--fg);font-weight:600}
+.rv-cx{font:600 12px/1 Consolas,monospace;color:var(--accent2);
+  background:color-mix(in srgb,var(--accent2) 14%,transparent);padding:3px 7px;border-radius:5px}
+.rv-aedit{margin-left:auto;font-size:11.5px;color:var(--dim);cursor:pointer;text-decoration:underline}
+.rv-aedit:hover{color:var(--accent)}
+.rv-idea{font-size:14px;line-height:1.75}
+.rv-idea p{margin:0 0 6px}
+.rv-idea ul,.rv-idea ol{margin:4px 0;padding-left:20px}
+.rv-idea .rv-none{color:var(--dim);font-size:13px}
+#rv-aedit-box{width:100%;min-height:120px;font:13px/1.6 Consolas,monospace;resize:vertical;
+  background:var(--bg);color:var(--fg);border:1px solid var(--accent);border-radius:6px;padding:8px}
+#rv-aedit-box.hidden{display:none}
+
+/* 选择题: 揭晓前先自己挑一个, 测的是「该用哪个模板」的辨别力 */
+.rv-quiz{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.rv-quiz.hidden{display:none}
+.rv-q{margin-bottom:12px}
+.rv-q-label{font-size:12.5px;color:var(--dim);margin-bottom:6px;font-weight:600}
+.rv-opts{display:flex;flex-direction:column;gap:5px}
+.rv-opt{display:flex;align-items:flex-start;gap:8px;text-align:left;width:100%;
+  background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:7px;
+  padding:7px 10px;font-size:13px;line-height:1.5;cursor:pointer}
+.rv-opt:hover{filter:none;border-color:var(--accent)}
+.rv-opt .k{flex:none;font:600 11px/1.5 Consolas,monospace;color:var(--dim);min-width:14px}
+.rv-opt.picked{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.rv-opt.picked .k{color:var(--accent)}
+/* 揭晓后 */
+.rv-opt.right{border-color:var(--fam1);background:color-mix(in srgb,var(--fam1) 14%,transparent)}
+.rv-opt.wrong{border-color:var(--fam4);background:color-mix(in srgb,var(--fam4) 12%,transparent)}
+.rv-opt.right .k::after{content:'✓';margin-left:3px;color:var(--fam1)}
+.rv-opt.wrong .k::after{content:'✗';margin-left:3px;color:var(--fam4)}
+.rv-opt.done{cursor:default}
+.rv-opt.done:hover{border-color:var(--line)}
+.rv-opt.right.done:hover{border-color:var(--fam1)}
+.rv-opt.wrong.done:hover{border-color:var(--fam4)}
+.rv-q-hint{font-size:11.5px;color:var(--dim);opacity:.75}
+.rv-mode{flex:none}
+.rv-mode .gb-btn{padding:3px 8px;font-size:11.5px}
+.rv-verdict{font-size:12px;margin-left:8px}
+.rv-verdict.ok{color:var(--fam1)}
+.rv-verdict.no{color:var(--fam4)}
+
+/* ---- 📈 复习进度 (FSRS): 概览数字 + 三张柱状图 ---- */
+.stats-detail{width:min(1040px,94vw);max-height:88vh;display:flex;flex-direction:column}
+.stats-body{overflow:auto;padding:12px 16px 18px}
+
+.stiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;margin-bottom:20px}
+.stile{border:1px solid var(--line);border-radius:9px;padding:10px 12px;background:var(--panel2);
+  display:flex;flex-direction:column;gap:1px}
+.stile b{font-size:22px;line-height:1.2;font-variant-numeric:tabular-nums}
+.stile span{font-size:12px;color:var(--dim)}
+.stile em{font-style:normal;font-size:11px;color:var(--dim);opacity:.8}
+
+.sblock{margin-bottom:22px}
+.sblock-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+.sblock-head b{font-size:13.5px}
+
+/* 柱子高度按全图最大值归一, 图高走 --ch(chartHTML 传进来) */
+.chart{display:flex;align-items:flex-end;gap:2px;padding:2px 0;
+  border-bottom:1px solid var(--line)}
+.col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;
+  gap:3px;cursor:default}
+.col-n{height:13px;font-size:10px;line-height:13px;text-align:center;color:var(--dim);
+  font-variant-numeric:tabular-nums;overflow:hidden}
+/* column-reverse: parts 数组的第一项落在最底下 */
+/* 轨道不上底色: 30 根柱子里大半天数是 0, 铺满灰底会糊成一大块 */
+.col-bars{height:var(--ch);display:flex;flex-direction:column-reverse;
+  border-radius:3px 3px 0 0;overflow:hidden}
+.col-bars i{display:block;width:100%;flex:none}
+.col-x{height:14px;font-size:10px;line-height:14px;text-align:center;color:var(--dim);
+  white-space:nowrap;overflow:hidden}
+.col:hover .col-bars{background:var(--panel2)}
+.col:hover .col-bars i{filter:brightness(1.15)}
+.col.on .col-x{color:var(--accent);font-weight:600}
+.col.on .col-bars{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+
+.slegend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:11.5px;color:var(--dim)}
+.skey{display:inline-flex;align-items:center;gap:5px}
+.skey i{width:9px;height:9px;border-radius:3px;flex:none}
+.skey b{color:var(--fg);font-variant-numeric:tabular-nums}
+
+/* 到期预测 */
+.b-due,.skey i.b-due{background:var(--accent)}
+.b-over,.skey i.b-over{background:var(--hard)}          /* 逾期堆在"今天"那根的底下 */
+
+/* 评分: 1 忘了 -> 4 很熟, 和熟练度那套色反着用(1 是最差的) */
+.b-r1,.skey i.b-r1{background:var(--fam4)}
+.b-r2,.skey i.b-r2{background:var(--fam3)}
+.b-r3,.skey i.b-r3{background:var(--fam2)}
+.b-r4,.skey i.b-r4{background:var(--fam1)}
+
+/* 记忆强度: 越牢越绿, 8 档从 --hard 渐变到 --accent2 */
+.b-s0{background:var(--fam4)}
+.b-s1{background:color-mix(in srgb,var(--fam4) 65%,var(--fam3))}
+.b-s2{background:var(--fam3)}
+.b-s3{background:color-mix(in srgb,var(--fam3) 55%,var(--fam2))}
+.b-s4{background:var(--fam2)}
+.b-s5{background:color-mix(in srgb,var(--fam2) 55%,var(--fam1))}
+.b-s6{background:var(--fam1)}
+.b-s7{background:color-mix(in srgb,var(--fam1) 70%,#fff)}
+
+/* 复习完的空屏上那个「看看复习进度」 */
+.rv-stats{margin-top:14px}

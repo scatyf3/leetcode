@@ -12,5 +12,27 @@
   ],
   "difficulty": "hard",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "每格水位 = min(左右最高) − 自身",
+    "wrong": [
+      "对撞双指针算最大面积",
+      "单调栈按层横向累加",
+      "找最高点后两侧各扫一遍"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 0.212,
+    "difficulty": 6.4133,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 1
+  }
 }

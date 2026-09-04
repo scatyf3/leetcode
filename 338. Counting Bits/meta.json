@@ -13,5 +13,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "dp[i] = dp[i>>1] + (i&1)",
+    "wrong": [
+      "对每个 i 单独数一遍",
+      "dp[i] = dp[i-1] + 1",
+      "查表: 预处理每字节的 1"
+    ]
+  }
 }

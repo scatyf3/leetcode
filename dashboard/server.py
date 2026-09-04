@@ -36,11 +36,13 @@ NOTES_DIR = REPO / "notes"         # cross-cutting notes, not tied to one proble
 SCRATCH = "scratch.md"             # 随想收件箱: 速记先落这里, 想清楚了再挪走
 PORT = 8765
 REVIEW_LOG = HERE / "reviews.jsonl"   # 每次评分追加一行, git 追踪, 留给以后跑 FSRS 优化器
+SESSION_FILE = HERE / "session.json"  # 当前这轮复习的队列快照, **易失状态**, 不进 git
 _REVIEW_LOCK = threading.Lock()       # ThreadingHTTPServer + meta.json 读改写 + 日志追加, 必须串行
 
 FOLDER_RE = re.compile(r"^(\d+)\.\s*(.+)$")
 # .md files that count as "the note" (first match wins), in priority order
 NOTE_NAMES = ["note.md", "explain.md", "motivation.md", "obs1.md", "notes.md"]
+ANSWER_FILE = "answer.md"   # 复习用的答案卡: 一句话思路, 和 note.md 的流水账分开
 
 
 # ---------------------------------------------------------------- scan / db ---
@@ -88,12 +90,12 @@ SCHEMA = """CREATE TABLE problems(
     title TEXT, folder TEXT,
     structures TEXT, paradigms TEXT, techniques TEXT,
     difficulty TEXT, status TEXT,
-    familiarity INTEGER,
+    familiarity INTEGER, complexity TEXT,
     due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT
 )"""
 
 COLUMNS = ("id", "title", "folder", "structures", "paradigms", "techniques",
-           "difficulty", "status", "familiarity",
+           "difficulty", "status", "familiarity", "complexity",
            "due", "stability", "reps", "last_review", "fsrs_state")
 
 
@@ -122,6 +124,7 @@ def sync():
                 m.get("difficulty", ""),
                 m.get("status", "solved"),
                 int(m.get("familiarity", 0) or 0),   # 0 = 未评级
+                json.dumps(m.get("complexity") or {}, ensure_ascii=False),
                 f.get("due", ""),                    # "" = 不是卡片, 前端靠这个判断
                 float(f.get("stability") or 0),
                 int(f.get("reps") or 0),
@@ -143,6 +146,7 @@ def list_problems():
             d = dict(r)
             for k in ("structures", "paradigms", "techniques"):
                 d[k] = json.loads(d[k] or "[]")
+            d["complexity"] = json.loads(d["complexity"] or "{}")
             out.append(d)
         return out
 
@@ -155,6 +159,7 @@ def get_detail(pid: int):
     d = dict(r)
     for k in ("structures", "paradigms", "techniques"):
         d[k] = json.loads(d[k] or "[]")
+    d["complexity"] = json.loads(d["complexity"] or "{}")
     folder = REPO / d["folder"]
     # all python solutions, sorted for stable tab order
     sols = []
@@ -176,7 +181,13 @@ def get_detail(pid: int):
     d["note_file"] = note_file
     d["note"] = nf.read_text(encoding="utf-8", errors="replace") if nf.exists() else ""
     # 复习界面要的东西随详情一起给, 省一次请求; 静态导出也就自动带上了
-    card = read_meta(d["folder"]).get("fsrs") or fsrs.new_card()
+    m = read_meta(d["folder"])
+    # 答案卡: 自然语言思路。和 note.md 分开 —— note 是随手记的过程, 这个是压缩过的结论
+    af = folder / ANSWER_FILE
+    d["answer"] = af.read_text(encoding="utf-8", errors="replace") if af.exists() else ""
+    # 选择题: 正确的一句话思路 + 3 个"这道题上似是而非"的干扰项(手写在 meta.json 里)
+    d["quiz"] = m.get("quiz") or {}
+    card = m.get("fsrs") or fsrs.new_card()
     d["fsrs"] = card
     d["fsrs_preview"] = fsrs.preview(card, today_str())   # {"1":1,"2":1,"3":2,"4":8} 天
     return d
@@ -190,6 +201,20 @@ def save_note(pid: int, content: str):
     folder = REPO / r["folder"]
     note_file = next((n for n in NOTE_NAMES if (folder / n).exists()), "note.md")
     (folder / note_file).write_text(content, encoding="utf-8")
+    return True
+
+
+def save_answer(pid: int, content: str) -> bool:
+    """写复习答案卡(answer.md)。空内容 = 删掉这个文件, 别留个空壳。"""
+    with db() as con:
+        r = con.execute("SELECT folder FROM problems WHERE id=?", (pid,)).fetchone()
+    if not r:
+        return False
+    f = REPO / r["folder"] / ANSWER_FILE
+    if content.strip():
+        f.write_text(content, encoding="utf-8")
+    elif f.exists():
+        f.unlink()
     return True
 
 
@@ -315,7 +340,7 @@ def save_meta(pid: int, payload: dict):
         return False
     folder = r["folder"]
     meta = read_meta(folder)
-    for k in ("structures", "paradigms", "techniques", "difficulty", "status"):
+    for k in ("structures", "paradigms", "techniques", "difficulty", "status", "complexity", "quiz"):
         if k in payload:
             meta[k] = payload[k]
     if "familiarity" in payload:
@@ -339,6 +364,58 @@ def append_review_log(entry: dict):
     """
     with REVIEW_LOG.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def _label(pid: int, titles: dict) -> dict:
+    return {"id": pid, "title": titles.get(pid, "?")}
+
+
+def write_session(body: dict) -> dict:
+    """把前端这一轮复习的队列快照落盘(覆盖写)。
+
+    这是**易失状态, 不是数据源** —— 关掉面板它就没意义了, 所以不进 git、不参与调度、
+    也没有任何东西会去读它做决定。存它只有一个目的: 让浏览器外面(比如我)能看见
+    "现在队列长什么样、哪几道被押到队尾了"。前端每次动队列就覆盖一次。
+    """
+    with db() as con:
+        titles = {r["id"]: r["title"] for r in con.execute("SELECT id, title FROM problems")}
+
+    def ids(key, cap=500):
+        v = body.get(key) or []
+        out = []
+        for x in v[:cap]:
+            try:
+                out.append(int(x))
+            except (TypeError, ValueError):
+                pass
+        return out
+
+    cur = body.get("current")
+    try:
+        cur = int(cur)
+    except (TypeError, ValueError):
+        cur = None
+
+    snap = {
+        "ts": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "open": bool(body.get("open")),
+        "mode": body.get("mode") if body.get("mode") in ("fsrs", "order", "random") else "?",
+        "done": int(body.get("done") or 0),
+        "total": int(body.get("total") or 0),
+        "current": _label(cur, titles) if cur is not None else None,
+        "queue": [_label(i, titles) for i in ids("queue")],
+        # 押到队尾的记录, 按发生顺序, 同一道押两次就出现两次
+        "deferred": [_label(i, titles) for i in ids("deferred")],
+    }
+    SESSION_FILE.write_text(json.dumps(snap, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return {"ok": True}
+
+
+def read_session() -> dict:
+    try:
+        return json.loads(SESSION_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"open": False, "queue": [], "deferred": [], "note": "还没有过复习会话"}
 
 
 def review_card(pid: int, rating: int):
@@ -396,6 +473,32 @@ def reset_card(pid: int) -> bool:
         return True
 
 
+def read_reviews() -> list:
+    """把 reviews.jsonl 整个读出来给 📈 进度用。
+
+    这个文件是**只追加**的历史, 所以坏行(半行/手改坏了)直接跳过而不是报错 —— 一行读不动
+    不该让整页图表打不开。返回的每条都是 append_review_log 写进去的那个 dict 原样。
+    """
+    if not REVIEW_LOG.exists():
+        return []
+    out = []
+    try:
+        with REVIEW_LOG.open(encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    e = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(e, dict) and e.get("date"):
+                    out.append(e)
+    except OSError:
+        return []
+    return out
+
+
 def read_lists() -> dict:
     """题单定义(Blind 75 等), 纯静态数据。进度由前端拿 /api/problems 现算, 这里不重复一份状态。"""
     f = HERE / "lists.json"
@@ -416,6 +519,9 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
+        # 本地开发站, 一切都现读磁盘。不给缓存留余地 —— 否则浏览器可能拿旧的
+        # index.html 配新的 app.js, 前端引用一个还不存在的元素就整页起不来。
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(data)
 
@@ -431,10 +537,19 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, (HERE / "app.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
         if path == "/styles.css":
             return self._send(200, (HERE / "styles.css").read_text(encoding="utf-8"), "text/css; charset=utf-8")
+        # 复习面板用的 Vue, 存在仓库里不走 CDN(见 README「为什么不用构建」)。
+        # 白名单单文件, 不做目录遍历 —— 这个 server 只在本地跑, 但也没必要开个读文件的口子。
+        if path == "/vendor/vue.global.prod.js":
+            return self._send(200, (HERE / "vendor" / "vue.global.prod.js").read_text(encoding="utf-8"),
+                              "text/javascript; charset=utf-8")
         if path == "/api/problems":
             return self._send(200, list_problems())
         if path == "/api/lists":
             return self._send(200, read_lists())
+        if path == "/api/review/session":
+            return self._send(200, read_session())
+        if path == "/api/reviews":
+            return self._send(200, {"reviews": read_reviews()})
         if path == "/api/notes":
             return self._send(200, list_notes())
         m = re.match(r"^/api/notes/(.+)$", path)
@@ -457,6 +572,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"synced": sync()})
         if path == "/api/scratch":
             return self._send(200, append_scratch(self._body_json().get("text", "")))
+        if path == "/api/review/session":
+            return self._send(200, write_session(self._body_json()))
         m = re.match(r"^/api/review/(\d+)$", path)
         if m:
             pid = int(m.group(1))
@@ -493,6 +610,10 @@ class Handler(BaseHTTPRequestHandler):
             ok = save_solution(int(m.group(1)), unquote(m.group(2)),
                                self._body_json().get("content", ""))
             return self._send(200 if ok else 400, {"ok": ok})
+        m = re.match(r"^/api/problems/(\d+)/answer$", path)
+        if m:
+            ok = save_answer(int(m.group(1)), self._body_json().get("content", ""))
+            return self._send(200 if ok else 404, {"ok": ok})
         m = re.match(r"^/api/problems/(\d+)/meta$", path)
         if m:
             ok = save_meta(int(m.group(1)), self._body_json())

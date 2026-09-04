@@ -15,5 +15,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n²·L)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "dp[i] = 前 i 个字符能否切分",
+    "wrong": [
+      "贪心：每次匹配最长的那个单词",
+      "对每个单词找所有出现位置",
+      "回溯枚举所有切分方式"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 0.03485140985964798,
+    "difficulty": 9.592868765339693,
+    "reps": 3,
+    "lapses": 2,
+    "last_rating": 1
+  }
 }

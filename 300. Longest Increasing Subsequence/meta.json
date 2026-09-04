@@ -15,5 +15,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 1
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "dp[i] = 以 i 结尾；或 tails + 二分",
+    "wrong": [
+      "滑动窗口找最长递增段",
+      "dp[i] = 前 i 个里的最长，取 dp[-1]",
+      "贪心接上就走，不做替换"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-03",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
 }

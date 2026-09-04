@@ -12,5 +12,27 @@
   ],
   "difficulty": "medium",
   "status": "review",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "递归传 (low, high) 上下界",
+    "wrong": [
+      "只比较父子三者的大小",
+      "层序遍历检查每层递增",
+      "看节点数是否为 2^h-1"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }

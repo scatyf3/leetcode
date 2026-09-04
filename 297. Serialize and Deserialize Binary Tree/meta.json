@@ -13,5 +13,27 @@
   ],
   "difficulty": "hard",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "前序遍历 + '#' 占位",
+    "wrong": [
+      "中序遍历 + '#' 占位",
+      "只存值，靠 BST 性质还原",
+      "层序遍历，跳过空节点"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

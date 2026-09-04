@@ -15,5 +15,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(mn)",
+    "space": "O(mn)"
+  },
+  "quiz": {
+    "idea": "反向搜索，两集合取交集",
+    "wrong": [
+      "从每个格子正向 DFS",
+      "按高度排序后并查集",
+      "只检查边界一圈的格子"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 0.10088578982099844,
+    "difficulty": 8.806304468856837,
+    "reps": 2,
+    "lapses": 1,
+    "last_rating": 1
+  }
 }

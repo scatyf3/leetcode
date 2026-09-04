@@ -11,5 +11,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 1
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "dp[i] = dp[i-1] + dp[i-2]",
+    "wrong": [
+      "组合数学求和",
+      "回溯枚举所有走法再计数",
+      "贪心：尽量多走两步"
+    ]
+  }
 }

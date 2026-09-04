@@ -13,5 +13,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n²)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "固定第一个数，退化成两数之和",
+    "wrong": [
+      "排序后滑动窗口找和为 0 的区间",
+      "两两配对存哈希找相反数",
+      "分治：左右各求一遍再合并"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

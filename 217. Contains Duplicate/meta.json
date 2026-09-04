@@ -12,5 +12,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "set 去重比长度",
+    "wrong": [
+      "排序后检查相邻元素是否相等",
+      "两重循环两两比较",
+      "位图标记每个值是否出现过"
+    ]
+  }
 }

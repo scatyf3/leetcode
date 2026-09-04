@@ -14,5 +14,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(min(n,|Σ|))"
+  },
+  "quiz": {
+    "idea": "滑动窗口 + 哈希记位置",
+    "wrong": [
+      "枚举每个起点，往后扫到重复",
+      "中心扩展，从每个位置向两边扩到重复",
+      "单调栈维护下标递增的字符"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }
