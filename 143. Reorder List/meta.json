@@ -1,7 +1,40 @@
 {
-  "structures": ["linked-list"],
-  "paradigms": ["two-pointer"],
-  "techniques": ["快慢指针找中点", "左中点vs右中点", "原地反转后半段", "交替合并", "指针即存储", "不变式消特判"],
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "快慢指针找中点",
+    "左中点vs右中点",
+    "原地反转后半段",
+    "交替合并",
+    "指针即存储",
+    "不变式消特判"
+  ],
   "difficulty": "medium",
-  "status": "solved"
+  "status": "solved",
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "找中点 → 反转 → 交替合并",
+    "wrong": [
+      "用数组存节点后按下标重连",
+      "递归到底后回溯着重连",
+      "每次把尾节点接到头后面"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

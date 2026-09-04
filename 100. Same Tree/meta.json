@@ -12,5 +12,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "同步递归，三个 base case",
+    "wrong": [
+      "各自序列化后比字符串",
+      "比高度和节点数是否相同",
+      "中序遍历结果相同即可判定"
+    ]
+  }
 }

@@ -12,5 +12,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "二分，拿 mid 和 nums[r] 比",
+    "wrong": [
+      "拿 nums[mid] 和 nums[l] 比",
+      "线性扫描找下降点",
+      "两段里各求一次最小"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.0905863426205262,
+    "reps": 5,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }

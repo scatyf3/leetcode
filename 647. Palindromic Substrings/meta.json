@@ -15,5 +15,17 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n²)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "中心扩展，边扩边计数",
+    "wrong": [
+      "枚举所有子串逐个判",
+      "滑动窗口，不对称就收缩左边界",
+      "反转后求最长公共子串"
+    ]
+  }
 }

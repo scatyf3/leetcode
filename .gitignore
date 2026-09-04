@@ -4,6 +4,9 @@ dashboard/data.db
 # LeetCode 全量题目清单缓存 (scaffold.py 用来把题号翻成 slug, 一周重抓一次)
 dashboard/.lc_index.json
 
+# 当前这轮复习的队列快照 (前端每次动队列覆盖一次)。易失状态, 不是数据源
+dashboard/session.json
+
 # python
 __pycache__/
 *.pyc

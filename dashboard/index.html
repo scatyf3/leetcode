@@ -27,6 +27,7 @@
         </div>
       </div>
       <button id="open-review" class="ghost">🧠 复习<span id="review-n" class="todo-n hidden"></span></button>
+      <button id="open-stats" class="ghost" title="复习进度: 到期预测 / 记忆强度 / 历史">📈 进度</button>
       <button id="open-lists" class="ghost">📊 题单</button>
       <button id="open-notes" class="ghost">📓 笔记</button>
       <button id="sync">↻ Sync</button>
@@ -106,45 +107,99 @@
     </div>
   </div>
 
-  <!-- FSRS 复习: 看题面 -> 心里过一遍思路 -> 空格揭晓 -> 1-4 自评 -->
-  <div id="review-overlay" class="overlay hidden">
-    <div class="detail review-detail">
-      <div class="detail-head">
-        <div>
-          <span id="rv-id" class="pill"></span>
-          <span id="rv-title" class="d-title"></span>
-          <span id="rv-meta" class="hint"></span>
-        </div>
-        <div class="rv-head-right">
-          <span id="rv-progress" class="hint"></span>
-          <button id="review-close">✕</button>
-        </div>
-      </div>
-
-      <div id="rv-empty" class="rv-empty hidden"></div>
-
-      <div id="rv-card" class="rv-card">
-        <div id="rv-question">
-          <div class="rv-ask">
-            先在心里说清三件事 —— <b>用什么结构 · 什么范式 · 触发条件是什么</b>。不写代码。
+  <!-- FSRS 复习: 看题面 -> 心里过一遍思路 -> 空格揭晓 -> 1-4 自评。
+       这一块由 Vue 接管(app.js 里的 ReviewApp) —— 下面是它的 in-DOM 模板,
+       别再往里塞 id 然后去 app.js 里 $() 抓, 状态一律走 data/computed。
+       其余 overlay 仍然是手写 DOM, 没动。 -->
+  <div id="review-app">
+    <div class="overlay" :class="{ hidden: !open }" @click.self="close">
+      <div class="detail review-detail">
+        <div class="detail-head">
+          <div>
+            <span class="pill" v-text="d ? d.id : ''"></span>
+            <span class="d-title" v-text="d ? d.title : ''"></span>
+            <span class="hint" v-text="note || metaLine"></span>
           </div>
-          <div id="rv-desc" class="lc-desc"></div>
+          <div class="rv-head-right">
+            <div class="groupby rv-mode" title="只改队列顺序, 不改题目范围(到期的 + 还没进过复习的)">
+              <button v-for="m in MODES" :key="m.k" class="gb-btn" :class="{ on: mode === m.k }"
+                      @click="setMode(m.k)" v-text="m.label"></button>
+            </div>
+            <span class="rv-verdict" :class="verdict.cls" v-text="verdict.text"></span>
+            <span class="hint" v-text="d ? (done + 1) + ' / ' + total : ''"></span>
+            <button @click="close">✕</button>
+          </div>
         </div>
 
-        <div id="rv-answer" class="hidden">
-          <div id="rv-tabs" class="tabs"></div>
-          <div id="rv-body" class="rv-body"></div>
+        <div v-if="showEmpty" class="rv-empty">
+          <span v-html="emptyMsg"></span>
+          <br><button class="ghost rv-stats" @click="toStats">📈 看看复习进度</button>
         </div>
-      </div>
 
-      <div class="rv-foot">
-        <button id="rv-reveal" class="rv-reveal">显示答案 <em>空格</em></button>
-        <div id="rv-rate" class="rv-rate hidden"></div>
-        <button id="rv-next" class="rv-next">下一题 <em>空格</em></button>
+        <template v-else-if="d">
+          <div class="rv-card" ref="card">
+            <div>
+              <div class="rv-ask">
+                先在心里说清三件事 —— <b>用什么结构 · 什么范式 · 触发条件是什么</b>。不写代码。
+              </div>
+              <div class="lc-desc" v-html="descHtml"></div>
+              <div v-if="hasQuiz" class="rv-quiz">
+                <div class="rv-q" v-for="b in quizBlocks" :key="b.key">
+                  <div class="rv-q-label" v-text="b.label"></div>
+                  <div class="rv-opts">
+                    <span v-if="!b.state" class="rv-q-hint">(这题还没写选项)</span>
+                    <button v-else v-for="(t, i) in b.state.opts" :key="i"
+                            class="rv-opt" :class="optClass(b.state, i)" @click="pick(b.state, i)">
+                      <span class="k" v-text="KEYS[i]"></span><span v-text="t"></span>
+                    </button>
+                  </div>
+                </div>
+                <div class="rv-q-hint">选不选都行 —— 直接按空格也能揭晓。选了的话揭晓时会标出对错。</div>
+              </div>
+            </div>
+
+            <!-- 答案卡: 标签 + 复杂度 + 一句话思路。note/解法退成次要 tab -->
+            <div v-if="revealed" id="rv-answer">
+              <div class="rv-acard">
+                <div class="rv-acard-head">
+                  <span class="rv-tagline" v-html="tagline"></span>
+                  <span v-if="cxLine" class="rv-cx" v-text="cxLine"></span>
+                  <span v-if="!readOnly" class="rv-aedit" title="双击那行思路也能编辑"
+                        @click="editing ? cancelEdit() : startEdit()"
+                        v-text="editing ? 'Ctrl+S 保存 · Esc 取消' : '改一下'"></span>
+                  <span class="msg" v-text="amsg"></span>
+                </div>
+                <div v-show="!editing" class="rv-idea" title="双击编辑"
+                     @dblclick="startEdit" v-html="ideaHtml"></div>
+                <textarea v-show="editing" id="rv-aedit-box" ref="aedit" v-model="draft"
+                          spellcheck="false" placeholder="一句话思路… Ctrl+S 保存，Esc 取消"></textarea>
+              </div>
+              <div class="tabs">
+                <button v-for="(x, k) in items" :key="k" class="tab" :class="{ on: active === k }"
+                        @click="active = k" v-text="x.name"></button>
+              </div>
+              <div class="rv-body" v-html="bodyHtml"></div>
+            </div>
+          </div>
+
+          <div class="rv-foot">
+            <button v-if="!revealed" class="rv-reveal" @click="reveal">显示答案 <em>空格</em></button>
+            <!-- 只读站没有写接口: 没有评分按钮, 只有单纯的「下一题」自测 -->
+            <div v-else-if="!readOnly" class="rv-rate">
+              <button v-for="r in [1, 2, 3, 4]" :key="r" class="rv-btn" :data-r="r" @click="rate(r)">
+                <b v-text="RATE[r][0]"></b>
+                <i v-text="fmtInterval(preview[r] || 0)"></i>
+                <u v-text="r + ' · ' + RATE[r][1]"></u>
+              </button>
+            </div>
+            <button v-else class="rv-next" @click="skip">下一题 <em>空格</em></button>
+            <button class="ghost rv-defer" :class="{ off: !queue.length }" @click="defer"
+                    title="不评分 · 不写 FSRS —— 只把这道题挪到本次会话的最后再问一遍">↓ 押到队尾 <em>0</em></button>
+          </div>
+        </template>
       </div>
     </div>
   </div>
-
   <!-- list coverage overlay: dashboard/lists.json 是题单定义, 进度现算 -->
   <div id="lists-overlay" class="overlay hidden">
     <div class="detail lists-detail">
@@ -158,6 +213,21 @@
       </div>
       <div id="lists-tabs" class="tabs lists-tabs"></div>
       <div id="lists-body" class="lists-body"></div>
+    </div>
+  </div>
+
+  <!-- 📈 复习进度: 全部由 /api/problems 的 fsrs 列 + /api/reviews 现算, 没有第二份状态 -->
+  <div id="stats-overlay" class="overlay hidden">
+    <div class="detail stats-detail">
+      <div class="detail-head">
+        <div>
+          <span class="pill">进度</span>
+          <span class="d-title">FSRS 复习</span>
+          <span class="hint">调度状态在各题 meta.json 的 fsrs 字段, 历史在 dashboard/reviews.jsonl</span>
+        </div>
+        <button id="stats-close">✕</button>
+      </div>
+      <div id="stats-body" class="stats-body"></div>
     </div>
   </div>
 
@@ -223,6 +293,7 @@
     </div>
   </div>
 
+  <script src="vendor/vue.global.prod.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

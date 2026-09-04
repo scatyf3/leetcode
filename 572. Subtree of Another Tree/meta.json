@@ -13,5 +13,27 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n·m)",
+    "space": "O(n+m)"
+  },
+  "quiz": {
+    "idea": "双层递归；或序列化判子串",
+    "wrong": [
+      "看 subRoot 根值是否出现过",
+      "比中序遍历是否为子串",
+      "比高度差和节点数"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

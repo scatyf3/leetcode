@@ -17,5 +17,27 @@
   ],
   "difficulty": "hard",
   "status": "review",
-  "familiarity": 4
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(log n) 插入 / O(1) 取中位数",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "对顶堆，堆顶即中位数",
+    "wrong": [
+      "有序数组 + 二分插入",
+      "每次取值时重新排序",
+      "两个指针盯住中间两个"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-02",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }

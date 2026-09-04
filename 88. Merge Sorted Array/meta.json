@@ -10,5 +10,17 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(m+n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "从后往前填，大的写到末尾",
+    "wrong": [
+      "从前往后归并，写进 nums1 的空位",
+      "拼接后调用排序",
+      "二分找插入位逐个插入"
+    ]
+  }
 }

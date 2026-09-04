@@ -13,5 +13,17 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(V+E)",
+    "space": "O(V)"
+  },
+  "quiz": {
+    "idea": "哈希表兼任 visited 和映射",
+    "wrong": [
+      "先建全部节点再连边",
+      "拓扑排序后按序复制",
+      "并查集合并连通分量后逐个复制"
+    ]
+  }
 }

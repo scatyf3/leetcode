@@ -1,6 +1,15 @@
 'use strict';
 const $ = (s) => document.querySelector(s);
 const api = (u, opt) => fetch(u, opt).then((r) => r.json());
+// 空安全绑定。底下有 40 多条顶层 addEventListener, 最后一行才是 reload() ——
+// 只要有一个元素不存在(典型场景: 浏览器拿了缓存的旧 index.html 配新 app.js),
+// 一个 TypeError 就会掐断整个顶层脚本, 连 reload() 都跑不到, 表现是**整页卡死**。
+// 宁可少绑一个按钮 + 在 console 上喊一声, 也不能让页面起不来。
+const on = (sel, ev, fn, opt) => {
+  const el = $(sel);
+  if (el) el.addEventListener(ev, fn, opt);
+  else console.warn(`[wire] 找不到 ${sel} —— 该按钮不会响应。多半是 index.html 是旧的, 强刷一下`);
+};
 
 let PROBLEMS = [];
 let CURRENT = null; // detail object
@@ -666,7 +675,11 @@ function md(src) {
       out.push(`<ol>${buf.join('')}</ol>`); continue;
     }
     if (l.trim() === '') { i++; continue; }
-    const buf = [];
+    // 第一行**无条件**吃掉 —— 能走到这里就说明上面每个分支都没接住它, 再让 while 的
+    // 排除式去判一次就可能一行都不消费 -> i 不前进 -> 死循环, 整个页面卡死。
+    // 真实触发者: 435 的 note.md 里 "|OPT'| = |OPT|" 这种集合势记号, 长得像表格
+    // (匹配 ^\s*\|.*\|) 但下一行不是 |---|---| 分隔行, 于是表格分支不接、段落分支也不敢吃。
+    const buf = [lines[i++]];
     while (i < lines.length && lines[i].trim() !== '' && !/^(#{1,6}\s|\s*```|\s*[-*+]\s|\s*\d+\.\s|\s*>|\s*\|)/.test(lines[i]))
       buf.push(lines[i++]);
     out.push(`<p>${inline(buf.join(' '))}</p>`);
@@ -678,7 +691,9 @@ function md(src) {
 // 调度状态在各题 meta.json 的 fsrs 字段里, 算法在 dashboard/fsrs.py。
 // 和 familiarity(L1-L4) 是**两套独立的东西**: 这里只管"什么时候再问一次",
 // familiarity 仍然是手工维护的掌握档位, 复习不会去改它。
-let REVIEW = null;          // {queue:[id], done, total, revealed, d, items, active}
+//
+// 这一节的 UI 是**唯一用 Vue 的地方**(模板在 index.html 的 #review-app 里),
+// 其余看板还是手写 DOM。下面这些排队/调度的纯函数不属于 UI, 📈 进度那节也在用。
 const isReadOnly = () => document.documentElement.classList.contains('ro');
 
 const todayStr = () => new Date().toLocaleDateString('sv');   // 本地 YYYY-MM-DD
@@ -687,15 +702,39 @@ const isDue = (p) => isCard(p) && p.due <= todayStr();
 const rvEligible = (p) => p.status === 'solved' || p.status === 'review';
 const FAM_ORDER = { 4: 0, 3: 1, 2: 2, 0: 3, 1: 4 };            // 越生的越先进队列
 
-function buildQueue() {
-  const due = PROBLEMS.filter(isDue).sort((a, b) =>
+// 队列**范围**三种模式都一样(到期的卡 + 还没进过复习的题), 模式只决定**顺序**:
+//   fsrs   到期优先 + 生的优先(默认)
+//   order  题号升序
+//   random 随机
+const RV_MODES = ['fsrs', 'order', 'random'];
+
+function savedMode() {
+  try {
+    const m = localStorage.getItem('rv-mode');
+    if (RV_MODES.includes(m)) return m;
+  } catch { /* 隐私模式 */ }
+  return 'fsrs';
+}
+
+const queuePool = () => [
+  ...PROBLEMS.filter(isDue),
+  ...PROBLEMS.filter((p) => rvEligible(p) && !isCard(p)),
+];
+
+function orderQueue(pool, mode = 'fsrs') {
+  if (mode === 'random') return shuffle(pool.map((p) => p.id));
+  if (mode === 'order') return [...pool].sort((a, b) => a.id - b.id).map((p) => p.id);
+  const due = pool.filter(isDue).sort((a, b) =>
     (a.status === 'review' ? 0 : 1) - (b.status === 'review' ? 0 : 1) ||
     a.due.localeCompare(b.due) || a.id - b.id);
   // 还没成为卡片的题, 按熟练度从生到熟排 —— 只是**读** familiarity 定顺序, 不写它
-  const fresh = PROBLEMS.filter((p) => rvEligible(p) && !isCard(p)).sort((a, b) =>
+  const fresh = pool.filter((p) => !isCard(p)).sort((a, b) =>
     FAM_ORDER[famOf(a)] - FAM_ORDER[famOf(b)] || a.id - b.id);
   return [...due, ...fresh].map((p) => p.id);
 }
+
+// 三种模式的**题目范围完全一样**, 所以徽章和 📈 里的数字跟模式无关
+const buildQueue = (mode = 'fsrs') => orderQueue(queuePool(), mode);
 
 function updateReviewBadge() {
   const n = buildQueue().length;
@@ -711,124 +750,455 @@ function fmtInterval(days) {
   return `${(days / 365).toFixed(1)} 年`;
 }
 
-async function openReview() {
-  const queue = buildQueue();
-  REVIEW = { queue, done: 0, total: queue.length, revealed: false, d: null, items: [], active: 0 };
-  $('#review-overlay').classList.remove('hidden');
-  nextCard();
+const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const cxText = (c) => (c && c.time ? `${c.time} / ${c.space || '?'}` : '');
+
+// 复杂度的干扰项从全库出现过的复杂度里抽, 并且**优先抽常见的** ——
+// 抽到 O(n^(T/min)) 那种独一份的等于送分, 抽到 O(n)/O(n) 才是真的容易混。
+function cxPool(correct) {
+  const freq = new Map();
+  for (const p of PROBLEMS) {
+    const t = cxText(p.complexity);
+    if (t && t !== correct) freq.set(t, (freq.get(t) || 0) + 1);
+  }
+  return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map((x) => x[0]);
 }
 
-function closeReview() {
-  $('#review-overlay').classList.add('hidden');
-  REVIEW = null;
+// 复杂度那道先关掉: 思路还没稳的时候先问思路, 复杂度等思路熟了再开。
+// 改成 true 就能把「时间/空间复杂度？」那道题恢复出来, 其余逻辑都还在。
+const QUIZ_CX = false;
+
+function buildQuiz(d) {
+  const q = d.quiz || {};
+  const cx = cxText(d.complexity);
+  const mk = (correct, wrongs) => {
+    if (!correct || wrongs.length < 1) return null;
+    const opts = shuffle([correct, ...wrongs.slice(0, 3)]);
+    return { opts, correct: opts.indexOf(correct), pick: -1 };
+  };
+  return {
+    idea: q.idea ? mk(q.idea, q.wrong || []) : null,
+    cx: QUIZ_CX && cx ? mk(cx, shuffle(cxPool(cx)).slice(0, 3)) : null,
+  };
 }
 
-async function nextCard() {
-  if (!REVIEW) return;
-  const id = REVIEW.queue.shift();
-  if (id === undefined) return showRvEmpty();
-  $('#rv-empty').classList.add('hidden');
-  $('#rv-card').classList.remove('hidden');
-  $('.rv-foot').classList.remove('hidden');
-  REVIEW.d = await api(`/api/problems/${id}`);
-  REVIEW.revealed = false;
-  renderQuestion();
+// ---- 复习面板(Vue)。模板是 index.html 里的 #review-app -----------------------
+// 迁移到 Vue 的理由: 这一屏状态最多(队列 / 揭晓与否 / 选择题 / 就地编辑 / tab),
+// 以前全靠手工 classList.toggle + innerHTML 对齐, 加一个元素就容易漏一处。
+// 现在 DOM 一律从下面这些 data/computed 推导出来, app.js 里不再有 $('#rv-*')。
+const RV = Vue.createApp({
+  data() {
+    return {
+      open: false,
+      queue: [], done: 0, total: 0,
+      d: null,                       // 当前这道的详情; null = 队列空了(显示收尾屏)
+      loading: false,                // 拉详情中。不加这个会先闪一下"没有到期的题"
+      revealed: false,
+      quiz: { idea: null, cx: null },
+      items: [], active: 0,          // 揭晓后的 note / 各解法 tab
+      editing: false, draft: '', amsg: '',
+      note: '',                      // 顶部那行临时提示(写失败 / 已经是队尾)
+      deferred: [],                  // 这一轮按过「押到队尾」的题, 按发生顺序, 可重复
+      mode: savedMode(),
+      readOnly: isReadOnly(),
+      MODES: [{ k: 'fsrs', label: '到期优先' }, { k: 'order', label: '题号' }, { k: 'random', label: '随机' }],
+      KEYS: 'ABCD',
+      RATE: { 1: ['忘了', '想不起来'], 2: ['勉强', '想了很久'], 3: ['想起来了', '正常'], 4: ['很熟', '秒答'] },
+    };
+  },
+
+  computed: {
+    metaLine() {
+      if (!this.d) return '';
+      const reps = this.d.fsrs && this.d.fsrs.reps ? `第 ${this.d.fsrs.reps + 1} 次复习` : '第一次进复习';
+      return `${this.d.difficulty || '?'} · ${reps}`;
+    },
+    // 只渲染题面。绝不碰 d.note / d.solutions —— 剧透了这个功能就没意义了
+    descHtml() {
+      return (this.d && this.d.description)
+        || '<p class="hint">这题没有抓到题面(problem.html 是空的)。只能靠标题回忆 —— 或者跑 dashboard/fetch_desc.py 补抓。</p>';
+    },
+    // 拉详情的空档不能显示收尾屏 —— 会闪一下"今天没有到期的题"
+    showEmpty() { return !this.d && !this.loading; },
+    hasQuiz() { return !!(this.quiz.idea || this.quiz.cx); },
+    quizBlocks() {
+      const b = [{ key: 'idea', label: '思路是哪个？', state: this.quiz.idea }];
+      if (this.quiz.cx) b.push({ key: 'cx', label: '时间 / 空间复杂度？', state: this.quiz.cx });
+      return b;                                    // cx 关掉时整块不占位
+    },
+    verdict() {
+      if (!this.revealed) return { cls: '', text: '' };
+      const v = (st) => (!st || st.pick < 0 ? '' : st.pick === st.correct ? 'ok' : 'no');
+      const vs = [v(this.quiz.idea), v(this.quiz.cx)].filter(Boolean);
+      if (!vs.length) return { cls: '', text: '' };
+      const allOk = vs.every((x) => x === 'ok');
+      return {
+        cls: allOk ? 'ok' : 'no',
+        text: allOk ? '选择题全对' : `选择题错了 ${vs.filter((x) => x === 'no').length} 项`,
+      };
+    },
+    // 标签就是答案的一部分 —— 「用什么结构 / 什么范式」正是揭晓时该对照的东西
+    tagline() {
+      const tag = (label, arr) => (arr && arr.length ? `${label} <b>${esc(arr.join(' · '))}</b>` : '');
+      return [tag('结构', this.d.structures), tag('范式', this.d.paradigms)].filter(Boolean).join('　　')
+        || '<span class="rv-none">(还没打标签)</span>';
+    },
+    cxLine() {
+      const cx = (this.d && this.d.complexity) || {};
+      return [cx.time, cx.space].filter(Boolean).join('  /  ');
+    },
+    ideaHtml() {
+      return this.d.answer
+        ? md(this.d.answer)
+        : '<span class="rv-none">还没写答案卡 —— 点右边「改一下」把刚才想的那套写进去</span>';
+    },
+    bodyHtml() {
+      const item = this.items[this.active];
+      if (!item) return '';
+      return item.code !== undefined ? `<pre><code>${highlightPython(item.code)}</code></pre>` : md(item.md);
+    },
+    preview() { return (this.d && this.d.fsrs_preview) || {}; },
+    emptyMsg() {
+      return this.done
+        ? `这一轮复习完了 —— 共 ${this.done} 道 🎉<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>`
+        : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>';
+    },
+  },
+
+  methods: {
+    fmtInterval,                                   // 模板里要用
+
+    // 把当前队列快照发给后端存成 dashboard/session.json。**单向**: 只写不读,
+    // 前端从不拿它做决定 —— 队列仍然是每次开面板现算的。存它只是为了在浏览器外面
+    // 也能看见"现在队列长什么样 / 哪几道被押到队尾了"。失败了不影响复习。
+    syncSession() {
+      if (this.readOnly) return;                   // 只读站没有写接口
+      api('/api/review/session', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          open: this.open, mode: this.mode, done: this.done, total: this.total,
+          current: this.d ? this.d.id : null, queue: this.queue, deferred: this.deferred,
+        }),
+      }).catch(() => { /* 存不上就算了, 这不是数据源 */ });
+    },
+
+    start() {
+      this.queue = buildQueue(this.mode);
+      this.done = 0;
+      this.total = this.queue.length;
+      this.deferred = [];
+      this.open = true;
+      this.next();
+    },
+    close() {
+      this.open = false;
+      this.d = null;
+      this.editing = false;
+      this.syncSession();
+    },
+    toStats() { this.close(); openStats(); },
+
+    async next() {
+      this.note = '';
+      this.editing = false;
+      this.amsg = '';
+      const id = this.queue.shift();
+      if (id === undefined) { this.d = null; return; }   // 队列空了 -> 收尾屏
+      this.loading = true;
+      try {
+        this.d = await api(`/api/problems/${id}`);
+      } finally {
+        this.loading = false;
+      }
+      this.revealed = false;
+      this.quiz = buildQuiz(this.d);
+      this.active = 0;
+      this.$nextTick(() => { if (this.$refs.card) this.$refs.card.scrollTop = 0; });
+      this.syncSession();
+    },
+    skip() { this.done++; this.next(); },              // 只读站用: 没有评分按钮
+
+    // 换模式: 只重排**剩下**的题, 当前这道不动, done/total 也不重来
+    setMode(m) {
+      if (!RV_MODES.includes(m)) return;
+      this.mode = m;
+      try { localStorage.setItem('rv-mode', m); } catch { /* 隐私模式 */ }
+      const byId = new Map(PROBLEMS.map((p) => [p.id, p]));
+      this.queue = orderQueue(this.queue.map((id) => byId.get(id)).filter(Boolean), m);
+      this.syncSession();
+    },
+
+    pick(state, i) {
+      if (this.revealed) return;                       // 揭晓后不能再改答案
+      state.pick = state.pick === i ? -1 : i;          // 再点一下取消
+    },
+    optClass(state, i) {
+      if (!this.revealed) return { picked: state.pick === i };
+      return { done: true, right: i === state.correct, wrong: i !== state.correct && i === state.pick };
+    },
+
+    reveal() {
+      if (!this.d || this.revealed) return;
+      this.revealed = true;
+      this.items = [{ name: '📝 笔记', md: this.d.note || '_(还没写笔记)_' },
+                    ...this.d.solutions.map((x) => ({ name: x.name, code: x.content }))];
+      this.active = 0;
+    },
+
+    // 就地改答案卡: 复习时脑子正热, 这时候压缩成一句话最准
+    startEdit() {
+      if (!this.revealed || this.readOnly) return;
+      this.draft = this.d.answer || '';
+      this.editing = true;
+      this.$nextTick(() => this.$refs.aedit && this.$refs.aedit.focus());
+    },
+    cancelEdit() { this.editing = false; },
+    async saveAnswer() {
+      if (!this.editing) return;
+      const content = this.draft;
+      let r;
+      try {
+        r = await api(`/api/problems/${this.d.id}/answer`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content }),
+        });
+      } catch { r = null; }
+      if (!r || !r.ok) { this.amsg = '没存上(只读站?)'; return; }
+      this.d.answer = content;
+      this.editing = false;
+      this.amsg = '已存 ✓';
+      setTimeout(() => { this.amsg = ''; }, 1500);
+    },
+
+    // 押到队尾: 不评分 / 不写 FSRS / 不算进度, 只把这道题挪到本次会话的最后再问一遍。
+    // 和评 1 的区别 —— 评 1 是**真的记一次复习**(写 reviews.jsonl, due 会变);
+    // 这里表达的是"现在没空细看", 不该污染调度数据。
+    defer() {
+      if (!this.d) return;
+      if (!this.queue.length) {                        // 后面没题了, 挪了还是它
+        this.note = '⚠ 已经是本轮最后一道了 —— 队尾就在这儿';
+        return;
+      }
+      this.queue.push(this.d.id);                      // done/total 都不动: 这道题还欠着
+      this.deferred.push(this.d.id);
+      this.next();                                     // next() 里会同步给后端
+    },
+
+    async rate(r) {
+      if (!this.revealed) return;
+      const id = this.d.id;
+      let res;
+      try {
+        res = await api(`/api/review/${id}`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating: r }),
+        });
+      } catch { res = null; }
+      if (!res || !res.ok) {
+        // 只读站的 403 也走这里(static-shim 是 resolve 不是 reject)。写失败就**不推进**——
+        // 假装评过了会让这道题的调度悄悄丢一次, 比停下来更糟。
+        this.note = '⚠ 没记录下来(只读站或服务没起) —— 按「下一题」继续自测';
+        return;
+      }
+      const p = PROBLEMS.find((x) => x.id === id);
+      if (p) {
+        p.due = res.card.due; p.reps = res.card.reps; p.stability = res.card.stability;
+        p.last_review = res.card.last_review; p.fsrs_state = res.card.state;
+      }
+      if (r === 1) { this.queue.push(id); this.total++; }   // 忘了 -> 本次会话末尾再问一遍
+      buildPanel();
+      updateReviewBadge();
+      REVIEWS = null;        // 历史多了一行, 让 📈 进度下次打开重新拉
+      this.done++;
+      this.next();
+    },
+
+    // 键盘由 app.js 末尾那个全局 handler 转进来 —— 保持和其它 overlay 同一套分发顺序
+    onKey(e) {
+      if (this.editing && (e.ctrlKey || e.metaKey) && e.key === 's') { this.saveAnswer(); return true; }
+      if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.keyCode === 229) return false;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return false;
+      if (e.key === ' ') {
+        if (!this.revealed) this.reveal();
+        else if (this.readOnly) this.skip();     // 只读站没有评分按钮, 空格 = 下一题
+        // 本地站揭晓后不响应空格: 必须按 1-4, 防止手滑跳过一道没评分
+        return true;
+      }
+      if (e.key === '0') { this.defer(); return true; }
+      if (this.revealed && !this.readOnly && '1234'.includes(e.key)) { this.rate(+e.key); return true; }
+      return false;
+    },
+    onEsc() {
+      if (this.editing) this.cancelEdit();
+      else this.close();
+    },
+  },
+}).mount('#review-app');
+
+// ---- 📈 复习进度: 到期预测 / 记忆强度 / 复习历史 -----------------------------
+// 每个数字都从 /api/problems 的 fsrs 列 + /api/reviews(reviews.jsonl) **现算**,
+// 不落第二份统计 —— 手改了某题的 meta.json 或者删掉 data.db 重建, 这里跟着变, 不会对不上。
+let REVIEWS = null;                 // reviews.jsonl 的全部行; null = 还没拉过
+
+const RATE_LABEL = { 1: '忘了', 2: '勉强', 3: '想起来了', 4: '很熟' };
+const FORECAST_DAYS = 30;           // 到期预测往前看多远
+const HISTORY_DAYS = 30;            // 复习历史往回看多久
+
+// 全部按**本地日期**算, 和 todayStr() / server.py 的 today_str() 是同一套口径
+const dParse = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const dAdd = (s, n) => { const t = dParse(s); t.setDate(t.getDate() + n); return t.toLocaleDateString('sv'); };
+const mmdd = (s) => s.slice(5).replace('-', '/');
+
+// stability(天)的分桶: [上界(不含), 标签]。最后一档兜底。
+const SBUCKETS = [[1, '<1天'], [3, '1-3天'], [7, '3-7天'], [14, '1-2周'],
+                  [30, '2-4周'], [90, '1-3月'], [180, '3-6月'], [Infinity, '>6月']];
+const sBucket = (d) => SBUCKETS.findIndex(([hi]) => d < hi);
+
+// 记忆强度和间隔都用它 —— fmtInterval 是给"下次什么时候"用的, 0 会说成"今天", 这里不合适
+function fmtDays(d) {
+  if (!d || d <= 0) return '—';
+  if (d < 1) return '<1 天';
+  if (d < 30) return `${d.toFixed(d < 10 ? 1 : 0)} 天`;
+  if (d < 365) return `${(d / 30).toFixed(1)} 个月`;
+  return `${(d / 365).toFixed(1)} 年`;
 }
 
-function showRvEmpty() {
-  const done = REVIEW ? REVIEW.done : 0;
-  $('#rv-card').classList.add('hidden');
-  $('.rv-foot').classList.add('hidden');
-  $('#rv-id').textContent = '';
-  $('#rv-title').textContent = '';
-  $('#rv-meta').textContent = '';
-  $('#rv-progress').textContent = '';
-  $('#rv-empty').classList.remove('hidden');
-  $('#rv-empty').innerHTML = done
-    ? `这一轮复习完了 —— 共 ${done} 道 🎉<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>`
-    : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>';
+// 柱状图。cols: [{label, tip, on, parts:[{cls,n}]}]; 高度按全图最大值归一, 堆叠从下往上。
+function chartHTML(cols, h = 96) {
+  const max = Math.max(1, ...cols.map((c) => c.parts.reduce((s, p) => s + p.n, 0)));
+  const body = cols.map((c) => {
+    const tot = c.parts.reduce((s, p) => s + p.n, 0);
+    const bars = c.parts.filter((p) => p.n > 0)
+      .map((p) => `<i class="${p.cls}" style="height:${(100 * p.n / max).toFixed(2)}%"></i>`).join('');
+    return `<div class="col${c.on ? ' on' : ''}" title="${esc(c.tip)}">
+        <div class="col-n">${tot || ''}</div>
+        <div class="col-bars">${bars}</div>
+        <div class="col-x">${esc(c.label || '')}</div>
+      </div>`;
+  }).join('');
+  return `<div class="chart" style="--ch:${h}px">${body}</div>`;
 }
 
-// 只渲染题面。绝不碰 d.note / d.solutions —— 剧透了这个功能就没意义了
-function renderQuestion() {
-  const d = REVIEW.d;
-  $('#rv-id').textContent = d.id;
-  $('#rv-title').textContent = d.title;
-  const reps = d.fsrs && d.fsrs.reps ? `第 ${d.fsrs.reps + 1} 次复习` : '第一次进复习';
-  $('#rv-meta').textContent = `${d.difficulty || '?'} · ${reps}`;
-  $('#rv-progress').textContent = `${REVIEW.done + 1} / ${REVIEW.total}`;
-  $('#rv-desc').innerHTML = d.description
-    || '<p class="hint">这题没有抓到题面(problem.html 是空的)。只能靠标题回忆 —— 或者跑 dashboard/fetch_desc.py 补抓。</p>';
-  $('#rv-card').scrollTop = 0;
-  $('#rv-answer').classList.add('hidden');
-  $('#rv-reveal').classList.remove('hidden');
-  $('#rv-rate').classList.add('hidden');
-  $('#rv-rate').innerHTML = '';
-}
+const stile = (v, label, sub) =>
+  `<div class="stile"><b>${esc(v)}</b><span>${esc(label)}</span>${sub ? `<em>${esc(sub)}</em>` : ''}</div>`;
 
-function revealAnswer() {
-  if (!REVIEW || REVIEW.revealed) return;
-  REVIEW.revealed = true;
-  const d = REVIEW.d;
-  REVIEW.items = [{ name: '📝 笔记', md: d.note || '_(还没写笔记)_' },
-                  ...d.solutions.map((x) => ({ name: x.name, code: x.content }))];
-  renderRvTabs(0);
-  $('#rv-answer').classList.remove('hidden');
-  $('#rv-reveal').classList.add('hidden');
+const sblock = (title, hint, body) => `<section class="sblock">
+    <div class="sblock-head"><b>${esc(title)}</b>${hint ? `<span class="hint">${esc(hint)}</span>` : ''}</div>
+    ${body}</section>`;
 
-  const pv = d.fsrs_preview || {};
-  const LABEL = { 1: ['忘了', '想不起来'], 2: ['勉强', '想了很久'], 3: ['想起来了', '正常'], 4: ['很熟', '秒答'] };
-  $('#rv-rate').innerHTML = [1, 2, 3, 4].map((r) => `
-    <button class="rv-btn" data-r="${r}">
-      <b>${LABEL[r][0]}</b><i>${fmtInterval(pv[r] ?? 0)}</i><u>${r} · ${LABEL[r][1]}</u>
-    </button>`).join('');
-  $('#rv-rate').classList.remove('hidden');
-  $('#rv-rate').querySelectorAll('.rv-btn').forEach((el) =>
-    el.addEventListener('click', () => rate(+el.dataset.r)));
-}
+const slegend = (items) => `<div class="slegend">${items
+  .map(([cls, label, n]) => `<span class="skey"><i class="${cls}"></i>${esc(label)}${
+    n === undefined ? '' : ` <b>${n}</b>`}</span>`).join('')}</div>`;
 
-function renderRvTabs(i) {
-  REVIEW.active = i;
-  $('#rv-tabs').innerHTML = REVIEW.items
-    .map((x, k) => `<button class="tab${k === i ? ' on' : ''}" data-i="${k}">${esc(x.name)}</button>`)
-    .join('');
-  $('#rv-tabs').querySelectorAll('.tab').forEach((el) =>
-    el.addEventListener('click', () => renderRvTabs(+el.dataset.i)));
-  const item = REVIEW.items[i];
-  $('#rv-body').innerHTML = item.code !== undefined
-    ? `<pre><code>${highlightPython(item.code)}</code></pre>`
-    : md(item.md);
-}
+function renderStats() {
+  const box = $('#stats-body');
+  const today = todayStr();
+  const cards = PROBLEMS.filter(isCard);
+  const eligible = PROBLEMS.filter(rvEligible);
+  const rvs = REVIEWS || [];
 
-async function rate(r) {
-  if (!REVIEW || !REVIEW.revealed) return;
-  const id = REVIEW.d.id;
-  let res;
-  try {
-    res = await api(`/api/review/${id}`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating: r }),
-    });
-  } catch { res = null; }
-  if (!res || !res.ok) {
-    // 只读站的 403 也走这里(static-shim 是 resolve 不是 reject)。写失败就**不推进**——
-    // 假装评过了会让这道题的调度悄悄丢一次, 比停下来更糟。
-    $('#rv-meta').textContent = '⚠ 没记录下来(只读站或服务没起) —— 按「下一题」继续自测';
+  if (!cards.length && !rvs.length) {
+    box.innerHTML = `<p class="empty-hint">还没有任何复习记录。<br>
+      <span class="hint">去 🧠 复习 评第一道题, 这里就有东西了 ——
+      现在有 <b>${eligible.length}</b> 道题(status 是 solved / review)在等第一次入队。</span></p>`;
     return;
   }
-  {
-    const p = PROBLEMS.find((x) => x.id === id);
-    if (p) {
-      p.due = res.card.due; p.reps = res.card.reps; p.stability = res.card.stability;
-      p.last_review = res.card.last_review; p.fsrs_state = res.card.state;
-    }
-    if (r === 1) { REVIEW.queue.push(id); REVIEW.total++; }   // 忘了 -> 本次会话末尾再问一遍
-    buildPanel();
-    updateReviewBadge();
+
+  // --- 复习历史按天归并, 顺带算连续天数 ---
+  const byDay = new Map();                        // date -> [_, r1, r2, r3, r4]
+  for (const e of rvs) {
+    const a = byDay.get(e.date) || [0, 0, 0, 0, 0];
+    if (a[e.rating] !== undefined) a[e.rating]++;
+    byDay.set(e.date, a);
   }
-  REVIEW.done++;
-  nextCard();
+  // 今天还没复习不该把昨天开始的连胜清零, 所以从今天或昨天起算
+  let streak = 0;
+  for (let d = byDay.has(today) ? today : dAdd(today, -1); byDay.has(d); d = dAdd(d, -1)) streak++;
+
+  // --- 概览 ---
+  const overdue = cards.filter((p) => p.due < today).length;
+  const dueToday = cards.filter((p) => p.due === today).length;
+  const fresh = eligible.filter((p) => !isCard(p)).length;
+  const stabs = cards.map((p) => +p.stability || 0).filter((x) => x > 0).sort((a, b) => a - b);
+  const median = stabs.length ? stabs[Math.floor(stabs.length / 2)] : 0;
+  const mean = stabs.length ? stabs.reduce((a, b) => a + b, 0) / stabs.length : 0;
+  // 留存率只算**老卡**: 新卡的第一次评分测的是"做过没有", 不是"记没记住", 混进来会虚高
+  const real = rvs.filter((e) => e.state && e.state !== 'new');
+  const recalled = real.filter((e) => e.rating >= 2).length;
+
+  let h = `<div class="stiles">
+    ${stile(buildQueue().length, '今天要复习', `到期 ${overdue + dueToday} · 新卡 ${fresh}`)}
+    ${stile(`${cards.length}/${eligible.length}`, '已入队 / 可复习', fresh ? `还有 ${fresh} 道没进过队列` : '全部进过队列')}
+    ${stile(fmtDays(median), '记忆强度中位数', `平均 ${fmtDays(mean)}`)}
+    ${stile(real.length ? `${(100 * recalled / real.length).toFixed(0)}%` : '—', '留存率',
+            real.length ? `${real.length} 次老卡回忆` : '还没有老卡复习过')}
+    ${stile(rvs.length, '累计复习', `${byDay.size} 天 · 连续 ${streak} 天`)}
+  </div>`;
+
+  // --- 未来到期 ---
+  const dueBy = new Map();
+  for (const p of cards) dueBy.set(p.due, (dueBy.get(p.due) || 0) + 1);
+  let ahead = 0;
+  const fc = [];
+  for (let i = 0; i < FORECAST_DAYS; i++) {
+    const d = dAdd(today, i);
+    const n = dueBy.get(d) || 0;
+    ahead += n;
+    const parts = [{ cls: 'b-due', n }];
+    if (i === 0 && overdue) parts.unshift({ cls: 'b-over', n: overdue });   // 逾期堆在今天这根的底下
+    fc.push({
+      label: i === 0 ? '今天' : (i % 5 === 0 ? mmdd(d) : ''),
+      on: i === 0,
+      tip: `${d}${i === 0 ? ' (今天)' : ''} · 到期 ${n} 道${i === 0 && overdue ? ` · 另有逾期 ${overdue} 道` : ''}`,
+      parts,
+    });
+  }
+  h += sblock('未来到期', `接下来 ${FORECAST_DAYS} 天共 ${ahead + overdue} 道 · 鼠标停在柱子上看当天`,
+    chartHTML(fc) + slegend([['b-due', '到期', ahead]].concat(overdue ? [['b-over', '逾期', overdue]] : [])));
+
+  // --- 记忆强度分布 ---
+  const sc = SBUCKETS.map(() => 0);
+  for (const p of cards) { const s = +p.stability || 0; if (s > 0) sc[sBucket(s)]++; }
+  h += sblock('记忆强度分布', 'stability = 回忆概率掉到 90% 需要的天数, 越靠右这题记得越牢',
+    chartHTML(SBUCKETS.map(([, label], i) => ({
+      label, tip: `记忆强度 ${label}: ${sc[i]} 道`, parts: [{ cls: `b-s${i}`, n: sc[i] }],
+    })), 84));
+
+  // --- 复习历史 ---
+  const hist = [];
+  for (let i = HISTORY_DAYS - 1; i >= 0; i--) {
+    const d = dAdd(today, -i);
+    const a = byDay.get(d) || [0, 0, 0, 0, 0];
+    const tot = a[1] + a[2] + a[3] + a[4];
+    hist.push({
+      label: i === 0 ? '今天' : (i % 5 === 0 ? mmdd(d) : ''),
+      on: i === 0,
+      tip: `${d} · 共 ${tot} 次${tot ? ' · ' + [1, 2, 3, 4].filter((r) => a[r])
+        .map((r) => `${RATE_LABEL[r]} ${a[r]}`).join(' / ') : ''}`,
+      parts: [1, 2, 3, 4].map((r) => ({ cls: `b-r${r}`, n: a[r] })),
+    });
+  }
+  const rc = { 1: 0, 2: 0, 3: 0, 4: 0 };
+  for (const e of rvs) if (rc[e.rating] !== undefined) rc[e.rating]++;
+  h += sblock('复习历史', `最近 ${HISTORY_DAYS} 天 · 按评分堆叠`,
+    chartHTML(hist) + slegend([1, 2, 3, 4].map((r) => [`b-r${r}`, RATE_LABEL[r], rc[r]])));
+
+  box.innerHTML = h;
 }
+
+async function openStats() {
+  $('#stats-overlay').classList.remove('hidden');
+  $('#stats-body').innerHTML = '<p class="empty-hint">读取中…</p>';
+  if (REVIEWS === null) {
+    // 只读站没有这个文件时 shim 会回一个空壳; 拿不到历史也要能画出到期预测那部分
+    try { REVIEWS = (await api('/api/reviews')).reviews || []; } catch { REVIEWS = []; }
+  }
+  renderStats();
+}
+
+function closeStats() { $('#stats-overlay').classList.add('hidden'); }
+const statsOpen = () => !$('#stats-overlay').classList.contains('hidden');
 
 // ---- 📊 题单覆盖率: dashboard/lists.json 是定义, 进度拿 PROBLEMS 现算 -------
 // 定义里有仓库还没有的题(那才是缺口的意义), 所以不能只靠 meta.json 反推。
@@ -1148,17 +1518,17 @@ async function reload() {
 }
 
 // ---- wire global controls ----
-$('#sync').addEventListener('click', async () => { await fetch('/api/sync', { method: 'POST' }); reload(); });
-$('#close').addEventListener('click', closeDetail);
-$('#save-note').addEventListener('click', () => { saveNote(); exitEdit(); });
-$('#note-preview').addEventListener('dblclick', enterEdit);
-$('#sol-code').addEventListener('dblclick', enterSolEdit);
-$('#sol-save').addEventListener('click', () => exitSolEdit(true));
-$('#sol-edit').addEventListener('blur', () => exitSolEdit(true));  // 点开 = 保存 + 回高亮
-$('#note-edit').addEventListener('blur', () => exitEdit(true));   // click away = save + render
-$('#e-difficulty').addEventListener('change', autoSaveMeta);
-$('#e-status').addEventListener('change', autoSaveMeta);
-$('#e-familiarity').addEventListener('change', autoSaveMeta);
+on('#sync', 'click', async () => { await fetch('/api/sync', { method: 'POST' }); reload(); });
+on('#close', 'click', closeDetail);
+on('#save-note', 'click', () => { saveNote(); exitEdit(); });
+on('#note-preview', 'dblclick', enterEdit);
+on('#sol-code', 'dblclick', enterSolEdit);
+on('#sol-save', 'click', () => exitSolEdit(true));
+on('#sol-edit', 'blur', () => exitSolEdit(true));  // 点开 = 保存 + 回高亮
+on('#note-edit', 'blur', () => exitEdit(true));   // click away = save + render
+on('#e-difficulty', 'change', autoSaveMeta);
+on('#e-status', 'change', autoSaveMeta);
+on('#e-familiarity', 'change', autoSaveMeta);
 
 // chip editor: remove on ✕, add on Enter/comma, delete-last on Backspace
 document.addEventListener('click', (e) => {
@@ -1166,23 +1536,9 @@ document.addEventListener('click', (e) => {
   if (x) removeTag(x.closest('.chipfield').dataset.field, +x.dataset.i);
 });
 document.addEventListener('keydown', (e) => {
-  // 复习模式的单键快捷键。这个全局 handler 原本只处理 Ctrl+S / Esc, 没有任何输入框保护,
-  // 所以这里必须自己挡: 输入框内、组合键、以及中文输入法组字中(isComposing / 229)。
-  if (REVIEW && !e.ctrlKey && !e.metaKey && !e.altKey && !e.isComposing && e.keyCode !== 229
-      && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) {
-    if (e.key === ' ') {
-      e.preventDefault();
-      if (!REVIEW.revealed) revealAnswer();
-      else if (isReadOnly()) nextCard();   // 只读站没有评分按钮, 空格 = 下一题
-      // 本地站揭晓后不响应空格: 必须按 1-4, 防止手滑跳过一道没评分
-      return;
-    }
-    if (REVIEW.revealed && '1234'.includes(e.key)) {
-      e.preventDefault();
-      rate(+e.key);
-      return;
-    }
-  }
+  // 复习面板的快捷键归 Vue 那边管(RV.onKey), 这里只负责把事件转过去 ——
+  // 分发顺序留在这个全局 handler 里, 才能保证复习的 Ctrl+S 抢在下面通用 Ctrl+S 之前。
+  if (RV.open && RV.onKey(e)) { e.preventDefault(); e.stopPropagation(); return; }
   const inp = e.target.closest('.ce-input');
   if (!inp) return;
   const field = inp.dataset.field;
@@ -1198,7 +1554,7 @@ document.addEventListener('click', closeFamMenu);
 addEventListener('resize', closeFamMenu);
 addEventListener('scroll', closeFamMenu, true);
 
-$('#overlay').addEventListener('click', (e) => { if (e.target.id === 'overlay') closeDetail(); });
+on('#overlay', 'click', (e) => { if (e.target.id === 'overlay') closeDetail(); });
 
 // 分组维度切换: 结构 <-> 范式
 document.querySelectorAll('.gb-btn').forEach((b) =>
@@ -1210,41 +1566,40 @@ document.querySelectorAll('.gb-btn').forEach((b) =>
 );
 
 // todo popover controls
-$('#open-todo').addEventListener('click', (e) => { e.stopPropagation(); toggleTodoPop(); });
-$('#todo-pop').addEventListener('click', (e) => e.stopPropagation());
-$('#todo-in').addEventListener('keydown', (e) => {
+on('#open-todo', 'click', (e) => { e.stopPropagation(); toggleTodoPop(); });
+on('#todo-pop', 'click', (e) => e.stopPropagation());
+on('#todo-in', 'keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addTodo(); }
 });
 document.addEventListener('click', closeTodoPop);      // 点别处收起
 
 // notes overlay controls
-$('#open-review').addEventListener('click', openReview);
-$('#review-close').addEventListener('click', closeReview);
-$('#review-overlay').addEventListener('click', (e) => { if (e.target.id === 'review-overlay') closeReview(); });
-$('#rv-reveal').addEventListener('click', revealAnswer);
-$('#rv-next').addEventListener('click', () => { REVIEW.done++; nextCard(); });  // 只读站用: 没有评分按钮
-$('#open-lists').addEventListener('click', openLists);
-$('#lists-close').addEventListener('click', closeLists);
-$('#lists-overlay').addEventListener('click', (e) => { if (e.target.id === 'lists-overlay') closeLists(); });
-$('#open-notes').addEventListener('click', () => openNotes());
-$('#notes-close').addEventListener('click', closeNotes);
-$('#note-new').addEventListener('click', newNote);
-$('#nt-save').addEventListener('click', () => { saveNoteFile(); exitNoteEdit(); });
-$('#nt-preview').addEventListener('dblclick', enterNoteEdit);
-$('#nt-edit').addEventListener('blur', () => exitNoteEdit(true));
-$('#scratch-in').addEventListener('keydown', (e) => {
+on('#open-review', 'click', () => RV.start());   // 面板内部的交互全在 Vue 模板里
+on('#open-stats', 'click', openStats);
+on('#stats-close', 'click', closeStats);
+on('#stats-overlay', 'click', (e) => { if (e.target.id === 'stats-overlay') closeStats(); });
+on('#open-lists', 'click', openLists);
+on('#lists-close', 'click', closeLists);
+on('#lists-overlay', 'click', (e) => { if (e.target.id === 'lists-overlay') closeLists(); });
+on('#open-notes', 'click', () => openNotes());
+on('#notes-close', 'click', closeNotes);
+on('#note-new', 'click', newNote);
+on('#nt-save', 'click', () => { saveNoteFile(); exitNoteEdit(); });
+on('#nt-preview', 'dblclick', enterNoteEdit);
+on('#nt-edit', 'blur', () => exitNoteEdit(true));
+on('#scratch-in', 'keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addScratch(); }
 });
-$('#notes-overlay').addEventListener('click', (e) => {
+on('#notes-overlay', 'click', (e) => {
   if (e.target.id === 'notes-overlay') closeNotes();
 });
 
 // structure-doc overlay controls
-$('#doc-close').addEventListener('click', closeDoc);
-$('#doc-save').addEventListener('click', () => { saveDoc(); exitDocEdit(); });
-$('#doc-preview').addEventListener('dblclick', enterDocEdit);
-$('#doc-edit').addEventListener('blur', () => exitDocEdit(true));
-$('#doc-overlay').addEventListener('click', (e) => { if (e.target.id === 'doc-overlay') closeDoc(); });
+on('#doc-close', 'click', closeDoc);
+on('#doc-save', 'click', () => { saveDoc(); exitDocEdit(); });
+on('#doc-preview', 'dblclick', enterDocEdit);
+on('#doc-edit', 'blur', () => exitDocEdit(true));
+on('#doc-overlay', 'click', (e) => { if (e.target.id === 'doc-overlay') closeDoc(); });
 
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 's') {
@@ -1261,7 +1616,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!$('#todo-pop').classList.contains('hidden')) { closeTodoPop(); return; }
     if (document.querySelector('.fam-menu')) { closeFamMenu(); return; }
-    if (REVIEW) { closeReview(); return; }
+    if (RV.open) { RV.onEsc(); return; }
+    if (statsOpen()) { closeStats(); return; }
     if (!$('#lists-overlay').classList.contains('hidden')) { closeLists(); return; }
     if (NOTE) { NOTE_EDITING ? exitNoteEdit(true) : closeNotes(); return; }
     if (DOC) { DOC_EDITING ? exitDocEdit(true) : closeDoc(); return; }

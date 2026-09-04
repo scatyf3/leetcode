@@ -13,5 +13,27 @@
   ],
   "difficulty": "hard",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(N log k)",
+    "space": "O(k)"
+  },
+  "quiz": {
+    "idea": "最小堆里只放 k 个当前头",
+    "wrong": [
+      "两两归并，做 k-1 轮",
+      "收集全部节点排序后重建",
+      "k 个指针每轮线性找最小"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }
