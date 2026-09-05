@@ -17,15 +17,21 @@ let CURRENT = null; // detail object
 // ---- familiarity (熟练度): 0 最熟(英语讲得清) → 4 完全不会; null = 还没评 ----
 // 未评**不是** 0 —— 0 是阶梯顶端。缺键在 meta.json 里就是缺键, 一路 null 到底,
 // 千万别写成 `Number(x) || 0`: 那会把没评过的题静默变成最熟的一档。
+// 半档 1.5 是故意的: 阶梯的语义是"排序", 不是"计数"。在 L1 和 L2 中间塞一档
+// 如果靠重新编号(2 让给新档, 老 2/3/4 各 +1), 就得迁移每个 meta.json,
+// 而且从此 `familiarity: 3` 读起来不等于 L3 —— 这文件是手写手读的, 不值当。
+// 直接存 1.5, 磁盘上写什么就是什么, 排序照样用数值比较。
 const FAM = {
   0: { short: 'L0', label: '英语讲得清' },
   1: { short: 'L1', label: '已经熟悉' },
+  1.5: { short: 'L1.5', label: '写得对 · 但不是最优解' },
   2: { short: 'L2', label: '思路会 · 细节易写错' },
   3: { short: 'L3', label: '思路大概知道 · 不熟' },
+  3.5: { short: 'L3.5', label: '方向对 · 但只是直觉' },
   4: { short: 'L4', label: '思路都不知道' },
 };
 const FAM_NONE = { short: '—', label: '未评' };
-const FAM_LEVELS = [0, 1, 2, 3, 4, null];        // 最熟 -> 最生 -> 未评
+const FAM_LEVELS = [0, 1, 1.5, 2, 3, 3.5, 4, null];   // 最熟 -> 最生 -> 未评
 let FAM_FILTER = new Set();          // empty = 不过滤
 const famOf = (p) => {
   const v = p.familiarity;
@@ -33,6 +39,9 @@ const famOf = (p) => {
 };
 const famInfo = (f) => (f === null || f === undefined ? FAM_NONE : FAM[f]);
 const famKey = (f) => (f === null || f === undefined ? 'none' : String(f));
+// CSS 类名里不能直接放小数点(`.f1.5` 会被当成两个类), 所以类名用下划线: f1_5。
+// 只有类名走这个, 对象键 / data 属性一律还是 famKey。
+const famCls = (f) => 'f' + famKey(f).replace('.', '_');
 
 // ---- board: cluster by 结构 or 范式, cards carry the other dimension + tricks ----
 const NO_STRUCT = '未分类';
@@ -68,8 +77,8 @@ function buildPanel() {
     return;
   }
 
-  let h = `<div class="fam-legend">${[0, 1, 2, 3, 4]
-    .map((f) => `<span class="fam f${f}">${FAM[f].short}</span>${esc(FAM[f].label)}`)
+  let h = `<div class="fam-legend">${[0, 1, 1.5, 2, 3, 3.5, 4]
+    .map((f) => `<span class="fam ${famCls(f)}">${FAM[f].short}</span>${esc(FAM[f].label)}`)
     .join('<span class="sep">·</span>')}</div>`;
   h += '<div class="groups">';
   for (const g of order) {
@@ -93,7 +102,7 @@ function buildFamFilter() {
   for (const p of PROBLEMS) counts.set(famOf(p), (counts.get(famOf(p)) || 0) + 1);
   $('#fam-filter').innerHTML = FAM_LEVELS
     .filter((f) => counts.get(f))                   // hide buckets nobody is in
-    .map((f) => `<button class="fam-btn f${famKey(f)}${FAM_FILTER.has(f) ? ' on' : ''}"
+    .map((f) => `<button class="fam-btn ${famCls(f)}${FAM_FILTER.has(f) ? ' on' : ''}"
         data-fam="${famKey(f)}" title="${esc(famInfo(f).label)}">${famInfo(f).short}
         <span class="fam-n">${counts.get(f)}</span></button>`)
     .join('');
@@ -115,7 +124,7 @@ function rowHTML(p) {
   const f = famOf(p);
   return `<div class="row${todo}" data-id="${p.id}">
     <span class="dot ${diff}" title="${diff}"></span>
-    <span class="fam f${famKey(f)}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(famInfo(f).label)})">${famInfo(f).short}</span>
+    <span class="fam ${famCls(f)}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(famInfo(f).label)})">${famInfo(f).short}</span>
     <span class="row-id">#${p.id}</span>
     <span class="row-title">${esc(p.title)}</span>
     <span class="row-tags">${paras}${tricks}</span>
@@ -155,7 +164,7 @@ function openFamMenu(badge) {
   menu.dataset.id = id;
   menu.innerHTML = FAM_LEVELS
     .map((f) => `<button class="fam-opt${f === cur ? ' on' : ''}" data-f="${famKey(f)}">
-        <span class="fam f${famKey(f)}">${famInfo(f).short}</span>${esc(famInfo(f).label)}</button>`)
+        <span class="fam ${famCls(f)}">${famInfo(f).short}</span>${esc(famInfo(f).label)}</button>`)
     .join('');
   document.body.appendChild(menu);
 
@@ -210,14 +219,56 @@ async function openDetail(id) {
 // ---- editable tag chips (structures / paradigms / techniques) ----
 let TAGS = { structures: [], paradigms: [], techniques: [] };
 
+// 三个字段都给 <datalist> 建议。理由各不相同但都成立:
+//   trick  自由文本, 同一个手法容易写出三种说法("快慢指针"/"快慢双指针"/"龟兔");
+//   结构/范式  是闭集, 就那么十几个 —— 正因为闭, 打错一个字(paradim / two-pointers)
+//              就凭空多出一个只有一道题的分组, 板面上再也聚不到一起。
+const SUGGEST = new Set(['structures', 'paradigms', 'techniques']);
+
+// 建议全部来自 PROBLEMS(前端已有的数据), 不走后端。排序:
+//   1. 亲缘度 —— 用过这个 trick 的题里, 和当前题共享的结构/范式最多的那个的重合个数。
+//      用个数而不是布尔: array 这种标签半个库都有, 一律算"同类"等于没排序;
+//      重合 2 个(比如同时 array + hash)才是真的邻居。
+//   2. 其次按被用次数, 用得多的通常是已经提炼过的说法;
+//   3. 最后按字典序稳定收尾。
+// 已经挂在这题上的不再列出来。
+function suggestFor(field) {
+  const have = new Set(TAGS[field]);
+  const kin = new Set([...TAGS.structures, ...TAGS.paradigms]);
+  const freq = new Map(), akin = new Map();
+  for (const p of PROBLEMS) {
+    if (CURRENT && p.id === CURRENT.id) continue;
+    const shared = [...p.structures, ...p.paradigms].filter((t) => kin.has(t)).length;
+    for (const t of p[field] || []) {
+      if (have.has(t)) continue;
+      freq.set(t, (freq.get(t) || 0) + 1);
+      akin.set(t, Math.max(akin.get(t) || 0, shared));
+    }
+  }
+  return [...freq.keys()]
+    .sort((a, b) =>
+      (akin.get(b) - akin.get(a)) ||
+      (freq.get(b) - freq.get(a)) ||
+      a.localeCompare(b, 'zh'))
+    .map((t) => ({ t, n: freq.get(t), near: akin.get(t) > 0 }));
+}
+
 function renderChips() {
   for (const field of ['structures', 'paradigms', 'techniques']) {
     const box = document.querySelector(`.chipfield[data-field="${field}"]`);
+    const sug = SUGGEST.has(field) ? suggestFor(field) : null;
     box.innerHTML =
       TAGS[field].map((t, i) =>
         `<span class="ce-chip ${field}">${esc(t)}<button class="ce-x" data-i="${i}" title="删除">×</button></span>`
       ).join('') +
-      `<input class="ce-input" data-field="${field}" placeholder="+ tag">`;
+      // 给建议的字段换个 placeholder: <datalist> 在页面上没有任何视觉痕迹,
+      // 不说一声就没人知道这个框能点开选(Safari 还要先按 ↓ 才弹)。
+      `<input class="ce-input" data-field="${field}" placeholder="${sug ? '+ tag · ↓ 选已有' : '+ tag'}"` +
+        `${sug ? ` list="ce-sug-${field}" title="点开或按 ↓ 从全库已有的 trick 里选，同类的排前面"` : ''}>` +
+      (sug
+        ? `<datalist id="ce-sug-${field}">${sug.map((s) =>
+            `<option value="${esc(s.t)}" label="${s.near ? '同类 · ' : ''}${s.n} 题在用">`).join('')}</datalist>`
+        : '');
   }
 }
 
@@ -253,6 +304,7 @@ async function autoSaveMeta() {
 async function reloadKeepOpen() {
   PROBLEMS = await api('/api/problems');
   buildPanel();
+  if (VIEW === 'grid') buildGrid();   // 从坐标系点进来的, 格子和 #count/#sub 都要还回去
 }
 
 // ---- note: render-by-default, double-click to edit source ----
@@ -712,7 +764,7 @@ const todayStr = () => new Date().toLocaleDateString('sv');   // 本地 YYYY-MM-
 const isCard = (p) => !!p.due;
 const isDue = (p) => isCard(p) && p.due <= todayStr();
 const rvEligible = (p) => p.status === 'solved' || p.status === 'review';
-const FAM_ORDER = { 4: 0, 3: 1, 2: 2, none: 3, 1: 4, 0: 5 };   // 越生的越先进队列
+const FAM_ORDER = { 4: 0, 3.5: 1, 3: 2, 2: 3, none: 4, 1.5: 5, 1: 6, 0: 7 };   // 越生的越先进队列
 
 // 队列**范围**三种模式都一样(到期的卡 + 还没进过复习的题), 模式只决定**顺序**:
 //   fsrs   到期优先 + 生的优先(默认)
@@ -1226,13 +1278,15 @@ const LBUCKETS = FAM_LEVELS;                      // 进度条从"最熟"到"最
 
 function barHTML(items) {
   const n = items.length || 1;
-  const c = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, none: 0, '-1': 0 };
+  const c = Object.fromEntries([...LBUCKETS.map(famKey), '-1'].map((k) => [k, 0]));
   for (const [id] of items) c[famKey(listFam(id))]++;
   const tip = LBUCKETS.map((f) => `${famInfo(f).short} ${c[famKey(f)]}`).join(' · ')
     + ` · 未做 ${c['-1']} · 共 ${items.length}`;
+  // 这里以前写的是 c[f]: f 为 null 时取到 c[null] = undefined, 于是"未评"那段
+  // 永远画不出来 —— 明明计进了 done, 进度条却少一块。统一走 famKey 就对上了。
   const seg = LBUCKETS
-    .filter((f) => c[f])
-    .map((f) => `<i class="f${f}" style="width:${(100 * c[f] / n).toFixed(2)}%"></i>`)
+    .filter((f) => c[famKey(f)])
+    .map((f) => `<i class="${famCls(f)}" style="width:${(100 * c[famKey(f)] / n).toFixed(2)}%"></i>`)
     .join('');
   return { counts: c, done: items.length - c['-1'], html: `<div class="lbar" title="${esc(tip)}">${seg}</div>` };
 }
@@ -1259,7 +1313,7 @@ function renderLists() {
   const legend = [...LBUCKETS, -1].map((f) => {
     const label = f === -1 ? '未做' : famInfo(f).label;
     const short = f === -1 ? '·' : famInfo(f).short;
-    return `<span class="lkey f${famKey(f)}"><i></i>${esc(short)} ${esc(label)} <b>${top.counts[famKey(f)]}</b></span>`;
+    return `<span class="lkey ${famCls(f)}"><i></i>${esc(short)} ${esc(label)} <b>${top.counts[famKey(f)]}</b></span>`;
   }).join('');
 
   let h = `<div class="lsum">
@@ -1281,11 +1335,11 @@ function renderLists() {
       <div class="lchips">${items.map(([id, title]) => {
         const f = listFam(id);
         const star = premium.has(id) ? '<span class="lprem" title="LeetCode 会员题">*</span>' : '';
-        const badge = f !== -1 && f !== null ? `<i class="lfam f${f}">${famInfo(f).short}</i>` : '';
+        const badge = f !== -1 && f !== null ? `<i class="lfam ${famCls(f)}">${famInfo(f).short}</i>` : '';
         const act = f === -1
           ? ` data-add="${id}" title="点一下建文件夹并抓题面"`
           : ` data-open="${id}" title="${esc(title)} · ${esc(famInfo(f).label)}"`;
-        return `<span class="lchip f${famKey(f)}"${act}>${badge}${id}${star} <em>${esc(title)}</em></span>`;
+        return `<span class="lchip ${famCls(f)}"${act}>${badge}${id}${star} <em>${esc(title)}</em></span>`;
       }).join('')}</div>
     </div>`;
   }
@@ -1540,10 +1594,11 @@ const byId = () => new Map(PROBLEMS.map((p) => [p.id, p]));
 function depthOf(rec) {
   if (!rec) return 0;
   const L = famOf(rec);
-  if (L === 0) return 3;
-  if (L === 1 || L === 2) return 2;
-  if (L === 3) return 1;
-  return 0;                       // 未评 / L4 思路都不知道
+  if (L === null) return 0;       // 未评 —— 不能落进下面任何区间
+  if (L <= 0) return 3;           // L0 讲得清
+  if (L <= 2) return 2;           // L1 / L1.5 / L2 —— 都是"跑得过", 够 OA 门槛
+  if (L <= 3) return 1;           // L3 思路大概知道 —— S1 的下界就划在这儿
+  return 0;                       // L3.5 / L4 —— 方向感不算"思路清楚", 够不着 S1
 }
 
 
@@ -1651,8 +1706,11 @@ function buildGrid() {
       const badge = rec === undefined ? '+' : famInfo(L).short;
       const tip = rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
         : L === null ? '还没评熟练度 — 点击标 L4' : famTip[L];
-      return `<button class="gr-chip" data-id="${p[0]}" data-d="${d}" title="${esc(p[1])} — ${esc(tip)}">
-          <span class="gr-st s${d}">${badge}</span>
+      // 两个点击区: 左边徽章翻熟练度(或建文件夹), 右边题名打开详情。
+      // 内层 span 的 title 会盖住外层 button 的, 所以悬停提示也各说各的。
+      return `<button class="gr-chip" data-id="${p[0]}" data-d="${d}" title="${esc(p[1])} — ${
+        rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）' : '点击打开题目'}">
+          <span class="gr-st s${d}" title="${esc(p[1])} — ${esc(tip)}">${badge}</span>
           <span class="gr-id">${p[0]}</span>
           <span class="gr-nm">${esc(p[1])}</span>
           <span class="dot ${p[2]}"></span></button>`;
@@ -1660,12 +1718,20 @@ function buildGrid() {
     const anchor = seenTier.has(grp.tier) ? '' : ` id="gr-tier-${grp.tier}"`;
     seenTier.add(grp.tier);
     // 组标题 -> 这个 pattern 的通用 trick 文档, 和矩阵视图点组标签是同一个 overlay
-    const t = grp.tag;
-    const head = t
-      ? `<h3><button class="gr-doc" data-kind="${t.kind}" data-tag="${esc(t.name)}"
-           title="打开 ${t.kind === 'paradigms' ? '范式' : '结构'} ${esc(t.name)} 的通用 trick 文档"
-           >${esc(grp.name)}<span class="gr-doc-x">通用 trick →</span></button></h3>`
-      : `<h3>${esc(grp.name)}</h3>`;
+    // 一个组可以跨多个概念(如 Arrays & Hashing), 所以 tag 支持数组。
+    // 旧的单 tag 写法继续兼容 —— 只有一个 tag 时渲染成原样, 视觉零变化。
+    const tags = grp.tags || (grp.tag ? [grp.tag] : []);
+    const kindCN = (k) => (k === 'paradigms' ? '范式' : '结构');
+    const docBtn = (t, label, extra) =>
+      `<button class="gr-doc${extra || ''}" data-kind="${t.kind}" data-tag="${esc(t.name)}"
+         title="打开${kindCN(t.kind)} ${esc(t.name)} 的通用 trick 文档">${label}</button>`;
+    const head = tags.length === 1
+      ? `<h3>${docBtn(tags[0],
+           `${esc(grp.name)}<span class="gr-doc-x">通用 trick →</span>`)}</h3>`
+      : tags.length
+        ? `<h3><span class="gr-nm-plain">${esc(grp.name)}</span>${
+             tags.map((t) => docBtn(t, `${esc(t.name)} →`, ' gr-doc-multi')).join('')}</h3>`
+        : `<h3>${esc(grp.name)}</h3>`;
     g += `<div class="gr-grp${grp.low ? ' low' : ''}"${anchor}>
       <div class="gr-grp-h">${head}
         <span class="gr-tier${grp.low ? ' low' : ''}" data-t="${grp.tier}">${label}</span>
@@ -1700,7 +1766,7 @@ function buildGrid() {
 }
 
 // 顺着"越来越熟"的方向走, 走到顶再回到未评
-const L_NEXT = { none: 4, 4: 3, 3: 2, 2: 1, 1: 0, 0: null };
+const L_NEXT = { none: 4, 4: 3.5, 3.5: 3, 3: 2, 2: 1.5, 1.5: 1, 1: 0, 0: null };
 
 const putMeta = (id, body) => fetch(`/api/problems/${id}/meta`, {
   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -1708,16 +1774,52 @@ const putMeta = (id, body) => fetch(`/api/problems/${id}/meta`, {
 
 async function cycleL(id) {
   const rec = byId().get(id);
-  if (!rec) {
-    // 还没建文件夹 —— 点一下就是"开始这道题": 抓题面 + 建目录, 走和 📋 TODO 同一条路
-    await fetch('/api/problems', {
+  if (!rec) return;                 // 没文件夹的走 startProblem, 不该到这儿
+  await putMeta(id, { familiarity: L_NEXT[famKey(famOf(rec))] });
+  await reload();
+}
+
+// 全局轻提示。flashTodo 写的是 📋 面板里的一行, 关着面板就看不见;
+// 在坐标系上建题这类动作没有现成的地方写反馈, 给它一个。
+let FLASH_T = null;
+function flash(msg, ms = 5000) {
+  let el = $('#flash');
+  if (!el) { el = document.createElement('div'); el.id = 'flash'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('on');
+  clearTimeout(FLASH_T);
+  FLASH_T = setTimeout(() => el.classList.remove('on'), ms);
+}
+
+// 还没建文件夹的题, 点一下 = "开始这道题": 抓题面 + 建目录, 和题单 / 📋 TODO 同一条路。
+// 和题单那格(addFromList)对齐: 建中给个态, 失败留在原地并把原因写进 title ——
+// 早先这里是裸 fetch 且不看返回值, 会员题(题面抓不到)和离线都静默失败, 看着像没反应。
+async function startProblem(id, chip) {
+  if (chip.classList.contains('busy')) return;
+  chip.classList.add('busy');
+  chip.classList.remove('failed');
+  const badge = chip.querySelector('.gr-st');
+  const old = badge.textContent;
+  badge.textContent = '…';
+  let r;
+  try {
+    r = await api('/api/problems', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query: String(id) }),
     });
-  } else {
-    await putMeta(id, { familiarity: L_NEXT[famKey(famOf(rec))] });
+  } catch { r = null; }
+  if (!r || !r.ok) {
+    badge.textContent = old;
+    chip.classList.remove('busy');
+    chip.classList.add('failed');
+    chip.title = (r && r.error) || '建不了(离线?) — 再点一下重试';
+    return;
   }
-  await reload();
+  // 文件夹建了但题面没抓到(会员题) —— 不是失败, 但得说一声, 否则详情页一片空白没人知道为什么
+  if (r.created && r.description === false) {
+    flash(`#${id} 文件夹建好了, 但题面没抓到(会员题?) — 可跑 dashboard/fetch_desc.py ${id} 重试`);
+  }
+  await reload();                   // 重画后这个 chip 就换成新的了, busy 态跟着没
 }
 
 
@@ -1761,7 +1863,12 @@ on('#grid-view', 'click', (e) => {
     return;
   }
   const chip = e.target.closest('.gr-chip');
-  if (chip) cycleL(+chip.dataset.id);
+  if (!chip) return;
+  const id = +chip.dataset.id;
+  // 还没建文件夹的题, 整个 chip 都是"开始这道题"; 建过的, 只有徽章翻熟练度。
+  if (!byId().get(id)) return void startProblem(id, chip);
+  if (e.target.closest('.gr-st')) return void cycleL(id);
+  openDetail(id);
 });
 on('#close', 'click', closeDetail);
 on('#save-note', 'click', () => { saveNote(); exitEdit(); });
@@ -1792,6 +1899,20 @@ document.addEventListener('keydown', (e) => {
   } else if (e.key === 'Backspace' && !inp.value && TAGS[field].length) {
     removeTag(field, TAGS[field].length - 1);
   }
+});
+
+// 从 datalist 里点中一项就直接成 chip, 不用再按一次 Enter。
+// 浏览器给这种"替换式输入"打的 inputType 是 insertReplacementText(老版本给 undefined),
+// 手打是 insertText —— 所以正常打字打到和某个建议一模一样时不会被抢走。
+document.addEventListener('input', (e) => {
+  const inp = e.target.closest('.ce-input');
+  if (!inp || !SUGGEST.has(inp.dataset.field)) return;
+  if (e.inputType && e.inputType !== 'insertReplacementText') return;
+  const v = inp.value.trim();
+  const dl = document.getElementById(`ce-sug-${inp.dataset.field}`);
+  if (!v || !dl || ![...dl.options].some((o) => o.value === v)) return;
+  inp.value = '';
+  addTag(inp.dataset.field, v);
 });
 
 document.addEventListener('click', closeFamMenu);
