@@ -8,10 +8,9 @@ LeetCode dashboard — 数据结构 x 算法范式 看板.
 索引层 : data.db  (SQLite, 由 /api/sync 从 meta.json 重建, gitignore)
 笔记   : 题目文件夹里的 note.md / explain.md ... 直接读写磁盘
 
-第二个视图「坐标系」(覆盖 x 深度) 另有两个文件, 都在 dashboard/ 下且 git 追踪:
-    plan.json      分层 + 时间线 (手改)
-    progress.json  每题掌握度 0..3 (面板点击写回)
-它不用 meta.json 存掌握度 —— 计划覆盖 150 题, 其中大半还没有文件夹.
+第二个视图「坐标系」(覆盖 x 深度) 的分层和时间线在 dashboard/plan.json (手改, git 追踪).
+掌握度不另存: S1/S2 由 meta.json 的 familiarity (L1..L4) 算出来, S3 是 meta.json 的
+explained 布尔位. 一处真相, 不会出现 "L2 但标了 S1" 这种自相矛盾的状态.
 
 run:
     python dashboard/server.py
@@ -37,7 +36,6 @@ REPO = HERE.parent
 DB = HERE / "data.db"
 STRUCT_DIR = REPO / "structures"   # per-data-structure trick docs (markdown)
 PLAN = HERE / "plan.json"          # coverage x depth curriculum (hand-edited)
-PROGRESS = HERE / "progress.json"  # id -> mastery stage 1..3 (written by the panel)
 PARADIGM_DIR = REPO / "paradigms"  # per-paradigm trick docs (双指针 / 贪心 / dp ...)
 NOTES_DIR = REPO / "notes"         # cross-cutting notes, not tied to one problem
 SCRATCH = "scratch.md"             # 随想收件箱: 速记先落这里, 想清楚了再挪走
@@ -97,12 +95,12 @@ SCHEMA = """CREATE TABLE problems(
     title TEXT, folder TEXT,
     structures TEXT, paradigms TEXT, techniques TEXT,
     difficulty TEXT, status TEXT,
-    familiarity INTEGER, complexity TEXT,
+    familiarity INTEGER, explained INTEGER, complexity TEXT,
     due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT
 )"""
 
 COLUMNS = ("id", "title", "folder", "structures", "paradigms", "techniques",
-           "difficulty", "status", "familiarity", "complexity",
+           "difficulty", "status", "familiarity", "explained", "complexity",
            "due", "stability", "reps", "last_review", "fsrs_state")
 
 
@@ -131,6 +129,7 @@ def sync():
                 m.get("difficulty", ""),
                 m.get("status", "solved"),
                 int(m.get("familiarity", 0) or 0),   # 0 = 未评级
+                int(bool(m.get("explained"))),        # 能用英语讲清 = 坐标系里的 S3
                 json.dumps(m.get("complexity") or {}, ensure_ascii=False),
                 f.get("due", ""),                    # "" = 不是卡片, 前端靠这个判断
                 float(f.get("stability") or 0),
@@ -352,6 +351,12 @@ def save_meta(pid: int, payload: dict):
             meta[k] = payload[k]
     if "familiarity" in payload:
         meta["familiarity"] = int(payload["familiarity"] or 0)
+    if "explained" in payload:
+        # 坐标系的 S3。false 就删掉键, 别在 meta.json 里留一堆 "explained": false
+        if payload["explained"]:
+            meta["explained"] = True
+        else:
+            meta.pop("explained", None)
     write_meta(folder, meta)
     sync()  # cheap for small repos; keeps index consistent
     return True
@@ -367,39 +372,6 @@ def read_plan() -> dict:
                 "stages": [], "phases": [], "targets": []}
 
 
-def read_progress() -> dict:
-    """{'<problem id>': stage}. Missing key means the problem hasn't been started."""
-    try:
-        doc = json.loads(PROGRESS.read_text(encoding="utf-8"))
-        return {str(k): int(v) for k, v in (doc.get("stages") or {}).items()}
-    except (json.JSONDecodeError, OSError, TypeError, ValueError):
-        return {}
-
-
-def write_progress(stages: dict):
-    """Rewrite progress.json, keeping the '_'-prefixed comment keys already there."""
-    doc = {}
-    try:
-        doc = json.loads(PROGRESS.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        pass
-    doc = {k: v for k, v in doc.items() if k.startswith("_")}
-    doc["stages"] = {k: stages[k] for k in sorted(stages, key=int)}
-    PROGRESS.write_text(
-        json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-
-
-def set_stage(pid: int, stage: int) -> dict:
-    """Set one problem's mastery stage; 0 (or out of range) clears it."""
-    stages = read_progress()
-    key = str(pid)
-    if stage in (1, 2, 3):
-        stages[key] = stage
-    else:
-        stages.pop(key, None)
-    write_progress(stages)
-    return stages
 # ------------------------------------------------------------------ 复习 ------
 def today_str() -> str:
     """本地日期。前端用 toLocaleDateString('sv') 得到同样的格式, 两边都是本地时区。"""
@@ -596,8 +568,6 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, list_problems())
         if path == "/api/plan":
             return self._send(200, read_plan())
-        if path == "/api/progress":
-            return self._send(200, {"stages": read_progress()})
         if path == "/api/lists":
             return self._send(200, read_lists())
         if path == "/api/review/session":
@@ -655,13 +625,6 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         path = urlparse(self.path).path
-        if path == "/api/progress":
-            body = self._body_json()
-            try:
-                pid, stage = int(body["id"]), int(body["stage"])
-            except (KeyError, TypeError, ValueError):
-                return self._send(400, {"error": "need {id, stage}"})
-            return self._send(200, {"stages": set_stage(pid, stage)})
         m = re.match(r"^/api/problems/(\d+)/note$", path)
         if m:
             ok = save_note(int(m.group(1)), self._body_json().get("content", ""))

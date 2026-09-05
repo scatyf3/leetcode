@@ -325,15 +325,25 @@ main{padding:18px 20px;overflow:auto}
   background:var(--panel);border:1px solid var(--line);border-radius:8px;
   padding:5px 9px 5px 5px;color:var(--fg);font-size:12.5px}
 .gr-chip:hover{background:var(--panel2);filter:none}
-.gr-chip[data-s="1"],.gr-chip[data-s="2"],.gr-chip[data-s="3"]{background:var(--panel2)}
-.gr-st{flex:none;width:22px;height:22px;border-radius:6px;display:grid;place-items:center;
-  font:600 11px/1 Consolas,monospace;background:var(--chip);color:var(--dim)}
-.gr-chip[data-s="1"] .gr-st{background:color-mix(in srgb,var(--accent) 30%,var(--panel2));color:var(--fg)}
-.gr-chip[data-s="2"] .gr-st{background:color-mix(in srgb,var(--accent) 65%,var(--panel2));color:#fff}
-.gr-chip[data-s="3"] .gr-st{background:var(--accent);color:#fff}
+.gr-chipwrap{display:flex;gap:3px;min-width:0}
+.gr-chipwrap>.gr-chip{flex:1;min-width:0}
+.gr-chip[data-d="1"],.gr-chip[data-d="2"],.gr-chip[data-d="3"]{background:var(--panel2)}
+/* 方块里写的是原始的 L 标签, 颜色编码的是由它算出来的 S —— 两个都要看得见 */
+.gr-st{flex:none;width:26px;height:22px;border-radius:6px;display:grid;place-items:center;
+  font:600 10.5px/1 Consolas,monospace}
+.gr-st.s0{background:var(--chip);color:var(--dim)}
+.gr-st.s1{background:color-mix(in srgb,var(--accent) 30%,var(--panel2));color:var(--fg)}
+.gr-st.s2{background:color-mix(in srgb,var(--accent) 65%,var(--panel2));color:#fff}
+.gr-st.s3{background:var(--accent);color:#fff}
+/* S3 开关: 只在 L1/L2 的题上出现 */
+.gr-say{flex:none;width:26px;border:1px dashed var(--line);border-radius:8px;padding:0;
+  background:transparent;color:var(--dim);font-size:11px;cursor:pointer}
+.gr-say:hover{border-color:var(--accent2);color:var(--accent2);filter:none}
+.gr-say.on{background:color-mix(in srgb,var(--accent2) 18%,transparent);
+  border:1px solid var(--accent2);color:var(--accent2)}
 .gr-id{flex:none;font:11.5px/1 Consolas,monospace;color:var(--dim);font-variant-numeric:tabular-nums}
 .gr-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}
-.gr-chip[data-s="1"] .gr-nm,.gr-chip[data-s="2"] .gr-nm,.gr-chip[data-s="3"] .gr-nm{color:var(--fg)}
+.gr-chip[data-d="1"] .gr-nm,.gr-chip[data-d="2"] .gr-nm,.gr-chip[data-d="3"] .gr-nm{color:var(--fg)}
 
 @media (max-width:900px){
   .gr-matrix{grid-template-columns:1fr 1fr}

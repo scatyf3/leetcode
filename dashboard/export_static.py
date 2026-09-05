@@ -7,6 +7,7 @@
 思路: server.py 的每个 GET 接口都只是文件系统的纯函数, 所以直接复用它们,
 把响应预先写成同名的 .json 文件:
 
+    /api/plan            -> api/plan.json
     /api/problems        -> api/problems.json
     /api/problems/98     -> api/problems/98.json
     /api/notes           -> api/notes.json
@@ -62,6 +63,7 @@ def export(out: Path) -> dict:
     for p in problems:
         write_json(api / "problems" / f"{p['id']}.json", server.get_detail(p["id"]))
 
+    write_json(api / "plan.json", server.read_plan())     # 坐标系的分层 + 时间线
     write_json(api / "lists.json", server.read_lists())   # 题单定义, 只读站照样能看进度
     write_json(api / "reviews.json", {"reviews": server.read_reviews()})  # 📈 进度的历史部分
 
