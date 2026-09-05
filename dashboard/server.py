@@ -8,6 +8,11 @@ LeetCode dashboard — 数据结构 x 算法范式 看板.
 索引层 : data.db  (SQLite, 由 /api/sync 从 meta.json 重建, gitignore)
 笔记   : 题目文件夹里的 note.md / explain.md ... 直接读写磁盘
 
+第二个视图「坐标系」(覆盖 x 深度) 另有两个文件, 都在 dashboard/ 下且 git 追踪:
+    plan.json      分层 + 时间线 (手改)
+    progress.json  每题掌握度 0..3 (面板点击写回)
+它不用 meta.json 存掌握度 —— 计划覆盖 150 题, 其中大半还没有文件夹.
+
 run:
     python dashboard/server.py
 then open http://localhost:8765
@@ -24,6 +29,8 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 DB = HERE / "data.db"
 STRUCT_DIR = REPO / "structures"   # per-data-structure trick docs (markdown)
+PLAN = HERE / "plan.json"          # coverage x depth curriculum (hand-edited)
+PROGRESS = HERE / "progress.json"  # id -> mastery stage 1..3 (written by the panel)
 PORT = 8765
 
 FOLDER_RE = re.compile(r"^(\d+)\.\s*(.+)$")
@@ -188,6 +195,51 @@ def save_meta(pid: int, payload: dict):
     return True
 
 
+# -------------------------------------------------- plan / progress (grid) ---
+def read_plan() -> dict:
+    """The coverage x depth curriculum. Hand-edited, so tolerate a broken save."""
+    try:
+        return json.loads(PLAN.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as e:
+        return {"error": f"plan.json 读不出来: {e}", "groups": [], "tiers": [],
+                "stages": [], "phases": [], "targets": []}
+
+
+def read_progress() -> dict:
+    """{'<problem id>': stage}. Missing key means the problem hasn't been started."""
+    try:
+        doc = json.loads(PROGRESS.read_text(encoding="utf-8"))
+        return {str(k): int(v) for k, v in (doc.get("stages") or {}).items()}
+    except (json.JSONDecodeError, OSError, TypeError, ValueError):
+        return {}
+
+
+def write_progress(stages: dict):
+    """Rewrite progress.json, keeping the '_'-prefixed comment keys already there."""
+    doc = {}
+    try:
+        doc = json.loads(PROGRESS.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        pass
+    doc = {k: v for k, v in doc.items() if k.startswith("_")}
+    doc["stages"] = {k: stages[k] for k in sorted(stages, key=int)}
+    PROGRESS.write_text(
+        json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+
+
+def set_stage(pid: int, stage: int) -> dict:
+    """Set one problem's mastery stage; 0 (or out of range) clears it."""
+    stages = read_progress()
+    key = str(pid)
+    if stage in (1, 2, 3):
+        stages[key] = stage
+    else:
+        stages.pop(key, None)
+    write_progress(stages)
+    return stages
+
+
 # ------------------------------------------------------------------- http ----
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, body, ctype="application/json"):
@@ -214,6 +266,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, (HERE / "styles.css").read_text(encoding="utf-8"), "text/css; charset=utf-8")
         if path == "/api/problems":
             return self._send(200, list_problems())
+        if path == "/api/plan":
+            return self._send(200, read_plan())
+        if path == "/api/progress":
+            return self._send(200, {"stages": read_progress()})
         m = re.match(r"^/api/problems/(\d+)$", path)
         if m:
             d = get_detail(int(m.group(1)))
@@ -230,6 +286,13 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         path = urlparse(self.path).path
+        if path == "/api/progress":
+            body = self._body_json()
+            try:
+                pid, stage = int(body["id"]), int(body["stage"])
+            except (KeyError, TypeError, ValueError):
+                return self._send(400, {"error": "need {id, stage}"})
+            return self._send(200, {"stages": set_stage(pid, stage)})
         m = re.match(r"^/api/problems/(\d+)/note$", path)
         if m:
             ok = save_note(int(m.group(1)), self._body_json().get("content", ""))
