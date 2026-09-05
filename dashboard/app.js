@@ -357,13 +357,184 @@ function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 }
 
+// ---- 坐标系 view: coverage (tier) × depth (stage) ----
+// tier  = how far the题单 is spread (75 / 110 / 135)
+// stage = how well each problem is held (S1 思路 / S2 写得对 / S3 讲得清)
+// a cell counts problems at that stage *or deeper*, so S3 also feeds S1 and S2.
+let PLAN = null;   // dashboard/plan.json  — the curriculum, hand-edited
+let STAGE = {};    // dashboard/progress.json — '<id>' -> 1..3
+let VIEW = 'board';
+
+const SUBTITLE = { board: '数据结构 × 算法范式', grid: '覆盖 × 深度 · NeetCode 150' };
+
+const parseDay = (s) => { const a = s.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2]); };
+const stageOf = (id) => STAGE[String(id)] || 0;
+
+// tag every phase past/active/future against today, and pick the live one
+function datePhases() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const ps = PLAN.phases;
+  for (const ph of ps) {
+    const from = parseDay(ph.from);
+    const to = ph.to ? parseDay(ph.to) : null;
+    ph.state = today < from ? 'future' : (to && today >= to) ? 'past' : 'active';
+  }
+  const live = ps.find((p) => p.state === 'active')
+    || (today < parseDay(ps[0].from) ? ps[0] : ps[ps.length - 1]);
+  return { today, live };
+}
+
+function planProblems() {
+  const out = [];
+  for (const g of PLAN.groups)
+    for (const p of g.problems) out.push({ id: p[0], tier: g.tier });
+  return out;
+}
+
+function buildGrid() {
+  if (!PLAN) return;
+  if (PLAN.error) { $('#grid-view').innerHTML = `<p class="empty-hint">${esc(PLAN.error)}</p>`; return; }
+
+  const { today, live } = datePhases();
+  const all = planProblems();
+  const size = (t) => all.filter((p) => p.tier === t).length;
+  const reached = (t, s) => all.filter((p) => p.tier === t && stageOf(p.id) >= s).length;
+
+  $('#count').textContent =
+    `${all.filter((p) => stageOf(p.id) > 0).length}/${all.length} 已开始 · 阶段 ${live.n}`;
+
+  // --- the grid itself: tiers down, stages across ---
+  let m = '<div class="gr-matrix"><div></div>';
+  for (const st of PLAN.stages)
+    m += `<div class="gr-colh"><span class="gr-colh-t">${esc(st.t)}</span><span class="gr-colh-d">${esc(st.d)}</span></div>`;
+  for (const tr of PLAN.tiers) {
+    const N = size(tr.t);
+    m += `<div class="gr-rowh">
+      <span class="gr-rowh-t">${esc(tr.name)}<span class="gr-rowh-n">本层 ${N} 题 · 做完题单累计 ${esc(tr.cum)}</span></span>
+      <span class="gr-rowh-d">${esc(tr.desc)}</span></div>`;
+    for (const st of PLAN.stages) {
+      const n = reached(tr.t, st.s);
+      const pct = N ? Math.round((n / N) * 100) : 0;
+      const tg = PLAN.targets.filter((x) => x.tier === tr.t && x.stage === st.s);
+      const isNow = tg.some((x) => x.phase === live.n);
+      const badges = tg
+        .map((x) => `<span class="gr-badge${x.phase < live.n ? ' met' : ''}">阶段 ${x.phase} 目标</span>`)
+        .join('');
+      m += `<div class="gr-cell${isNow ? ' target' : ''}">
+        <div class="gr-cell-top"><span class="gr-frac">${n}<small>/${N}</small></span><span class="gr-pct">${pct}%</span></div>
+        <div class="gr-bar"><i class="s${st.s}" style="width:${pct}%"></i></div>
+        <div class="gr-cell-foot">${badges || '&nbsp;'}</div></div>`;
+    }
+  }
+  m += '</div>';
+
+  // --- timeline: the four phases are a real sequence, so they're numbered ---
+  const md_ = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  let t = '<div class="gr-tl">';
+  for (const ph of PLAN.phases) {
+    const range = md_(parseDay(ph.from)) + (ph.to ? ' – ' + md_(parseDay(ph.to)) : ' 起');
+    const left = ph.to ? Math.max(0, Math.round((parseDay(ph.to) - today) / 864e5)) : null;
+    t += `<div class="gr-ph ${ph.state}">
+      <div class="gr-ph-n"><span>阶段 ${ph.n}</span>${
+        ph.state === 'active' ? `<span class="gr-live">进行中${left !== null ? ' · 剩 ' + left + ' 天' : ''}</span>` : ''}</div>
+      <h3>${esc(ph.name)}</h3>
+      <div class="gr-ph-when">${range}　·　${esc(ph.hrs)}</div>
+      <div class="gr-goal">${esc(ph.goal)}</div>
+      <div class="gr-adds">${esc(ph.adds)}</div>
+      <div class="gr-serves">${esc(ph.serves)}</div></div>`;
+  }
+  t += '</div>';
+
+  // --- the problems, by pattern group; click a chip to cycle its stage ---
+  let g = '';
+  for (const grp of PLAN.groups) {
+    const started = grp.problems.filter((p) => stageOf(p[0]) > 0).length;
+    const label = `第 ${grp.tier} 层${grp.low ? ' · 低优先' : ''}`;
+    const chips = grp.problems.map((p) => {
+      const s = stageOf(p[0]);
+      return `<button class="gr-chip" data-id="${p[0]}" data-s="${s}"
+        title="${esc(p[1])} — ${s ? 'S' + s : '未开始'}，点击进到下一级">
+        <span class="gr-st">${s || '·'}</span>
+        <span class="gr-id">${p[0]}</span>
+        <span class="gr-nm">${esc(p[1])}</span>
+        <span class="dot ${p[2]}"></span></button>`;
+    }).join('');
+    g += `<div class="gr-grp${grp.low ? ' low' : ''}">
+      <div class="gr-grp-h"><h3>${esc(grp.name)}</h3>
+        <span class="gr-tier${grp.low ? ' low' : ''}" data-t="${grp.tier}">${label}</span>
+        ${grp.sub ? `<span class="gr-sub">${esc(grp.sub)}</span>` : ''}
+        <span class="gr-grp-c">${started}/${grp.problems.length}</span></div>
+      <div class="gr-chips">${chips}</div></div>`;
+  }
+
+  $('#grid-view').innerHTML = `
+    <section class="gr-sec">
+      <div class="gr-sec-h"><h2>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进 S1、S2 三列。层之间<b>不</b>累计：每题只属于一层。琥珀框 = 当前阶段该站的位置。</p></div>
+      ${m}
+      <div class="gr-legend">
+        <span class="gr-key"><i class="s0"></i>未开始</span>
+        <span class="gr-key"><i class="s1"></i>S1 思路清楚</span>
+        <span class="gr-key"><i class="s2"></i>S2 能写对</span>
+        <span class="gr-key"><i class="s3"></i>S3 英语讲得清</span>
+      </div>
+      <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
+      否则会攒下一整个月「做得出但讲不清」的题。</p>
+    </section>
+    <section class="gr-sec">
+      <div class="gr-sec-h"><h2>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
+      ${t}
+    </section>
+    <section class="gr-sec">
+      <div class="gr-sec-h"><h2>题目</h2><p>点一下循环切换 <span class="mono">— → S1 → S2 → S3</span>，写回 dashboard/progress.json。<b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
+      ${g}
+    </section>`;
+}
+
+async function bumpStage(id) {
+  const next = (stageOf(id) + 1) % 4;
+  const r = await api('/api/progress', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, stage: next }),
+  });
+  STAGE = r.stages || STAGE;
+  buildGrid();
+}
+
+async function switchView(v) {
+  VIEW = v;
+  $('#subtitle').textContent = SUBTITLE[v];
+  document.querySelectorAll('.view-tab').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
+  $('#panel').classList.toggle('hidden', v !== 'board');
+  $('#grid-view').classList.toggle('hidden', v !== 'grid');
+  try { localStorage.setItem('lc-view', v); } catch (e) { /* private mode */ }
+  if (v === 'grid') {
+    if (!PLAN) {
+      const [plan, prog] = await Promise.all([api('/api/plan'), api('/api/progress')]);
+      PLAN = plan;
+      STAGE = prog.stages || {};
+    }
+    buildGrid();
+  } else {
+    buildPanel();
+  }
+}
+
 async function reload() {
   PROBLEMS = await api('/api/problems');
   buildPanel();
+  if (VIEW === 'grid') buildGrid();   // buildPanel owns #count; give it back
 }
 
 // ---- wire global controls ----
 $('#sync').addEventListener('click', async () => { await fetch('/api/sync', { method: 'POST' }); reload(); });
+document.querySelectorAll('.view-tab').forEach((b) =>
+  b.addEventListener('click', () => switchView(b.dataset.view)));
+$('#grid-view').addEventListener('click', (e) => {
+  const chip = e.target.closest('.gr-chip');
+  if (chip) bumpStage(+chip.dataset.id);
+});
 $('#close').addEventListener('click', closeDetail);
 $('#save-note').addEventListener('click', () => { saveNote(); exitEdit(); });
 $('#note-preview').addEventListener('dblclick', enterEdit);
@@ -408,4 +579,6 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-reload();
+let startView = 'board';
+try { startView = localStorage.getItem('lc-view') || 'board'; } catch (e) { /* private mode */ }
+reload().then(() => switchView(startView));

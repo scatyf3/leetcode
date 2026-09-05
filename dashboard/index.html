@@ -8,14 +8,21 @@
 </head>
 <body>
   <header>
-    <h1>LeetCode 看板 <span class="sub">数据结构 × 算法范式</span></h1>
+    <h1>LeetCode 看板 <span id="subtitle" class="sub">数据结构 × 算法范式</span></h1>
     <div class="actions">
+      <nav class="views">
+        <button class="view-tab active" data-view="board">矩阵</button>
+        <button class="view-tab" data-view="grid">坐标系</button>
+      </nav>
       <span id="count" class="count"></span>
       <button id="sync">↻ Sync</button>
     </div>
   </header>
 
-  <main id="panel"></main>
+  <main>
+    <div id="panel"></div>
+    <div id="grid-view" class="hidden"></div>
+  </main>
 
   <!-- detail overlay -->
   <div id="overlay" class="overlay hidden">
