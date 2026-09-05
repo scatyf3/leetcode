@@ -1,0 +1,30 @@
+{
+  "structures": [],
+  "paradigms": [],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "Kadane: cur = max(cur + x, x), best 边走边记",
+    "wrong": [
+      "返回 cur, 即以最后一个元素结尾的最大和",
+      "dp[i][j] 存 i..j 这一段的和",
+      "双指针, 和变负就收缩左边界"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-02",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

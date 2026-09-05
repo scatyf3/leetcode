@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "intervals"
+  ],
+  "techniques": [
+    "按 start 排 → 只需比 res[-1]",
+    "max 往外推, 处理 [[1,10],[2,3]] 包含关系",
+    "开新的就不回头 = 连通分量封闭"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "按 start 排, 重叠则 res[-1][1] = max(res[-1][1], e)",
+    "wrong": [
+      "比较相邻的两个原始区间 intervals[i-1] 和 intervals[i]",
+      "重叠时直接 res[-1][1] = e",
+      "按 end 排, 重叠则更新 res[-1]"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-10",
+    "last_review": "2026-09-02",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
+}

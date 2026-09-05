@@ -1,0 +1,43 @@
+{
+  "structures": [
+    "array",
+    "heap"
+  ],
+  "paradigms": [
+    "binary-search",
+    "heap",
+    "design"
+  ],
+  "techniques": [
+    "二分找插入位(搜索缝: r 取 n 不取 n-1)",
+    "中位数下标是 n 的纯函数 (n-1)//2 与 n//2",
+    "冗余状态不要存,能算就算",
+    "对顶堆: 大顶堆存小的一半 + 小顶堆存大的一半",
+    "先推后弹再平衡,避开分类讨论"
+  ],
+  "difficulty": "hard",
+  "status": "review",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(log n) 插入 / O(1) 取中位数",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "对顶堆，堆顶即中位数",
+    "wrong": [
+      "有序数组 + 二分插入",
+      "每次取值时重新排序",
+      "两个指针盯住中间两个"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-02",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

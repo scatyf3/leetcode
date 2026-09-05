@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp",
+    "greedy"
+  ],
+  "techniques": [
+    "同时维护最大与最小",
+    "滚动变量压掉数组",
+    "三候选转移"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "同时维护最大和最小乘积",
+    "wrong": [
+      "只维护以 i 结尾的最大乘积",
+      "前缀积除以最小前缀积",
+      "滑动窗口，变小就收缩"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-10",
+    "last_review": "2026-09-02",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
+}

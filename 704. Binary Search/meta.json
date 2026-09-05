@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "半开区间 [l, r) 模板",
+    "循环不变量: 答案始终在 [l, r) 内",
+    "找第一个满足条件的位置,而不是找目标本身"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "半开区间 [l, r) 二分",
+    "wrong": [
+      "闭区间 [l, r]，命中就返回",
+      "线性扫描直到找到 target",
+      "三分法切成三段"
+    ]
+  }
+}

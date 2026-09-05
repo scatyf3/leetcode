@@ -10,5 +10,28 @@
     "原地交换"
   ],
   "difficulty": "medium",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "三次反转",
+    "wrong": [
+      "新数组按 (i+k)%n 写回",
+      "每次整体右移一格，做 k 轮",
+      "对撞双指针交换首尾"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 0.08335671711031604,
+    "difficulty": 8.806304468856837,
+    "reps": 2,
+    "lapses": 1,
+    "last_rating": 1
+  }
 }

@@ -1,7 +1,38 @@
 {
-  "structures": ["linked-list"],
-  "paradigms": ["two-pointer"],
-  "techniques": ["快慢指针提前量", "dummy哨兵", "一趟扫描", "删除靠前驱"],
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "快慢指针提前量",
+    "dummy哨兵",
+    "一趟扫描",
+    "删除靠前驱"
+  ],
   "difficulty": "medium",
-  "status": "solved"
+  "status": "solved",
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "快慢指针拉开 n 步一起走",
+    "wrong": [
+      "快慢指针相遇处即待删点",
+      "先反转，删第 n 个再转回",
+      "快慢指针找中点，从中点往后数"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

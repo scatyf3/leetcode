@@ -1,7 +1,29 @@
 {
-  "structures": ["graph"],
-  "paradigms": ["dfs", "bfs"],
-  "techniques": ["哈希表兼任visited与映射", "先占位后填充", "显式栈替代递归"],
+  "structures": [
+    "graph"
+  ],
+  "paradigms": [
+    "dfs",
+    "bfs"
+  ],
+  "techniques": [
+    "哈希表兼任visited与映射",
+    "先占位后填充",
+    "显式栈替代递归"
+  ],
   "difficulty": "medium",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(V+E)",
+    "space": "O(V)"
+  },
+  "quiz": {
+    "idea": "哈希表兼任 visited 和映射",
+    "wrong": [
+      "先建全部节点再连边",
+      "拓扑排序后按序复制",
+      "并查集合并连通分量后逐个复制"
+    ]
+  }
 }

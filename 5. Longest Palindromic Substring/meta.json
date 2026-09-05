@@ -1,7 +1,40 @@
 {
-  "structures": ["string"],
-  "paradigms": ["two-pointer", "dp"],
-  "techniques": ["中心扩展", "奇偶双中心", "区间DP按长度递增", "Manacher"],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "2d-dp"
+  ],
+  "techniques": [
+    "中心扩展",
+    "奇偶双中心",
+    "区间DP按长度递增",
+    "Manacher"
+  ],
   "difficulty": "medium",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n²)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "中心扩展，奇偶中心各扫一遍",
+    "wrong": [
+      "反转后求最长公共子串",
+      "滑动窗口，不对称就收缩左边界",
+      "对撞双指针从两端向中间夹"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-03",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
 }

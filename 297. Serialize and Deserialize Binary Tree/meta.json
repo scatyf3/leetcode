@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs",
+    "bfs"
+  ],
+  "techniques": [
+    "前序 + null 占位才能唯一还原, 中序不行",
+    "iterator 当消费指针",
+    "层序(BFS)是唯一好读的非递归版, 位置对齐所以不用状态位"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "前序遍历 + '#' 占位",
+    "wrong": [
+      "中序遍历 + '#' 占位",
+      "只存值，靠 BST 性质还原",
+      "层序遍历，跳过空节点"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
+}

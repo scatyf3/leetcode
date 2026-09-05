@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "greedy"
+  ],
+  "techniques": [
+    "相向双指针",
+    "短板支配论证",
+    "先结算再移动指针"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "对撞双指针，每次移动矮的一边",
+    "wrong": [
+      "预处理前缀/后缀最大值",
+      "单调栈找每根柱子的左右边界",
+      "固定最高的那根，向两边各扫一遍"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-02",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

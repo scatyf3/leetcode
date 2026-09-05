@@ -1,0 +1,30 @@
+{
+  "structures": [],
+  "paradigms": [],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(m·n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "四边界 top/bottom/left/right, 走完一条边就收缩",
+    "wrong": [
+      "四边界, 但四趟都不需要守卫",
+      "按层循环 n/2 次, 每层走一圈",
+      "先转置再逐行输出"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-06",
+    "last_review": "2026-09-03",
+    "stability": 3.2494117658571677,
+    "difficulty": 6.7404595108297,
+    "reps": 2,
+    "lapses": 0,
+    "last_rating": 2
+  }
+}
