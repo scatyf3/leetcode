@@ -2,7 +2,8 @@
   --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
   --fg:#e6e8ee; --dim:#9aa3b2; --accent:#6ea8fe; --accent2:#7ee0a8;
   --easy:#54c78b; --medium:#e2b04a; --hard:#e06c75; --chip:#242a35;
-  --fam0:#22b8a6; --fam1:#54c78b; --fam2:#6ea8fe; --fam3:#e2b04a; --fam4:#e06c75;
+  --fam0:#22b8a6; --fam1:#54c78b; --fam15:#5fbcd0; --fam2:#6ea8fe;
+  --fam3:#e2b04a; --fam35:#e48f5c; --fam4:#e06c75;
 }
 @media (prefers-color-scheme:light){
   :root{
@@ -70,8 +71,10 @@ main{padding:18px 20px;overflow:auto}
   border-radius:5px;background:var(--chip);color:var(--dim)}
 .fam.f0{background:color-mix(in srgb,var(--fam0) 20%,transparent);color:var(--fam0)}
 .fam.f1{background:color-mix(in srgb,var(--fam1) 18%,transparent);color:var(--fam1)}
+.fam.f1_5{background:color-mix(in srgb,var(--fam15) 18%,transparent);color:var(--fam15)}
 .fam.f2{background:color-mix(in srgb,var(--fam2) 18%,transparent);color:var(--fam2)}
 .fam.f3{background:color-mix(in srgb,var(--fam3) 20%,transparent);color:var(--fam3)}
+.fam.f3_5{background:color-mix(in srgb,var(--fam35) 20%,transparent);color:var(--fam35)}
 .fam.f4{background:color-mix(in srgb,var(--fam4) 20%,transparent);color:var(--fam4)}
 
 .fam-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:1100px;
@@ -100,8 +103,8 @@ main{padding:18px 20px;overflow:auto}
   font:600 12px/1 Consolas,monospace;color:var(--dim)}
 .fam-btn:hover{filter:none;background:var(--panel2)}
 .fam-btn.f0{color:var(--fam0)}
-.fam-btn.f1{color:var(--fam1)}.fam-btn.f2{color:var(--fam2)}
-.fam-btn.f3{color:var(--fam3)}.fam-btn.f4{color:var(--fam4)}
+.fam-btn.f1{color:var(--fam1)}.fam-btn.f1_5{color:var(--fam15)}.fam-btn.f2{color:var(--fam2)}
+.fam-btn.f3{color:var(--fam3)}.fam-btn.f3_5{color:var(--fam35)}.fam-btn.f4{color:var(--fam4)}
 .fam-btn.on{border-color:currentColor;background:color-mix(in srgb,currentColor 14%,transparent)}
 .fam-n{font-weight:400;opacity:.65;font-size:11px}
 
@@ -325,6 +328,13 @@ main{padding:18px 20px;overflow:auto}
 .gr-doc:hover{color:var(--accent);filter:none}
 .gr-doc-x{font-size:11px;font-weight:400;color:var(--accent);opacity:0;transition:opacity .1s}
 .gr-doc:hover .gr-doc-x,.gr-doc:focus-visible .gr-doc-x{opacity:1}
+.gr-nm-plain{margin-right:2px}
+/* 组跨多个概念时(Arrays & Hashing), 每个概念一个小链接, 而不是整个标题一个按钮 */
+.gr-doc-multi{font:600 11px/1.6 Consolas,monospace;color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+  border-radius:5px;padding:1px 7px;margin-left:6px;opacity:.75}
+.gr-doc-multi:hover,.gr-doc-multi:focus-visible{opacity:1;
+  background:color-mix(in srgb,var(--accent) 12%,transparent)}
 .gr-tier{font:600 10.5px/1.6 Consolas,monospace;padding:2px 7px;border-radius:5px;
   border:1px solid var(--line);color:var(--dim);white-space:nowrap}
 .gr-tier[data-t="1"]{border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent)}
@@ -347,6 +357,23 @@ main{padding:18px 20px;overflow:auto}
 .gr-id{flex:none;font:11.5px/1 Consolas,monospace;color:var(--dim);font-variant-numeric:tabular-nums}
 .gr-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}
 .gr-chip[data-d="1"] .gr-nm,.gr-chip[data-d="2"] .gr-nm,.gr-chip[data-d="3"] .gr-nm{color:var(--fg)}
+/* 建题进行中 / 建不出来 —— 和题单那格 (.lchip.busy/.failed) 同一套语汇 */
+.gr-chip.busy{opacity:.6;cursor:progress}
+.gr-chip.failed{border-color:var(--hard)}
+
+/* 全局轻提示: 在坐标系上建题这类动作发生在弹窗之外, 没别的地方写反馈 */
+#flash{position:fixed;left:50%;bottom:24px;z-index:50;
+  transform:translateX(-50%) translateY(8px);
+  max-width:min(560px,90vw);padding:10px 14px;border-radius:8px;font-size:13px;
+  background:var(--panel2);color:var(--fg);border:1px solid var(--line);
+  box-shadow:0 6px 24px rgba(0,0,0,.28);
+  opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
+#flash.on{opacity:1;transform:translateX(-50%)}
+@media (prefers-reduced-motion:reduce){#flash{transition:none}}
+
+/* 一个 chip 两个点击区: 徽章翻熟练度, 题名开详情 —— 悬停时各自给个反馈, 免得只能靠 title 猜 */
+.gr-chip:hover .gr-nm{text-decoration:underline;text-underline-offset:2px;text-decoration-color:var(--dim)}
+.gr-st:hover{outline:2px solid var(--accent2);outline-offset:1px}
 
 @media (max-width:900px){
   .gr-matrix{grid-template-columns:1fr 1fr}
@@ -417,8 +444,10 @@ main{padding:18px 20px;overflow:auto}
 /* 进度条 / 格子按熟练度着色, 复用看板上那套 --fam1..4 */
 .lbar i.f0{background:var(--fam0)}
 .lbar i.f1{background:var(--fam1)}
+.lbar i.f1_5{background:var(--fam15)}
 .lbar i.f2{background:var(--fam2)}
 .lbar i.f3{background:var(--fam3)}
+.lbar i.f3_5{background:var(--fam35)}
 .lbar i.f4{background:var(--fam4)}
 .lbar i.fnone{background:var(--dim);opacity:.55}   /* 建了但没评熟练度 */
 
@@ -426,8 +455,10 @@ main{padding:18px 20px;overflow:auto}
 .lkey{display:inline-flex;align-items:center;gap:5px}
 .lkey i{width:9px;height:9px;border-radius:3px;flex:none}
 .lkey.f0 i{background:var(--fam0)}
-.lkey.f1 i{background:var(--fam1)} .lkey.f2 i{background:var(--fam2)}
-.lkey.f3 i{background:var(--fam3)} .lkey.f4 i{background:var(--fam4)}
+.lkey.f1 i{background:var(--fam1)} .lkey.f1_5 i{background:var(--fam15)}
+.lkey.f2 i{background:var(--fam2)}
+.lkey.f3 i{background:var(--fam3)} .lkey.f3_5 i{background:var(--fam35)}
+.lkey.f4 i{background:var(--fam4)}
 .lkey.fnone i{background:var(--dim);opacity:.55}
 .lkey.f-1 i{background:transparent;border:1px dashed var(--line)}
 .lkey b{color:var(--fg);font-variant-numeric:tabular-nums}
@@ -435,12 +466,16 @@ main{padding:18px 20px;overflow:auto}
 .lfam{font-style:normal;font:700 9.5px/1 Consolas,monospace;padding:2px 3px;border-radius:3px;margin-right:3px}
 .lchip.f0{color:var(--fam0);border-color:color-mix(in srgb,var(--fam0) 45%,transparent)}
 .lchip.f1{color:var(--fam1);border-color:color-mix(in srgb,var(--fam1) 45%,transparent)}
+.lchip.f1_5{color:var(--fam15);border-color:color-mix(in srgb,var(--fam15) 45%,transparent)}
 .lchip.f2{color:var(--fam2);border-color:color-mix(in srgb,var(--fam2) 45%,transparent)}
 .lchip.f3{color:var(--fam3);border-color:color-mix(in srgb,var(--fam3) 45%,transparent)}
+.lchip.f3_5{color:var(--fam35);border-color:color-mix(in srgb,var(--fam35) 45%,transparent)}
 .lchip.f4{color:var(--fam4);border-color:color-mix(in srgb,var(--fam4) 45%,transparent)}
 .lchip.f1 .lfam{background:color-mix(in srgb,var(--fam1) 18%,transparent)}
+.lchip.f1_5 .lfam{background:color-mix(in srgb,var(--fam15) 18%,transparent)}
 .lchip.f2 .lfam{background:color-mix(in srgb,var(--fam2) 18%,transparent)}
 .lchip.f3 .lfam{background:color-mix(in srgb,var(--fam3) 20%,transparent)}
+.lchip.f3_5 .lfam{background:color-mix(in srgb,var(--fam35) 20%,transparent)}
 .lchip.f4 .lfam{background:color-mix(in srgb,var(--fam4) 20%,transparent)}
 .lchip.f0{color:var(--fg)}                          /* 建了没评 */
 .lchip.f-1{opacity:.45;border-style:dashed}         /* 还没建 */

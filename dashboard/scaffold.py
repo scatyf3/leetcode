@@ -155,9 +155,11 @@ def create_problem(query: str) -> dict:
         (folder / "problem.html").write_text(problem_html(slug, q), encoding="utf-8")
     (folder / "sol.py").write_text("", encoding="utf-8")
     (folder / "note.md").write_text(f"# {pid}. {title}\n", encoding="utf-8")
+    # familiarity 这个键**故意不写**: 缺键 = 还没评。别写 0 —— 0 是阶梯顶端
+    # (L0 英语讲得清), 新建的题一出生就成了最熟的一档, 还会直接计进坐标系的 S3。
     (folder / "meta.json").write_text(json.dumps({
         "structures": [], "paradigms": [], "techniques": [],
-        "difficulty": difficulty, "status": "todo", "familiarity": 0,
+        "difficulty": difficulty, "status": "todo",
     }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     return {"ok": True, "created": True, "id": pid, "title": title, "folder": folder.name,

@@ -9,7 +9,7 @@ LeetCode dashboard — 数据结构 x 算法范式 看板.
 笔记   : 题目文件夹里的 note.md / explain.md ... 直接读写磁盘
 
 第二个视图「坐标系」(覆盖 x 深度) 的分层和时间线在 dashboard/plan.json (手改, git 追踪).
-掌握度不另存: S1/S2/S3 全部由 meta.json 的 familiarity (L0..L4) 算出来.
+掌握度不另存: S1/S2/S3 全部由 meta.json 的 familiarity (L0..L4, 含半档 L1.5) 算出来.
 一个字段一条阶梯, 不会出现 "L2 但标了 S1" 这种自相矛盾的状态.
 
 run:
@@ -86,14 +86,23 @@ def fam_level(meta: dict):
 
     别写成 `int(meta.get("familiarity", 0) or 0)` —— 0 现在是阶梯**顶端**,
     那样会把所有没评过的题静默算成最熟的一档。
+
+    也别用 int() 转: 阶梯允许半档(L1.5), int(1.5) == 1 会把它悄悄升成 L1。
     """
     v = meta.get("familiarity")
     if v is None or v == "":
         return None
     try:
-        return int(v)
+        return fam_num(v)
     except (TypeError, ValueError):
         return None
+
+
+def fam_num(v):
+    """档位数值化: 整数档回 int, 半档(L1.5)回 float —— 写回 meta.json 时
+    1 就还是 1 而不是 1.0, 那个文件是手写手读的, 别给它塞小数点。"""
+    f = float(v)
+    return int(f) if f.is_integer() else f
 
 
 def db():
@@ -110,7 +119,7 @@ SCHEMA = """CREATE TABLE problems(
     title TEXT, folder TEXT,
     structures TEXT, paradigms TEXT, techniques TEXT,
     difficulty TEXT, status TEXT,
-    familiarity INTEGER, complexity TEXT,
+    familiarity REAL, complexity TEXT,   -- REAL: 阶梯有半档(L1.5)
     due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT
 )"""
 
@@ -159,16 +168,21 @@ def sync():
     return len(rows)
 
 
+def _unpack(row):
+    d = dict(row)
+    for k in ("structures", "paradigms", "techniques"):
+        d[k] = json.loads(d[k] or "[]")
+    d["complexity"] = json.loads(d["complexity"] or "{}")
+    # familiarity 列是 REAL(阶梯有半档), 于是整数档读回来是 2.0 —— 收敛回 2,
+    # 否则 API 和静态站导出的 JSON 里整数档全带个小数点。
+    if d.get("familiarity") is not None:
+        d["familiarity"] = fam_num(d["familiarity"])
+    return d
+
+
 def list_problems():
     with db() as con:
-        out = []
-        for r in con.execute("SELECT * FROM problems ORDER BY id"):
-            d = dict(r)
-            for k in ("structures", "paradigms", "techniques"):
-                d[k] = json.loads(d[k] or "[]")
-            d["complexity"] = json.loads(d["complexity"] or "{}")
-            out.append(d)
-        return out
+        return [_unpack(r) for r in con.execute("SELECT * FROM problems ORDER BY id")]
 
 
 def get_detail(pid: int):
@@ -176,10 +190,7 @@ def get_detail(pid: int):
         r = con.execute("SELECT * FROM problems WHERE id=?", (pid,)).fetchone()
     if not r:
         return None
-    d = dict(r)
-    for k in ("structures", "paradigms", "techniques"):
-        d[k] = json.loads(d[k] or "[]")
-    d["complexity"] = json.loads(d["complexity"] or "{}")
+    d = _unpack(r)
     folder = REPO / d["folder"]
     # all python solutions, sorted for stable tab order
     sols = []
@@ -369,7 +380,7 @@ def save_meta(pid: int, payload: dict):
         if v is None or v == "":
             meta.pop("familiarity", None)
         else:
-            meta["familiarity"] = int(v)
+            meta["familiarity"] = fam_num(v)
     write_meta(folder, meta)
     sync()  # cheap for small repos; keeps index consistent
     return True

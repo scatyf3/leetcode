@@ -1,7 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "hash"
+  ],
   "techniques": [],
   "difficulty": "easy",
-  "status": "todo"
+  "status": "solved",
+  "familiarity": 2
 }

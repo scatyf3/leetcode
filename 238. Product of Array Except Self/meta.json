@@ -1,0 +1,13 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [],
+  "techniques": [
+    "0 的个数决定答案形状: 0/1/≥2 三档",
+    "前缀积 × 后缀积代替除法"
+  ],
+  "difficulty": "medium",
+  "status": "todo",
+  "familiarity": 2
+}
