@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "bit"
+  ],
+  "paradigms": [
+    "bit-manipulation"
+  ],
+  "techniques": [
+    "位宽固定 32 轮不能 while n",
+    "res<<1 | n&1 逐位搬运",
+    "f-string 补零"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(1)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "固定 32 轮逐位搬运",
+    "wrong": [
+      "while n 逐位搬运",
+      "转成字符串反转后再转回整数",
+      "分治按位两两交换"
+    ]
+  }
+}

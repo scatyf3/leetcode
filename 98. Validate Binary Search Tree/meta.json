@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "上下界沿路径向下传递",
+    "中序遍历必严格递增",
+    "None base case 吸收叶子/单边分支"
+  ],
+  "difficulty": "medium",
+  "status": "review",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "递归传 (low, high) 上下界",
+    "wrong": [
+      "只比较父子三者的大小",
+      "层序遍历检查每层递增",
+      "看节点数是否为 2^h-1"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

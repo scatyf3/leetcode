@@ -1,0 +1,30 @@
+{
+  "structures": [],
+  "paradigms": [],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n·k log k)",
+    "space": "O(n·k)"
+  },
+  "quiz": {
+    "idea": "\"\".join(sorted(s)) 当 key, 值用 list 分组",
+    "wrong": [
+      "两两 is_anagram 比较后归组",
+      "值用 set 存, 顺便去掉重复字符串",
+      "Counter(s) 直接当 dict 的 key"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-03",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
+}

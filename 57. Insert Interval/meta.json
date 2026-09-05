@@ -1,0 +1,29 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "intervals"
+  ],
+  "techniques": [
+    "三段式: 左段抄 / 中段吞 / 右段抄, i 不回退",
+    "while 跑零次吸收边界, 全程无 if",
+    "append 在中段循环外且无条件, 保证 new 恰好放一次",
+    "已排序则别 append+sort 退化成 56, 也别上二分"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "三段式: 左段抄 / 中段吞 / 右段抄, i 不回退",
+    "wrong": [
+      "append 进去重新排序, 套 56 的解法",
+      "二分找插入位置, 插入后再和相邻的合并",
+      "找到位置插入, 只需和左右各一个区间合并"
+    ]
+  }
+}

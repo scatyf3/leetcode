@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "先找旋转点再二分",
+    "两段值域不重叠",
+    "复用 153 的找最小值"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "先二分找旋转点，再段内二分",
+    "wrong": [
+      "直接线性扫描找 target",
+      "先整体排序再普通二分",
+      "对撞双指针从两端向中间找"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

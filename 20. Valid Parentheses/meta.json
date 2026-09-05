@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "string",
+    "stack"
+  ],
+  "paradigms": [
+    "stack"
+  ],
+  "techniques": [
+    "反向映射表 右→左",
+    "栈顶配对",
+    "收尾查栈空"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "栈 + 反向映射比对栈顶",
+    "wrong": [
+      "计数器分别数三种括号的数量是否相等",
+      "双指针从两端向中间配对",
+      "反复消掉相邻的成对括号"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-03",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
+}

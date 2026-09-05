@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "bit"
+  ],
+  "paradigms": [
+    "bit-manipulation"
+  ],
+  "techniques": [
+    "Brian Kernighan: n &= n-1",
+    "循环次数 = 1 的个数",
+    "零位算不算数决定循环条件"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(popcount)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "n &= n-1 消最低位的 1",
+    "wrong": [
+      "固定 32 轮逐位检查",
+      "n % 2 累加，n //= 2 直到 0",
+      "查表: 预处理每字节的 1"
+    ]
+  }
+}

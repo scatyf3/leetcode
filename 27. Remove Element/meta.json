@@ -1,7 +1,38 @@
 {
-  "structures": ["array"],
-  "paradigms": ["two-pointer"],
-  "techniques": ["快慢指针", "原地覆盖"],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "read-write-pointer"
+  ],
+  "techniques": [
+    "快慢指针",
+    "原地覆盖"
+  ],
   "difficulty": "easy",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "读写双指针原地覆盖",
+    "wrong": [
+      "遇到 val 就把后面左移",
+      "先排序把 val 聚到一起再截断",
+      "用 filter 建新数组再拷回去"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 6.7404595108297,
+    "reps": 2,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

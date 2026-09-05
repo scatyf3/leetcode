@@ -1,0 +1,29 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "半开区间 [l, r) 模板",
+    "搜索的是缝不是元素: r 取 n 不取 n-1",
+    "返回 l 而不是 mid",
+    "等价于 bisect_left"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "半开区间二分，返回 l",
+    "wrong": [
+      "闭区间 [l, r] 二分，找不到返回 -1",
+      "线性扫描第一个 >= target",
+      "二分后向左线性回退"
+    ]
+  }
+}

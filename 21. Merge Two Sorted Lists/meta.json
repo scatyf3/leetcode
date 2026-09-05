@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "哨兵节点消灭空表特例",
+    "剩余链整段接上",
+    "return head.next"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n+m)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "归并型双指针 + 哨兵节点",
+    "wrong": [
+      "全部塞进最小堆再依次弹出",
+      "先拼接再整体排序",
+      "递归到底后回溯着往前接"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

@@ -1,7 +1,38 @@
 {
-  "structures": ["array"],
-  "paradigms": ["greedy", "dp"],
-  "techniques": ["滚动最小值", "状态压缩"],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "greedy",
+    "1d-dp"
+  ],
+  "techniques": [
+    "滚动最小值",
+    "状态压缩"
+  ],
   "difficulty": "easy",
-  "status": "solved"
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "一次扫描维护历史最低价",
+    "wrong": [
+      "吃掉所有上坡的差值",
+      "对撞双指针找最大差",
+      "排序后取最大值减最小值"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-04",
+    "last_review": "2026-09-03",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

@@ -1,0 +1,29 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "set 代替显式哈希表",
+    "入口剪枝: 只从链头 x-1∉s 出发",
+    "每条链只走一次"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "set + 只从链头出发",
+    "wrong": [
+      "排序后一遍扫描数最长连续段",
+      "对每个元素往两边扩",
+      "哈希记链长，两端合并"
+    ]
+  }
+}

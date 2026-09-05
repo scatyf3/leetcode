@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "recursion"
+  ],
+  "techniques": [
+    "prev/curr/next 三指针翻转",
+    "尾递归传 prev 等价迭代",
+    "后序回溯 head.next.next=head"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "prev/curr/next 三指针掉头",
+    "wrong": [
+      "用栈存节点再弹出重连",
+      "递归到底后回溯着接",
+      "找中点后分段反转"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-05",
+    "last_review": "2026-09-03",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

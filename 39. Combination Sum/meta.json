@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
+  "techniques": [
+    "选择-递归-撤销三步骨架",
+    "start 指针防组合重复",
+    "传 i 而非 i+1 实现可重复选",
+    "remain 递减代替 cur_sum 累加",
+    "排序后 break 剪枝"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n^(T/min))",
+    "space": "O(T/min)"
+  },
+  "quiz": {
+    "idea": "回溯，下一层仍从 i 开始",
+    "wrong": [
+      "每层从 0 开始，最后去重",
+      "完全背包 DP 求方案数",
+      "先排序再用双指针凑目标和"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-08",
+    "last_review": "2026-09-03",
+    "stability": 4.546029441066125,
+    "difficulty": 5.102286904192293,
+    "reps": 2,
+    "lapses": 0,
+    "last_rating": 3
+  }
+}

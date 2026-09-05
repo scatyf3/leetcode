@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp",
+    "binary-search",
+    "greedy"
+  ],
+  "techniques": [
+    "dp[i] = 以 i 结尾的最长上升子序列长度, 答案取 max(dp) 不是 dp[-1]",
+    "dp 初值 = 「零次转移」时的真值(1), 不是哨兵",
+    "O(n log n): tails[k] = 长度 k+1 的最小结尾, 下标是长度、内容是值",
+    "严格上升用 bisect_left, 非严格用 bisect_right"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "dp[i] = 以 i 结尾；或 tails + 二分",
+    "wrong": [
+      "滑动窗口找最长递增段",
+      "dp[i] = 前 i 个里的最长，取 dp[-1]",
+      "贪心接上就走，不做替换"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-03",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
+}
