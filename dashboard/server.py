@@ -9,8 +9,8 @@ LeetCode dashboard — 数据结构 x 算法范式 看板.
 笔记   : 题目文件夹里的 note.md / explain.md ... 直接读写磁盘
 
 第二个视图「坐标系」(覆盖 x 深度) 的分层和时间线在 dashboard/plan.json (手改, git 追踪).
-掌握度不另存: S1/S2 由 meta.json 的 familiarity (L1..L4) 算出来, S3 是 meta.json 的
-explained 布尔位. 一处真相, 不会出现 "L2 但标了 S1" 这种自相矛盾的状态.
+掌握度不另存: S1/S2/S3 全部由 meta.json 的 familiarity (L0..L4) 算出来.
+一个字段一条阶梯, 不会出现 "L2 但标了 S1" 这种自相矛盾的状态.
 
 run:
     python dashboard/server.py
@@ -81,6 +81,21 @@ def write_meta(folder: str, meta: dict):
     os.replace(tmp, f)
 
 
+def fam_level(meta: dict):
+    """熟练度 0..4 (0 = L0 英语讲得清, 4 = 完全不会), 缺键 = 还没评 -> None.
+
+    别写成 `int(meta.get("familiarity", 0) or 0)` —— 0 现在是阶梯**顶端**,
+    那样会把所有没评过的题静默算成最熟的一档。
+    """
+    v = meta.get("familiarity")
+    if v is None or v == "":
+        return None
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
 def db():
     con = sqlite3.connect(DB)
     con.row_factory = sqlite3.Row
@@ -95,12 +110,12 @@ SCHEMA = """CREATE TABLE problems(
     title TEXT, folder TEXT,
     structures TEXT, paradigms TEXT, techniques TEXT,
     difficulty TEXT, status TEXT,
-    familiarity INTEGER, explained INTEGER, complexity TEXT,
+    familiarity INTEGER, complexity TEXT,
     due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT
 )"""
 
 COLUMNS = ("id", "title", "folder", "structures", "paradigms", "techniques",
-           "difficulty", "status", "familiarity", "explained", "complexity",
+           "difficulty", "status", "familiarity", "complexity",
            "due", "stability", "reps", "last_review", "fsrs_state")
 
 
@@ -128,8 +143,7 @@ def sync():
                 json.dumps(m.get("techniques", []), ensure_ascii=False),
                 m.get("difficulty", ""),
                 m.get("status", "solved"),
-                int(m.get("familiarity", 0) or 0),   # 0 = 未评级
-                int(bool(m.get("explained"))),        # 能用英语讲清 = 坐标系里的 S3
+                fam_level(m),                        # 0..4, None = 还没评(缺键)
                 json.dumps(m.get("complexity") or {}, ensure_ascii=False),
                 f.get("due", ""),                    # "" = 不是卡片, 前端靠这个判断
                 float(f.get("stability") or 0),
@@ -350,13 +364,12 @@ def save_meta(pid: int, payload: dict):
         if k in payload:
             meta[k] = payload[k]
     if "familiarity" in payload:
-        meta["familiarity"] = int(payload["familiarity"] or 0)
-    if "explained" in payload:
-        # 坐标系的 S3。false 就删掉键, 别在 meta.json 里留一堆 "explained": false
-        if payload["explained"]:
-            meta["explained"] = True
+        # 0 是 L0(英语讲得清), 不是"未评" —— 未评就是没有这个键
+        v = payload["familiarity"]
+        if v is None or v == "":
+            meta.pop("familiarity", None)
         else:
-            meta.pop("explained", None)
+            meta["familiarity"] = int(v)
     write_meta(folder, meta)
     sync()  # cheap for small repos; keeps index consistent
     return True

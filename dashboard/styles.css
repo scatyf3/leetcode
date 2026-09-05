@@ -2,7 +2,7 @@
   --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
   --fg:#e6e8ee; --dim:#9aa3b2; --accent:#6ea8fe; --accent2:#7ee0a8;
   --easy:#54c78b; --medium:#e2b04a; --hard:#e06c75; --chip:#242a35;
-  --fam1:#54c78b; --fam2:#6ea8fe; --fam3:#e2b04a; --fam4:#e06c75;
+  --fam0:#22b8a6; --fam1:#54c78b; --fam2:#6ea8fe; --fam3:#e2b04a; --fam4:#e06c75;
 }
 @media (prefers-color-scheme:light){
   :root{
@@ -68,6 +68,7 @@ main{padding:18px 20px;overflow:auto}
 /* ---- familiarity 熟练度: L1 熟 → L4 完全不会, 方块标签(和难度圆点区分) ---- */
 .fam{flex:none;width:26px;text-align:center;font:700 10.5px/1.6 Consolas,monospace;
   border-radius:5px;background:var(--chip);color:var(--dim)}
+.fam.f0{background:color-mix(in srgb,var(--fam0) 20%,transparent);color:var(--fam0)}
 .fam.f1{background:color-mix(in srgb,var(--fam1) 18%,transparent);color:var(--fam1)}
 .fam.f2{background:color-mix(in srgb,var(--fam2) 18%,transparent);color:var(--fam2)}
 .fam.f3{background:color-mix(in srgb,var(--fam3) 20%,transparent);color:var(--fam3)}
@@ -98,6 +99,7 @@ main{padding:18px 20px;overflow:auto}
   border:1px solid var(--line);border-radius:7px;padding:4px 8px;
   font:600 12px/1 Consolas,monospace;color:var(--dim)}
 .fam-btn:hover{filter:none;background:var(--panel2)}
+.fam-btn.f0{color:var(--fam0)}
 .fam-btn.f1{color:var(--fam1)}.fam-btn.f2{color:var(--fam2)}
 .fam-btn.f3{color:var(--fam3)}.fam-btn.f4{color:var(--fam4)}
 .fam-btn.on{border-color:currentColor;background:color-mix(in srgb,currentColor 14%,transparent)}
@@ -325,8 +327,6 @@ main{padding:18px 20px;overflow:auto}
   background:var(--panel);border:1px solid var(--line);border-radius:8px;
   padding:5px 9px 5px 5px;color:var(--fg);font-size:12.5px}
 .gr-chip:hover{background:var(--panel2);filter:none}
-.gr-chipwrap{display:flex;gap:3px;min-width:0}
-.gr-chipwrap>.gr-chip{flex:1;min-width:0}
 .gr-chip[data-d="1"],.gr-chip[data-d="2"],.gr-chip[data-d="3"]{background:var(--panel2)}
 /* 方块里写的是原始的 L 标签, 颜色编码的是由它算出来的 S —— 两个都要看得见 */
 .gr-st{flex:none;width:26px;height:22px;border-radius:6px;display:grid;place-items:center;
@@ -335,12 +335,6 @@ main{padding:18px 20px;overflow:auto}
 .gr-st.s1{background:color-mix(in srgb,var(--accent) 30%,var(--panel2));color:var(--fg)}
 .gr-st.s2{background:color-mix(in srgb,var(--accent) 65%,var(--panel2));color:#fff}
 .gr-st.s3{background:var(--accent);color:#fff}
-/* S3 开关: 只在 L1/L2 的题上出现 */
-.gr-say{flex:none;width:26px;border:1px dashed var(--line);border-radius:8px;padding:0;
-  background:transparent;color:var(--dim);font-size:11px;cursor:pointer}
-.gr-say:hover{border-color:var(--accent2);color:var(--accent2);filter:none}
-.gr-say.on{background:color-mix(in srgb,var(--accent2) 18%,transparent);
-  border:1px solid var(--accent2);color:var(--accent2)}
 .gr-id{flex:none;font:11.5px/1 Consolas,monospace;color:var(--dim);font-variant-numeric:tabular-nums}
 .gr-nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dim)}
 .gr-chip[data-d="1"] .gr-nm,.gr-chip[data-d="2"] .gr-nm,.gr-chip[data-d="3"] .gr-nm{color:var(--fg)}
@@ -412,22 +406,25 @@ main{padding:18px 20px;overflow:auto}
 .lprem{color:var(--hard);font-weight:700}
 
 /* 进度条 / 格子按熟练度着色, 复用看板上那套 --fam1..4 */
+.lbar i.f0{background:var(--fam0)}
 .lbar i.f1{background:var(--fam1)}
 .lbar i.f2{background:var(--fam2)}
 .lbar i.f3{background:var(--fam3)}
 .lbar i.f4{background:var(--fam4)}
-.lbar i.f0{background:var(--dim);opacity:.55}      /* 建了但没评熟练度 */
+.lbar i.fnone{background:var(--dim);opacity:.55}   /* 建了但没评熟练度 */
 
 .lkeys{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:7px;font-size:11.5px;color:var(--dim)}
 .lkey{display:inline-flex;align-items:center;gap:5px}
 .lkey i{width:9px;height:9px;border-radius:3px;flex:none}
+.lkey.f0 i{background:var(--fam0)}
 .lkey.f1 i{background:var(--fam1)} .lkey.f2 i{background:var(--fam2)}
 .lkey.f3 i{background:var(--fam3)} .lkey.f4 i{background:var(--fam4)}
-.lkey.f0 i{background:var(--dim);opacity:.55}
+.lkey.fnone i{background:var(--dim);opacity:.55}
 .lkey.f-1 i{background:transparent;border:1px dashed var(--line)}
 .lkey b{color:var(--fg);font-variant-numeric:tabular-nums}
 
 .lfam{font-style:normal;font:700 9.5px/1 Consolas,monospace;padding:2px 3px;border-radius:3px;margin-right:3px}
+.lchip.f0{color:var(--fam0);border-color:color-mix(in srgb,var(--fam0) 45%,transparent)}
 .lchip.f1{color:var(--fam1);border-color:color-mix(in srgb,var(--fam1) 45%,transparent)}
 .lchip.f2{color:var(--fam2);border-color:color-mix(in srgb,var(--fam2) 45%,transparent)}
 .lchip.f3{color:var(--fam3);border-color:color-mix(in srgb,var(--fam3) 45%,transparent)}

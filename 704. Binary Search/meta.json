@@ -12,7 +12,6 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2,
   "complexity": {
     "time": "O(log n)",
     "space": "O(1)"
@@ -24,5 +23,6 @@
       "线性扫描直到找到 target",
       "三分法切成三段"
     ]
-  }
+  },
+  "familiarity": 3
 }

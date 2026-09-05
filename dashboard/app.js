@@ -14,16 +14,25 @@ const on = (sel, ev, fn, opt) => {
 let PROBLEMS = [];
 let CURRENT = null; // detail object
 
-// ---- familiarity (熟练度): 1 熟 → 4 完全不会, 0 = 未评 ----
+// ---- familiarity (熟练度): 0 最熟(英语讲得清) → 4 完全不会; null = 还没评 ----
+// 未评**不是** 0 —— 0 是阶梯顶端。缺键在 meta.json 里就是缺键, 一路 null 到底,
+// 千万别写成 `Number(x) || 0`: 那会把没评过的题静默变成最熟的一档。
 const FAM = {
-  0: { short: '—',  label: '未评' },
+  0: { short: 'L0', label: '英语讲得清' },
   1: { short: 'L1', label: '已经熟悉' },
   2: { short: 'L2', label: '思路会 · 细节易写错' },
   3: { short: 'L3', label: '思路大概知道 · 不熟' },
   4: { short: 'L4', label: '思路都不知道' },
 };
+const FAM_NONE = { short: '—', label: '未评' };
+const FAM_LEVELS = [0, 1, 2, 3, 4, null];        // 最熟 -> 最生 -> 未评
 let FAM_FILTER = new Set();          // empty = 不过滤
-const famOf = (p) => Number(p.familiarity) || 0;
+const famOf = (p) => {
+  const v = p.familiarity;
+  return v === null || v === undefined || v === '' ? null : Number(v);
+};
+const famInfo = (f) => (f === null || f === undefined ? FAM_NONE : FAM[f]);
+const famKey = (f) => (f === null || f === undefined ? 'none' : String(f));
 
 // ---- board: cluster by 结构 or 范式, cards carry the other dimension + tricks ----
 const NO_STRUCT = '未分类';
@@ -59,7 +68,7 @@ function buildPanel() {
     return;
   }
 
-  let h = `<div class="fam-legend">${[1, 2, 3, 4]
+  let h = `<div class="fam-legend">${[0, 1, 2, 3, 4]
     .map((f) => `<span class="fam f${f}">${FAM[f].short}</span>${esc(FAM[f].label)}`)
     .join('<span class="sep">·</span>')}</div>`;
   h += '<div class="groups">';
@@ -80,17 +89,17 @@ function buildPanel() {
 }
 
 function buildFamFilter() {
-  const counts = new Map([[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]]);
+  const counts = new Map(FAM_LEVELS.map((f) => [f, 0]));
   for (const p of PROBLEMS) counts.set(famOf(p), (counts.get(famOf(p)) || 0) + 1);
-  $('#fam-filter').innerHTML = [1, 2, 3, 4, 0]
+  $('#fam-filter').innerHTML = FAM_LEVELS
     .filter((f) => counts.get(f))                   // hide buckets nobody is in
-    .map((f) => `<button class="fam-btn f${f}${FAM_FILTER.has(f) ? ' on' : ''}"
-        data-fam="${f}" title="${esc(FAM[f].label)}">${FAM[f].short}
+    .map((f) => `<button class="fam-btn f${famKey(f)}${FAM_FILTER.has(f) ? ' on' : ''}"
+        data-fam="${famKey(f)}" title="${esc(famInfo(f).label)}">${famInfo(f).short}
         <span class="fam-n">${counts.get(f)}</span></button>`)
     .join('');
   document.querySelectorAll('.fam-btn').forEach((b) =>
     b.addEventListener('click', () => {
-      const f = +b.dataset.fam;
+      const f = b.dataset.fam === 'none' ? null : +b.dataset.fam;
       FAM_FILTER.has(f) ? FAM_FILTER.delete(f) : FAM_FILTER.add(f);
       buildPanel();
     })
@@ -106,7 +115,7 @@ function rowHTML(p) {
   const f = famOf(p);
   return `<div class="row${todo}" data-id="${p.id}">
     <span class="dot ${diff}" title="${diff}"></span>
-    <span class="fam f${f}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(FAM[f].label)})">${FAM[f].short}</span>
+    <span class="fam f${famKey(f)}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(famInfo(f).label)})">${famInfo(f).short}</span>
     <span class="row-id">#${p.id}</span>
     <span class="row-title">${esc(p.title)}</span>
     <span class="row-tags">${paras}${tricks}</span>
@@ -144,9 +153,9 @@ function openFamMenu(badge) {
   const menu = document.createElement('div');
   menu.className = 'fam-menu';
   menu.dataset.id = id;
-  menu.innerHTML = [1, 2, 3, 4, 0]
-    .map((f) => `<button class="fam-opt${f === cur ? ' on' : ''}" data-f="${f}">
-        <span class="fam f${f}">${FAM[f].short}</span>${esc(FAM[f].label)}</button>`)
+  menu.innerHTML = FAM_LEVELS
+    .map((f) => `<button class="fam-opt${f === cur ? ' on' : ''}" data-f="${famKey(f)}">
+        <span class="fam f${famKey(f)}">${famInfo(f).short}</span>${esc(famInfo(f).label)}</button>`)
     .join('');
   document.body.appendChild(menu);
 
@@ -156,7 +165,10 @@ function openFamMenu(badge) {
     ? r.top - menu.offsetHeight - 4 : r.bottom + 4}px`;   // 贴着窗口下沿时朝上开
 
   menu.querySelectorAll('.fam-opt').forEach((b) =>
-    b.addEventListener('click', (e) => { e.stopPropagation(); setFam(id, +b.dataset.f); })
+    b.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setFam(id, b.dataset.f === 'none' ? null : +b.dataset.f);
+    })
   );
 }
 
@@ -185,7 +197,7 @@ async function openDetail(id) {
   renderChips();
   $('#e-difficulty').value = d.difficulty || '';
   $('#e-status').value = d.status || 'solved';
-  $('#e-familiarity').value = String(famOf(d));
+  $('#e-familiarity').value = famOf(d) === null ? '' : String(famOf(d));
   $('#note-file').textContent = d.note_file;
   $('#note-edit').value = d.note;
   $('#note-msg').textContent = '';
@@ -227,7 +239,7 @@ async function autoSaveMeta() {
   const body = {
     structures: TAGS.structures, paradigms: TAGS.paradigms, techniques: TAGS.techniques,
     difficulty: $('#e-difficulty').value, status: $('#e-status').value,
-    familiarity: +$('#e-familiarity').value,
+    familiarity: $('#e-familiarity').value === '' ? null : +$('#e-familiarity').value,
   };
   await fetch(`/api/problems/${CURRENT.id}/meta`, {
     method: 'PUT', headers: { 'Content-Type': 'application/json' },
@@ -700,7 +712,7 @@ const todayStr = () => new Date().toLocaleDateString('sv');   // 本地 YYYY-MM-
 const isCard = (p) => !!p.due;
 const isDue = (p) => isCard(p) && p.due <= todayStr();
 const rvEligible = (p) => p.status === 'solved' || p.status === 'review';
-const FAM_ORDER = { 4: 0, 3: 1, 2: 2, 0: 3, 1: 4 };            // 越生的越先进队列
+const FAM_ORDER = { 4: 0, 3: 1, 2: 2, none: 3, 1: 4, 0: 5 };   // 越生的越先进队列
 
 // 队列**范围**三种模式都一样(到期的卡 + 还没进过复习的题), 模式只决定**顺序**:
 //   fsrs   到期优先 + 生的优先(默认)
@@ -729,7 +741,7 @@ function orderQueue(pool, mode = 'fsrs') {
     a.due.localeCompare(b.due) || a.id - b.id);
   // 还没成为卡片的题, 按熟练度从生到熟排 —— 只是**读** familiarity 定顺序, 不写它
   const fresh = pool.filter((p) => !isCard(p)).sort((a, b) =>
-    FAM_ORDER[famOf(a)] - FAM_ORDER[famOf(b)] || a.id - b.id);
+    FAM_ORDER[famKey(famOf(a))] - FAM_ORDER[famKey(famOf(b))] || a.id - b.id);
   return [...due, ...fresh].map((p) => p.id);
 }
 
@@ -1205,18 +1217,18 @@ const statsOpen = () => !$('#stats-overlay').classList.contains('hidden');
 let LISTS = null;          // {lists: {名字: {source, note, categories}}, premium: [id]}
 let LIST_CUR = null;       // 当前看的是哪个题单
 
-// 一题在题单里的档位: 1..4 = 熟练度, 0 = 建了但没评, -1 = 仓库里压根没有
+// 一题在题单里的档位: 0..4 = 熟练度, null = 建了但没评, -1 = 仓库里压根没有
 const listFam = (id) => {
   const p = PROBLEMS.find((x) => x.id === id);
   return p ? famOf(p) : -1;
 };
-const LBUCKETS = [1, 2, 3, 4, 0];                 // 进度条从"最熟"到"最生", 未做是剩下的空白
+const LBUCKETS = FAM_LEVELS;                      // 进度条从"最熟"到"最生", 未做是剩下的空白
 
 function barHTML(items) {
   const n = items.length || 1;
-  const c = { 1: 0, 2: 0, 3: 0, 4: 0, 0: 0, '-1': 0 };
-  for (const [id] of items) c[listFam(id)]++;
-  const tip = LBUCKETS.map((f) => `${f ? FAM[f].short : '未评'} ${c[f]}`).join(' · ')
+  const c = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, none: 0, '-1': 0 };
+  for (const [id] of items) c[famKey(listFam(id))]++;
+  const tip = LBUCKETS.map((f) => `${famInfo(f).short} ${c[famKey(f)]}`).join(' · ')
     + ` · 未做 ${c['-1']} · 共 ${items.length}`;
   const seg = LBUCKETS
     .filter((f) => c[f])
@@ -1245,9 +1257,9 @@ function renderLists() {
   const top = barHTML(all);
 
   const legend = [...LBUCKETS, -1].map((f) => {
-    const label = f === -1 ? '未做' : f ? FAM[f].label : '未评';
-    const short = f === -1 ? '·' : f ? FAM[f].short : '—';
-    return `<span class="lkey f${f}"><i></i>${esc(short)} ${esc(label)} <b>${top.counts[f]}</b></span>`;
+    const label = f === -1 ? '未做' : famInfo(f).label;
+    const short = f === -1 ? '·' : famInfo(f).short;
+    return `<span class="lkey f${famKey(f)}"><i></i>${esc(short)} ${esc(label)} <b>${top.counts[famKey(f)]}</b></span>`;
   }).join('');
 
   let h = `<div class="lsum">
@@ -1269,11 +1281,11 @@ function renderLists() {
       <div class="lchips">${items.map(([id, title]) => {
         const f = listFam(id);
         const star = premium.has(id) ? '<span class="lprem" title="LeetCode 会员题">*</span>' : '';
-        const badge = f > 0 ? `<i class="lfam f${f}">${FAM[f].short}</i>` : '';
+        const badge = f !== -1 && f !== null ? `<i class="lfam f${f}">${famInfo(f).short}</i>` : '';
         const act = f === -1
           ? ` data-add="${id}" title="点一下建文件夹并抓题面"`
-          : ` data-open="${id}" title="${esc(title)} · ${f ? FAM[f].label : '未评熟练度'}"`;
-        return `<span class="lchip f${f}"${act}>${badge}${id}${star} <em>${esc(title)}</em></span>`;
+          : ` data-open="${id}" title="${esc(title)} · ${esc(famInfo(f).label)}"`;
+        return `<span class="lchip f${famKey(f)}"${act}>${badge}${id}${star} <em>${esc(title)}</em></span>`;
       }).join('')}</div>
     </div>`;
   }
@@ -1517,19 +1529,21 @@ function esc(s) {
 let PLAN = null;   // dashboard/plan.json — the curriculum, hand-edited
 let VIEW = 'board';
 
-// 深度不另存: 由每题 meta.json 的 familiarity (L1..L4) 算出来。
+// 深度不另存: 由每题 meta.json 的 familiarity 算出来。一个字段, 一条阶梯:
+//   L0 英语讲得清                      -> S3 讲得清 (面试门槛)
 //   L1 已经熟悉 / L2 思路会·细节易写错  -> S2 写得对 (OA 门槛)
 //   L3 思路大概知道·不熟               -> S1 思路清楚
-//   L4 思路都不知道 / 0 未评 / 没建文件夹 -> 还没到 S1
-// S3 是 meta.json 的 explained 布尔位, 且只有 L1/L2 才算 —— 写不对的题不该
-// 因为"讲得出"就混进 S2 那一列, 而 S2 正是判断能不能去做 OA 的那一列。
+//   L4 思路都不知道 / 未评 / 没建文件夹  -> 还没到 S1
+// 阶梯是有序的, 所以 S3 ⊂ S2 ⊂ S1 由构造保证 —— 讲得清的题必然也写得对,
+// 不会出现"讲得出但写不对"的题混进 S2 那一列(而 S2 正是判断能不能做 OA 的那列)。
 const byId = () => new Map(PROBLEMS.map((p) => [p.id, p]));
 function depthOf(rec) {
   if (!rec) return 0;
-  const L = rec.familiarity || 0;
+  const L = famOf(rec);
+  if (L === 0) return 3;
+  if (L === 1 || L === 2) return 2;
   if (L === 3) return 1;
-  if (L === 1 || L === 2) return rec.explained ? 3 : 2;
-  return 0;                       // 0 未评 / L4 思路都不知道
+  return 0;                       // 未评 / L4 思路都不知道
 }
 
 
@@ -1628,22 +1642,16 @@ function buildGrid() {
     const label = `第 ${grp.tier} 层${grp.low ? ' · 低优先' : ''}`;
     const chips = grp.problems.map((p) => {
       const rec = recs.get(p[0]);
-      const L = rec ? (rec.familiarity || 0) : -1;   // -1 = 还没建文件夹
+      const L = rec ? famOf(rec) : undefined;        // undefined = 还没建文件夹
       const d = depthOf(rec);
-      const badge = L < 0 ? '+' : L === 0 ? '·' : 'L' + L;
-      const tip = L < 0 ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
-        : L === 0 ? '还没评熟练度 — 点击标 L4' : famTip[L];
-      // 「讲」只在 L1/L2 出现: 写不对的题不该因为讲得出就混进 S2 那一列
-      const say = (L === 1 || L === 2)
-        ? `<button class="gr-say${rec.explained ? ' on' : ''}" data-say="${p[0]}"
-             title="英语 60 秒讲得清 = S3${rec.explained ? '（已标，点掉）' : ''}">讲</button>`
-        : '';
-      return `<div class="gr-chipwrap">
-        <button class="gr-chip" data-id="${p[0]}" data-d="${d}" title="${esc(p[1])} — ${esc(tip)}">
+      const badge = rec === undefined ? '+' : famInfo(L).short;
+      const tip = rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
+        : L === null ? '还没评熟练度 — 点击标 L4' : famTip[L];
+      return `<button class="gr-chip" data-id="${p[0]}" data-d="${d}" title="${esc(p[1])} — ${esc(tip)}">
           <span class="gr-st s${d}">${badge}</span>
           <span class="gr-id">${p[0]}</span>
           <span class="gr-nm">${esc(p[1])}</span>
-          <span class="dot ${p[2]}"></span></button>${say}</div>`;
+          <span class="dot ${p[2]}"></span></button>`;
     }).join('');
     g += `<div class="gr-grp${grp.low ? ' low' : ''}">
       <div class="gr-grp-h"><h3>${esc(grp.name)}</h3>
@@ -1661,7 +1669,7 @@ function buildGrid() {
         <span class="gr-key"><i class="s0"></i>L4 / 未评 · 还没到 S1</span>
         <span class="gr-key"><i class="s1"></i>L3 → S1 思路清楚</span>
         <span class="gr-key"><i class="s2"></i>L1–L2 → S2 能写对</span>
-        <span class="gr-key"><i class="s3"></i>＋「讲」→ S3</span>
+        <span class="gr-key"><i class="s3"></i>L0 → S3 讲得清</span>
       </div>
       <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
       否则会攒下一整个月「做得出但讲不清」的题。</p>
@@ -1671,15 +1679,15 @@ function buildGrid() {
       ${t}
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2>题目</h2><p>点方块循环熟练度 <span class="mono">· → L4 → L3 → L2 → L1</span>，写回该题 meta.json；
-      「讲」是独立的 S3 开关，只在 L1/L2 出现。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
+      <div class="gr-sec-h"><h2>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
+      和详情页那个下拉是同一个字段。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
       <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
       ${g}
     </section>`;
 }
 
-// 顺着"越来越熟"的方向走: 未评 -> L4 -> L3 -> L2 -> L1 -> 未评
-const L_NEXT = { 0: 4, 4: 3, 3: 2, 2: 1, 1: 0 };
+// 顺着"越来越熟"的方向走, 走到顶再回到未评
+const L_NEXT = { none: 4, 4: 3, 3: 2, 2: 1, 1: 0, 0: null };
 
 const putMeta = (id, body) => fetch(`/api/problems/${id}/meta`, {
   method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
@@ -1694,17 +1702,12 @@ async function cycleL(id) {
       body: JSON.stringify({ query: String(id) }),
     });
   } else {
-    await putMeta(id, { familiarity: L_NEXT[rec.familiarity || 0] });
+    await putMeta(id, { familiarity: L_NEXT[famKey(famOf(rec))] });
   }
   await reload();
 }
 
-async function toggleSay(id) {
-  const rec = byId().get(id);
-  if (!rec) return;
-  await putMeta(id, { explained: !rec.explained });
-  await reload();
-}
+
 
 async function switchView(v) {
   VIEW = v;
@@ -1736,8 +1739,6 @@ on('#sync', 'click', async () => { await fetch('/api/sync', { method: 'POST' });
 document.querySelectorAll('.view-tab').forEach((b) =>
   b.addEventListener('click', () => switchView(b.dataset.view)));
 on('#grid-view', 'click', (e) => {
-  const say = e.target.closest('.gr-say');
-  if (say) return void toggleSay(+say.dataset.say);
   const chip = e.target.closest('.gr-chip');
   if (chip) cycleL(+chip.dataset.id);
 });

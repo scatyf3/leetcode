@@ -31,7 +31,6 @@
    Vue 那边有个 readOnly 标志位, 直接用 v-if 决定渲染哪一套, 见 index.html 的 #review-app。 */
 
 /* 坐标系: 只读站上格子和时间线照看, 但改不了熟练度 */
-.ro .gr-say{display:none}
 .ro .gr-chip{cursor:default}
 .ro .gr-chip:hover{background:var(--panel);border-color:var(--line)}
 .ro .gr-chip[data-d="1"]:hover,.ro .gr-chip[data-d="2"]:hover,.ro .gr-chip[data-d="3"]:hover{background:var(--panel2)}
