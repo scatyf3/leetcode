@@ -440,9 +440,9 @@ let DOC = null, DOC_EDITING = false;
 async function openDoc(kind, name) {
   DOC = await api(`/api/${kind}/` + encodeURIComponent(name));
   $('#doc-kind').textContent = kind === 'paradigms' ? '范式' : '结构';
-  $('#doc-title').textContent = DOC.name;
-  $('#doc-file').textContent = DOC.file;
-  $('#doc-edit').value = DOC.content;
+  $('#doc-title').textContent = DOC.name || name;
+  $('#doc-file').textContent = DOC.file || `${kind}/${name}.md`;
+  $('#doc-edit').value = DOC.content || '';
   $('#doc-msg').textContent = '改动自动保存';
   exitDocEdit();
   $('#doc-overlay').classList.remove('hidden');
@@ -1548,6 +1548,7 @@ function depthOf(rec) {
 
 
 const parseDay = (s) => { const a = s.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2]); };
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // tag every phase past/active/future against today, and pick the live one
 function datePhases() {
@@ -1593,7 +1594,9 @@ function buildGrid() {
   for (const tr of PLAN.tiers) {
     const N = size(tr.t);
     m += `<div class="gr-rowh">
-      <span class="gr-rowh-t">${esc(tr.name)}<span class="gr-rowh-n">本层 ${N} 题 · 做完题单累计 ${esc(tr.cum)}</span></span>
+      <button class="gr-rowh-t" data-jump="${tr.t}" title="跳到下面「题目」里这一层的第一组">
+        ${esc(tr.name)}<span class="gr-jump-x">▾</span>
+        <span class="gr-rowh-n">本层 ${N} 题 · 做完题单累计 ${esc(tr.cum)}</span></button>
       <span class="gr-rowh-d">${esc(tr.desc)}</span></div>`;
     for (const st of PLAN.stages) {
       const n = reached(tr.t, st.s);
@@ -1636,6 +1639,7 @@ function buildGrid() {
     famTip[f.l] = `${f.t} ${f.d} → ${d ? 'S' + d : '还没到 S1'}`;
   }
   const depths = new Map(all.map((p) => [p.id, p.depth]));
+  const seenTier = new Set();          // 每层第一组挂锚点, 给上面的行标签跳
   let g = '';
   for (const grp of PLAN.groups) {
     const started = grp.problems.filter((p) => (depths.get(p[0]) || 0) >= 1).length;
@@ -1653,8 +1657,17 @@ function buildGrid() {
           <span class="gr-nm">${esc(p[1])}</span>
           <span class="dot ${p[2]}"></span></button>`;
     }).join('');
-    g += `<div class="gr-grp${grp.low ? ' low' : ''}">
-      <div class="gr-grp-h"><h3>${esc(grp.name)}</h3>
+    const anchor = seenTier.has(grp.tier) ? '' : ` id="gr-tier-${grp.tier}"`;
+    seenTier.add(grp.tier);
+    // 组标题 -> 这个 pattern 的通用 trick 文档, 和矩阵视图点组标签是同一个 overlay
+    const t = grp.tag;
+    const head = t
+      ? `<h3><button class="gr-doc" data-kind="${t.kind}" data-tag="${esc(t.name)}"
+           title="打开 ${t.kind === 'paradigms' ? '范式' : '结构'} ${esc(t.name)} 的通用 trick 文档"
+           >${esc(grp.name)}<span class="gr-doc-x">通用 trick →</span></button></h3>`
+      : `<h3>${esc(grp.name)}</h3>`;
+    g += `<div class="gr-grp${grp.low ? ' low' : ''}"${anchor}>
+      <div class="gr-grp-h">${head}
         <span class="gr-tier${grp.low ? ' low' : ''}" data-t="${grp.tier}">${label}</span>
         ${grp.sub ? `<span class="gr-sub">${esc(grp.sub)}</span>` : ''}
         <span class="gr-grp-c">${started}/${grp.problems.length}</span></div>
@@ -1739,6 +1752,14 @@ on('#sync', 'click', async () => { await fetch('/api/sync', { method: 'POST' });
 document.querySelectorAll('.view-tab').forEach((b) =>
   b.addEventListener('click', () => switchView(b.dataset.view)));
 on('#grid-view', 'click', (e) => {
+  const doc = e.target.closest('.gr-doc');
+  if (doc) return void openDoc(doc.dataset.kind, doc.dataset.tag);
+  const jump = e.target.closest('[data-jump]');
+  if (jump) {
+    const el = document.getElementById(`gr-tier-${jump.dataset.jump}`);
+    if (el) el.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
+    return;
+  }
   const chip = e.target.closest('.gr-chip');
   if (chip) cycleL(+chip.dataset.id);
 });
