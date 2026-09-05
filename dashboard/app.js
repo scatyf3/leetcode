@@ -1514,13 +1514,26 @@ function esc(s) {
 // tier  = how far the题单 is spread (75 / 110 / 135)
 // stage = how well each problem is held (S1 思路 / S2 写得对 / S3 讲得清)
 // a cell counts problems at that stage *or deeper*, so S3 also feeds S1 and S2.
-let PLAN = null;   // dashboard/plan.json  — the curriculum, hand-edited
-let STAGE = {};    // dashboard/progress.json — '<id>' -> 1..3
+let PLAN = null;   // dashboard/plan.json — the curriculum, hand-edited
 let VIEW = 'board';
+
+// 深度不另存: 由每题 meta.json 的 familiarity (L1..L4) 算出来。
+//   L1 已经熟悉 / L2 思路会·细节易写错  -> S2 写得对 (OA 门槛)
+//   L3 思路大概知道·不熟               -> S1 思路清楚
+//   L4 思路都不知道 / 0 未评 / 没建文件夹 -> 还没到 S1
+// S3 是 meta.json 的 explained 布尔位, 且只有 L1/L2 才算 —— 写不对的题不该
+// 因为"讲得出"就混进 S2 那一列, 而 S2 正是判断能不能去做 OA 的那一列。
+const byId = () => new Map(PROBLEMS.map((p) => [p.id, p]));
+function depthOf(rec) {
+  if (!rec) return 0;
+  const L = rec.familiarity || 0;
+  if (L === 3) return 1;
+  if (L === 1 || L === 2) return rec.explained ? 3 : 2;
+  return 0;                       // 0 未评 / L4 思路都不知道
+}
 
 
 const parseDay = (s) => { const a = s.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2]); };
-const stageOf = (id) => STAGE[String(id)] || 0;
 
 // tag every phase past/active/future against today, and pick the live one
 function datePhases() {
@@ -1538,9 +1551,11 @@ function datePhases() {
 }
 
 function planProblems() {
+  const rec = byId();
   const out = [];
   for (const g of PLAN.groups)
-    for (const p of g.problems) out.push({ id: p[0], tier: g.tier });
+    for (const p of g.problems)
+      out.push({ id: p[0], tier: g.tier, rec: rec.get(p[0]), depth: depthOf(rec.get(p[0])) });
   return out;
 }
 
@@ -1551,11 +1566,11 @@ function buildGrid() {
   const { today, live } = datePhases();
   const all = planProblems();
   const size = (t) => all.filter((p) => p.tier === t).length;
-  const reached = (t, s) => all.filter((p) => p.tier === t && stageOf(p.id) >= s).length;
+  const reached = (t, s) => all.filter((p) => p.tier === t && p.depth >= s).length;
 
   $('#sub').textContent = '覆盖 × 深度 · NeetCode 150';
   $('#count').textContent =
-    `${all.filter((p) => stageOf(p.id) > 0).length}/${all.length} 已开始 · 阶段 ${live.n}`;
+    `${all.filter((p) => p.rec).length}/${all.length} 有文件夹 · 阶段 ${live.n}`;
 
   // --- the grid itself: tiers down, stages across ---
   let m = '<div class="gr-matrix"><div></div>';
@@ -1600,18 +1615,35 @@ function buildGrid() {
   t += '</div>';
 
   // --- the problems, by pattern group; click a chip to cycle its stage ---
+  const recs = byId();
+  const famTip = {};
+  for (const f of (PLAN.familiarity || [])) {
+    const d = depthOf({ familiarity: f.l });
+    famTip[f.l] = `${f.t} ${f.d} → ${d ? 'S' + d : '还没到 S1'}`;
+  }
+  const depths = new Map(all.map((p) => [p.id, p.depth]));
   let g = '';
   for (const grp of PLAN.groups) {
-    const started = grp.problems.filter((p) => stageOf(p[0]) > 0).length;
+    const started = grp.problems.filter((p) => (depths.get(p[0]) || 0) >= 1).length;
     const label = `第 ${grp.tier} 层${grp.low ? ' · 低优先' : ''}`;
     const chips = grp.problems.map((p) => {
-      const s = stageOf(p[0]);
-      return `<button class="gr-chip" data-id="${p[0]}" data-s="${s}"
-        title="${esc(p[1])} — ${s ? 'S' + s : '未开始'}，点击进到下一级">
-        <span class="gr-st">${s || '·'}</span>
-        <span class="gr-id">${p[0]}</span>
-        <span class="gr-nm">${esc(p[1])}</span>
-        <span class="dot ${p[2]}"></span></button>`;
+      const rec = recs.get(p[0]);
+      const L = rec ? (rec.familiarity || 0) : -1;   // -1 = 还没建文件夹
+      const d = depthOf(rec);
+      const badge = L < 0 ? '+' : L === 0 ? '·' : 'L' + L;
+      const tip = L < 0 ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
+        : L === 0 ? '还没评熟练度 — 点击标 L4' : famTip[L];
+      // 「讲」只在 L1/L2 出现: 写不对的题不该因为讲得出就混进 S2 那一列
+      const say = (L === 1 || L === 2)
+        ? `<button class="gr-say${rec.explained ? ' on' : ''}" data-say="${p[0]}"
+             title="英语 60 秒讲得清 = S3${rec.explained ? '（已标，点掉）' : ''}">讲</button>`
+        : '';
+      return `<div class="gr-chipwrap">
+        <button class="gr-chip" data-id="${p[0]}" data-d="${d}" title="${esc(p[1])} — ${esc(tip)}">
+          <span class="gr-st s${d}">${badge}</span>
+          <span class="gr-id">${p[0]}</span>
+          <span class="gr-nm">${esc(p[1])}</span>
+          <span class="dot ${p[2]}"></span></button>${say}</div>`;
     }).join('');
     g += `<div class="gr-grp${grp.low ? ' low' : ''}">
       <div class="gr-grp-h"><h3>${esc(grp.name)}</h3>
@@ -1626,10 +1658,10 @@ function buildGrid() {
       <div class="gr-sec-h"><h2>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进 S1、S2 三列。层之间<b>不</b>累计：每题只属于一层。琥珀框 = 当前阶段该站的位置。</p></div>
       ${m}
       <div class="gr-legend">
-        <span class="gr-key"><i class="s0"></i>未开始</span>
-        <span class="gr-key"><i class="s1"></i>S1 思路清楚</span>
-        <span class="gr-key"><i class="s2"></i>S2 能写对</span>
-        <span class="gr-key"><i class="s3"></i>S3 英语讲得清</span>
+        <span class="gr-key"><i class="s0"></i>L4 / 未评 · 还没到 S1</span>
+        <span class="gr-key"><i class="s1"></i>L3 → S1 思路清楚</span>
+        <span class="gr-key"><i class="s2"></i>L1–L2 → S2 能写对</span>
+        <span class="gr-key"><i class="s3"></i>＋「讲」→ S3</span>
       </div>
       <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
       否则会攒下一整个月「做得出但讲不清」的题。</p>
@@ -1639,20 +1671,39 @@ function buildGrid() {
       ${t}
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2>题目</h2><p>点一下循环切换 <span class="mono">— → S1 → S2 → S3</span>，写回 dashboard/progress.json。<b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
+      <div class="gr-sec-h"><h2>题目</h2><p>点方块循环熟练度 <span class="mono">· → L4 → L3 → L2 → L1</span>，写回该题 meta.json；
+      「讲」是独立的 S3 开关，只在 L1/L2 出现。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
+      <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
       ${g}
     </section>`;
 }
 
-async function bumpStage(id) {
-  const next = (stageOf(id) + 1) % 4;
-  const r = await api('/api/progress', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, stage: next }),
-  });
-  STAGE = r.stages || STAGE;
-  buildGrid();
+// 顺着"越来越熟"的方向走: 未评 -> L4 -> L3 -> L2 -> L1 -> 未评
+const L_NEXT = { 0: 4, 4: 3, 3: 2, 2: 1, 1: 0 };
+
+const putMeta = (id, body) => fetch(`/api/problems/${id}/meta`, {
+  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+});
+
+async function cycleL(id) {
+  const rec = byId().get(id);
+  if (!rec) {
+    // 还没建文件夹 —— 点一下就是"开始这道题": 抓题面 + 建目录, 走和 📋 TODO 同一条路
+    await fetch('/api/problems', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: String(id) }),
+    });
+  } else {
+    await putMeta(id, { familiarity: L_NEXT[rec.familiarity || 0] });
+  }
+  await reload();
+}
+
+async function toggleSay(id) {
+  const rec = byId().get(id);
+  if (!rec) return;
+  await putMeta(id, { explained: !rec.explained });
+  await reload();
 }
 
 async function switchView(v) {
@@ -1665,11 +1716,7 @@ async function switchView(v) {
   $('#fam-filter').classList.toggle('hidden', v !== 'board');
   try { localStorage.setItem('lc-view', v); } catch (e) { /* private mode */ }
   if (v === 'grid') {
-    if (!PLAN) {
-      const [plan, prog] = await Promise.all([api('/api/plan'), api('/api/progress')]);
-      PLAN = plan;
-      STAGE = prog.stages || {};
-    }
+    if (!PLAN) PLAN = await api('/api/plan');
     buildGrid();
   } else {
     buildPanel();
@@ -1689,8 +1736,10 @@ on('#sync', 'click', async () => { await fetch('/api/sync', { method: 'POST' });
 document.querySelectorAll('.view-tab').forEach((b) =>
   b.addEventListener('click', () => switchView(b.dataset.view)));
 on('#grid-view', 'click', (e) => {
+  const say = e.target.closest('.gr-say');
+  if (say) return void toggleSay(+say.dataset.say);
   const chip = e.target.closest('.gr-chip');
-  if (chip) bumpStage(+chip.dataset.id);
+  if (chip) cycleL(+chip.dataset.id);
 });
 on('#close', 'click', closeDetail);
 on('#save-note', 'click', () => { saveNote(); exitEdit(); });
