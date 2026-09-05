@@ -191,6 +191,9 @@ python dashboard/fsrs.py --selftest
 - 底下按 pattern group 列题。方块里写的是**原始的 L**，方块的**颜色**是算出来的 S —— 两个都看得见。
   点方块循环 `— → L4 → L3 → L2 → L1 → L0`，写回该题 `meta.json`；和详情页那个下拉是同一个字段。
 - 显示 `+` 的是**还没建文件夹**的题，点一下就抓题面建目录（和 📋 TODO 同一条路）。
+- **组标题可点** → 打开这个 pattern 的通用 trick 文档（`paradigms/*.md` 或 `structures/*.md`），
+  和矩阵视图点组标签是同一个 overlay。哪些 pattern 还没写 trick，扫一眼标题就知道。
+- **层标签可点** → 跳到下面「题目」区这一层的第一组。
 - **灰掉的组**（Math & Geometry / Bit Manipulation）在第三层里低优先：迁移性最低、OA 命中率最低，时间不够先砍它们。
   第三层内部的取舍顺序是 2-D DP > Advanced Graphs > Greedy > 这两组，从后往前砍。
 
@@ -229,6 +232,8 @@ L4 思路都不知道          ─┐
 - `tiers` / `groups[].tier` — 哪些 group 算第几层
 - `phases` — 时间线四段的日期、周投入、目标、说明
 - `targets` — 哪个阶段该点亮哪个格子（`{phase, tier, stage}`）
+- `groups[].tag` — 这一组挂到哪份 trick 文档（`{kind: "paradigms"|"structures", name}`），
+  组标题就是链到它。指向一份还不存在的文档也没关系 —— 点开是空的，写完保存就建出来了。
 
 ## API（供扩展）
 

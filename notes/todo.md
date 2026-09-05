@@ -7,3 +7,4 @@ web 看板右上角 📋 TODO 可以按题号或题名快速加,勾掉 = 做完�
 
 - [ ] 105 Construct Binary Tree from Preorder and Inorder Traversal
 - [ ] 1094 Car Pooling
+- [ ] 1 Two Sum

@@ -1,6 +1,6 @@
 {
   "source": "NeetCode 150 · 按 pattern group 分层，不按列表顺序",
-  "note": "计划的真相源。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4) 算出。",
+  "note": "计划的真相源。每组的 tag 指向 paradigms/ 或 structures/ 里那份通用 trick 文档，点组标题打开。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4) 算出。",
 
   "familiarity": [
     { "l": 0, "t": "L0", "d": "英语讲得清" },
@@ -49,7 +49,7 @@
   ],
 
   "groups": [
-    { "name": "Arrays & Hashing", "tier": 1, "problems": [
+    { "name": "Arrays & Hashing", "tier": 1, "tag": { "kind": "paradigms", "name": "hash" }, "problems": [
       [217, "Contains Duplicate", "easy"],
       [242, "Valid Anagram", "easy"],
       [1, "Two Sum", "easy"],
@@ -60,14 +60,14 @@
       [36, "Valid Sudoku", "medium"],
       [128, "Longest Consecutive Sequence", "medium"]
     ]},
-    { "name": "Two Pointers", "tier": 1, "problems": [
+    { "name": "Two Pointers", "tier": 1, "tag": { "kind": "paradigms", "name": "two-pointer" }, "problems": [
       [125, "Valid Palindrome", "easy"],
       [167, "Two Sum II", "medium"],
       [15, "3Sum", "medium"],
       [11, "Container With Most Water", "medium"],
       [42, "Trapping Rain Water", "hard"]
     ]},
-    { "name": "Sliding Window", "tier": 1, "problems": [
+    { "name": "Sliding Window", "tier": 1, "tag": { "kind": "paradigms", "name": "sliding-window" }, "problems": [
       [121, "Best Time to Buy and Sell Stock", "easy"],
       [3, "Longest Substring Without Repeating", "medium"],
       [424, "Longest Repeating Char Replacement", "medium"],
@@ -75,7 +75,7 @@
       [76, "Minimum Window Substring", "hard"],
       [239, "Sliding Window Maximum", "hard"]
     ]},
-    { "name": "Stack", "tier": 1, "problems": [
+    { "name": "Stack", "tier": 1, "tag": { "kind": "paradigms", "name": "stack" }, "problems": [
       [20, "Valid Parentheses", "easy"],
       [155, "Min Stack", "medium"],
       [150, "Evaluate Reverse Polish Notation", "medium"],
@@ -84,7 +84,7 @@
       [853, "Car Fleet", "medium"],
       [84, "Largest Rectangle in Histogram", "hard"]
     ]},
-    { "name": "Binary Search", "tier": 1, "problems": [
+    { "name": "Binary Search", "tier": 1, "tag": { "kind": "paradigms", "name": "binary-search" }, "problems": [
       [704, "Binary Search", "easy"],
       [74, "Search a 2D Matrix", "medium"],
       [875, "Koko Eating Bananas", "medium"],
@@ -93,7 +93,7 @@
       [981, "Time Based Key-Value Store", "medium"],
       [4, "Median of Two Sorted Arrays", "hard"]
     ]},
-    { "name": "Linked List", "tier": 1, "problems": [
+    { "name": "Linked List", "tier": 1, "tag": { "kind": "structures", "name": "linked-list" }, "problems": [
       [206, "Reverse Linked List", "easy"],
       [21, "Merge Two Sorted Lists", "easy"],
       [141, "Linked List Cycle", "easy"],
@@ -106,7 +106,7 @@
       [23, "Merge K Sorted Lists", "hard"],
       [25, "Reverse Nodes in k-Group", "hard"]
     ]},
-    { "name": "Trees", "tier": 1, "problems": [
+    { "name": "Trees", "tier": 1, "tag": { "kind": "structures", "name": "tree" }, "problems": [
       [226, "Invert Binary Tree", "easy"],
       [104, "Maximum Depth of Binary Tree", "easy"],
       [543, "Diameter of Binary Tree", "easy"],
@@ -123,7 +123,7 @@
       [124, "Binary Tree Maximum Path Sum", "hard"],
       [297, "Serialize and Deserialize Binary Tree", "hard"]
     ]},
-    { "name": "Heap / Priority Queue", "tier": 1, "problems": [
+    { "name": "Heap / Priority Queue", "tier": 1, "tag": { "kind": "structures", "name": "heap" }, "problems": [
       [703, "Kth Largest Element in a Stream", "easy"],
       [1046, "Last Stone Weight", "easy"],
       [973, "K Closest Points to Origin", "medium"],
@@ -132,24 +132,24 @@
       [355, "Design Twitter", "medium"],
       [295, "Find Median from Data Stream", "hard"]
     ]},
-    { "name": "网格 BFS / DFS", "tier": 1, "sub": "从 Graphs 里先摘出来的一支", "problems": [
+    { "name": "网格 BFS / DFS", "tier": 1, "sub": "从 Graphs 里先摘出来的一支", "tag": { "kind": "structures", "name": "grid" }, "problems": [
       [200, "Number of Islands", "medium"],
       [695, "Max Area of Island", "medium"],
       [994, "Rotting Oranges", "medium"],
       [130, "Surrounded Regions", "medium"],
       [417, "Pacific Atlantic Water Flow", "medium"]
     ]},
-    { "name": "1-D DP · 前置四题", "tier": 1, "sub": "从阶段三提前上来 — OA 高频，成本曲线拉平", "problems": [
+    { "name": "1-D DP · 前置四题", "tier": 1, "sub": "从阶段三提前上来 — OA 高频，成本曲线拉平", "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
       [70, "Climbing Stairs", "easy"],
       [198, "House Robber", "medium"],
       [213, "House Robber II", "medium"],
       [322, "Coin Change", "medium"]
     ]},
-    { "name": "Tries · 模板题", "tier": 1, "problems": [
+    { "name": "Tries · 模板题", "tier": 1, "tag": { "kind": "structures", "name": "trie" }, "problems": [
       [208, "Implement Trie", "medium"]
     ]},
 
-    { "name": "Backtracking", "tier": 2, "problems": [
+    { "name": "Backtracking", "tier": 2, "tag": { "kind": "paradigms", "name": "backtracking" }, "problems": [
       [78, "Subsets", "medium"],
       [39, "Combination Sum", "medium"],
       [46, "Permutations", "medium"],
@@ -160,7 +160,7 @@
       [17, "Letter Combinations of a Phone Number", "medium"],
       [51, "N-Queens", "hard"]
     ]},
-    { "name": "1-D DP · 其余", "tier": 2, "problems": [
+    { "name": "1-D DP · 其余", "tier": 2, "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
       [746, "Min Cost Climbing Stairs", "easy"],
       [5, "Longest Palindromic Substring", "medium"],
       [647, "Palindromic Substrings", "medium"],
@@ -170,7 +170,7 @@
       [300, "Longest Increasing Subsequence", "medium"],
       [416, "Partition Equal Subset Sum", "medium"]
     ]},
-    { "name": "Intervals", "tier": 2, "problems": [
+    { "name": "Intervals", "tier": 2, "tag": { "kind": "paradigms", "name": "intervals" }, "problems": [
       [57, "Insert Interval", "medium"],
       [56, "Merge Intervals", "medium"],
       [435, "Non-overlapping Intervals", "medium"],
@@ -178,7 +178,7 @@
       [253, "Meeting Rooms II", "medium"],
       [1851, "Minimum Interval to Include Each Query", "hard"]
     ]},
-    { "name": "Graphs · 其余", "tier": 2, "problems": [
+    { "name": "Graphs · 其余", "tier": 2, "tag": { "kind": "structures", "name": "graph" }, "problems": [
       [133, "Clone Graph", "medium"],
       [286, "Walls and Gates", "medium"],
       [207, "Course Schedule", "medium"],
@@ -188,12 +188,12 @@
       [684, "Redundant Connection", "medium"],
       [127, "Word Ladder", "hard"]
     ]},
-    { "name": "Tries · 其余", "tier": 2, "sub": "212 是 Trie × Backtracking，必须排在回溯之后", "problems": [
+    { "name": "Tries · 其余", "tier": 2, "sub": "212 是 Trie × Backtracking，必须排在回溯之后", "tag": { "kind": "structures", "name": "trie" }, "problems": [
       [211, "Design Add and Search Words", "medium"],
       [212, "Word Search II", "hard"]
     ]},
 
-    { "name": "2-D DP", "tier": 3, "problems": [
+    { "name": "2-D DP", "tier": 3, "tag": { "kind": "paradigms", "name": "2d-dp" }, "problems": [
       [62, "Unique Paths", "medium"],
       [1143, "Longest Common Subsequence", "medium"],
       [309, "Buy and Sell Stock With Cooldown", "medium"],
@@ -206,7 +206,7 @@
       [312, "Burst Balloons", "hard"],
       [10, "Regular Expression Matching", "hard"]
     ]},
-    { "name": "Advanced Graphs", "tier": 3, "problems": [
+    { "name": "Advanced Graphs", "tier": 3, "tag": { "kind": "structures", "name": "graph" }, "problems": [
       [1584, "Min Cost to Connect All Points", "medium"],
       [743, "Network Delay Time", "medium"],
       [787, "Cheapest Flights Within K Stops", "medium"],
@@ -214,7 +214,7 @@
       [778, "Swim in Rising Water", "hard"],
       [269, "Alien Dictionary", "hard"]
     ]},
-    { "name": "Greedy", "tier": 3, "sub": "每题一个 trick，迁移性最低 — 排最后，砍起来最不心疼", "problems": [
+    { "name": "Greedy", "tier": 3, "sub": "每题一个 trick，迁移性最低 — 排最后，砍起来最不心疼", "tag": { "kind": "paradigms", "name": "greedy" }, "problems": [
       [53, "Maximum Subarray", "medium"],
       [55, "Jump Game", "medium"],
       [45, "Jump Game II", "medium"],
@@ -225,7 +225,7 @@
       [678, "Valid Parenthesis String", "medium"]
     ]},
 
-    { "name": "Math & Geometry", "tier": 3, "low": true, "sub": "低频，最先放弃的一组", "problems": [
+    { "name": "Math & Geometry", "tier": 3, "low": true, "sub": "低频，最先放弃的一组", "tag": { "kind": "structures", "name": "matrix" }, "problems": [
       [48, "Rotate Image", "medium"],
       [54, "Spiral Matrix", "medium"],
       [73, "Set Matrix Zeroes", "medium"],
@@ -235,7 +235,7 @@
       [43, "Multiply Strings", "medium"],
       [2013, "Detect Squares", "medium"]
     ]},
-    { "name": "Bit Manipulation", "tier": 3, "low": true, "sub": "知道就秒、不知道就卡，学不到可迁移的东西", "problems": [
+    { "name": "Bit Manipulation", "tier": 3, "low": true, "sub": "知道就秒、不知道就卡，学不到可迁移的东西", "tag": { "kind": "paradigms", "name": "bit-manipulation" }, "problems": [
       [136, "Single Number", "easy"],
       [191, "Number of 1 Bits", "easy"],
       [338, "Counting Bits", "easy"],
