@@ -390,6 +390,48 @@ main{padding:18px 20px;overflow:auto}
   color:var(--dim);border:1px solid var(--line);border-radius:6px;padding:5px 9px 5px 5px}
 .gr-key i{width:13px;height:13px;border-radius:4px;display:block}
 
+/* --- 配速: 计划线 vs 实际线 --- */
+.pc-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.pc-tabs{flex:none}
+.pc-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.pc-t{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pc-t b{font:600 20px/1.15 Consolas,monospace;font-variant-numeric:tabular-nums}
+.pc-t span{font-size:11.5px;color:var(--dim)}
+.pc-t em{font:11px/1.4 Consolas,monospace;color:var(--dim);font-style:normal;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc-t.ahead{border-color:color-mix(in srgb,var(--accent2) 45%,var(--line))}
+.pc-t.ahead b{color:var(--accent2)}
+.pc-t.behind{border-color:color-mix(in srgb,var(--hard) 45%,var(--line))}
+.pc-t.behind b{color:var(--hard)}
+
+.pc-svg{display:block;width:100%;height:auto;background:var(--panel);
+  border:1px solid var(--line);border-radius:12px}
+.pc-grid{stroke:var(--line);stroke-width:1}
+.pc-ylbl{fill:var(--dim);font:10px Consolas,monospace;text-anchor:end}
+.pc-xlbl{fill:var(--dim);font:10px Consolas,monospace}
+.pc-fill{fill:color-mix(in srgb,var(--accent) 12%,transparent)}
+.pc-plan{stroke:var(--dim);stroke-width:1.5;stroke-dasharray:5 4}
+.pc-act{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.pc-base{stroke:var(--dim);stroke-width:1;stroke-dasharray:2 4;opacity:.55}
+.pc-blbl{fill:var(--dim);font:9.5px Consolas,monospace}
+.pc-today{stroke:var(--line);stroke-width:1;stroke-dasharray:2 3}
+.pc-gap{stroke-width:3.5;stroke-linecap:round}
+.pc-gap.ahead{stroke:var(--accent2)}
+.pc-gap.behind{stroke:var(--hard)}
+.pc-dot.ahead{fill:var(--accent2)}
+.pc-dot.behind{fill:var(--hard)}
+.pc-goal{fill:var(--medium)}
+.pc-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
+.pc-key{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--dim)}
+.pc-key i{width:18px;height:0;display:block;border-top:2px solid var(--dim)}
+.pc-key i.k-plan{border-top-style:dashed}
+.pc-key i.k-act{border-top-color:var(--accent)}
+.pc-key i.k-gap{border-top-width:3.5px}
+.pc-key i.k-gap.ahead{border-top-color:var(--accent2)}
+.pc-key i.k-gap.behind{border-top-color:var(--hard)}
+@media (max-width:900px){.pc-tiles{grid-template-columns:repeat(2,1fr)}}
+
 /* --- timeline: four numbered phases, past / active / future --- */
 .gr-tl{display:grid;grid-template-columns:repeat(4,1fr);
   border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -667,6 +709,13 @@ main{padding:18px 20px;overflow:auto}
 .rv-q-hint{font-size:11.5px;color:var(--dim);opacity:.75}
 .rv-mode{flex:none}
 .rv-mode .gb-btn{padding:3px 8px;font-size:11.5px}
+/* 牌组切换比模式切换重一档: 那个只换顺序, 这个换的是**内容** */
+.rv-deck{flex:none}
+.rv-deck .gb-btn{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;
+  font-size:12px;font-weight:600}
+.rv-deck-n{font-style:normal;font-size:10.5px;line-height:1;padding:2px 5px;border-radius:8px;
+  background:var(--panel2);color:var(--dim)}
+.rv-deck .gb-btn.on .rv-deck-n{background:rgba(255,255,255,.22);color:#fff}
 .rv-verdict{font-size:12px;margin-left:8px}
 .rv-verdict.ok{color:var(--fam1)}
 .rv-verdict.no{color:var(--fam4)}

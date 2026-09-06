@@ -30,6 +30,7 @@ from urllib.parse import urlparse, unquote
 
 import fsrs              # FSRS-6 调度算法(见 dashboard/fsrs.py)
 import scaffold          # 题号/题名 -> 建题目文件夹(见 dashboard/scaffold.py)
+import syntax            # 第二个牌组: 语法卡(见 dashboard/syntax.py)
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -464,8 +465,9 @@ def append_review_log(entry: dict):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
-def _label(pid: int, titles: dict) -> dict:
-    return {"id": pid, "title": titles.get(pid, "?")}
+def _label(pid, titles: dict) -> dict:
+    # 语法卡的 id 本身就是 "主题/标题", 已经自带人话了, 查不到就用它自己
+    return {"id": pid, "title": titles.get(pid) or (pid if isinstance(pid, str) else "?")}
 
 
 def write_session(body: dict) -> dict:
@@ -478,25 +480,27 @@ def write_session(body: dict) -> dict:
     with db() as con:
         titles = {r["id"]: r["title"] for r in con.execute("SELECT id, title FROM problems")}
 
-    def ids(key, cap=500):
-        v = body.get(key) or []
-        out = []
-        for x in v[:cap]:
-            try:
-                out.append(int(x))
-            except (TypeError, ValueError):
-                pass
-        return out
+    # 题目牌组的 id 是整数, 语法卡的是 "主题/标题" 字符串。别无脑 int() ——
+    # 那样整个语法队列会被静默丢光, 快照看着像"队列是空的"。
+    deck = body.get("deck") if body.get("deck") in ("problems", "syntax") else "problems"
 
-    cur = body.get("current")
-    try:
-        cur = int(cur)
-    except (TypeError, ValueError):
-        cur = None
+    def one_id(x):
+        if deck == "syntax":
+            return x if isinstance(x, str) and x else None
+        try:
+            return int(x)
+        except (TypeError, ValueError):
+            return None
+
+    def ids(key, cap=500):
+        return [i for i in (one_id(x) for x in (body.get(key) or [])[:cap]) if i is not None]
+
+    cur = one_id(body.get("current"))
 
     snap = {
         "ts": time.strftime("%Y-%m-%d %H:%M:%S"),
         "open": bool(body.get("open")),
+        "deck": deck,
         "mode": body.get("mode") if body.get("mode") in ("fsrs", "order", "random") else "?",
         "done": int(body.get("done") or 0),
         "total": int(body.get("total") or 0),
@@ -569,6 +573,29 @@ def reset_card(pid: int) -> bool:
             write_meta(r["folder"], meta)
             sync()
         return True
+
+
+# ------------------------------------------------------- 语法卡组(第二牌组) ---
+# 内容和调度都在 syntax.py, 这里只负责"加锁"和"翻译成 HTTP" —— 和题目牌组共用
+# 同一把 _REVIEW_LOCK, 因为两边都会往 reviews.jsonl 追行。
+
+def syntax_list() -> dict:
+    return syntax.list_cards(today_str())
+
+
+def syntax_review(cid: str, rating: int):
+    with _REVIEW_LOCK:
+        return syntax.review_card(cid, rating, today_str())
+
+
+def syntax_reset(cid: str) -> bool:
+    with _REVIEW_LOCK:
+        return syntax.reset_card(cid)
+
+
+def syntax_save_back(cid: str, content: str) -> bool:
+    with _REVIEW_LOCK:
+        return syntax.save_back(cid, content)
 
 
 def read_jsonl(path: Path) -> list:
@@ -660,6 +687,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, read_lists())
         if path == "/api/review/session":
             return self._send(200, read_session())
+        if path == "/api/syntax":
+            return self._send(200, syntax_list())
         if path == "/api/reviews":
             return self._send(200, {"reviews": read_reviews()})
         if path == "/api/edits":
@@ -702,6 +731,22 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"ok": False, "error": "rating 必须是 1..4"})
             res = review_card(pid, rating)
             return self._send(200, res) if res else self._send(404, {"ok": False, "error": "not found"})
+        if path == "/api/syntax/review":
+            # 语法卡的 id 是 "主题/标题"(带中文和空格), 塞不进 URL 路径, 所以走 body
+            body = self._body_json()
+            cid = str(body.get("id") or "")
+            if not cid:
+                return self._send(400, {"ok": False, "error": "缺 id"})
+            if body.get("op") == "reset":
+                return self._send(200, {"ok": syntax_reset(cid)})
+            try:
+                rating = int(body.get("rating", 0))
+            except (TypeError, ValueError):
+                rating = 0
+            if rating not in (1, 2, 3, 4):
+                return self._send(400, {"ok": False, "error": "rating 必须是 1..4"})
+            res = syntax_review(cid, rating)
+            return self._send(200, res) if res else self._send(404, {"ok": False, "error": "没这张卡"})
         if path == "/api/problems":
             # 给题号或题名, 拉题面 + 建空 sol.py/note.md, 然后立刻进索引表
             try:
@@ -717,6 +762,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         path = urlparse(self.path).path
+        if path == "/api/syntax/card":
+            body = self._body_json()
+            ok = syntax_save_back(str(body.get("id") or ""), body.get("content", ""))
+            return self._send(200 if ok else 400, {"ok": ok})
         m = re.match(r"^/api/problems/(\d+)/note$", path)
         if m:
             ok = save_note(int(m.group(1)), self._body_json().get("content", ""))

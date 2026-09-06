@@ -1,7 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
   "techniques": [],
   "difficulty": "easy",
-  "status": "todo"
+  "status": "solved",
+  "familiarity": 2
 }

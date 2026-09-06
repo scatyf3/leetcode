@@ -12,6 +12,7 @@ const on = (sel, ev, fn, opt) => {
 };
 
 let PROBLEMS = [];
+let SYNTAX = [];           // 语法牌组的全部卡片(/api/syntax), 见 dashboard/syntax.py
 let CURRENT = null; // detail object
 
 // ---- familiarity (熟练度): 0 最熟(英语讲得清) → 4 完全不会; null = 还没评 ----
@@ -782,30 +783,61 @@ function savedMode() {
   return 'fsrs';
 }
 
-const queuePool = () => [
-  ...PROBLEMS.filter(isDue),
-  ...PROBLEMS.filter((p) => rvEligible(p) && !isCard(p)),
-];
+// ---- 两个牌组 ---------------------------------------------------------------
+// problems 题目(真相在各题 meta.json) / syntax 语法卡(真相在 syntax/*.md)。
+// 两边**只共用调度器和历史**, 排队规则各写各的 —— 语法卡没有 status 也没有 familiarity,
+// 硬套题目那套会得到一个"全 undefined 参与排序"的随机顺序。
+const DECKS = ['problems', 'syntax'];
+const DECK_LABEL = { problems: '题目', syntax: '语法' };
+const deckRows = (deck) => (deck === 'syntax' ? SYNTAX : PROBLEMS);
 
-function orderQueue(pool, mode = 'fsrs') {
+function savedDeck() {
+  try {
+    const d = localStorage.getItem('rv-deck');
+    if (DECKS.includes(d)) return d;
+  } catch { /* 隐私模式 */ }
+  return 'problems';
+}
+
+// 队列范围: 到期的卡 + 还没进过复习的。题目那边"还没进过"要先够格(status 是 solved/review,
+// 没想出来过的思路谈不上复习); 语法卡只要写在 syntax/*.md 里就算数, 没有这一层。
+function queuePool(deck = 'problems') {
+  const rows = deckRows(deck);
+  const fresh = deck === 'syntax' ? rows : rows.filter(rvEligible);
+  return [...rows.filter(isDue), ...fresh.filter((p) => !isCard(p))];
+}
+
+function orderQueue(pool, mode = 'fsrs', deck = 'problems') {
+  // 组内的稳定兜底顺序。题目按题号; 语法卡按 ord(= /api/syntax 的下标, 也就是
+  // 文件名 -> 文件内的书写顺序)。**别拿 a.id - b.id 排语法卡** —— id 是字符串,
+  // 相减得 NaN, 比较器全返回 NaN 等于没排序, 表现是顺序每次都不一样。
+  const tie = deck === 'syntax'
+    ? (a, b) => (a.ord || 0) - (b.ord || 0)
+    : (a, b) => a.id - b.id;
   if (mode === 'random') return shuffle(pool.map((p) => p.id));
-  if (mode === 'order') return [...pool].sort((a, b) => a.id - b.id).map((p) => p.id);
+  if (mode === 'order') return [...pool].sort(tie).map((p) => p.id);
   const due = pool.filter(isDue).sort((a, b) =>
     (a.status === 'review' ? 0 : 1) - (b.status === 'review' ? 0 : 1) ||
-    a.due.localeCompare(b.due) || a.id - b.id);
-  // 还没成为卡片的题, 按熟练度从生到熟排 —— 只是**读** familiarity 定顺序, 不写它
-  const fresh = pool.filter((p) => !isCard(p)).sort((a, b) =>
-    FAM_ORDER[famKey(famOf(a))] - FAM_ORDER[famKey(famOf(b))] || a.id - b.id);
+    a.due.localeCompare(b.due) || tie(a, b));
+  // 还没成为卡片的题, 按熟练度从生到熟排 —— 只是**读** familiarity 定顺序, 不写它。
+  // 语法卡没有这个字段, 就按书写顺序来(同一个文件里相关的卡挨着问, 正好对照)。
+  const fresh = pool.filter((p) => !isCard(p)).sort(deck === 'syntax' ? tie
+    : (a, b) => FAM_ORDER[famKey(famOf(a))] - FAM_ORDER[famKey(famOf(b))] || tie(a, b));
   return [...due, ...fresh].map((p) => p.id);
 }
 
-// 三种模式的**题目范围完全一样**, 所以徽章和 📈 里的数字跟模式无关
-const buildQueue = (mode = 'fsrs') => orderQueue(queuePool(), mode);
+// 三种模式的**范围完全一样**, 所以徽章和 📈 里的数字跟模式无关
+const buildQueue = (mode = 'fsrs', deck = 'problems') => orderQueue(queuePool(deck), mode, deck);
+const deckDue = (deck) => queuePool(deck).length;
 
 function updateReviewBadge() {
-  const n = buildQueue().length;
-  $('#review-n').textContent = n;
-  $('#review-n').classList.toggle('hidden', !n);
+  const n = { problems: deckDue('problems'), syntax: deckDue('syntax') };
+  const total = n.problems + n.syntax;
+  $('#review-n').textContent = total;
+  $('#review-n').classList.toggle('hidden', !total);
+  const btn = $('#open-review');
+  if (btn) btn.title = `题目 ${n.problems} 道 · 语法 ${n.syntax} 张`;
+  return n;
 }
 
 function fmtInterval(days) {
@@ -869,27 +901,46 @@ const RV = Vue.createApp({
       failMsg: '',                   // 拉下一题失败时的收尾屏文案(替掉"复习完了")
       deferred: [],                  // 这一轮按过「押到队尾」的题, 按发生顺序, 可重复
       mode: savedMode(),
+      deck: savedDeck(),             // 'problems' | 'syntax'
+      counts: { problems: 0, syntax: 0 },   // 标在牌组按钮上的到期数
       readOnly: isReadOnly(),
-      MODES: [{ k: 'fsrs', label: '到期优先' }, { k: 'order', label: '题号' }, { k: 'random', label: '随机' }],
+      MODES: [{ k: 'fsrs', label: '到期优先' }, { k: 'order', label: '顺序' }, { k: 'random', label: '随机' }],
+      DECKS: [{ k: 'problems', label: '题目' }, { k: 'syntax', label: '语法' }],
       KEYS: 'ABCD',
       RATE: { 1: ['忘了', '想不起来'], 2: ['勉强', '想了很久'], 3: ['想起来了', '正常'], 4: ['很熟', '秒答'] },
     };
   },
 
   computed: {
+    isSyntax() { return this.deck === 'syntax'; },
+    // 左上角那个胶囊: 题目是题号, 语法卡是主题(= 文件名), 都是"这是哪一类"的定位信息
+    pillText() { return this.d ? (this.isSyntax ? this.d.topic : this.d.id) : ''; },
     metaLine() {
       if (!this.d) return '';
       const reps = this.d.fsrs && this.d.fsrs.reps ? `第 ${this.d.fsrs.reps + 1} 次复习` : '第一次进复习';
-      return `${this.d.difficulty || '?'} · ${reps}`;
+      return `${this.isSyntax ? this.d.file : (this.d.difficulty || '?')} · ${reps}`;
     },
-    // 只渲染题面。绝不碰 d.note / d.solutions —— 剧透了这个功能就没意义了
+    // v-html: 两句提示里都有加粗。内容是写死的常量, 没有外部输入
+    askText() {
+      return this.isSyntax
+        ? '先<b>在心里把答案说出来</b>, 再揭晓 —— 说不出口就是不会, 别停在"感觉知道"。'
+        : '先在心里说清三件事 —— <b>用什么结构 · 什么范式 · 触发条件是什么</b>。不写代码。';
+    },
+    // 只渲染题面 / 卡片正面。绝不碰 d.note / d.solutions / d.back —— 剧透了这个功能就没意义了
     descHtml() {
-      return (this.d && this.d.description)
+      if (!this.d) return '';
+      if (this.isSyntax) {
+        // 正面可以是空的: 那种卡的问题**就是标题**(「想判断字符是字母或数字, 用哪个方法」),
+        // 标题已经在上面大字显示了, 这里不用再补一句废话
+        return this.d.front ? md(this.d.front) : '';
+      }
+      return this.d.description
         || '<p class="hint">这题没有抓到题面(problem.html 是空的)。只能靠标题回忆 —— 或者跑 dashboard/fetch_desc.py 补抓。</p>';
     },
     // 拉详情的空档不能显示收尾屏 —— 会闪一下"今天没有到期的题"
     showEmpty() { return !this.d && !this.loading; },
-    hasQuiz() { return !!(this.quiz.idea || this.quiz.cx); },
+    // 选择题只有题目牌组有 —— 它测的是"该用哪个模板"的辨别力, 语法卡没有这个维度
+    hasQuiz() { return !this.isSyntax && !!(this.quiz.idea || this.quiz.cx); },
     quizBlocks() {
       const b = [{ key: 'idea', label: '思路是哪个？', state: this.quiz.idea }];
       if (this.quiz.cx) b.push({ key: 'cx', label: '时间 / 空间复杂度？', state: this.quiz.cx });
@@ -917,6 +968,11 @@ const RV = Vue.createApp({
       return [cx.time, cx.space].filter(Boolean).join('  /  ');
     },
     ideaHtml() {
+      if (this.isSyntax) {
+        return this.d.back
+          ? md(this.d.back)
+          : '<span class="rv-none">这张卡还没写背面 —— 点右边「改一下」补上</span>';
+      }
       return this.d.answer
         ? md(this.d.answer)
         : '<span class="rv-none">还没写答案卡 —— 点右边「改一下」把刚才想的那套写进去</span>';
@@ -929,9 +985,18 @@ const RV = Vue.createApp({
     preview() { return (this.d && this.d.fsrs_preview) || {}; },
     emptyMsg() {
       if (this.failMsg) return this.failMsg;
-      return this.done
-        ? `这一轮复习完了 —— 共 ${this.done} 道 🎉<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>`
-        : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>';
+      const unit = this.isSyntax ? '张' : '道';
+      const other = this.isSyntax ? 'problems' : 'syntax';
+      const rest = this.counts[other]
+        ? `<br><span class="hint">另一组「${DECK_LABEL[other]}」还有 ${this.counts[other]} ${other === 'syntax' ? '张' : '道'}到期 —— 点上面切过去</span>`
+        : '';
+      if (this.done) {
+        return `这一轮复习完了 —— 共 ${this.done} ${unit} 🎉`
+          + `<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>${rest}`;
+      }
+      return (this.isSyntax
+        ? '今天没有到期的语法卡 🎉<br><span class="hint">卡片写在 syntax/*.md 里, 一个 ## 一张 —— 加一张就会进队列</span>'
+        : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>') + rest;
     },
   },
 
@@ -946,19 +1011,29 @@ const RV = Vue.createApp({
       api('/api/review/session', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          open: this.open, mode: this.mode, done: this.done, total: this.total,
+          open: this.open, deck: this.deck, mode: this.mode, done: this.done, total: this.total,
           current: this.d ? this.d.id : null, queue: this.queue, deferred: this.deferred,
         }),
       }).catch(() => { /* 存不上就算了, 这不是数据源 */ });
     },
 
     start() {
-      this.queue = buildQueue(this.mode);
+      this.counts = updateReviewBadge();
+      this.queue = buildQueue(this.mode, this.deck);
       this.done = 0;
       this.total = this.queue.length;
       this.deferred = [];
       this.open = true;
       this.next();
+    },
+
+    // 换牌组 = **重开一轮**, 不是重排队列: 两组的 id 空间都不一样(整数 vs 字符串),
+    // 混在一个 queue 里 next() 会拿着题号去语法卡里找。所以 done/total 一起清零。
+    setDeck(k) {
+      if (!DECKS.includes(k) || k === this.deck) return;
+      this.deck = k;
+      try { localStorage.setItem('rv-deck', k); } catch { /* 隐私模式 */ }
+      this.start();
     },
     close() {
       this.open = false;
@@ -980,25 +1055,34 @@ const RV = Vue.createApp({
       this.revealed = false;                             // 先落下答案, 再去拉
       const id = this.queue.shift();
       if (id === undefined) { this.d = null; return; }   // 队列空了 -> 收尾屏
-      this.loading = true;
+      // 语法卡整组在 /api/syntax 里一次拉完(几十张而已), 不需要逐张再请求一次 ——
+      // 所以这条路没有"拉详情失败"这种状态, 直接从内存里取。
       let d = null;
-      try {
-        d = await api(`/api/problems/${id}`);
-      } catch (e) {
-        console.error('[review] 拉题详情失败', id, e);
-      } finally {
-        this.loading = false;
+      if (this.isSyntax) {
+        d = SYNTAX.find((c) => c.id === id) || null;
+      } else {
+        this.loading = true;
+        try {
+          d = await api(`/api/problems/${id}`);
+        } catch (e) {
+          console.error('[review] 拉题详情失败', id, e);
+        } finally {
+          this.loading = false;
+        }
       }
-      if (!d || !d.id) {                                 // 没拉到: 题号放回队头, 不丢
+      if (!d || d.id === undefined) {                    // 没拿到: id 放回队头, 不丢
         this.queue.unshift(id);
         this.d = null;
-        this.failMsg = `⚠ 拉 #${id} 的详情失败(服务没起? 看 console)<br>`
-          + `<span class="hint">这道题还在队列里 —— 关掉重开就接着问它</span>`;
+        this.failMsg = this.isSyntax
+          ? `⚠ 队列里的「${esc(String(id))}」在 syntax/*.md 里找不到了<br>`
+            + `<span class="hint">多半是刚改了卡标题(改标题 = 换 id)。关掉重开就好</span>`
+          : `⚠ 拉 #${id} 的详情失败(服务没起? 看 console)<br>`
+            + `<span class="hint">这道题还在队列里 —— 关掉重开就接着问它</span>`;
         this.syncSession();
         return;
       }
       this.d = d;
-      this.quiz = buildQuiz(this.d);
+      this.quiz = buildQuiz(this.isSyntax ? {} : this.d);
       this.active = 0;
       this.$nextTick(() => { if (this.$refs.card) this.$refs.card.scrollTop = 0; });
       this.syncSession();
@@ -1017,8 +1101,8 @@ const RV = Vue.createApp({
       if (!RV_MODES.includes(m)) return;
       this.mode = m;
       try { localStorage.setItem('rv-mode', m); } catch { /* 隐私模式 */ }
-      const byId = new Map(PROBLEMS.map((p) => [p.id, p]));
-      this.queue = orderQueue(this.queue.map((id) => byId.get(id)).filter(Boolean), m);
+      const byId = new Map(deckRows(this.deck).map((p) => [p.id, p]));
+      this.queue = orderQueue(this.queue.map((id) => byId.get(id)).filter(Boolean), m, this.deck);
       this.syncSession();
     },
 
@@ -1034,15 +1118,17 @@ const RV = Vue.createApp({
     reveal() {
       if (!this.d || this.revealed || this.busy) return;
       this.revealed = true;
-      this.items = [{ name: '📝 笔记', md: this.d.note || '_(还没写笔记)_' },
-                    ...this.d.solutions.map((x) => ({ name: x.name, code: x.content }))];
+      // 语法卡的背面就是全部, 没有次要 tab —— items 留空, 模板里那一块整个不占位
+      this.items = this.isSyntax ? []
+        : [{ name: '📝 笔记', md: this.d.note || '_(还没写笔记)_' },
+           ...this.d.solutions.map((x) => ({ name: x.name, code: x.content }))];
       this.active = 0;
     },
 
     // 就地改答案卡: 复习时脑子正热, 这时候压缩成一句话最准
     startEdit() {
       if (!this.revealed || this.readOnly) return;
-      this.draft = this.d.answer || '';
+      this.draft = (this.isSyntax ? this.d.back : this.d.answer) || '';
       this.editing = true;
       this.$nextTick(() => this.$refs.aedit && this.$refs.aedit.focus());
     },
@@ -1050,15 +1136,19 @@ const RV = Vue.createApp({
     async saveAnswer() {
       if (!this.editing) return;
       const content = this.draft;
+      // 语法卡的背面存回 syntax/<主题>.md 的对应行区间(见 syntax.save_back), 题目的存 answer.md
+      const req = this.isSyntax
+        ? ['/api/syntax/card', { id: this.d.id, content }]
+        : [`/api/problems/${this.d.id}/answer`, { content }];
       let r;
       try {
-        r = await api(`/api/problems/${this.d.id}/answer`, {
+        r = await api(req[0], {
           method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify(req[1]),
         });
       } catch { r = null; }
       if (!r || !r.ok) { this.amsg = '没存上(只读站?)'; return; }
-      this.d.answer = content;
+      if (this.isSyntax) this.d.back = content; else this.d.answer = content;
       this.editing = false;
       this.amsg = '已存 ✓';
       setTimeout(() => { this.amsg = ''; }, 1500);
@@ -1085,11 +1175,15 @@ const RV = Vue.createApp({
       if (!this.revealed || this.busy) return;
       const id = this.d.id;
       this.busy = true;
+      // 语法卡的 id 是 "主题/标题"(带中文和空格), 塞不进 URL 路径, 所以走 body
+      const req = this.isSyntax
+        ? ['/api/syntax/review', { id, rating: r }]
+        : [`/api/review/${id}`, { rating: r }];
       let res;
       try {
-        res = await api(`/api/review/${id}`, {
+        res = await api(req[0], {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rating: r }),
+          body: JSON.stringify(req[1]),
         });
       } catch { res = null; }
       if (!res || !res.ok) {
@@ -1099,17 +1193,23 @@ const RV = Vue.createApp({
         this.note = '⚠ 没记录下来(只读站或服务没起) —— 按「下一题」继续自测';
         return;
       }
-      const p = PROBLEMS.find((x) => x.id === id);
+      // 就地更新内存里那一行, 免得为了一个 due 重拉整组。两个牌组的行是同形状的
+      // (语法卡的调度字段在 /api/syntax 里就摊平到顶层了), 所以这段不用分叉。
+      const p = deckRows(this.deck).find((x) => x.id === id);
       if (p) {
         p.due = res.card.due; p.reps = res.card.reps; p.stability = res.card.stability;
         p.last_review = res.card.last_review; p.fsrs_state = res.card.state;
+        p.fsrs = res.card; p.fsrs_preview = res.preview;
       }
       if (r === 1) { this.queue.push(id); this.total++; }   // 忘了 -> 本次会话末尾再问一遍
       REVIEWS = null;        // 历史多了一行, 让 📈 进度下次打开重新拉
       this.done++;
       // 看板重绘是**旁支**: 它抛了顶多是背后那屏没刷新, 不能连累复习推进 ——
       // 以前这两行在 this.next() 前面裸调, 一抛就停在当前这道题上, 表现同上。
-      try { buildPanel(); updateReviewBadge(); } catch (e) { console.error('[review] 刷新看板失败', e); }
+      try {
+        buildPanel();
+        this.counts = updateReviewBadge();
+      } catch (e) { console.error('[review] 刷新看板失败', e); }
       try { await this.next(); } finally { this.busy = false; }
     },
 
@@ -1217,7 +1317,11 @@ const TL_ROWS = {
 const tlKey = (s) => (!s.exists ? TL_GONE
   : TL_MODE === 'L' ? famKey(s.fam) : String(depthOf({ familiarity: s.fam })));
 
-function buildTimeline() {
+// opts.ids   = 只**统计**这些题(其余照样跟着回放状态, 只是不计数) —— 配速图要的是某一层
+// opts.keyOf = 怎么把一道题的状态归档; 默认跟着 L/S 那个开关走
+function buildTimeline(opts = {}) {
+  const keyOf = opts.keyOf || tlKey;
+  const only = opts.ids || null;
   const st = new Map();                       // id -> {fam, exists}, 先铺现状
   for (const g of (PLAN?.groups || [])) for (const p of g.problems) st.set(p[0], { fam: null, exists: false });
   for (const p of PROBLEMS) st.set(p.id, { fam: famOf(p), exists: true });
@@ -1246,12 +1350,18 @@ function buildTimeline() {
   for (let d = start; d <= today; d = dAdd(d, 1)) {
     while (i < evs.length && evs[i].date <= d) { set(evs[i], evs[i].to); i++; }
     const c = {};
-    for (const s of st.values()) { const k = tlKey(s); c[k] = (c[k] || 0) + 1; }
+    for (const [id, s] of st) {
+      if (only && !only.has(id)) continue;
+      const k = keyOf(s); c[k] = (c[k] || 0) + 1;
+    }
     days.push({ date: d, c });
   }
   // 日志里全是未来日期(手改过时间戳之类)的话一天都取不到, 别让下面拿 days[-1]
-  return days.length ? { days, total: st.size } : null;
+  return days.length ? { days, total: only ? only.size : st.size } : null;
 }
+
+// 按算出来的深度归档(不受 TL_MODE 那个开关影响) —— 配速图固定按 S 读
+const depthKey = (s) => (!s.exists ? TL_GONE : String(depthOf({ familiarity: s.fam })));
 
 function timelineHTML() {
   const tl = buildTimeline();
@@ -1288,8 +1398,13 @@ function renderStats() {
   const today = todayStr();
   const cards = PROBLEMS.filter(isCard);
   const eligible = PROBLEMS.filter(rvEligible);
-  const rvs = REVIEWS || [];
+  // ⚠️ reviews.jsonl 现在是**两个牌组共用**的一份历史, 靠 deck 字段区分(老行没这个字段
+  // = 题目)。这一页所有图表的单位都是"题", 不过滤的话语法卡会混进留存率和复习历史里,
+  // 数字看着涨了其实是另一个牌组的。语法牌组只在下面那块概览里出现。
+  const rvs = (REVIEWS || []).filter((e) => (e.deck || 'problems') === 'problems');
 
+  const synCards = SYNTAX.filter(isCard);
+  const synRvs = (REVIEWS || []).filter((e) => e.deck === 'syntax');
   if (!cards.length && !rvs.length) {
     box.innerHTML = `<p class="empty-hint">还没有任何复习记录。<br>
       <span class="hint">去 🧠 复习 评第一道题, 这里就有东西了 ——
@@ -1328,6 +1443,8 @@ function renderStats() {
     ${stile(real.length ? `${(100 * recalled / real.length).toFixed(0)}%` : '—', '留存率',
             real.length ? `${real.length} 次老卡回忆` : '还没有老卡复习过')}
     ${stile(rvs.length, '累计复习', `${byDay.size} 天 · 连续 ${streak} 天`)}
+    ${stile(SYNTAX.length ? `${synCards.length}/${SYNTAX.length}` : '—', '语法卡 已入队 / 总数',
+            SYNTAX.length ? `今天要复习 ${deckDue('syntax')} 张 · 累计 ${synRvs.length} 次` : '还没写语法卡')}
   </div>`;
 
   // --- 未来到期 ---
@@ -1716,6 +1833,8 @@ function esc(s) {
 // stage = how well each problem is held (S1 思路 / S2 写得对 / S3 讲得清)
 // a cell counts problems at that stage *or deeper*, so S3 also feeds S1 and S2.
 let PLAN = null;   // dashboard/plan.json — the curriculum, hand-edited
+const tierName = (t) => (PLAN.tiers.find((x) => x.t === t) || {}).name || `第 ${t} 层`;
+const stageName = (sv) => (PLAN.stages.find((x) => x.s === sv) || {}).t || `S${sv}`;
 let VIEW = 'board';
 
 // 深度不另存: 由每题 meta.json 的 familiarity 算出来。一个字段, 一条阶梯:
@@ -1783,8 +1902,6 @@ function buildGrid() {
 
   // --- 概览条: 首屏第一眼只需要回答两件事 —— 我在哪个阶段, 这阶段要把哪几格推到底。
   // 下面的矩阵/时间线/题目都是它的展开, 所以这里只放数字和差额, 不重复解释。
-  const tierName = (t) => (PLAN.tiers.find((x) => x.t === t) || {}).name || `第 ${t} 层`;
-  const stageName = (sv) => (PLAN.stages.find((x) => x.s === sv) || {}).t || `S${sv}`;
   const goals = PLAN.targets.filter((x) => x.phase === live.n).map((x) => {
     const N = size(x.tier), n = reached(x.tier, x.stage), pct = N ? Math.round((n / N) * 100) : 0;
     return `<div class="gr-hg">
@@ -1936,16 +2053,18 @@ function buildGrid() {
       <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
       否则会攒下一整个月「做得出但讲不清」的题。</p>
     </section>
+    <section class="gr-sec" id="gr-pace"><p class="empty-hint">读取历史…</p></section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
       ${t}
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">4</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
       和详情页那个下拉是同一个字段。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
       <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
       ${g}
     </section>`;
+  renderPace();          // 异步: 要等 edits.jsonl
 }
 
 // 顺着"越来越熟"的方向走, 走到顶再回到未评
@@ -2029,6 +2148,140 @@ async function startProblem(id, chip) {
 
 
 
+// ---- 配速: 把这一格剩下的题均摊到阶段的每一天, 看实际爬得比计划快还是慢 ------
+// 数据和「掌握度时间轴」同一条路: edits.jsonl 逐日回放, 不落第二份统计。
+//
+// **计划线从阶段开始那天的实际值起步, 不是从 0 起步。** 阶段一开始时第一层已经有一批
+// 题到了 S1(9/1 那次批量评级), 从 0 画会显示"领先十几题", 其实一天都没多做。
+// 均摊的是**剩下的**: (总数 − 起点) / 阶段天数。
+let PACE_SEL = null;                 // "tier:stage"; null = 还没选过, 取第一项
+
+function paceOptions() {
+  const { live } = datePhases();
+  const out = [];
+  for (const t of PLAN.targets.filter((x) => x.phase === live.n))
+    for (let s = 1; s <= t.stage; s++) out.push({ tier: t.tier, stage: s, phase: live });
+  return out;
+}
+
+const pcFmt = (n) => n.toFixed(1).replace(/\.0$/, '');
+
+function paceHTML() {
+  const head = (body) => `<div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>配速</h2>
+    <p>把目标格<b>剩下</b>的题均摊到阶段的每一天，和实际爬到的高度比 ——
+    计划线的起点是<b>阶段开始那天的实际值</b>，不是 0，否则开局就凭空"领先"一大截。</p></div>${body}`;
+  if (!PLAN || PLAN.error) return head('');
+  const opts = paceOptions();
+  const kOf = (o) => `${o.tier}:${o.stage}`;
+  const sel = opts.find((o) => kOf(o) === PACE_SEL) || opts[0];
+  if (!sel) return head('<p class="empty-hint">当前阶段没有设目标格，没有可对的计划。</p>');
+  PACE_SEL = kOf(sel);
+  const ph = sel.phase;
+  const tabs = `<div class="groupby pc-tabs">${opts.map((o) =>
+    `<button class="gb-btn${kOf(o) === PACE_SEL ? ' on' : ''}" data-pace="${kOf(o)}"
+       >${esc(tierName(o.tier))} S${o.stage}</button>`).join('')}</div>`;
+  if (!ph.to) return head(`${tabs}<p class="empty-hint">阶段 ${ph.n} 没有结束日，均摊无从谈起。</p>`);
+
+  const ids = new Set();
+  for (const g of PLAN.groups) if (g.tier === sel.tier) for (const p of g.problems) ids.add(p[0]);
+  const tl = buildTimeline({ ids, keyOf: depthKey });
+  if (!tl) {
+    return head(`${tabs}<p class="empty-hint">dashboard/edits.jsonl 还没有可用的历史，画不出实际线。<br>
+      <span class="hint">跑 <code>python dashboard/backfill_edits.py --write</code> 从 git 里把历史补回来。</span></p>`);
+  }
+
+  // 达到 sel.stage 及以上 = 深度桶 sel.stage..3 之和(和格子里那个"及以上"同一个口径)
+  const reached = (c) => [1, 2, 3].reduce((n, s) => n + (s >= sel.stage ? (c[String(s)] || 0) : 0), 0);
+  const hist = new Map(tl.days.map((d) => [d.date, reached(d.c)]));
+  const firstDay = tl.days[0].date, lastDay = tl.days[tl.days.length - 1].date;
+  const at = (date) => (hist.has(date) ? hist.get(date)
+    : date < firstDay ? reached(tl.days[0].c) : reached(tl.days[tl.days.length - 1].c));
+
+  const ix = (date) => Math.round((dParse(date) - dParse(ph.from)) / 864e5);
+  const span = ix(ph.to);
+  if (span <= 0) return head(`${tabs}<p class="empty-hint">阶段 ${ph.n} 的起止日期不合法。</p>`);
+  const cur = Math.min(Math.max(ix(todayStr()), 0), span);
+  const total = ids.size;
+  const base = at(ph.from);
+  const per = (total - base) / span;                   // 计划每天几题
+  const planAt = (i) => base + per * i;
+  const act = [];
+  for (let i = 0; i <= cur; i++) act.push(at(dAdd(ph.from, i)));
+  const now = act[cur];
+  const delta = now - planAt(cur);
+  const leftDays = Math.max(1, span - cur);
+  const needPer = Math.max(0, (total - now) / leftDays);
+  const aheadDays = per > 0 ? delta / per : 0;
+  const ahead = delta >= 0;
+
+  // --- SVG: 计划线(虚) vs 实际线(实), 今天那一列画出两者的差 ---
+  const W = 760, H = 190, L = 42, R = 14, T = 12, B = 26;
+  const x = (i) => L + (W - L - R) * (i / span);
+  const y = (v) => T + (H - T - B) * (1 - v / (total || 1));
+  const n2 = (v) => v.toFixed(1);
+  const grid = [0, .25, .5, .75, 1].map((f) => {
+    const v = total * f, yy = y(v);
+    return `<line class="pc-grid" x1="${n2(L)}" y1="${n2(yy)}" x2="${n2(W - R)}" y2="${n2(yy)}"/>`
+      + `<text class="pc-ylbl" x="${n2(L - 7)}" y="${n2(yy + 3.5)}">${Math.round(v)}</text>`;
+  }).join('');
+  const step = Math.max(1, Math.ceil(span / 7));
+  const marks = [];
+  for (let i = 0; i < span - step / 2; i += step) marks.push(i);
+  marks.push(span);
+  const xlbl = marks.map((i, k) => `<text class="pc-xlbl" x="${n2(x(i))}" y="${H - 8}"
+    text-anchor="${i === 0 ? 'start' : i === span ? 'end' : 'middle'}"
+    >${esc(mmdd(dAdd(ph.from, i)))}${i === span ? ' 截止' : ''}</text>`).join('');
+  const pts = act.map((v, i) => `${n2(x(i))},${n2(y(v))}`).join(' ');
+  const svg = `<svg class="pc-svg" viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="计划 vs 实际配速">
+    ${grid}
+    <line class="pc-base" x1="${n2(L)}" y1="${n2(y(base))}" x2="${n2(W - R)}" y2="${n2(y(base))}"/>
+    <text class="pc-blbl" x="${n2(W - R - 5)}" y="${n2(y(base) - 5)}" text-anchor="end">起点 ${base}</text>
+    <polygon class="pc-fill" points="${n2(x(0))},${n2(y(0))} ${pts} ${n2(x(cur))},${n2(y(0))}"/>
+    <line class="pc-plan" x1="${n2(x(0))}" y1="${n2(y(base))}" x2="${n2(x(span))}" y2="${n2(y(total))}"/>
+    <polyline class="pc-act" points="${pts}"/>
+    <line class="pc-today" x1="${n2(x(cur))}" y1="${T}" x2="${n2(x(cur))}" y2="${H - B}"/>
+    <line class="pc-gap ${ahead ? 'ahead' : 'behind'}" x1="${n2(x(cur))}" y1="${n2(y(planAt(cur)))}"
+          x2="${n2(x(cur))}" y2="${n2(y(now))}"/>
+    <circle class="pc-goal" cx="${n2(x(span))}" cy="${n2(y(total))}" r="3.5"/>
+    <circle class="pc-dot ${ahead ? 'ahead' : 'behind'}" cx="${n2(x(cur))}" cy="${n2(y(now))}" r="4"/>
+    ${xlbl}
+  </svg>`;
+
+  const tile = (v, label, sub, cls) => `<div class="pc-t${cls ? ' ' + cls : ''}">
+    <b>${esc(v)}</b><span>${esc(label)}</span><em>${esc(sub)}</em></div>`;
+  const tiles = `<div class="pc-tiles">
+    ${tile(`${now}/${total}`, `实际已到 S${sel.stage}`, `阶段开始时 ${base} 题`)}
+    ${tile(pcFmt(planAt(cur)), '今天应达', `计划 ${pcFmt(per)} 题/天`)}
+    ${tile(`${ahead ? '+' : '−'}${pcFmt(Math.abs(delta))}`, ahead ? '超前' : '落后',
+           `约 ${pcFmt(Math.abs(aheadDays))} 天`, ahead ? 'ahead' : 'behind')}
+    ${tile(pcFmt(needPer), '剩下要的节奏 题/天', `还剩 ${leftDays} 天 · 还差 ${total - now} 题`)}
+  </div>`;
+
+  return head(`<div class="pc-head">${tabs}
+      <span class="hint">阶段 ${ph.n}「${esc(ph.name)}」${esc(ph.from.slice(5))} – ${esc(ph.to.slice(5))}
+        · 共 ${span} 天 · 历史自 ${esc(firstDay)}${lastDay < todayStr() ? '(日志最后一天 ' + esc(lastDay) + ')' : ''}</span></div>
+    ${tiles}${svg}
+    <div class="pc-legend">
+      <span class="pc-key"><i class="k-plan"></i>计划（剩下的均摊到每天）</span>
+      <span class="pc-key"><i class="k-act"></i>实际（edits.jsonl 逐日回放）</span>
+      <span class="pc-key"><i class="k-gap ${ahead ? 'ahead' : 'behind'}"></i>今天的差额</span>
+    </div>`);
+}
+
+// EDITS 是懒加载的(📈 进度那边也用它)。首屏先出格子, 历史拉回来再补这一段。
+async function renderPace() {
+  if (!$('#gr-pace')) return;
+  if (EDITS === null) {
+    try { EDITS = (await api('/api/edits')).edits || []; } catch { EDITS = []; }
+  }
+  const box = $('#gr-pace');            // 等待期间可能已经重画/切走了, 重新拿一次
+  if (!box) return;
+  box.innerHTML = paceHTML();
+  box.querySelectorAll('[data-pace]').forEach((b) =>
+    b.addEventListener('click', () => { PACE_SEL = b.dataset.pace; renderPace(); }));
+}
+
 async function switchView(v) {
   VIEW = v;
   document.querySelectorAll('.view-tab').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
@@ -2048,6 +2301,12 @@ async function switchView(v) {
 
 async function reload() {
   PROBLEMS = await api('/api/problems');
+  // 语法牌组拉失败不能连累看板(只读站没导出这个文件时就会走到这) —— 空数组即可,
+  // 队列自然是 0, 徽章上只剩题目那边的数字。
+  try {
+    SYNTAX = (await api('/api/syntax')).cards || [];
+  } catch { SYNTAX = []; }
+  SYNTAX.forEach((c, i) => { c.ord = i; });   // 书写顺序, 给「题号」那档排序用
   buildPanel();
   if (VIEW === 'grid') buildGrid();   // buildPanel 占了 #count / #sub，还回来
   loadTodo();                          // 刷新 📋 TODO 上的角标
