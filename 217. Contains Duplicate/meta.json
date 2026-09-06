@@ -24,5 +24,15 @@
       "两重循环两两比较",
       "位图标记每个值是否出现过"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-14",
+    "last_review": "2026-09-06",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
   }
 }

@@ -37,7 +37,7 @@ PRIVATE_NOTES = {"scratch.md", "todo.md"}
 # vendor/vue.global.prod.js 是**存在仓库里的**, 不走 CDN —— 本地看板断网也要能用,
 # 而且 CI 里没有 node, 不能有构建步骤。见 dashboard/README.md 的「为什么不用构建」。
 SITE_FILES = ["app.js", "styles.css", "static-shim.js", "ro.css",
-              "vendor/vue.global.prod.js"]
+              "vendor/vue.global.prod.js", "vendor/marked.min.js"]
 
 
 def write_json(path: Path, obj):
@@ -66,6 +66,7 @@ def export(out: Path) -> dict:
     write_json(api / "plan.json", server.read_plan())     # 坐标系的分层 + 时间线
     write_json(api / "lists.json", server.read_lists())   # 题单定义, 只读站照样能看进度
     write_json(api / "reviews.json", {"reviews": server.read_reviews()})  # 📈 进度的历史部分
+    write_json(api / "edits.json", {"edits": server.read_edits()})      # 标签改动时间轴
 
     # 分组标签 = 看板上可点开的通用 trick 文档, 两个维度各导一份
     docs = 0

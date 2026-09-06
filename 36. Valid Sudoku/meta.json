@@ -1,10 +1,27 @@
 {
   "structures": [
-    "matrix"
+    "matrix",
+    "hash-table"
   ],
-  "paradigms": [],
-  "techniques": [],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "宫号一行算出 (r//3)*3 + c//3, 取代四层嵌套",
+    "一个格子记三笔账: 行/列/宫",
+    "只查冲突不做搜索 —— 解数独是 LC 37"
+  ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3.5
+  "familiarity": 3.5,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-07",
+    "last_review": "2026-09-06",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

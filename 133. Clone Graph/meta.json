@@ -25,5 +25,15 @@
       "拓扑排序后按序复制",
       "并查集合并连通分量后逐个复制"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-07",
+    "last_review": "2026-09-06",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
   }
 }

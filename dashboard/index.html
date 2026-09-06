@@ -11,8 +11,8 @@
     <h1>LeetCode 看板 <span class="sub" id="sub">数据结构 × 算法范式</span></h1>
     <div class="actions">
       <nav class="views">
-        <button class="view-tab active" data-view="board">矩阵</button>
-        <button class="view-tab" data-view="grid">坐标系</button>
+        <button class="view-tab active" data-view="grid">坐标系</button>
+        <button class="view-tab" data-view="board">矩阵</button>
       </nav>
       <div class="groupby" id="groupby">
         <button class="gb-btn on" data-by="structures">按结构</button><button class="gb-btn" data-by="paradigms">按范式</button>
@@ -39,8 +39,8 @@
   </header>
 
   <main>
-    <div id="panel"></div>
-    <div id="grid-view" class="hidden"></div>
+    <div id="panel" class="hidden"></div>
+    <div id="grid-view"></div>
   </main>
 
   <!-- detail overlay -->
@@ -304,6 +304,7 @@
   </div>
 
   <script src="vendor/vue.global.prod.js"></script>
+  <script src="vendor/marked.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

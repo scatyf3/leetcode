@@ -1,7 +1,16 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp"
+  ],
+  "techniques": [
+    "状态是「以 i 结尾的最大和」(A 类定义)",
+    "dp[i] = max(dp[i-1] + x, x): 接上去 or 重开",
+    "答案是 max(dp) 不是 dp[-1], 压成标量要另记 best",
+    "k=1 ⇒ 数组可滚成一个标量(Kadane)"
+  ],
   "difficulty": "medium",
   "status": "solved",
   "familiarity": 4,
@@ -19,12 +28,12 @@
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-04",
-    "last_review": "2026-09-02",
-    "stability": 2.3065,
-    "difficulty": 2.118103970459016,
-    "reps": 1,
+    "due": "2026-10-04",
+    "last_review": "2026-09-06",
+    "stability": 28.28505240225195,
+    "difficulty": 1.0,
+    "reps": 2,
     "lapses": 0,
-    "last_rating": 3
+    "last_rating": 4
   }
 }

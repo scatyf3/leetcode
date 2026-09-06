@@ -25,5 +25,15 @@
       "dp[i] = dp[i-1] + 1",
       "查表: 预处理每字节的 1"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-08",
+    "last_review": "2026-09-06",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
   }
 }

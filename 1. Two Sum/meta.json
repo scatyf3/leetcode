@@ -1,12 +1,27 @@
 {
   "structures": [
-    "array"
+    "array",
+    "hash-table"
   ],
   "paradigms": [
     "hash"
   ],
-  "techniques": [],
+  "techniques": [
+    "存补数当 key: remain -> index",
+    "一趟扫描, 先查后存",
+    "要返回下标 ⇒ 不能排序(对比 167 有序可夹逼)"
+  ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-11-05",
+    "last_review": "2026-09-06",
+    "stability": 60.375368073700066,
+    "difficulty": 1.0,
+    "reps": 6,
+    "lapses": 0,
+    "last_rating": 4
+  }
 }

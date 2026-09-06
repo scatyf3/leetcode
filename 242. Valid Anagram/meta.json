@@ -25,5 +25,15 @@
       "对撞双指针从两端向中间配对",
       "映射成质数比较乘积"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-07",
+    "last_review": "2026-09-06",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
   }
 }

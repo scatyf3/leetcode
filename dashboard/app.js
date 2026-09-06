@@ -88,6 +88,7 @@ function buildPanel() {
       <div class="group-label${openable ? ' openable' : ''}"${openable ? ` data-struct="${esc(g)}" title="打开 ${esc(g)} 通用 trick 文档"` : ''}>
         <span class="group-name">${esc(g)}</span>
         <span class="group-count">${items.length} 题</span>
+        <span class="group-bar">${famBar(items)}</span>
         ${openable ? '<span class="group-open">通用 trick →</span>' : ''}</div>
       <div class="group-rows">${items.map(rowHTML).join('')}</div>
     </div>`;
@@ -115,11 +116,24 @@ function buildFamFilter() {
   );
 }
 
+// 组标签上的熟练度分布: 一条按 L0→L4 排的堆叠条。分母是这一组, 不是全库 ——
+// 想知道的是"这个结构我握得怎么样", 不是"它占全库多少"。
+function famBar(items) {
+  return FAM_LEVELS
+    .map((f) => [f, items.filter((p) => famOf(p) === f).length])
+    .filter(([, n]) => n)
+    .map(([f, n]) => `<i class="${famCls(f)}" style="flex:${n}"
+      title="${esc(famInfo(f).short)} ${esc(famInfo(f).label)} — ${n} 题"></i>`)
+    .join('');
+}
+
 function rowHTML(p) {
   const diff = p.difficulty || 'none';
   const todo = p.status === 'todo' ? ' todo' : '';
-  // 行尾展示的是"另一个维度": 按结构分组时显示范式, 按范式分组时显示结构
+  // 另一个维度(按结构分组时是范式, 反之是结构)单独占一列 —— 这一列是"× 范式"里的
+  // 那个乘号, 竖着能扫才有意义, 所以别和 trick 混在同一个右对齐的口袋里。
   const paras = p[otherDim()].map((x) => `<span class="tag para">${esc(x)}</span>`).join('');
+  // trick 是这道题的注脚, 不是维度: 压到最后一格, 颜色也调轻
   const tricks = p.techniques.map((x) => `<span class="tag trick">${esc(x)}</span>`).join('');
   const f = famOf(p);
   return `<div class="row${todo}" data-id="${p.id}">
@@ -127,7 +141,8 @@ function rowHTML(p) {
     <span class="fam ${famCls(f)}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(famInfo(f).label)})">${famInfo(f).short}</span>
     <span class="row-id">#${p.id}</span>
     <span class="row-title">${esc(p.title)}</span>
-    <span class="row-tags">${paras}${tricks}</span>
+    <span class="row-para">${paras || '<span class="tag-none" title="还没标范式">—</span>'}</span>
+    <span class="row-trick">${tricks}</span>
   </div>`;
 }
 
@@ -183,10 +198,7 @@ function openFamMenu(badge) {
 
 async function setFam(id, f) {
   closeFamMenu();
-  await fetch(`/api/problems/${id}/meta`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ familiarity: f }),      // 只发这一个字段, 其它标签原样保留
-  });
+  await putMeta(id, { familiarity: f });           // 只发这一个字段, 其它标签原样保留
   const p = PROBLEMS.find((x) => x.id === id);
   if (p) p.familiarity = f;
   buildPanel();                                    // 正在按熟练度过滤时, 改完会自动移出/移入
@@ -292,10 +304,7 @@ async function autoSaveMeta() {
     difficulty: $('#e-difficulty').value, status: $('#e-status').value,
     familiarity: $('#e-familiarity').value === '' ? null : +$('#e-familiarity').value,
   };
-  await fetch(`/api/problems/${CURRENT.id}/meta`, {
-    method: 'PUT', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  await putMeta(CURRENT.id, body);
   $('#meta-msg').textContent = '已保存 ✓';
   await reloadKeepOpen();
 }
@@ -688,67 +697,60 @@ function highlightPython(src) {
   return out;
 }
 
-// ---- tiny markdown renderer (headings/lists/tables/code/inline) ----
+// ---- 题号 -> 可点链接 ------------------------------------------------------
+// 只认**显式标记**: "LC 42"、"LC42"、"#42"。一串连号共用一个标记 ——
+// "LC 26, 27"、"LC 5/647"、"LC 3、76、209、424" 里每个数字都会各自去查,
+// 库里没有的(76/209 这种还没做的)保持纯文本, 不生成死链。
+//
+// 为什么不猜裸数字: 试过一版启发式(值域/量词/左右边界一堆规则), 全库能跑对,
+// 但规则不可预测 —— 写文档的时候没法一眼知道 "各 1 个标量" 的 1 会不会变成链接。
+// 显式标记的代价只是多打三个字符, 换来的是渲染结果完全可预期。存量文档(structures/
+// paradigms/notes 共 16 篇)的 182 处引用已经一次性迁移过, 迁移前后链接集合逐条对过。
+//
+// 只碰纯文本: <code> 里的 2i+1、<a href="../paradigms/1d-dp.md"> 里的路径、
+// 标签属性里的数字都不能动, 所以先按「标签/代码/已有链接」切段, 只改偶数段。
+const PID_SEG = /(<code[\s\S]*?<\/code>|<a\b[\s\S]*?<\/a>|<[^>]*>)/;
+// 标记 + 一串用 / , 、 和 与 连起来的题号
+// 末尾的否定环视: "每天 LC 1-1.5 小时" 里 LC 是网站名, 1 是时长不是题号
+const PID_RUN = /(?:LC\s*|#)\d{1,4}(?:\s*(?:[\/,、]|和|与)\s*\d{1,4})*(?![\w.%\-–—])/gi;
+const PID_ONE = /\d{1,4}/g;
+
+function linkifyPids(html) {
+  const rec = byId();
+  if (!rec.size) return html;
+  return html.split(PID_SEG).map((seg, k) => {
+    if (k % 2) return seg;                       // 捕获组 = 标签/代码/已有链接, 原样放回
+    return seg.replace(PID_RUN, (run) =>
+      run.replace(PID_ONE, (num) => {
+        const p = rec.get(+num);
+        return p
+          ? `<a class="pid" data-pid="${p.id}" title="${esc(p.id + '. ' + p.title)}">${num}</a>`
+          : num;                                 // 还没做的题: 留字, 不留链
+      }));
+  }).join('');
+}
+
+// ---- markdown 渲染: marked(存在仓库里) + 两层后处理 ------------------------
+// 这里以前是 60 行手写渲染器, 换掉的直接原因是**嵌套列表渲染不出来**: 它按行匹配
+// `^\s*[-*+]\s+` 就把所有层级拍平进同一个 <ul>, structures/array.md 的 feature
+// 那种三层缩进全塌成一层。顺带修掉的还有:
+//   - 行内 `|OPT'| = |OPT|` 长得像表头但下一行不是分隔行, 老渲染器要靠一句
+//     "第一行无条件吃掉" 的兜底才不死循环(见 git history, 435 的 note.md 触发过);
+//   - 引用块套列表、列表里的代码块、任务列表 `- [ ]` 这些一概不认。
+//
+// marked 是 vendored 的(vendor/marked.min.js, MIT), 不走 CDN、不需要构建步骤 ——
+// 和 vue.global.prod.js 同一条规矩, 见 README「没有构建步骤」。
+const MD_OPT = { gfm: true, breaks: false };
+
 function md(src) {
-  const lines = src.replace(/\r/g, '').split('\n');
-  let out = [], i = 0;
-  const inline = (t) =>
-    esc(t)
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/(^|[^*\w])\*(\S(?:[^*]*\S)?)\*/g, '$1<em>$2</em>')
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-  while (i < lines.length) {
-    let l = lines[i];
-    if (/^\s*```/.test(l)) {                 // fence 可以缩进(列表项里的代码块)
-      const buf = []; i++;
-      while (i < lines.length && !/^\s*```/.test(lines[i])) buf.push(lines[i++]);
-      i++;
-      const pad = Math.min(...buf.filter((x) => x.trim())
-        .map((x) => x.match(/^ */)[0].length), Infinity);
-      const body = buf.map((x) => (pad === Infinity ? x : x.slice(pad))).join('\n');
-      out.push(`<pre><code>${esc(body)}</code></pre>`); continue;
-    }
-    let m = l.match(/^(#{1,6})\s+(.*)/);
-    if (m) { out.push(`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`); i++; continue; }
-    if (/^\s*>/.test(l)) {
-      const buf = [];
-      while (i < lines.length && /^\s*>/.test(lines[i])) buf.push(lines[i++].replace(/^\s*>\s?/, ''));
-      out.push(`<blockquote>${inline(buf.join(' '))}</blockquote>`); continue;
-    }
-    if (/^\s*\|.*\|/.test(l) && i + 1 < lines.length && /^\s*\|[-:\s|]+\|/.test(lines[i + 1])) {
-      const row = (s) => s.trim().replace(/^\||\|$/g, '').split('|').map((c) => c.trim());
-      const head = row(l); i += 2;
-      let body = '';
-      while (i < lines.length && /^\s*\|.*\|/.test(lines[i])) {
-        body += '<tr>' + row(lines[i++]).map((c) => `<td>${inline(c)}</td>`).join('') + '</tr>';
-      }
-      out.push(`<table><thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>`);
-      continue;
-    }
-    if (/^\s*[-*+]\s+/.test(l)) {
-      const buf = [];
-      while (i < lines.length && /^\s*[-*+]\s+/.test(lines[i]))
-        buf.push(`<li>${inline(lines[i++].replace(/^\s*[-*+]\s+/, ''))}</li>`);
-      out.push(`<ul>${buf.join('')}</ul>`); continue;
-    }
-    if (/^\s*\d+\.\s+/.test(l)) {
-      const buf = [];
-      while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i]))
-        buf.push(`<li>${inline(lines[i++].replace(/^\s*\d+\.\s+/, ''))}</li>`);
-      out.push(`<ol>${buf.join('')}</ol>`); continue;
-    }
-    if (l.trim() === '') { i++; continue; }
-    // 第一行**无条件**吃掉 —— 能走到这里就说明上面每个分支都没接住它, 再让 while 的
-    // 排除式去判一次就可能一行都不消费 -> i 不前进 -> 死循环, 整个页面卡死。
-    // 真实触发者: 435 的 note.md 里 "|OPT'| = |OPT|" 这种集合势记号, 长得像表格
-    // (匹配 ^\s*\|.*\|) 但下一行不是 |---|---| 分隔行, 于是表格分支不接、段落分支也不敢吃。
-    const buf = [lines[i++]];
-    while (i < lines.length && lines[i].trim() !== '' && !/^(#{1,6}\s|\s*```|\s*[-*+]\s|\s*\d+\.\s|\s*>|\s*\|)/.test(lines[i]))
-      buf.push(lines[i++]);
-    out.push(`<p>${inline(buf.join(' '))}</p>`);
+  if (typeof marked === 'undefined') {          // vendor 文件掉了也别让整页炸
+    console.warn('[md] marked 没加载 —— 退化成纯文本。检查 vendor/marked.min.js');
+    return `<pre>${esc(String(src))}</pre>`;
   }
-  return out.join('\n');
+  const html = marked.parse(String(src), MD_OPT);
+  // 1) 文档里的链接指向仓库文件, 一律新标签打开(和老渲染器行为一致)
+  // 2) 题号 -> 可点链接。放在最后, 因为它的跳过依据正是上面生成的 <code>/<a>
+  return linkifyPids(html.replace(/<a href=/g, '<a target="_blank" href='));
 }
 
 // ---- 🧠 FSRS 复习: 看题面 -> 心里过思路 -> 揭晓 -> 1-4 自评 --------------------
@@ -863,6 +865,8 @@ const RV = Vue.createApp({
       items: [], active: 0,          // 揭晓后的 note / 各解法 tab
       editing: false, draft: '', amsg: '',
       note: '',                      // 顶部那行临时提示(写失败 / 已经是队尾)
+      busy: false,                   // 评分->取下一题这一整段在飞。见 rate() 上面那段注释
+      failMsg: '',                   // 拉下一题失败时的收尾屏文案(替掉"复习完了")
       deferred: [],                  // 这一轮按过「押到队尾」的题, 按发生顺序, 可重复
       mode: savedMode(),
       readOnly: isReadOnly(),
@@ -924,6 +928,7 @@ const RV = Vue.createApp({
     },
     preview() { return (this.d && this.d.fsrs_preview) || {}; },
     emptyMsg() {
+      if (this.failMsg) return this.failMsg;
       return this.done
         ? `这一轮复习完了 —— 共 ${this.done} 道 🎉<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>`
         : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>';
@@ -963,25 +968,49 @@ const RV = Vue.createApp({
     },
     toStats() { this.close(); openStats(); },
 
+    // 拉详情要是失败, 绝不能让 this.d / revealed 停在**上一道**题上 —— 那样卡面纹丝不动,
+    // 看着像前端卡死, 而 1-4 还照样响应, 于是每按一次就给上一道重复记一次复习。
+    // (真发生过: reviews.jsonl 里 #1 在 4 秒内被记了 6 次, #206 记了 4 次, stability
+    //  一路 8→60 天。) 所以: 先落下 revealed, 失败就把题号放回队头 + 走收尾屏说明白。
     async next() {
       this.note = '';
+      this.failMsg = '';
       this.editing = false;
       this.amsg = '';
+      this.revealed = false;                             // 先落下答案, 再去拉
       const id = this.queue.shift();
       if (id === undefined) { this.d = null; return; }   // 队列空了 -> 收尾屏
       this.loading = true;
+      let d = null;
       try {
-        this.d = await api(`/api/problems/${id}`);
+        d = await api(`/api/problems/${id}`);
+      } catch (e) {
+        console.error('[review] 拉题详情失败', id, e);
       } finally {
         this.loading = false;
       }
-      this.revealed = false;
+      if (!d || !d.id) {                                 // 没拉到: 题号放回队头, 不丢
+        this.queue.unshift(id);
+        this.d = null;
+        this.failMsg = `⚠ 拉 #${id} 的详情失败(服务没起? 看 console)<br>`
+          + `<span class="hint">这道题还在队列里 —— 关掉重开就接着问它</span>`;
+        this.syncSession();
+        return;
+      }
+      this.d = d;
       this.quiz = buildQuiz(this.d);
       this.active = 0;
       this.$nextTick(() => { if (this.$refs.card) this.$refs.card.scrollTop = 0; });
       this.syncSession();
     },
-    skip() { this.done++; this.next(); },              // 只读站用: 没有评分按钮
+    // 只读站用: 没有评分按钮, 空格 = 下一题。busy 同 rate() —— 连按两下空格
+    // 会在上一道还没拉回来的时候再 shift 一个题号, 那道就被静默跳过了。
+    async skip() {
+      if (this.busy) return;
+      this.busy = true;
+      this.done++;
+      try { await this.next(); } finally { this.busy = false; }
+    },
 
     // 换模式: 只重排**剩下**的题, 当前这道不动, done/total 也不重来
     setMode(m) {
@@ -1003,7 +1032,7 @@ const RV = Vue.createApp({
     },
 
     reveal() {
-      if (!this.d || this.revealed) return;
+      if (!this.d || this.revealed || this.busy) return;
       this.revealed = true;
       this.items = [{ name: '📝 笔记', md: this.d.note || '_(还没写笔记)_' },
                     ...this.d.solutions.map((x) => ({ name: x.name, code: x.content }))];
@@ -1039,7 +1068,7 @@ const RV = Vue.createApp({
     // 和评 1 的区别 —— 评 1 是**真的记一次复习**(写 reviews.jsonl, due 会变);
     // 这里表达的是"现在没空细看", 不该污染调度数据。
     defer() {
-      if (!this.d) return;
+      if (!this.d || this.busy) return;
       if (!this.queue.length) {                        // 后面没题了, 挪了还是它
         this.note = '⚠ 已经是本轮最后一道了 —— 队尾就在这儿';
         return;
@@ -1049,9 +1078,13 @@ const RV = Vue.createApp({
       this.next();                                     // next() 里会同步给后端
     },
 
+    // busy 是**去重闸**, 不是转圈动画: 一次评分要走 POST -> 刷看板 -> 再 GET 下一题,
+    // 这中间卡面还停在当前这道且 revealed=true, 手快按第二下就会给同一道题再记一次复习。
+    // 服务端每条都照单全收(reviews.jsonl 里 #1 连记 6 次那次就是这么来的), 只能前端拦。
     async rate(r) {
-      if (!this.revealed) return;
+      if (!this.revealed || this.busy) return;
       const id = this.d.id;
+      this.busy = true;
       let res;
       try {
         res = await api(`/api/review/${id}`, {
@@ -1060,6 +1093,7 @@ const RV = Vue.createApp({
         });
       } catch { res = null; }
       if (!res || !res.ok) {
+        this.busy = false;
         // 只读站的 403 也走这里(static-shim 是 resolve 不是 reject)。写失败就**不推进**——
         // 假装评过了会让这道题的调度悄悄丢一次, 比停下来更糟。
         this.note = '⚠ 没记录下来(只读站或服务没起) —— 按「下一题」继续自测';
@@ -1071,11 +1105,12 @@ const RV = Vue.createApp({
         p.last_review = res.card.last_review; p.fsrs_state = res.card.state;
       }
       if (r === 1) { this.queue.push(id); this.total++; }   // 忘了 -> 本次会话末尾再问一遍
-      buildPanel();
-      updateReviewBadge();
       REVIEWS = null;        // 历史多了一行, 让 📈 进度下次打开重新拉
       this.done++;
-      this.next();
+      // 看板重绘是**旁支**: 它抛了顶多是背后那屏没刷新, 不能连累复习推进 ——
+      // 以前这两行在 this.next() 前面裸调, 一抛就停在当前这道题上, 表现同上。
+      try { buildPanel(); updateReviewBadge(); } catch (e) { console.error('[review] 刷新看板失败', e); }
+      try { await this.next(); } finally { this.busy = false; }
     },
 
     // 键盘由 app.js 末尾那个全局 handler 转进来 —— 保持和其它 overlay 同一套分发顺序
@@ -1104,6 +1139,7 @@ const RV = Vue.createApp({
 // 每个数字都从 /api/problems 的 fsrs 列 + /api/reviews(reviews.jsonl) **现算**,
 // 不落第二份统计 —— 手改了某题的 meta.json 或者删掉 data.db 重建, 这里跟着变, 不会对不上。
 let REVIEWS = null;                 // reviews.jsonl 的全部行; null = 还没拉过
+let EDITS = null;                   // edits.jsonl 的全部行(标签/熟练度改动); null = 还没拉过
 
 const RATE_LABEL = { 1: '忘了', 2: '勉强', 3: '想起来了', 4: '很熟' };
 const FORECAST_DAYS = 30;           // 到期预测往前看多远
@@ -1128,7 +1164,9 @@ function fmtDays(d) {
   return `${(d / 365).toFixed(1)} 年`;
 }
 
-// 柱状图。cols: [{label, tip, on, parts:[{cls,n}]}]; 高度按全图最大值归一, 堆叠从下往上。
+// 柱状图。cols: [{label, tip, on, n, parts:[{cls,n}]}]; 高度按全图最大值归一, 堆叠从下往上。
+// 柱子顶上默认写这一列的合计; 给了 c.n 就写它 —— 时间轴那张图每列合计都是全库题数,
+// 印一排一模一样的数字没有信息量。
 function chartHTML(cols, h = 96) {
   const max = Math.max(1, ...cols.map((c) => c.parts.reduce((s, p) => s + p.n, 0)));
   const body = cols.map((c) => {
@@ -1136,7 +1174,7 @@ function chartHTML(cols, h = 96) {
     const bars = c.parts.filter((p) => p.n > 0)
       .map((p) => `<i class="${p.cls}" style="height:${(100 * p.n / max).toFixed(2)}%"></i>`).join('');
     return `<div class="col${c.on ? ' on' : ''}" title="${esc(c.tip)}">
-        <div class="col-n">${tot || ''}</div>
+        <div class="col-n">${esc(c.n !== undefined ? c.n : (tot || ''))}</div>
         <div class="col-bars">${bars}</div>
         <div class="col-x">${esc(c.label || '')}</div>
       </div>`;
@@ -1155,6 +1193,96 @@ const slegend = (items) => `<div class="slegend">${items
   .map(([cls, label, n]) => `<span class="skey"><i class="${cls}"></i>${esc(label)}${
     n === undefined ? '' : ` <b>${n}</b>`}</span>`).join('')}</div>`;
 
+// ---- 掌握度时间轴: 每天各档各有几道题 ----------------------------------------
+// 和这一页其它数字一样**不落第二份统计**。最右边那一列直接来自 /api/problems, 是真相;
+// 往左靠 edits.jsonl 里每条改动的 from 值一步步倒推, 再正推回来逐日取快照。
+// 好处是"今天"永远和看板对得上 —— 日志漏记的手改(直接编辑 meta.json)只会让更早的
+// 那几天偏一点, 不会让整条线整体漂掉。
+//
+// 分母是**题单 ∪ 仓库**: 没建文件夹的题也得占一格, 否则"未做"这一层就画不出来,
+// 曲线会变成"总量凭空长大", 而不是"未做在被吃掉"。
+const TL_MAX_DAYS = 120;      // 一列一天, 再长就挤不下了, 只画最近这些天
+const TL_GONE = 'gone';       // 还没建文件夹 = 未做
+let TL_MODE = 'L';            // 'L' 按熟练度档(原始的 L) | 'S' 按深度级(算出来的 S)
+
+// 每档 [key, cls, label]。数组顺序 = 堆叠顺序, 第一项在**最底下**(见 .col-bars 的 column-reverse)。
+const TL_ROWS = {
+  L: FAM_LEVELS.map((f) => [famKey(f), famCls(f), f === null ? '未评' : FAM[f].short])
+      .concat([[TL_GONE, 'fgone', '未做']]),
+  // 「还没到 S1」用灰(和 L 那边的"未评"同色), 不用坐标系里的 .s0 —— .s0 是 --chip,
+  // 和下面"未做"那一段一个颜色, 堆在一起就分不出来了
+  S: [['3', 's3', 'S3 讲得清'], ['2', 's2', 'S2 写得对'], ['1', 's1', 'S1 思路清楚'],
+      ['0', 'fnone', '还没到 S1'], [TL_GONE, 'fgone', '未做']],
+};
+const tlKey = (s) => (!s.exists ? TL_GONE
+  : TL_MODE === 'L' ? famKey(s.fam) : String(depthOf({ familiarity: s.fam })));
+
+function buildTimeline() {
+  const st = new Map();                       // id -> {fam, exists}, 先铺现状
+  for (const g of (PLAN?.groups || [])) for (const p of g.problems) st.set(p[0], { fam: null, exists: false });
+  for (const p of PROBLEMS) st.set(p.id, { fam: famOf(p), exists: true });
+
+  const evs = (EDITS || [])
+    .filter((e) => e.date && st.has(e.id) && (e.field === 'familiarity' || e.field === 'exists'))
+    .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  if (!evs.length) return null;
+
+  const set = (e, v) => {
+    const s = st.get(e.id);
+    if (e.field === 'exists') s.exists = !!v;
+    else s.fam = (v === null || v === undefined || v === '') ? null : Number(v);
+  };
+  for (let i = evs.length - 1; i >= 0; i--) set(evs[i], evs[i].from);   // 倒推到第一条事件之前
+
+  const today = todayStr();
+  const floor = dAdd(today, -(TL_MAX_DAYS - 1));
+  let start = dAdd(evs[0].date, -1);          // 多留一列: 什么都还没发生的样子
+  let i = 0;
+  if (start < floor) {                        // 太久远的那段直接快进掉, 只留最近的窗口
+    start = floor;
+    while (i < evs.length && evs[i].date < start) { set(evs[i], evs[i].to); i++; }
+  }
+  const days = [];
+  for (let d = start; d <= today; d = dAdd(d, 1)) {
+    while (i < evs.length && evs[i].date <= d) { set(evs[i], evs[i].to); i++; }
+    const c = {};
+    for (const s of st.values()) { const k = tlKey(s); c[k] = (c[k] || 0) + 1; }
+    days.push({ date: d, c });
+  }
+  // 日志里全是未来日期(手改过时间戳之类)的话一天都取不到, 别让下面拿 days[-1]
+  return days.length ? { days, total: st.size } : null;
+}
+
+function timelineHTML() {
+  const tl = buildTimeline();
+  if (!tl) {
+    return sblock('掌握度时间轴', '还没有可用的历史',
+      `<p class="empty-hint">dashboard/edits.jsonl 还是空的。<br>
+       <span class="hint">改一次标签或熟练度就会开始记;
+       想把开写之前的历史补回来, 跑 <code>python dashboard/backfill_edits.py --write</code>
+       —— 它从 git 里每个碰过 meta.json 的 commit 反推。</span></p>`);
+  }
+  const rows = TL_ROWS[TL_MODE];
+  const last = tl.days.length - 1;
+  const cols = tl.days.map((day, k) => ({
+    label: k === last ? '今天' : (k % 5 === 0 ? mmdd(day.date) : ''),
+    on: k === last,
+    n: '',                                    // 每列合计恒等于全库题数, 印一排一样的数没意义
+    tip: `${day.date}${k === last ? ' (今天)' : ''} · ` + rows.filter(([key]) => day.c[key])
+      .map(([key, , label]) => `${label} ${day.c[key]}`).join(' · '),
+    parts: rows.map(([key, cls]) => ({ cls, n: day.c[key] || 0 })),
+  }));
+  const cur = tl.days[last].c;
+  return `<section class="sblock">
+    <div class="sblock-head"><b>掌握度时间轴</b>
+      <span class="hint">${esc(tl.days[0].date)} 起 · 每列一天 · 分母 ${tl.total} 题(题单 ∪ 仓库)</span>
+      <span class="tl-mode" id="tl-mode">${['L', 'S']
+        .map((m) => `<button class="tab${m === TL_MODE ? ' on' : ''}" data-mode="${m}">按 ${m}</button>`)
+        .join('')}</span></div>
+    ${chartHTML(cols, 120)}
+    ${slegend(rows.map(([key, cls, label]) => [cls, label, cur[key] || 0]))}</section>`;
+}
+
 function renderStats() {
   const box = $('#stats-body');
   const today = todayStr();
@@ -1165,7 +1293,9 @@ function renderStats() {
   if (!cards.length && !rvs.length) {
     box.innerHTML = `<p class="empty-hint">还没有任何复习记录。<br>
       <span class="hint">去 🧠 复习 评第一道题, 这里就有东西了 ——
-      现在有 <b>${eligible.length}</b> 道题(status 是 solved / review)在等第一次入队。</span></p>`;
+      现在有 <b>${eligible.length}</b> 道题(status 是 solved / review)在等第一次入队。</span></p>`
+      + timelineHTML();       // 一次都没复习过, 时间轴照样有东西看(它读的是标签, 不是评分)
+    bindTimeline(box);
     return;
   }
 
@@ -1248,8 +1378,14 @@ function renderStats() {
   h += sblock('复习历史', `最近 ${HISTORY_DAYS} 天 · 按评分堆叠`,
     chartHTML(hist) + slegend([1, 2, 3, 4].map((r) => [`b-r${r}`, RATE_LABEL[r], rc[r]])));
 
+  h += timelineHTML();
+
   box.innerHTML = h;
+  bindTimeline(box);
 }
+
+const bindTimeline = (box) => box.querySelectorAll('#tl-mode .tab').forEach((el) =>
+  el.addEventListener('click', () => { TL_MODE = el.dataset.mode; renderStats(); }));
 
 async function openStats() {
   $('#stats-overlay').classList.remove('hidden');
@@ -1258,6 +1394,11 @@ async function openStats() {
     // 只读站没有这个文件时 shim 会回一个空壳; 拿不到历史也要能画出到期预测那部分
     try { REVIEWS = (await api('/api/reviews')).reviews || []; } catch { REVIEWS = []; }
   }
+  if (EDITS === null) {
+    try { EDITS = (await api('/api/edits')).edits || []; } catch { EDITS = []; }
+  }
+  // 时间轴的分母要算上"题单里有、仓库里还没有"的题, 所以这里也得有 plan
+  if (!PLAN) { try { PLAN = await api('/api/plan'); } catch { PLAN = null; } }
   renderStats();
 }
 
@@ -1360,10 +1501,7 @@ async function addFromList(el, id) {
   el.innerHTML = `${id} <em>建中…</em>`;
   let r;
   try {
-    r = await api('/api/problems', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: String(id) }),
-    });
+    r = await postProblem(id);
   } catch { r = null; }
   if (!r || !r.ok) {
     el.innerHTML = old;
@@ -1513,10 +1651,7 @@ async function scaffoldForTodo(query, line, canon) {
   flashTodo('拉题中…');
   let r;
   try {
-    r = await api('/api/problems', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query }),
-    });
+    r = await postProblem(query);
   } catch {
     return flashTodo('拉题失败(离线?)');
   }
@@ -1638,19 +1773,65 @@ function buildGrid() {
   const size = (t) => all.filter((p) => p.tier === t).length;
   const reached = (t, s) => all.filter((p) => p.tier === t && p.depth >= s).length;
 
+  const md_ = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
+  const spanOf = (ph) => md_(parseDay(ph.from)) + (ph.to ? ' – ' + md_(parseDay(ph.to)) : ' 起');
+  const daysLeft = (ph) => (ph.to ? Math.max(0, Math.round((parseDay(ph.to) - today) / 864e5)) : null);
+
   $('#sub').textContent = '覆盖 × 深度 · NeetCode 150';
   $('#count').textContent =
     `${all.filter((p) => p.rec).length}/${all.length} 有文件夹 · 阶段 ${live.n}`;
 
+  // --- 概览条: 首屏第一眼只需要回答两件事 —— 我在哪个阶段, 这阶段要把哪几格推到底。
+  // 下面的矩阵/时间线/题目都是它的展开, 所以这里只放数字和差额, 不重复解释。
+  const tierName = (t) => (PLAN.tiers.find((x) => x.t === t) || {}).name || `第 ${t} 层`;
+  const stageName = (sv) => (PLAN.stages.find((x) => x.s === sv) || {}).t || `S${sv}`;
+  const goals = PLAN.targets.filter((x) => x.phase === live.n).map((x) => {
+    const N = size(x.tier), n = reached(x.tier, x.stage), pct = N ? Math.round((n / N) * 100) : 0;
+    return `<div class="gr-hg">
+      <div class="gr-hg-t">${esc(tierName(x.tier))}<span
+        class="gr-hg-ar">→</span>${esc(stageName(x.stage))}</div>
+      <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
+      <div class="gr-hg-n"><b>${n}</b><small>/${N}</small><span class="gr-hg-gap${n >= N ? ' met' : ''}">${
+        n >= N ? '已达标 ✓' : '还差 ' + (N - n) + ' 题'}</span></div></div>`;
+  }).join('');
+  // 底下这排是**跨层**的总计 —— 上面的矩阵只按层拆, 全局这三个数在那儿看不到。
+  const built = all.filter((p) => p.rec).length;
+  const stat = (label, n, cls) => {
+    const pct = Math.round((n / all.length) * 100);
+    return `<div class="gr-st4">
+      <div class="gr-st4-t">${esc(label)}</div>
+      <div class="gr-st4-n"><b>${n}</b><small>/${all.length}</small></div>
+      <div class="gr-st4-bar"><i class="${cls}" style="width:${pct}%"></i></div></div>`;
+  };
+  const stats = stat('已建文件夹', built, 'built')
+    + PLAN.stages.map((st) => stat(`S${st.s} 及以上`, all.filter((x) => x.depth >= st.s).length, `s${st.s}`)).join('');
+  const dl = daysLeft(live);
+  const hero = `<section class="gr-hero">
+    <div class="gr-hero-l">
+      <div class="gr-hero-k">现在</div>
+      <h2 class="gr-hero-ph"><span class="gr-hero-n">阶段 ${live.n}</span>${esc(live.name)}</h2>
+      <div class="gr-hero-when">${spanOf(live)}　·　${esc(live.hrs)}${
+        dl !== null ? `<b class="gr-hero-left">剩 ${dl} 天</b>` : ''}</div>
+      <div class="gr-hero-goal">${esc(live.adds)}</div>
+      <div class="gr-hero-serves">${esc(live.serves)}</div>
+    </div>
+    <div class="gr-hero-r">
+      <div class="gr-hero-k">这阶段要推到底的格子</div>
+      <div class="gr-hero-goals">${goals || '<span class="gr-hg-gap">这阶段没设目标格</span>'}</div>
+      <div class="gr-hero-cov">${stats}</div>
+    </div>
+  </section>`;
+
   // --- the grid itself: tiers down, stages across ---
   let m = '<div class="gr-matrix"><div></div>';
   for (const st of PLAN.stages)
-    m += `<div class="gr-colh"><span class="gr-colh-t">${esc(st.t)}</span><span class="gr-colh-d">${esc(st.d)}</span></div>`;
+    m += `<div class="gr-colh" data-s="${st.s}"><span class="gr-colh-t">${esc(st.t)}</span><span class="gr-colh-d">${esc(st.d)}</span></div>`;
   for (const tr of PLAN.tiers) {
     const N = size(tr.t);
     m += `<div class="gr-rowh">
       <button class="gr-rowh-t" data-jump="${tr.t}" title="跳到下面「题目」里这一层的第一组">
-        ${esc(tr.name)}<span class="gr-jump-x">▾</span>
+        <b class="gr-tno">${tr.t}</b>
+        <span class="gr-rowh-nm">${esc(tr.name)}<span class="gr-jump-x">▾</span></span>
         <span class="gr-rowh-n">本层 ${N} 题 · 做完题单累计 ${esc(tr.cum)}</span></button>
       <span class="gr-rowh-d">${esc(tr.desc)}</span></div>`;
     for (const st of PLAN.stages) {
@@ -1661,7 +1842,8 @@ function buildGrid() {
       const badges = tg
         .map((x) => `<span class="gr-badge${x.phase < live.n ? ' met' : ''}">阶段 ${x.phase} 目标</span>`)
         .join('');
-      m += `<div class="gr-cell${isNow ? ' target' : ''}">
+      m += `<div class="gr-cell${isNow ? ' target' : ''}${n ? '' : ' zero'}">
+        ${isNow ? '<span class="gr-now">现在</span>' : ''}
         <div class="gr-cell-top"><span class="gr-frac">${n}<small>/${N}</small></span><span class="gr-pct">${pct}%</span></div>
         <div class="gr-bar"><i class="s${st.s}" style="width:${pct}%"></i></div>
         <div class="gr-cell-foot">${badges || '&nbsp;'}</div></div>`;
@@ -1670,11 +1852,10 @@ function buildGrid() {
   m += '</div>';
 
   // --- timeline: the four phases are a real sequence, so they're numbered ---
-  const md_ = (d) => `${d.getMonth() + 1}/${d.getDate()}`;
   let t = '<div class="gr-tl">';
   for (const ph of PLAN.phases) {
-    const range = md_(parseDay(ph.from)) + (ph.to ? ' – ' + md_(parseDay(ph.to)) : ' 起');
-    const left = ph.to ? Math.max(0, Math.round((parseDay(ph.to) - today) / 864e5)) : null;
+    const range = spanOf(ph);
+    const left = daysLeft(ph);
     t += `<div class="gr-ph ${ph.state}">
       <div class="gr-ph-n"><span>阶段 ${ph.n}</span>${
         ph.state === 'active' ? `<span class="gr-live">进行中${left !== null ? ' · 剩 ' + left + ' 天' : ''}</span>` : ''}</div>
@@ -1736,13 +1917,15 @@ function buildGrid() {
       <div class="gr-grp-h">${head}
         <span class="gr-tier${grp.low ? ' low' : ''}" data-t="${grp.tier}">${label}</span>
         ${grp.sub ? `<span class="gr-sub">${esc(grp.sub)}</span>` : ''}
-        <span class="gr-grp-c">${started}/${grp.problems.length}</span></div>
+        <span class="gr-grp-c"><b>${started}</b>/${grp.problems.length}<i class="gr-grp-bar"><u
+          style="width:${Math.round((started / grp.problems.length) * 100)}%"></u></i></span></div>
       <div class="gr-chips">${chips}</div></div>`;
   }
 
   $('#grid-view').innerHTML = `
+    ${hero}
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进 S1、S2 三列。层之间<b>不</b>累计：每题只属于一层。琥珀框 = 当前阶段该站的位置。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进 S1、S2 三列。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
       ${m}
       <div class="gr-legend">
         <span class="gr-key"><i class="s0"></i>L4 / 未评 · 还没到 S1</span>
@@ -1754,11 +1937,11 @@ function buildGrid() {
       否则会攒下一整个月「做得出但讲不清」的题。</p>
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
       ${t}
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
       和详情页那个下拉是同一个字段。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
       <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
       ${g}
@@ -1768,9 +1951,24 @@ function buildGrid() {
 // 顺着"越来越熟"的方向走, 走到顶再回到未评
 const L_NEXT = { none: 4, 4: 3.5, 3.5: 3, 3: 2, 2: 1.5, 1.5: 1, 1: 0, 0: null };
 
-const putMeta = (id, body) => fetch(`/api/problems/${id}/meta`, {
-  method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
-});
+// 改标签的**唯一**出口(看板的熟练度菜单 / 详情页 / 坐标系上点方块都走这儿) ——
+// 服务器每次都会往 edits.jsonl 追一行, 所以顺手把时间轴的缓存作废。
+// 建题目文件夹的唯一出口(📋 TODO / 题单那格 / 坐标系上的 + 都走这儿) ——
+// 服务器会记一行"未做 → 进了库", 时间轴的分子分母都跟着变, 同样作废缓存。
+const postProblem = (query) => {
+  EDITS = null;
+  return api('/api/problems', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: String(query) }),
+  });
+};
+
+const putMeta = (id, body) => {
+  EDITS = null;
+  return fetch(`/api/problems/${id}/meta`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+  });
+};
 
 async function cycleL(id) {
   const rec = byId().get(id);
@@ -1791,6 +1989,16 @@ function flash(msg, ms = 5000) {
   FLASH_T = setTimeout(() => el.classList.remove('on'), ms);
 }
 
+// 没人接的报错一律亮出来。这一屏(复习)大量是 async: 一个 await 抛了, Vue 不会渲染任何
+// 东西, 页面就那么定在原地 —— 只有 console 里有一行, 而复习的时候没人开着 console。
+// 亮一条比什么都不说强: 至少知道该刷新, 而不是对着不动的卡面反复按键。
+const bang = (what, err) => {
+  console.error(what, err);
+  flash(`⚠ 前端出错(${what}): ${(err && err.message) || err} —— 刷新一下, 详情看 console`);
+};
+window.addEventListener('unhandledrejection', (e) => bang('异步', e.reason));
+window.addEventListener('error', (e) => { if (e.error) bang('脚本', e.error); });
+
 // 还没建文件夹的题, 点一下 = "开始这道题": 抓题面 + 建目录, 和题单 / 📋 TODO 同一条路。
 // 和题单那格(addFromList)对齐: 建中给个态, 失败留在原地并把原因写进 title ——
 // 早先这里是裸 fetch 且不看返回值, 会员题(题面抓不到)和离线都静默失败, 看着像没反应。
@@ -1803,10 +2011,7 @@ async function startProblem(id, chip) {
   badge.textContent = '…';
   let r;
   try {
-    r = await api('/api/problems', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: String(id) }),
-    });
+    r = await postProblem(id);
   } catch { r = null; }
   if (!r || !r.ok) {
     badge.textContent = old;
@@ -1832,7 +2037,7 @@ async function switchView(v) {
   // 按结构/按范式、熟练度筛选只对矩阵视图有意义
   $('#groupby').classList.toggle('hidden', v !== 'board');
   $('#fam-filter').classList.toggle('hidden', v !== 'board');
-  try { localStorage.setItem('lc-view', v); } catch (e) { /* private mode */ }
+  try { localStorage.setItem('lc-view2', v); } catch (e) { /* private mode */ }
   if (v === 'grid') {
     if (!PLAN) PLAN = await api('/api/plan');
     buildGrid();
@@ -1848,6 +2053,15 @@ async function reload() {
   loadTodo();                          // 刷新 📋 TODO 上的角标
   updateReviewBadge();                 // 🧠 复习上的到期数
 }
+
+// 正文(trick 文档 / 笔记 / 题解)里的题号链接 —— 详情浮层直接盖在当前浮层上面,
+// 关掉就回到原来读的地方, 不丢上下文。文档里的数字怎么变成链接见 linkifyPids。
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a.pid');
+  if (!a) return;
+  e.preventDefault();
+  openDetail(+a.dataset.pid);
+});
 
 // ---- wire global controls ----
 on('#sync', 'click', async () => { await fetch('/api/sync', { method: 'POST' }); reload(); });
@@ -1984,16 +2198,21 @@ document.addEventListener('keydown', (e) => {
     if (RV.open) { RV.onEsc(); return; }
     if (statsOpen()) { closeStats(); return; }
     if (!$('#lists-overlay').classList.contains('hidden')) { closeLists(); return; }
-    if (NOTE) { NOTE_EDITING ? exitNoteEdit(true) : closeNotes(); return; }
-    if (DOC) { DOC_EDITING ? exitDocEdit(true) : closeDoc(); return; }
+    // 详情浮层永远在最上面(#overlay 的 z-index 比别的浮层高一档), 所以先退它 ——
+    // 从 trick 文档里点题号进来的场景, Esc 一下回到文档, 再一下才关文档。
     if (CURRENT) {
       if (SOL_EDITING) { exitSolEdit(true); return; }
       EDITING ? exitEdit(true) : closeDetail();
       return;
     }
+    if (NOTE) { NOTE_EDITING ? exitNoteEdit(true) : closeNotes(); return; }
+    if (DOC) { DOC_EDITING ? exitDocEdit(true) : closeDoc(); return; }
   }
 });
 
-let startView = 'board';
-try { startView = localStorage.getItem('lc-view') || 'board'; } catch (e) { /* private mode */ }
+// 默认落在坐标系: 首页要先回答"我现在在哪、下一步练什么", 矩阵是查题的第二跳。
+// 键从 lc-view 换成 lc-view2 是一次性迁移 —— 老浏览器里存着的 'board' 不该把
+// 新默认值顶掉, 换个键等于所有人重新按新默认开一次, 之后再记各自的选择。
+let startView = 'grid';
+try { startView = localStorage.getItem('lc-view2') || 'grid'; } catch (e) { /* private mode */ }
 reload().then(() => switchView(startView));

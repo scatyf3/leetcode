@@ -55,7 +55,7 @@ _ 1 _ 3 _ 5 _ 6 _        target = 2
 
 ## 踩过的坑：`return mid`
 
-35 第一版最后一行写成 `return mid`，WA。
+LC 35 第一版最后一行写成 `return mid`，WA。
 `[1,3,5,6], target=2` 期望 `1`，返回 `0`。
 
 **不是 edge case，是每个「没找到」的用例都错，且恒定偏 1。**

@@ -1,7 +1,15 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "matrix"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
+  "techniques": [
+    "四边界 top/bottom/left/right, 走完一条边就收缩",
+    "两条守卫防单行/单列被输出两次",
+    "倒序 range 要写步长 -1"
+  ],
   "difficulty": "medium",
   "status": "solved",
   "familiarity": 4,
@@ -19,11 +27,11 @@
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-06",
-    "last_review": "2026-09-03",
-    "stability": 3.2494117658571677,
-    "difficulty": 6.7404595108297,
-    "reps": 2,
+    "due": "2026-09-13",
+    "last_review": "2026-09-06",
+    "stability": 6.728346299675288,
+    "difficulty": 7.821393497998797,
+    "reps": 3,
     "lapses": 0,
     "last_rating": 2
   }
