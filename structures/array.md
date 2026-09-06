@@ -28,18 +28,39 @@ given一个array，我们可以思考几个问题：
 1. 有无顺序，或者partial顺序(有序+rotate k)
 2. 有无重复
 3. index本身有无意义，如果index有意义，类似桶排序，用index做key 比naive hash更好
+4. 范围
+  1. 有没有0，有0导致乘法不可逆
+  2. 有没有负数，负数导致乘法要维护俩极值
+  3. 是否范围很小，能拿来桶排序(3)
+6. in place or not
+7. 是否是区间[s,e]，这部分参见 [[xxx]]
+8. stream, 295，这里的特点是给你一个按时序的1d元素，用途不明
 
 返回：
 1. 是否存在？t/f，某个value？
 2. 切片，这里都是坑
+  1. 细节
     1. 切片让你返回value还是index
     2. 这个切片是是否要求连续，有的会不要求连续！(subseq vs subarray)
+  2. 切片本身，切片本身的expend是否可逆
+    1. substr/sum 统计，可逆
+    2. 有0乘法，... 不可逆
+  3. 这个切片变化边界的时候怎么reset状态，l++？l跳转到某个index？l=r？
 
 
 ## 和其他结构的联系
 
-## 在array上的题型
+1. **语义替代**: hash，array可以做一个天然的以[0..n]的正int为key的hash
+2. 可以拿来做别的dataset的**building blocks**
+  1. 二叉树，有个二叉树序列化的题
+  2. bitmap
+  3. matrix 用stride之类的表示
+  4. heap
+  5. string，本质上是array但是不可变
+  6. graph
 
+
+## 在array上的题型
 
 ### 1. 双指针 (two-pointer)
 
@@ -52,10 +73,13 @@ given一个array，我们可以思考几个问题：
     3. 基于某些中心扩散 ⬅️➡️
 2. 对应两者同向运动还是相向运动
     1. 相向运动
-    2. 同向怎么做
-        - 一个快一点一个慢一点
-    3. 基于同向如何iterate，即是否能接受l-1有意义
-        - reset的
+    2. 同向怎么做iteration
+        - 一个快一点一个慢一点, 外层loop l(slow)，内层loop r(fast)
+        - 内层loop是skip没有意义的，还是贪婪添加，直到第一个没有意义的
+    3. reset
+        - l++？
+        - l跳转到某个index？
+        - l=r？
 
 同一个序列上，按两个指针怎么动分四族：
 
