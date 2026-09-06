@@ -27,5 +27,15 @@
       "滑动窗口，不对称就收缩左边界",
       "反转后求最长公共子串"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-08",
+    "last_review": "2026-09-06",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
   }
 }

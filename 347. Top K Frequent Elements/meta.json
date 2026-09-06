@@ -1,7 +1,19 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "array",
+    "hash-table",
+    "heap"
+  ],
+  "paradigms": [
+    "heap",
+    "counting"
+  ],
+  "techniques": [
+    "Counter 统计频次",
+    "大小固定为 k 的最小堆: O(n + m log k)",
+    "桶排序: 下标 = 频次, O(n) 突破比较排序 O(m log m) 下界",
+    "能开桶的前提: 频次有界在 [1, n]"
+  ],
   "difficulty": "medium",
   "status": "solved",
   "familiarity": 1.5

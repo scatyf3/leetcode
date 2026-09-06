@@ -30,41 +30,62 @@ button.ghost{background:transparent;color:var(--dim);border:1px solid var(--line
 /* ---- grouped rows: cluster by data structure, one row per problem ---- */
 main{padding:18px 20px;overflow:auto}
 .empty-hint{color:var(--dim)}
-.groups{max-width:1100px}
-.group{display:flex;border:1px solid var(--line);border-radius:10px;
+.groups{max-width:1340px}
+.group{display:flex;border:1px solid var(--line);border-radius:12px;
   margin-bottom:14px;overflow:hidden;background:var(--panel)}
 
 /* left sidebar labelling the cluster (e.g. "array") */
-.group-label{flex:0 0 128px;background:var(--panel2);border-right:1px solid var(--line);
-  padding:14px 16px;display:flex;flex-direction:column;gap:4px;justify-content:center;
-  position:sticky;left:0}
+/* 顶对齐, 不居中: 一组有 29 行时居中的标签会飘到块的正中间, 离组的开头十万八千里 */
+.group-label{flex:0 0 148px;background:var(--panel2);border-right:1px solid var(--line);
+  padding:13px 15px;display:flex;flex-direction:column;gap:5px;justify-content:flex-start}
 .group-label.openable{cursor:pointer}
 .group-label.openable:hover{background:var(--chip)}
-.group-name{font-weight:650;font-size:15px}
+.group-name{font-weight:650;font-size:15px;line-height:1.25;word-break:break-word}
 .group-label.openable:hover .group-name{color:var(--accent)}
-.group-count{color:var(--dim);font-size:12px}
-.group-open{color:var(--accent);font-size:11px;opacity:0;transition:opacity .1s}
+.group-count{color:var(--dim);font:11.5px/1 Consolas,monospace}
+/* 熟练度分布: 这一组握得怎么样, 不用逐行数 L 标 */
+.group-bar{display:flex;height:5px;border-radius:3px;overflow:hidden;background:var(--chip);margin-top:2px}
+.group-bar i{display:block;min-width:2px}
+.group-bar i.f0{background:var(--fam0)}.group-bar i.f1{background:var(--fam1)}
+.group-bar i.f1_5{background:var(--fam15)}.group-bar i.f2{background:var(--fam2)}
+.group-bar i.f3{background:var(--fam3)}.group-bar i.f3_5{background:var(--fam35)}
+.group-bar i.f4{background:var(--fam4)}.group-bar i.fnone{background:var(--line)}
+.group-open{color:var(--accent);font-size:11px;margin-top:auto;padding-top:8px;
+  opacity:0;transition:opacity .1s}
 .group-label.openable:hover .group-open{opacity:1}
 
-.group-rows{flex:1;min-width:0}
-.row{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;
+/* 列在 .group-rows 上定义, 每行用 subgrid 挂上去 —— 独立的 grid 是各画各的,
+   对不齐就没有"× 范式"那一列可扫。不支持 subgrid 时退回同样的显式列宽。 */
+.group-rows{flex:1;min-width:0;display:grid;column-gap:12px;
+  grid-template-columns:8px 30px 40px minmax(120px,1.05fr) minmax(96px,auto) minmax(0,1.9fr)}
+.row{display:grid;grid-column:1/-1;grid-template-columns:subgrid;
+  align-items:center;row-gap:4px;padding:8px 14px;cursor:pointer;
   border-bottom:1px solid var(--line)}
+@supports not (grid-template-columns:subgrid){
+  .row{grid-template-columns:8px 30px 40px minmax(120px,1.05fr) minmax(96px,auto) minmax(0,1.9fr)}
+}
 .row:last-child{border-bottom:0}
 .row:hover{background:var(--panel2)}
 .row.todo{opacity:.55}
 .dot{width:8px;height:8px;border-radius:50%;flex:none}
 .dot.easy{background:var(--easy)}.dot.medium{background:var(--medium)}
 .dot.hard{background:var(--hard)}.dot.none{background:var(--dim)}
-.row-id{color:var(--dim);font:12px/1 Consolas,monospace;flex:none;width:44px}
-.row-title{font-size:13.5px;font-weight:550;flex:0 1 auto;white-space:nowrap;
+.row-id{color:var(--dim);font:12px/1 Consolas,monospace;text-align:right}
+.row-title{font-size:13.5px;font-weight:550;white-space:nowrap;
   overflow:hidden;text-overflow:ellipsis}
-.row-tags{display:flex;flex-wrap:wrap;gap:5px;margin-left:auto;justify-content:flex-end}
+.row-para{display:flex;flex-wrap:wrap;gap:4px}
+.row-trick{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 
 .tag{font-size:11.5px;border-radius:6px;padding:2px 8px;line-height:1.5;white-space:nowrap}
 .tag.para{background:color-mix(in srgb,var(--accent) 18%,transparent);
   color:var(--accent);font-weight:600}
-.tag.trick{background:color-mix(in srgb,var(--accent2) 16%,transparent);
-  color:var(--accent2);border:1px solid color-mix(in srgb,var(--accent2) 30%,transparent)}
+/* trick 是注脚不是维度: 去掉实底和硬边框, 让范式那一列先被看见 */
+.tag.trick{background:transparent;font-size:11px;
+  color:color-mix(in srgb,var(--accent2) 62%,var(--dim));
+  border:1px solid color-mix(in srgb,var(--accent2) 22%,var(--line))}
+.row:hover .tag.trick{color:var(--accent2);
+  border-color:color-mix(in srgb,var(--accent2) 40%,transparent)}
+.tag-none{color:var(--line);font:11.5px/1.5 Consolas,monospace;padding:2px 8px}
 
 /* ---- familiarity 熟练度: L1 熟 → L4 完全不会, 方块标签(和难度圆点区分) ---- */
 .fam{flex:none;width:26px;text-align:center;font:700 10.5px/1.6 Consolas,monospace;
@@ -77,8 +98,8 @@ main{padding:18px 20px;overflow:auto}
 .fam.f3_5{background:color-mix(in srgb,var(--fam35) 20%,transparent);color:var(--fam35)}
 .fam.f4{background:color-mix(in srgb,var(--fam4) 20%,transparent);color:var(--fam4)}
 
-.fam-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:1100px;
-  margin:0 0 14px;color:var(--dim);font-size:12px}
+.fam-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px;max-width:1340px;
+  margin:0 0 14px;color:var(--dim);font-size:11.5px}
 .fam-legend .sep{opacity:.4;margin:0 4px}
 
 .row .fam{cursor:pointer}
@@ -112,6 +133,14 @@ main{padding:18px 20px;overflow:auto}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;
   align-items:center;justify-content:center;padding:24px;z-index:10}
 .overlay.hidden{display:none}
+/* 详情浮层比别的浮层高一档: 在 trick 文档里点题号时它盖在文档上面,
+   Esc 退回文档而不是把文档也一起关掉(顺序见 app.js 的 Escape 分支)。 */
+#overlay{z-index:11}
+
+/* 正文里的题号 —— 看着像链接但不是 <a href>, 点击走 app.js 的代理 */
+.pid{color:var(--accent);cursor:pointer;white-space:nowrap;
+  border-bottom:1px dashed color-mix(in srgb,var(--accent) 55%,transparent)}
+.pid:hover{background:color-mix(in srgb,var(--accent) 16%,transparent);border-radius:3px}
 .detail{background:var(--bg);border:1px solid var(--line);border-radius:12px;
   width:min(1200px,96vw);height:min(860px,92vh);display:flex;flex-direction:column;
   overflow:hidden}
@@ -201,6 +230,12 @@ main{padding:18px 20px;overflow:auto}
 .note-preview pre code{background:none;padding:0}
 .note-preview table{border-collapse:collapse}
 .note-preview th,.note-preview td{border:1px solid var(--line);padding:4px 10px}
+/* 换成 marked 之后才会出现的三种结构(手写渲染器压根不认): 嵌套列表、分隔线、任务框 */
+.note-preview ul,.note-preview ol{padding-left:1.6em;margin:.35em 0}
+.note-preview li>ul,.note-preview li>ol{margin:.2em 0}      /* 嵌套层不要再撑开一行 */
+.note-preview li>p{margin:.25em 0}                          /* 松散列表: 别拉成段落间距 */
+.note-preview hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+.note-preview input[type=checkbox]{margin-right:6px;vertical-align:-1px}
 .note-preview blockquote{border-left:3px solid var(--accent);margin:0;
   padding-left:12px;color:var(--dim)}
 
@@ -242,43 +277,102 @@ main{padding:18px 20px;overflow:auto}
 /* header view switcher */
 .views{display:flex;gap:2px;background:var(--panel2);border:1px solid var(--line);
   border-radius:8px;padding:2px}
-.view-tab{background:transparent;color:var(--dim);border-radius:6px;padding:4px 12px;font-size:13px}
+.view-tab{background:transparent;color:var(--dim);border-radius:6px;padding:4px 12px;font-size:13px;white-space:nowrap}
 .view-tab:hover{background:var(--chip);filter:none}
 .view-tab.active{background:var(--accent);color:#fff}
 
 #grid-view{max-width:1180px}
 .gr-sec{margin-bottom:38px}
-.gr-sec-h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.gr-sec-h h2{font-size:16px;margin:0;font-weight:650}
-.gr-sec-h p{margin:0;color:var(--dim);font-size:12.5px}
+.gr-sec-h{margin-bottom:14px}
+.gr-sec-h h2{font-size:16px;margin:0 0 5px;font-weight:650;display:flex;align-items:center;gap:9px}
+.gr-sec-n{width:20px;height:20px;border-radius:6px;display:grid;place-items:center;
+  font:600 11px/1 Consolas,monospace;color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 14%,transparent);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
+.gr-sec-h p{margin:0;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:94ch}
+
+/* --- 概览条: 阶段 + 这阶段要推到底的格子。下面三段都是它的展开 --- */
+.gr-hero{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.1fr);gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:14px;
+  overflow:hidden;margin-bottom:32px}
+.gr-hero-l,.gr-hero-r{background:var(--panel);padding:16px 18px 15px;
+  display:flex;flex-direction:column;gap:9px}
+.gr-hero-l{background:linear-gradient(180deg,color-mix(in srgb,var(--medium) 10%,var(--panel)),var(--panel) 62%)}
+.gr-hero-k{font:600 10.5px/1 Consolas,monospace;letter-spacing:.09em;color:var(--dim)}
+.gr-hero-ph{margin:0;font-size:19px;font-weight:650;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.gr-hero-n{font:600 11px/1.7 Consolas,monospace;padding:1px 8px;border-radius:6px;
+  background:var(--medium);color:#1b1f27}
+.gr-hero-when{font:12.5px/1.5 Consolas,monospace;color:var(--dim);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.gr-hero-left{color:var(--medium);font-weight:600}
+.gr-hero-goal{font-size:12.5px;line-height:1.7}
+.gr-hero-serves{margin-top:auto;padding-top:9px;border-top:1px dashed var(--line);
+  font-size:11.5px;color:var(--dim)}
+.gr-hero-goals{display:flex;flex-direction:column;gap:11px}
+.gr-hg{display:flex;flex-direction:column;gap:5px}
+.gr-hg-t{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.gr-hg-ar{color:var(--dim);font-weight:400}
+.gr-hg-bar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.gr-hg-bar i{display:block;height:100%;border-radius:4px;transition:width .3s ease}
+.gr-hg-n{display:flex;align-items:baseline;gap:5px;font:12px/1 Consolas,monospace;color:var(--dim)}
+.gr-hg-n b{font-size:15px;color:var(--fg);font-variant-numeric:tabular-nums}
+.gr-hg-gap{margin-left:auto;color:var(--medium)}
+.gr-hg-gap.met{color:var(--accent2)}
+.gr-hero-cov{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.gr-st4{display:flex;flex-direction:column;gap:4px;min-width:0}
+.gr-st4-t{font:10.5px/1.3 Consolas,monospace;color:var(--dim);white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.gr-st4-n{font:600 15px/1 Consolas,monospace;font-variant-numeric:tabular-nums}
+.gr-st4-n small{font-size:11px;font-weight:400;color:var(--dim)}
+.gr-st4-bar{height:4px;border-radius:2px;background:var(--chip);overflow:hidden}
+.gr-st4-bar i{display:block;height:100%;border-radius:2px}
+.gr-st4-bar i.built{background:var(--accent2)}
 .gr-note{color:var(--dim);font-size:12.5px;line-height:1.7;max-width:80ch;
   border-left:2px solid var(--line);padding-left:12px;margin:14px 0 0}
 
 /* --- the grid: tiers down, stages across --- */
-.gr-matrix{display:grid;grid-template-columns:200px repeat(3,1fr);gap:8px}
-.gr-colh{display:flex;flex-direction:column;gap:2px;padding:0 2px 4px}
+.gr-matrix{display:grid;grid-template-columns:212px repeat(3,1fr);gap:12px}
+/* 列头顶一条色带, 深浅 = 这一列的深度 —— 和格子里的进度条同一套语汇 */
+.gr-colh{display:flex;flex-direction:column;gap:3px;padding:9px 2px 6px;border-top:2px solid var(--line)}
+.gr-colh[data-s="1"]{border-top-color:color-mix(in srgb,var(--accent) 32%,var(--line))}
+.gr-colh[data-s="2"]{border-top-color:color-mix(in srgb,var(--accent) 66%,var(--line))}
+.gr-colh[data-s="3"]{border-top-color:var(--accent)}
 .gr-colh-t{font-weight:650;font-size:13.5px}
 .gr-colh-d{color:var(--dim);font-size:11.5px;line-height:1.4}
 .gr-rowh{display:flex;flex-direction:column;gap:3px;justify-content:center;
   padding:12px 14px 12px 0;border-right:1px solid var(--line)}
-.gr-rowh-t{font-weight:650;font-size:14px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+.gr-rowh-t{font-weight:650;font-size:14.5px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
   background:transparent;border:0;padding:0;color:var(--fg);cursor:pointer;text-align:left;font-family:inherit}
 .gr-rowh-t:hover{color:var(--accent);filter:none}
+.gr-tno{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;
+  font:600 12px/1 Consolas,monospace;background:var(--chip);color:var(--dim);border:1px solid var(--line)}
+.gr-rowh-t:hover .gr-tno{border-color:var(--accent);color:var(--accent)}
+.gr-rowh-nm{display:inline-flex;align-items:baseline;gap:5px}
 .gr-jump-x{color:var(--dim);font-size:11px;transition:transform .15s}
 .gr-rowh-t:hover .gr-jump-x{color:var(--accent);transform:translateY(2px)}
-.gr-rowh-n{font:11px/1 Consolas,monospace;color:var(--dim);font-weight:400}
-.gr-rowh-d{color:var(--dim);font-size:11.5px;line-height:1.45}
+/* 层号那颗圆标占 22+9, 下面两行缩进对齐到层名, 免得挂在圆标底下 */
+.gr-rowh-n{flex-basis:100%;padding-left:31px;font:11px/1.4 Consolas,monospace;color:var(--dim);font-weight:400}
+.gr-rowh-d{padding-left:31px;color:var(--dim);font-size:11.5px;line-height:1.45}
 
-.gr-cell{background:var(--panel);border:1px solid var(--line);border-radius:10px;
-  padding:12px 14px 11px;display:flex;flex-direction:column;gap:9px;min-height:96px}
+.gr-cell{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:13px 15px 12px;display:flex;flex-direction:column;gap:10px;min-height:102px;
+  transition:border-color .15s}
+.gr-cell:hover{border-color:color-mix(in srgb,var(--accent) 42%,var(--line))}
+.gr-cell.zero{background:color-mix(in srgb,var(--panel) 55%,transparent)}
+.gr-cell.zero .gr-frac{color:var(--dim)}
 .gr-cell.target{border-color:var(--medium);
-  box-shadow:0 0 0 2px color-mix(in srgb,var(--medium) 22%,transparent)}
+  background:linear-gradient(180deg,color-mix(in srgb,var(--medium) 11%,var(--panel)),var(--panel) 62%);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--medium) 15%,transparent)}
+/* 当前该站的格子: 只描个边太轻, 挂个角标才一眼看得见 */
+.gr-now{position:absolute;top:-8px;right:12px;font:600 10px/1.6 Consolas,monospace;
+  padding:0 8px;border-radius:5px;background:var(--medium);color:#1b1f27}
 .gr-cell-top{display:flex;align-items:baseline;gap:8px}
-.gr-frac{font:600 22px/1 Consolas,monospace;font-variant-numeric:tabular-nums}
+.gr-frac{font:600 26px/1 Consolas,monospace;font-variant-numeric:tabular-nums}
 .gr-frac small{font-size:13px;font-weight:400;color:var(--dim)}
 .gr-pct{margin-left:auto;font:11.5px/1 Consolas,monospace;color:var(--dim)}
-.gr-bar{height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
-.gr-bar i{display:block;height:100%;border-radius:3px;transition:width .3s ease}
+.gr-bar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
+.gr-bar i{display:block;height:100%;border-radius:4px;transition:width .3s ease}
 .gr-cell-foot{display:flex;flex-wrap:wrap;gap:6px;min-height:20px;align-items:center}
 .gr-badge{font:600 10.5px/1.6 Consolas,monospace;padding:2px 7px;border-radius:5px;
   color:var(--medium);background:color-mix(in srgb,var(--medium) 15%,transparent);
@@ -297,14 +391,16 @@ main{padding:18px 20px;overflow:auto}
 .gr-key i{width:13px;height:13px;border-radius:4px;display:block}
 
 /* --- timeline: four numbered phases, past / active / future --- */
-.gr-tl{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.gr-tl{display:grid;grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);border-radius:12px;overflow:hidden}
 .gr-ph{position:relative;padding:14px 16px 16px;border-right:1px solid var(--line);
   display:flex;flex-direction:column;gap:8px}
 .gr-ph:last-child{border-right:0}
-.gr-ph::before{content:"";position:absolute;top:-1px;left:0;width:100%;height:2px;background:var(--line)}
+.gr-ph::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:var(--line)}
 .gr-ph.past::before{background:var(--accent)}
 .gr-ph.active::before{background:var(--medium)}
-.gr-ph.active{background:var(--panel)}
+.gr-ph.active{background:linear-gradient(180deg,color-mix(in srgb,var(--medium) 9%,var(--panel)),var(--panel) 58%)}
+.gr-ph.future h3{color:var(--dim)}
 .gr-ph h3{margin:0;font-size:14.5px;font-weight:650}
 .gr-ph-n{display:flex;align-items:center;gap:8px;font:600 11px/1 Consolas,monospace;color:var(--dim)}
 .gr-live{background:var(--medium);color:#1b1f27;padding:2px 7px;border-radius:5px;font-weight:600}
@@ -340,7 +436,11 @@ main{padding:18px 20px;overflow:auto}
 .gr-tier[data-t="1"]{border-color:color-mix(in srgb,var(--accent) 45%,transparent);color:var(--accent)}
 .gr-tier.low{border-style:dashed;color:var(--dim)}
 .gr-sub{font-size:11.5px;color:var(--dim)}
-.gr-grp-c{margin-left:auto;font:12px/1 Consolas,monospace;color:var(--dim)}
+.gr-grp-c{margin-left:auto;display:flex;align-items:center;gap:8px;
+  font:12px/1 Consolas,monospace;color:var(--dim);font-variant-numeric:tabular-nums}
+.gr-grp-c b{color:var(--fg)}
+.gr-grp-bar{display:block;width:54px;height:4px;border-radius:2px;background:var(--chip);overflow:hidden}
+.gr-grp-bar u{display:block;height:100%;background:var(--accent);border-radius:2px}
 .gr-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:5px;margin-top:8px}
 .gr-chip{display:flex;align-items:center;gap:8px;width:100%;text-align:left;cursor:pointer;
   background:var(--panel);border:1px solid var(--line);border-radius:8px;
@@ -376,6 +476,7 @@ main{padding:18px 20px;overflow:auto}
 .gr-st:hover{outline:2px solid var(--accent2);outline-offset:1px}
 
 @media (max-width:900px){
+  .gr-hero{grid-template-columns:1fr}
   .gr-matrix{grid-template-columns:1fr 1fr}
   .gr-matrix>div:first-child,.gr-colh{display:none}
   .gr-rowh{grid-column:1/-1;border-right:0;border-top:1px solid var(--line);padding:14px 0 4px}
@@ -383,7 +484,7 @@ main{padding:18px 20px;overflow:auto}
   .gr-ph{border-right:0;border-bottom:1px solid var(--line)}
   .gr-serves{margin-top:0}
 }
-@media (prefers-reduced-motion:reduce){.gr-bar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.gr-bar i,.gr-hg-bar i{transition:none}}
 /* ---- 📋 TODO 浮层: 数据源是 notes/todo.md ---- */
 .todo-wrap{position:relative}
 .todo-n{display:inline-block;min-width:17px;margin-left:6px;padding:0 5px;border-radius:9px;
@@ -629,6 +730,25 @@ main{padding:18px 20px;overflow:auto}
 .b-s5{background:color-mix(in srgb,var(--fam2) 55%,var(--fam1))}
 .b-s6{background:var(--fam1)}
 .b-s7{background:color-mix(in srgb,var(--fam1) 70%,#fff)}
+
+/* 掌握度时间轴: 段的颜色沿用看板那套 --fam0..4 / 坐标系那套 .s0-.s3(它们本来就带 background),
+   这里只补熟练度这几档和"未做"。未做用 --chip: 比未评还淡一档, 才看得出"还没进库" */
+.chart i.f0,.skey i.f0{background:var(--fam0)}
+.chart i.f1,.skey i.f1{background:var(--fam1)}
+.chart i.f1_5,.skey i.f1_5{background:var(--fam15)}
+.chart i.f2,.skey i.f2{background:var(--fam2)}
+.chart i.f3,.skey i.f3{background:var(--fam3)}
+.chart i.f3_5,.skey i.f3_5{background:var(--fam35)}
+.chart i.f4,.skey i.f4{background:var(--fam4)}
+.chart i.fnone,.skey i.fnone{background:var(--dim);opacity:.5}   /* 建了但没评 */
+.chart i.fgone{background:var(--chip)}                           /* 还没建文件夹 */
+/* 图上"未做"就该是留白, 但图例里一块白方块等于没有, 给它描个边 */
+.skey i.fgone{background:var(--chip);border:1px solid var(--line)}
+/* 按 L / 按 S 的切换, 顶到标题行最右边。.tab 基础样式是给页签条用的(上圆角), 这里改成小胶囊 */
+.tl-mode{margin-left:auto;display:inline-flex;gap:2px;flex:none}
+.tl-mode .tab{border-radius:6px;padding:3px 9px;font-size:11.5px;border:1px solid transparent}
+.tl-mode .tab:hover{color:var(--fg)}
+.tl-mode .tab.on{background:var(--chip);color:var(--fg);border-color:var(--line)}
 
 /* 复习完的空屏上那个「看看复习进度」 */
 .rv-stats{margin-top:14px}

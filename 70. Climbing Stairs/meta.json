@@ -23,5 +23,15 @@
       "回溯枚举所有走法再计数",
       "贪心：尽量多走两步"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-14",
+    "last_review": "2026-09-06",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
   }
 }

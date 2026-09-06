@@ -1,7 +1,15 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "matrix"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "转置 + 每行反转 = 顺时针 90°",
+    "转置只走上三角 j>i, 否则每对换两次",
+    "一趟版: 四元环搬运, i 走 n//2 而 j 走 (n+1)//2"
+  ],
   "difficulty": "medium",
   "status": "solved",
   "familiarity": 4,

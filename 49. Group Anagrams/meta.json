@@ -1,7 +1,17 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash",
+    "counting"
+  ],
+  "techniques": [
+    "sorted(s) 当 key 归组",
+    "26 位计数元组当 key 可把 O(k log k) 降到 O(k)",
+    "defaultdict(list) 省掉 if not in"
+  ],
   "difficulty": "medium",
   "status": "solved",
   "familiarity": 1,

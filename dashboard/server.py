@@ -41,8 +41,10 @@ NOTES_DIR = REPO / "notes"         # cross-cutting notes, not tied to one proble
 SCRATCH = "scratch.md"             # 随想收件箱: 速记先落这里, 想清楚了再挪走
 PORT = 8765
 REVIEW_LOG = HERE / "reviews.jsonl"   # 每次评分追加一行, git 追踪, 留给以后跑 FSRS 优化器
+EDIT_LOG = HERE / "edits.jsonl"       # 每次改标签/难度/状态追加一行, git 追踪, 留给以后画"标签什么时候长出来的"
 SESSION_FILE = HERE / "session.json"  # 当前这轮复习的队列快照, **易失状态**, 不进 git
 _REVIEW_LOCK = threading.Lock()       # ThreadingHTTPServer + meta.json 读改写 + 日志追加, 必须串行
+VENDOR_FILES = ("/vendor/vue.global.prod.js", "/vendor/marked.min.js")
 
 FOLDER_RE = re.compile(r"^(\d+)\.\s*(.+)$")
 # .md files that count as "the note" (first match wins), in priority order
@@ -364,25 +366,75 @@ def append_scratch(text: str) -> dict:
     return {"ok": True, "file": SCRATCH}
 
 
+LOGGED_FIELDS = ("structures", "paradigms", "techniques", "difficulty", "status", "familiarity")
+LIST_FIELDS = ("structures", "paradigms", "techniques")
+
+
+def append_edit_log(pid: int, before: dict, after: dict):
+    """把这次保存**真正改动**的字段追加成日志行, 一个字段一行。
+
+    meta.json 是覆盖写的, 改完就没了"上一版长什么样" —— git 里那点粒度是
+    "一个 commit 一堆题", 重建不出"哪天给哪道题加了 two-pointer"。这里补的就是那条时间轴。
+
+    只记变化: 前端每次都 PATCH 全量字段, 不 diff 的话每保存一次就多几行噪音。
+    """
+    ts, date = int(time.time()), today_str()
+    rows = []
+    for k in LOGGED_FIELDS:
+        old, cur = before.get(k), after.get(k)
+        if old == cur:
+            continue
+        if k in LIST_FIELDS:
+            o, c = list(old or []), list(cur or [])
+            rows.append({"ts": ts, "date": date, "id": pid, "field": k,
+                         "added": [x for x in c if x not in o],
+                         "removed": [x for x in o if x not in c]})
+        else:
+            rows.append({"ts": ts, "date": date, "id": pid, "field": k,
+                         "from": old, "to": cur})
+    write_edit_rows(rows)
+
+
+def write_edit_rows(rows: list):
+    if not rows:
+        return
+    with EDIT_LOG.open("a", encoding="utf-8") as f:
+        for r in rows:
+            f.write(json.dumps(r, ensure_ascii=False) + "\n")
+
+
+def log_problem_created(pid: int):
+    """新建题目文件夹也记一行。
+
+    时间轴上"未做 → 进了库"那一步全靠它 —— 没有这行的话, 一道题要等到第一次被打标签
+    才会从"未做"里消失, 中间那段"建了但还没碰"就看不见了。
+    """
+    write_edit_rows([{"ts": int(time.time()), "date": today_str(), "id": pid,
+                      "field": "exists", "from": None, "to": True}])
+
+
 def save_meta(pid: int, payload: dict):
     with db() as con:
         r = con.execute("SELECT folder FROM problems WHERE id=?", (pid,)).fetchone()
     if not r:
         return False
     folder = r["folder"]
-    meta = read_meta(folder)
-    for k in ("structures", "paradigms", "techniques", "difficulty", "status", "complexity", "quiz"):
-        if k in payload:
-            meta[k] = payload[k]
-    if "familiarity" in payload:
-        # 0 是 L0(英语讲得清), 不是"未评" —— 未评就是没有这个键
-        v = payload["familiarity"]
-        if v is None or v == "":
-            meta.pop("familiarity", None)
-        else:
-            meta["familiarity"] = fam_num(v)
-    write_meta(folder, meta)
-    sync()  # cheap for small repos; keeps index consistent
+    with _REVIEW_LOCK:   # meta.json 读改写 + 日志追加, 和评分那条路一样必须串行
+        meta = read_meta(folder)
+        before = {k: meta.get(k) for k in LOGGED_FIELDS}
+        for k in ("structures", "paradigms", "techniques", "difficulty", "status", "complexity", "quiz"):
+            if k in payload:
+                meta[k] = payload[k]
+        if "familiarity" in payload:
+            # 0 是 L0(英语讲得清), 不是"未评" —— 未评就是没有这个键
+            v = payload["familiarity"]
+            if v is None or v == "":
+                meta.pop("familiarity", None)
+            else:
+                meta["familiarity"] = fam_num(v)
+        write_meta(folder, meta)
+        append_edit_log(pid, before, meta)
+        sync()  # cheap for small repos; keeps index consistent
     return True
 
 
@@ -519,17 +571,17 @@ def reset_card(pid: int) -> bool:
         return True
 
 
-def read_reviews() -> list:
-    """把 reviews.jsonl 整个读出来给 📈 进度用。
+def read_jsonl(path: Path) -> list:
+    """把一个只追加的日志整个读出来。
 
-    这个文件是**只追加**的历史, 所以坏行(半行/手改坏了)直接跳过而不是报错 —— 一行读不动
-    不该让整页图表打不开。返回的每条都是 append_review_log 写进去的那个 dict 原样。
+    坏行(写了一半/手改坏了)直接跳过而不是报错 —— 一行读不动不该让整页图表打不开。
+    返回的每条都是当初写进去的那个 dict 原样。
     """
-    if not REVIEW_LOG.exists():
+    if not path.exists():
         return []
     out = []
     try:
-        with REVIEW_LOG.open(encoding="utf-8") as f:
+        with path.open(encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -543,6 +595,16 @@ def read_reviews() -> list:
     except OSError:
         return []
     return out
+
+
+def read_reviews() -> list:
+    """reviews.jsonl 全部行, 给 📈 进度用。"""
+    return read_jsonl(REVIEW_LOG)
+
+
+def read_edits() -> list:
+    """edits.jsonl 全部行: 标签/难度/状态的改动时间轴。"""
+    return read_jsonl(EDIT_LOG)
 
 
 def read_lists() -> dict:
@@ -583,10 +645,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, (HERE / "app.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
         if path == "/styles.css":
             return self._send(200, (HERE / "styles.css").read_text(encoding="utf-8"), "text/css; charset=utf-8")
-        # 复习面板用的 Vue, 存在仓库里不走 CDN(见 README「为什么不用构建」)。
-        # 白名单单文件, 不做目录遍历 —— 这个 server 只在本地跑, 但也没必要开个读文件的口子。
-        if path == "/vendor/vue.global.prod.js":
-            return self._send(200, (HERE / "vendor" / "vue.global.prod.js").read_text(encoding="utf-8"),
+        # 复习面板用的 Vue + 文档渲染用的 marked, 都存在仓库里不走 CDN(见 README「为什么不用构建」)。
+        # 白名单, 不做目录遍历 —— 这个 server 只在本地跑, 但也没必要开个读文件的口子。
+        # 往 vendor/ 里加文件时**这里也要加一行**, 否则浏览器拿到 404:
+        # app.js 的 md() 会退化成纯文本(整篇 markdown 原样显示), 看起来像"渲染坏了"。
+        if path in VENDOR_FILES:
+            return self._send(200, (HERE / "vendor" / path.split("/")[-1]).read_text(encoding="utf-8"),
                               "text/javascript; charset=utf-8")
         if path == "/api/problems":
             return self._send(200, list_problems())
@@ -598,6 +662,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, read_session())
         if path == "/api/reviews":
             return self._send(200, {"reviews": read_reviews()})
+        if path == "/api/edits":
+            return self._send(200, {"edits": read_edits()})
         if path == "/api/notes":
             return self._send(200, list_notes())
         m = re.match(r"^/api/notes/(.+)$", path)
@@ -643,6 +709,8 @@ class Handler(BaseHTTPRequestHandler):
             except scaffold.ScaffoldError as e:
                 return self._send(400, {"ok": False, "error": str(e)})
             if r.get("created"):
+                with _REVIEW_LOCK:
+                    log_problem_created(int(r["id"]))
                 sync()
             return self._send(200, r)
         self._send(404, {"error": "not found"})
