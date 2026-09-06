@@ -8,6 +8,7 @@
 把响应预先写成同名的 .json 文件:
 
     /api/plan            -> api/plan.json
+    /api/syntax          -> api/syntax.json
     /api/problems        -> api/problems.json
     /api/problems/98     -> api/problems/98.json
     /api/notes           -> api/notes.json
@@ -33,6 +34,10 @@ DEFAULT_OUT = REPO / "dist"
 # 注意这只挡住看板; 仓库是 public 的, notes/ 在 GitHub 上照样能直接看到。
 EXPORT_NOTES = False
 PRIVATE_NOTES = {"scratch.md", "todo.md"}
+
+# 语法卡组照常上线 —— syntax/*.md 里就是 Python 语法坑, 没有私人内容, 而且仓库本来就是
+# public 的。只读站上它退化成纯自测(空格揭晓 -> 下一张, 不记录), 和题目牌组一个待遇。
+EXPORT_SYNTAX = True
 
 # vendor/vue.global.prod.js 是**存在仓库里的**, 不走 CDN —— 本地看板断网也要能用,
 # 而且 CI 里没有 node, 不能有构建步骤。见 dashboard/README.md 的「为什么不用构建」。
@@ -62,6 +67,10 @@ def export(out: Path) -> dict:
     write_json(api / "problems.json", problems)
     for p in problems:
         write_json(api / "problems" / f"{p['id']}.json", server.get_detail(p["id"]))
+
+    # 第二个牌组。不导的话前端拉到空壳 -> 语法队列是 0, 页面照常(见 app.js 的 reload)
+    write_json(api / "syntax.json",
+               server.syntax_list() if EXPORT_SYNTAX else {"cards": [], "orphans": []})
 
     write_json(api / "plan.json", server.read_plan())     # 坐标系的分层 + 时间线
     write_json(api / "lists.json", server.read_lists())   # 题单定义, 只读站照样能看进度
@@ -100,7 +109,8 @@ def export(out: Path) -> dict:
     out.joinpath("index.html").write_text(build_index(), encoding="utf-8")
     (out / ".nojekyll").touch()             # Pages 别拿 Jekyll 处理这堆文件
 
-    return {"problems": n, "docs": docs, "notes": len(notes)}
+    return {"problems": n, "docs": docs, "notes": len(notes),
+            "syntax": len(server.syntax_list()["cards"]) if EXPORT_SYNTAX else 0}
 
 
 def build_index() -> str:
@@ -123,8 +133,8 @@ def main():
     out = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else DEFAULT_OUT
     stat = export(out)
     size = sum(f.stat().st_size for f in out.rglob("*") if f.is_file())
-    print(f"exported {stat['problems']} problems, {stat['docs']} docs, "
-          f"{stat['notes']} notes -> {out}  ({size / 1024:.0f} KB)")
+    print(f"exported {stat['problems']} problems, {stat['syntax']} syntax cards, "
+          f"{stat['docs']} docs, {stat['notes']} notes -> {out}  ({size / 1024:.0f} KB)")
 
 
 if __name__ == "__main__":
