@@ -12,7 +12,7 @@
   ],
   "difficulty": "hard",
   "status": "solved",
-  "familiarity": 3,
+  "familiarity": 2,
   "complexity": {
     "time": "O(n)",
     "space": "O(1)"

@@ -29,3 +29,26 @@ l(r) 单调不减:r 右移时,最小合法左边界不会往左退。这条才�
 
 还有个问题，official的解信息量都很大，我觉得我无法一次写出来这么信息压缩的题解，一个sde的思路是封装，比如这些indexing写好接口，就不raw的再想一遍他们了。lc的最优题解不追求这样。我感觉很矛盾和困难，有任何推荐的办法吗
 
+---
+
+第二趟，我知道要维护last seen然后来收缩左窗口， 根据testcase写出
+```python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        last_seen_index = {}
+        l=0
+        max_len=1
+        for r,c in enumerate(s):
+            if c in last_seen_index:
+                max_len=max(r-l,max_len) # 正常的距离是r-l+1，然而此时是第一个invalid，然后又要-1
+                l=max(l, last[c] + 1) # 这里同时处理边界和非边界
+            last_seen_index[c]=r
+            r+=1
+        return max_len
+```
+
+这里的问题是无法分辨两种情况
+1. 遇到重复，收缩左 r-l
+2. 全无重复r-l+1
+
+所以l+=1好，还是跳到新增的右侧元素last seen+1好
