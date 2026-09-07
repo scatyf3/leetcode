@@ -1,5 +1,20 @@
 # 424. Longest Repeating Character Replacement
 
+## pass2
+
+我们知道要双指针，要维护counter，然而为什么枚举r，收缩l呢，通常来讲都是枚举l，再向前推进r。
+
+两种写法本质上一样，但「枚举r，收缩l」更好，因为
+1. 加入是"探索性"的，移除是"确定性"的 ← 最核心。你必须先把 s[r] 加进 counter，才知道窗口坏没坏。而移除 s[l] 永远不会把合法窗口变成非法。所以自然的结构是：无条件做那个确定的事（推进 r），发现坏了再修复（收缩 l）。
+2. 模版好。`for r: add(r); while bad: remove(l++); update(ans)` 这一个骨架同时覆盖最长 / 最短 / 计数三类，只有 bad 的定义和 update 的位置在变。而枚举 l 的写法，r 到头时要 break、答案更新时机在 while 之后，三类题的形状各不相同。
+
+以及内层while 里max(cnt.values()) 不带来额外复杂性，因为cnt是const，怪，但在算法题的语境里确实.
+
+
+---
+
+## pass1
+
 滑动窗口，但是起始状态如何思考？
 l=r=0
 

@@ -14,7 +14,7 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4,
+  "familiarity": 3,
   "complexity": {
     "time": "O(n·|Σ|)",
     "space": "O(|Σ|)"
