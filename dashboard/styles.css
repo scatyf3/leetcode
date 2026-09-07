@@ -684,6 +684,20 @@ main{padding:18px 20px;overflow:auto}
   background:var(--bg);color:var(--fg);border:1px solid var(--accent);border-radius:6px;padding:8px}
 #rv-aedit-box.hidden{display:none}
 
+/* 默写框: 揭晓前自己写一遍。纯草稿纸 —— 不存盘、不判对错、不进 FSRS */
+.rv-write{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+.rv-write .rv-q-hint b{color:var(--fg);font-weight:600}
+#rv-write-box{width:100%;min-height:96px;margin-bottom:6px;font:13px/1.6 Consolas,monospace;
+  resize:vertical;background:var(--bg);color:var(--fg);border:1px solid var(--line);
+  border-radius:6px;padding:8px}
+#rv-write-box:focus{outline:none;border-color:var(--accent)}
+/* 揭晓后: 你写的贴在答案卡上面。边框用 --dim 而不是 --accent2 —— 那是答案的颜色,
+   这半边只是对照物, 抢过去会看不出哪个才是正确答案 */
+.rv-mine{border:1px solid var(--line);border-left:3px solid var(--dim);border-radius:8px;
+  background:var(--panel2);padding:10px 12px;margin-bottom:10px}
+.rv-mine pre{margin:0;overflow:auto;font:13px/1.6 Consolas,monospace;color:var(--fg);
+  white-space:pre-wrap;word-break:break-word}
+
 /* 选择题: 揭晓前先自己挑一个, 测的是「该用哪个模板」的辨别力 */
 .rv-quiz{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
 .rv-quiz.hidden{display:none}

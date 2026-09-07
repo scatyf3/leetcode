@@ -172,10 +172,24 @@
                 </div>
                 <div class="rv-q-hint">选不选都行 —— 直接按空格也能揭晓。选了的话揭晓时会标出对错。</div>
               </div>
+              <!-- 默写框(只有语法卡有)。纯草稿纸: 不存盘、不判对错、不进 FSRS ——
+                   揭晓后原样贴到答案上面自己比。之所以不自动判, 是因为「只保留符合条件的
+                   字符」这种卡写法自由度太高, 机器判错会比不判更烦人。 -->
+              <div v-if="canWrite && !revealed" class="rv-write">
+                <div class="rv-q-label">默写一遍(可选)</div>
+                <textarea id="rv-write-box" ref="write" v-model="attempt" spellcheck="false"
+                          placeholder="把答案写出来… 写不出来就是不会，别停在「感觉知道」"></textarea>
+                <div class="rv-q-hint">写不写都行 —— <b>w</b> 跳进来写，框里 <b>Ctrl+Enter</b> 揭晓（空格在框里就是空格）。不判对错。</div>
+              </div>
             </div>
 
             <!-- 答案卡: 标签 + 复杂度 + 一句话思路。note/解法退成次要 tab -->
             <div v-if="revealed" id="rv-answer">
+              <!-- 你刚才写的, 原样贴在答案卡**上面** —— 要比的两半挨着才比得动 -->
+              <div v-if="mine" class="rv-mine">
+                <div class="rv-q-label">你写的</div>
+                <pre v-text="mine"></pre>
+              </div>
               <div class="rv-acard">
                 <div class="rv-acard-head">
                   <!-- 标签和复杂度是**题目**答案卡的一部分(正是揭晓时该对照的东西);

@@ -896,6 +896,8 @@ const RV = Vue.createApp({
       quiz: { idea: null, cx: null },
       items: [], active: 0,          // 揭晓后的 note / 各解法 tab
       editing: false, draft: '', amsg: '',
+      attempt: '',                   // 揭晓前自己默写的那一遍。**只活在这一张卡的这一次**:
+                                     // 不发给后端、不写 syntax/*.md、换一张就清空
       note: '',                      // 顶部那行临时提示(写失败 / 已经是队尾)
       busy: false,                   // 评分->取下一题这一整段在飞。见 rate() 上面那段注释
       failMsg: '',                   // 拉下一题失败时的收尾屏文案(替掉"复习完了")
@@ -939,6 +941,11 @@ const RV = Vue.createApp({
     },
     // 拉详情的空档不能显示收尾屏 —— 会闪一下"今天没有到期的题"
     showEmpty() { return !this.d && !this.loading; },
+    // 默写框只有语法卡有。题目牌组揭晓前的规矩是"不写代码"(见 askText), 它测的是
+    // 辨别力, 那边对应的是选择题 —— 两个牌组各有各的"揭晓前动一下手"。
+    canWrite() { return this.isSyntax; },
+    // 空白/只有空格的不算写过: 揭晓后就不必贴一个空框上去
+    mine() { return this.attempt.trim(); },
     // 选择题只有题目牌组有 —— 它测的是"该用哪个模板"的辨别力, 语法卡没有这个维度
     hasQuiz() { return !this.isSyntax && !!(this.quiz.idea || this.quiz.cx); },
     quizBlocks() {
@@ -1052,6 +1059,7 @@ const RV = Vue.createApp({
       this.failMsg = '';
       this.editing = false;
       this.amsg = '';
+      this.attempt = '';                                 // 上一张写的别串到这张来
       this.revealed = false;                             // 先落下答案, 再去拉
       const id = this.queue.shift();
       if (id === undefined) { this.d = null; return; }   // 队列空了 -> 收尾屏
@@ -1117,12 +1125,21 @@ const RV = Vue.createApp({
 
     reveal() {
       if (!this.d || this.revealed || this.busy) return;
+      // 焦点还留在默写框里的话, 接下来的 1-4 会被 onKey 的 TEXTAREA 那道闸放行 ——
+      // 表现是"揭晓了但评不了分, 键盘像死了"。趁 DOM 还没重渲染(框是 v-if)先抬走焦点。
+      if (this.$refs.write && document.activeElement === this.$refs.write) this.$refs.write.blur();
       this.revealed = true;
       // 语法卡的背面就是全部, 没有次要 tab —— items 留空, 模板里那一块整个不占位
       this.items = this.isSyntax ? []
         : [{ name: '📝 笔记', md: this.d.note || '_(还没写笔记)_' },
            ...this.d.solutions.map((x) => ({ name: x.name, code: x.content }))];
       this.active = 0;
+    },
+
+    // w = 跳进默写框。不自动 focus 是故意的 —— 一进卡就把焦点塞进 textarea 的话,
+    // 空格就成了打空格, 原来"空格揭晓"的手感整个没了。
+    focusWrite() {
+      if (this.$refs.write) this.$refs.write.focus();
     },
 
     // 就地改答案卡: 复习时脑子正热, 这时候压缩成一句话最准
@@ -1216,8 +1233,13 @@ const RV = Vue.createApp({
     // 键盘由 app.js 末尾那个全局 handler 转进来 —— 保持和其它 overlay 同一套分发顺序
     onKey(e) {
       if (this.editing && (e.ctrlKey || e.metaKey) && e.key === 's') { this.saveAnswer(); return true; }
+      // 默写框里空格是空格, 所以另给一个揭晓键。这条必须在下面那道修饰键闸**之前**
+      if (!this.revealed && this.canWrite && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        this.reveal(); return true;
+      }
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.keyCode === 229) return false;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return false;
+      if (e.key === 'w' && !this.revealed && this.canWrite) { this.focusWrite(); return true; }
       if (e.key === ' ') {
         if (!this.revealed) this.reveal();
         else if (this.readOnly) this.skip();     // 只读站没有评分按钮, 空格 = 下一题
@@ -1229,6 +1251,11 @@ const RV = Vue.createApp({
       return false;
     },
     onEsc() {
+      // 在默写框里按 Esc 只退出输入框。直接关面板会把刚写的一起吞掉(attempt 不存盘),
+      // 而 Esc 恰恰是打字时最容易顺手按的那个键
+      if (this.$refs.write && document.activeElement === this.$refs.write) {
+        this.$refs.write.blur(); return;
+      }
       if (this.editing) this.cancelEdit();
       else this.close();
     },

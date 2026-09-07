@@ -31,5 +31,20 @@ for i in range(n-2, -1, -1):
     R[i] = max(R[i+1], height[i])
 ```
 
-btw记得反向循环怎么写
+btw记得反向循环怎么写，这里有啥sop吗，我今天推的一版是：
+```python
+prefix_max = []
+n = len(height)
+prefix_max.append(height[0])
+for i in range(1,n):
+    prefix_max.append(max(prefix_max[i-1],height[i]))
+suffix_max = [0 for i in range(n)]
+suffix_max[n-1] = height[n-1]
+for i in range(2,n+1):
+    reverse_i = n-i # n-1 => 0
+    # reverse max: n=>1
+    suffix_max[reverse_i]=max(suffix_max[reverse_i+1],height[reverse_i])
+```
+
+
 
