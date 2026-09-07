@@ -12,5 +12,5 @@ class Solution:
             while (r - l + 1) - max(cnt.values()) > k:     # ② 破坏不变式就收缩, 单向
                 cnt[s[l]] -= 1
                 l += 1
-            best = max(best, r - l + 1)                    # ③ 此刻必合法, 直接结算
+            best = max(best, r - l + 1)                    # 到达第一个valid
         return best
