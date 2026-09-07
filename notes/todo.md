@@ -12,3 +12,6 @@ web 看板右上角 📋 TODO 可以按题号或题名快速加,勾掉 = 做完�
 - [ ] 200 Number of Islands
 - [ ] 207 Course Schedule
 - [ ] 994 Rotting Oranges
+- [ ] 46 Permutations
+- [ ] 22 Generate Parentheses
+- [ ] 79 Word Search
