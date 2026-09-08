@@ -1,0 +1,202 @@
+{
+  "source": "AI infra 求职 · 三档分层 + 8 周时间线",
+  "note": "计划的真相源, 手改这个文件就是改计划。这里只有**方法论和候选池**——没有任何投递状态, 所以可以安全地进 git / 上 Pages。你的实际投递记录在 jobs/data/applications.json, 已 gitignore。",
+
+  "anchor": "2026-09-08",
+  "anchor_note": "W0 的周一。改这个日期整条时间线跟着平移。",
+
+  "target": {
+    "onsite": 5,
+    "offer": 2,
+    "why": "目标用 onsite 数计价而不是 offer 数——offer 受太多你不控制的因素。2-3 个 offer 是「手上有得选」的最低配置, 再往下就只能被动接受。"
+  },
+
+  "budget_note": "Budget 用**投递数和工时**计价, 因为那是你能排进日历、能执行的量。转化率只是连接 budget 和 target 的参数, 而且它是**待测量的, 不是待假设的**——下面 prior 是行业先验, 只用来算出一个能开工的初始数字, W3 拿到实测值就重算。",
+
+  "tiers": [
+    {
+      "k": "C",
+      "t": "C · 可重来",
+      "d": "传统 infra 公司 + 大厂平台/backend 岗。无 cooldown 顾虑、岗位常年开、流程短。",
+      "why": "面试考的是分布式系统 / 性能 / 系统设计 / K8s——不是 CUDA。所以练兵场不必是 AI infra, 是 infra 就够了。这也是你唯一可以低成本烧掉、用来测简历的池子。",
+      "budget": 60,
+      "cost_min": 5,
+      "prior": 0.06,
+      "weeks": [1, 2],
+      "how": "Simplify 扩展批量投, 不改简历。改简历是 A 档才值得的投入。"
+    },
+    {
+      "k": "B",
+      "t": "B · 有成本",
+      "d": "大厂的 AI infra 组 + 中型 AI infra 公司。cooldown 短但流程长。",
+      "why": "带 referral 的转化率是不带的 4 倍(12% vs 3%)。那 30 家不带 referral 的是整个 budget 里 ROI 最差的一块——要砍先砍它。",
+      "budget": 50,
+      "referral_target": 20,
+      "cost_min": 10,
+      "cost_min_referral": 30,
+      "prior": 0.06,
+      "prior_referral": 0.12,
+      "prior_cold": 0.03,
+      "weeks": [3, 4],
+      "how": "带 referral 的按 JD 改简历; 不带的用 base 简历。"
+    },
+    {
+      "k": "A",
+      "t": "A · 不可重来",
+      "d": "头部 lab + 小而精的 AI infra。判据是**风险不是喜好**: 方向内全球个位数家 / cooldown ≥6 个月 / 内推名额只有一次。",
+      "why": "A 档 15 家产出的面试量 ≈ C 档 60 家。所以边际投入往 referral 和精投倾斜, 不是往数量倾斜。注意小公司落在 A 档而不是 C 档——五个人的 infra 组不招新手, 今年招完就没了。",
+      "budget": 15,
+      "cost_min": 120,
+      "prior": 0.2,
+      "weeks": [5, 6],
+      "how": "每家 2 小时: 按 JD 改简历 + 找内推 + cold email HM + 研究他们在做什么。"
+    }
+  ],
+
+  "funnel": [
+    {
+      "k": "apply2contact",
+      "t": "投递 → 首次真人接触 / OA",
+      "prior": 0.06,
+      "diagnose": "简历 / 定位问题",
+      "fix": "改简历、定位词前置、infra 关键词上移、加 referral",
+      "trap": "转化率低的正确反应是**修分子, 不是加分母**。3% 的问题不是分母不够大, 是简历没过筛——这时候加量只会加速烧掉整个池子, 大厂还留下 cooldown。"
+    },
+    {
+      "k": "contact2onsite",
+      "t": "OA / 电面 → onsite",
+      "prior": 0.5,
+      "diagnose": "coding 手感",
+      "fix": "回去刷题——**这才是刷题的正当时机**。没有 OA 在等你的时候刷第 300 题, 收益是零。"
+    },
+    {
+      "k": "onsite2offer",
+      "t": "onsite → offer",
+      "prior": 0.4,
+      "diagnose": "系统设计 / 沟通 / 项目讲不清",
+      "fix": "练 system design, 重写项目叙述"
+    }
+  ],
+
+  "weeks": [
+    { "w": 0, "apply": {}, "focus": "建名单 + baseline 模拟 OA + 开始要 A 档 referral", "note": "C 档试投 10 家。baseline: 2 道没做过的 medium, 限时 90 分钟一次写完, 按 OA 方式判(测试用例全过, 不是「思路对了」)。" },
+    { "w": 1, "apply": { "C": 25 }, "focus": "C 档铺开", "note": "referral 跟进。referral 的 lead time 最长(找人→发消息→等回复→对方提交→recruiter 处理, 2-4 周), 所以它 W0 就启动, 且不占申请名额。" },
+    { "w": 2, "apply": { "C": 25 }, "focus": "C 档投满 60", "note": "第一批 OA 到达。**真实 OA 就是最好的模拟 OA**——真实、免费、有反馈。" },
+    { "w": 3, "apply": { "B": 30 }, "focus": "B 档无 referral", "note": "★ 校准决策点: 用 C 档实测首响率重算 B/A 的需要量。首响率 <3% 就**停止投递**, 回去重做简历。", "gate": true },
+    { "w": 4, "apply": { "B": 20 }, "focus": "B 档有 referral, 投满 50", "note": "C 档电面开始进来。兜底岗(GPU 运维 / SRE)压到这周之后再投——太早拿到 ops offer, 它的 deadline 会在你 A 档还没面完时逼你做决定。" },
+    { "w": 5, "apply": { "A": 8 }, "focus": "A 档精投", "note": "峰值周, 提前清空其他事。某家 referral 一旦到位可以提前投, 不必死等。" },
+    { "w": 6, "apply": { "A": 7 }, "focus": "A 档投满 15", "note": "B 档 onsite。" },
+    { "w": 7, "apply": {}, "focus": "补投 + A 档电面", "note": "" },
+    { "w": 8, "apply": {}, "focus": "onsite 密集期", "note": "offer 落点: 11 月中到 12 月初。" }
+  ],
+
+  "rules": {
+    "w3_gate": [
+      { "min": 0.12, "verdict": "简历很对口", "action": "B 档砍到 30 家, 省下的时间加深 A 档精投或做项目", "cls": "good" },
+      { "min": 0.06, "verdict": "符合预期", "action": "按原计划推进", "cls": "ok" },
+      { "min": 0.03, "verdict": "偏低", "action": "先改简历再投 B——定位词前置、infra 关键词上移", "cls": "warn" },
+      { "min": 0.0, "verdict": "有系统性问题", "action": "停止投递, 重做简历 / 定位。继续投是烧池子。", "cls": "bad" }
+    ],
+    "cooldown_heuristic": [
+      { "size": "large", "t": ">5000 人", "months": "6-12", "tier_hint": "A 档对待" },
+      { "size": "mid", "t": "200-5000 人", "months": "3-6", "tier_hint": "B" },
+      { "size": "small", "t": "<200 人", "months": "基本没有", "tier_hint": "C 的失败成本" }
+    ],
+    "cooldown_note": "cooldown 政策几乎从不公开, 查不准, 别逐家查——分档只需要相对顺序, 不需要精确天数。更关键的是**触发点是「进入评估流程后被拒」(OA 挂 / 面挂), 不是投递本身**。所以要谨慎的是收到 OA 之后什么时候做, 而不是投不投。OA 窗口可以跟 recruiter 要延期, 这就是你的缓冲。拒信原文存下来, 里面往往写着重投窗口。",
+    "tier_rule": "排 tier **不需要你有偏好**。你没面过、不知道薪资和具体做什么, 现在的「想去程度」是低信息量的。排序变量换成「搞砸了能不能重来」: 稀缺性 / cooldown / 流程长度。偏好在 W3-W4 面过几家之后自然长出来, 那时再回来调 A 档名单。"
+  },
+
+  "signals": [
+    { "t": "自己训模型 / 自己有集群吗?", "d": "对 AI infra 最强的二分法。自己有集群的, infra 是核心业务; 只调 API 的, infra 是成本中心, 你在做 devops。成长速度差一个量级。这一条能筛掉名单里一半。" },
+    { "t": "这个组有公开产出吗?", "d": "开源仓库 / 技术博客 / 论文。有 = 入职前就能验证他们在做什么, 面试也讲得具体; 没有 = 黑盒, 只能凭 JD 猜。" },
+    { "t": "infra 组多大?", "d": "5 人 vs 50 人, 决定你是造轮子还是值班维护轮子。LinkedIn 上数一下就知道。" }
+  ],
+
+  "channels": [
+    { "t": "Hiring Cafe", "u": "https://hiring.cafe", "d": "直接爬各公司 ATS, 过滤器细(薪资/远程/签证/年限), 没有 LinkedIn 那种猎头噪音。C 档批量筛选用这个最快。" },
+    { "t": "HN Who is Hiring", "u": "https://hnhiring.com", "d": "每月 1 号发帖, infra/系统方向密度极高, 很多小公司**只在这里发**。" },
+    { "t": "VC portfolio job boards", "u": "https://jobs.a16z.com", "d": "找 AI infra 初创最高效的方式——一次看完整个赛道, 比一家家搜快得多。a16z / Sequoia / Lightspeed 都有。" },
+    { "t": "YC Work at a Startup", "u": "https://workatastartup.com", "d": "能直接联系创始人, 小公司密度高。" },
+    { "t": "Simplify", "u": "https://simplify.jobs", "d": "浏览器扩展自动填 Greenhouse / Lever / Ashby 表单。粗投 100 家的效率基本取决于有没有装它。" },
+    { "t": "一亩三分地", "u": "https://www.1point3acres.com", "d": "内推版 + 面经, 北美中文求职信息密度最高。" },
+    { "t": "开源社区直连", "u": "", "d": "**infra 方向独有的渠道**: vLLM / SGLang / Ray / ClickHouse 的 committer 在 GitHub 上有邮箱和个人站, 项目有公开 Slack/Discord。对这类人 cold email 的回复率远高于对 recruiter。如果你之前提过 PR 或有质量的 issue, 那封邮件的开头就有了。" }
+  ],
+
+  "channel_rule": "**聚合站用来「发现」, 投递永远去公司自己的 ATS。** 别用 LinkedIn Easy Apply——那是另一个池子, 转化率明显更低, 有些聚合站的一键申请根本没同步进公司系统。",
+
+  "keywords": {
+    "use": ["Infrastructure Engineer", "Platform Engineer", "Distributed Systems Engineer", "Systems Engineer", "Performance Engineer", "Backend Engineer, Infrastructure", "ML Platform Engineer", "GPU Infrastructure Engineer"],
+    "avoid": ["SRE", "On-call", "Production Support", "GPU Operations"],
+    "avoid_why": "定位粘性: 第一份工作 title 是 ops/SRE, 之后往 infra 开发转要费力, 薪资带也低一档。同样的活, 搜 \"GPU operations\" 出来的是低带岗, 搜 \"ML Platform Engineer\" 出来的是开发岗。搜索词的选择直接决定你看到的岗位质量。",
+    "mle_note": "MLE 太宽(推荐系统到 CV 到 posttrain 全叫这个), 大多数要建模经验或发表, infra 简历会被直接筛掉。**只投标题里带 infra / systems / platform / training / inference 的 MLE**——那些实质就是 infra 岗换了个 title。"
+  },
+
+  "resumes": [
+    { "k": "A", "t": "简历 A(主)", "d": "AI infra —— 训练/推理系统、性能、CUDA、分布式。覆盖 AI infra + infra 味的 MLE + GPU 平台岗。infra 简历投运维岗是降维能过, 反过来不行。", "share": 0.9 },
+    { "k": "B", "t": "简历 B(次)", "d": "agent dev / applied —— 产品向、full-stack、LLM 应用。别当主线: 很多岗实质是调 API, 且和 infra 的叙事互斥——你没法同时可信地讲「我是底层性能工程师」和「我是产品向 agent 开发者」。", "share": 0.1 }
+  ],
+
+  "pool": [
+    { "n": "Cloudflare",      "tier": "C", "cat": "云/网络",   "size": "large", "bridge": 1, "d": "岗位极多、常年招、Rust/Go 系统向; 有边缘推理线" },
+    { "n": "Datadog",         "tier": "C", "cat": "可观测",   "size": "large", "bridge": 1, "d": "招聘量大、流程标准化, 最好的刷面试对象; 有 LLM 可观测线" },
+    { "n": "VAST Data",       "tier": "C", "cat": "存储",     "size": "mid",   "bridge": 1, "d": "高性能存储直接卖给 AI 集群, 离 GPU infra 最近" },
+    { "n": "WEKA",            "tier": "C", "cat": "存储",     "size": "mid",   "bridge": 1, "d": "同上, AI 集群并行文件系统" },
+    { "n": "ClickHouse",      "tier": "C", "cat": "数据库",   "size": "mid",   "bridge": 1, "d": "C++/性能工程, 和推理优化同源" },
+    { "n": "Confluent",       "tier": "C", "cat": "数据",     "size": "large", "bridge": 1, "d": "Kafka; AI 数据管道" },
+    { "n": "Redpanda",        "tier": "C", "cat": "数据",     "size": "small", "bridge": 1, "d": "C++ 性能向 Kafka 替代" },
+    { "n": "Cockroach Labs",  "tier": "C", "cat": "数据库",   "size": "mid",   "bridge": 0, "d": "分布式数据库, system design 面试最硬核的一批" },
+    { "n": "Yugabyte",        "tier": "C", "cat": "数据库",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "SingleStore",     "tier": "C", "cat": "数据库",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Timescale",       "tier": "C", "cat": "数据库",   "size": "small", "bridge": 0, "d": "" },
+    { "n": "Materialize",     "tier": "C", "cat": "数据库",   "size": "small", "bridge": 0, "d": "Rust 流式" },
+    { "n": "Neon",            "tier": "C", "cat": "数据库",   "size": "small", "bridge": 0, "d": "Rust, serverless Postgres" },
+    { "n": "Grafana Labs",    "tier": "C", "cat": "可观测",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Honeycomb",       "tier": "C", "cat": "可观测",   "size": "small", "bridge": 0, "d": "" },
+    { "n": "Chronosphere",    "tier": "C", "cat": "可观测",   "size": "small", "bridge": 0, "d": "" },
+    { "n": "Sentry",          "tier": "C", "cat": "可观测",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Temporal",        "tier": "C", "cat": "平台",     "size": "small", "bridge": 0, "d": "分布式工作流, 面试很扎实" },
+    { "n": "Pulumi",          "tier": "C", "cat": "平台",     "size": "small", "bridge": 0, "d": "" },
+    { "n": "Fly.io",          "tier": "C", "cat": "云/网络",   "size": "small", "bridge": 0, "d": "" },
+    { "n": "Fastly",          "tier": "C", "cat": "云/网络",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "DigitalOcean",    "tier": "C", "cat": "云/网络",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Uber",            "tier": "C", "cat": "大厂平台", "size": "large", "bridge": 0, "d": "成熟 infra org, 面试高度标准化, 练手性价比最高" },
+    { "n": "Lyft",            "tier": "C", "cat": "大厂平台", "size": "large", "bridge": 0, "d": "" },
+    { "n": "DoorDash",        "tier": "C", "cat": "大厂平台", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Airbnb",          "tier": "C", "cat": "大厂平台", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Stripe",          "tier": "C", "cat": "大厂平台", "size": "large", "bridge": 0, "d": "" },
+
+    { "n": "NVIDIA",          "tier": "B", "cat": "大厂 AI infra", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Google",          "tier": "B", "cat": "大厂 AI infra", "size": "large", "bridge": 0, "d": "ML infra / TPU 组" },
+    { "n": "Meta",            "tier": "B", "cat": "大厂 AI infra", "size": "large", "bridge": 0, "d": "AI infra / PyTorch" },
+    { "n": "Microsoft",       "tier": "B", "cat": "大厂 AI infra", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Amazon (AWS)",    "tier": "B", "cat": "大厂 AI infra", "size": "large", "bridge": 0, "d": "★ 硬 cooldown 最出名的一家, OA 认真对待" },
+    { "n": "Apple",           "tier": "B", "cat": "大厂 AI infra", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Databricks",      "tier": "B", "cat": "中型 AI infra", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Snowflake",       "tier": "B", "cat": "中型 AI infra", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Together AI",     "tier": "B", "cat": "推理服务",     "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Fireworks AI",    "tier": "B", "cat": "推理服务",     "size": "small", "bridge": 0, "d": "" },
+    { "n": "Baseten",         "tier": "B", "cat": "推理服务",     "size": "small", "bridge": 0, "d": "" },
+    { "n": "Replicate",       "tier": "B", "cat": "推理服务",     "size": "small", "bridge": 0, "d": "" },
+    { "n": "Anyscale",        "tier": "B", "cat": "推理服务",     "size": "small", "bridge": 0, "d": "Ray" },
+    { "n": "Lambda",          "tier": "B", "cat": "GPU cloud",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "CoreWeave",       "tier": "B", "cat": "GPU cloud",   "size": "large", "bridge": 0, "d": "" },
+    { "n": "Crusoe",          "tier": "B", "cat": "GPU cloud",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Nebius",          "tier": "B", "cat": "GPU cloud",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Pinecone",        "tier": "B", "cat": "向量/检索",   "size": "small", "bridge": 0, "d": "" },
+    { "n": "Weights & Biases","tier": "B", "cat": "评测/可观测", "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Scale AI",        "tier": "B", "cat": "中型 AI infra", "size": "large", "bridge": 0, "d": "" },
+
+    { "n": "Anthropic",       "tier": "A", "cat": "头部 lab", "size": "mid",   "bridge": 0, "d": "倾向 take-home work sample, 不是传统 leetcode OA" },
+    { "n": "OpenAI",          "tier": "A", "cat": "头部 lab", "size": "large", "bridge": 0, "d": "" },
+    { "n": "Google DeepMind", "tier": "A", "cat": "头部 lab", "size": "large", "bridge": 0, "d": "" },
+    { "n": "xAI",             "tier": "A", "cat": "头部 lab", "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Mistral",         "tier": "A", "cat": "头部 lab", "size": "small", "bridge": 0, "d": "" },
+    { "n": "Thinking Machines","tier": "A","cat": "头部 lab", "size": "small", "bridge": 0, "d": "" },
+    { "n": "Modal",           "tier": "A", "cat": "小而精",   "size": "small", "bridge": 0, "d": "infra 组极小 —— 机会不可重来, 所以在 A 不在 C" },
+    { "n": "Modular",         "tier": "A", "cat": "编译器",   "size": "small", "bridge": 0, "d": "Mojo / MAX" },
+    { "n": "Groq",            "tier": "A", "cat": "芯片/推理", "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Cerebras",        "tier": "A", "cat": "芯片/推理", "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Perplexity",      "tier": "A", "cat": "小而精",   "size": "mid",   "bridge": 0, "d": "" },
+    { "n": "Cursor (Anysphere)","tier":"A","cat": "小而精",   "size": "small", "bridge": 0, "d": "" }
+  ]
+}

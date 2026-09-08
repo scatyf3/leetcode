@@ -8,6 +8,7 @@
 .ro #save-note, .ro #sol-save, .ro #nt-save, .ro #doc-save,
 .ro .ce-x, .ro .ce-input,       /* 标签的 ✕ 和 + tag 输入框 */
 .ro #meta-msg,                  /* "改动自动保存" */
+.ro #d-attempt, .ro #attempt-msg,   /* 「＋ 做了一遍」打卡: 写 attempts.jsonl, 只读站按不动 */
 .ro #note-mode, .ro #nt-mode, .ro #doc-mode, .ro #sol-mode {
   display: none !important;
 }

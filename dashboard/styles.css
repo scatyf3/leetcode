@@ -332,9 +332,10 @@ main{padding:18px 20px;overflow:auto}
   border-left:2px solid var(--line);padding-left:12px;margin:14px 0 0}
 
 /* --- the grid: tiers down, stages across --- */
-.gr-matrix{display:grid;grid-template-columns:212px repeat(3,1fr);gap:12px}
+.gr-matrix{display:grid;grid-template-columns:212px repeat(4,1fr);gap:12px}
 /* 列头顶一条色带, 深浅 = 这一列的深度 —— 和格子里的进度条同一套语汇 */
 .gr-colh{display:flex;flex-direction:column;gap:3px;padding:9px 2px 6px;border-top:2px solid var(--line)}
+.gr-colh[data-s="seen"]{border-top-color:color-mix(in srgb,var(--dim) 40%,var(--line))}
 .gr-colh[data-s="1"]{border-top-color:color-mix(in srgb,var(--accent) 32%,var(--line))}
 .gr-colh[data-s="2"]{border-top-color:color-mix(in srgb,var(--accent) 66%,var(--line))}
 .gr-colh[data-s="3"]{border-top-color:var(--accent)}
@@ -384,6 +385,10 @@ main{padding:18px 20px;overflow:auto}
 .s1{background:color-mix(in srgb,var(--accent) 30%,var(--panel2))}
 .s2{background:color-mix(in srgb,var(--accent) 65%,var(--panel2))}
 .s3{background:var(--accent)}
+/* 「见过」不在这条蓝色梯子上 —— 它量的是覆盖不是深度, 用中性灰让蓝色仍然只讲深度 */
+.sseen{background:color-mix(in srgb,var(--dim) 55%,var(--panel2))}
+.gr-cell.seen{background:color-mix(in srgb,var(--panel) 72%,transparent)}
+.gr-cell.seen .gr-frac{font-weight:500}
 
 .gr-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .gr-key{display:inline-flex;align-items:center;gap:6px;font:11.5px/1 Consolas,monospace;
@@ -815,3 +820,57 @@ main{padding:18px 20px;overflow:auto}
 
 /* 复习完的空屏上那个「看看复习进度」 */
 .rv-stats{margin-top:14px}
+
+/* ============ 做题打卡 / 日课: 复习重做 + 新题 ============================ */
+/* 两半各一条, 中间那格是"巩固"(打卡时已 L0–L2, 记但不占额度)。
+   颜色沿用熟练度那套: 复习重做走绿(accent2, 该练的就是它), 新题走蓝(accent)。 */
+.chart i.b-redo,.skey i.b-redo,.td-bar i.b-redo{background:var(--accent2)}
+.chart i.b-new,.skey i.b-new,.td-bar i.b-new{background:var(--accent)}
+.chart i.b-warm,.skey i.b-warm,.td-bar i.b-warm{background:var(--line)}
+
+.gr-sec-today{margin-bottom:34px}
+.td-lanes{display:grid;grid-template-columns:1fr 1fr minmax(130px,.6fr);gap:10px}
+.td-lane{background:var(--panel);border:1px solid var(--line);border-radius:11px;
+  padding:12px 14px 13px;display:flex;flex-direction:column;gap:7px}
+.td-lane.met{border-color:color-mix(in srgb,var(--accent2) 45%,var(--line))}
+.td-lane-h{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.td-lane-h b{font-size:13.5px;font-weight:600}
+.td-lane-h .hint{font-size:11px;color:var(--dim)}
+.td-lane-n{display:flex;align-items:baseline;gap:5px}
+.td-lane-n b{font:600 26px/1.1 Consolas,monospace;font-variant-numeric:tabular-nums}
+.td-lane-n small{font:13px/1 Consolas,monospace;color:var(--dim)}
+.td-gap{margin-left:auto;font-size:11.5px;color:var(--dim)}
+.td-gap.met{color:var(--accent2)}
+.td-bar{height:7px;border-radius:4px;background:var(--chip);overflow:hidden}
+.td-bar i{display:block;height:100%;border-radius:4px;transition:width .25s}
+.td-side{background:var(--panel);border:1px dashed var(--line);border-radius:11px;
+  padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.td-side-k{font:600 10.5px/1 Consolas,monospace;letter-spacing:.09em;color:var(--dim)}
+.td-side-n{font:600 22px/1.1 Consolas,monospace;color:var(--dim)}
+.td-side-d{font-size:10.5px;line-height:1.5;color:var(--dim);opacity:.85}
+
+.td-done{margin-top:14px}
+.td-done-k{font:600 10.5px/1 Consolas,monospace;letter-spacing:.09em;color:var(--dim)}
+.td-chips{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+/* 打卡记的是**当时**那一档, 所以边框按 kind 上色, 不跟着题目现在的熟练度走 */
+.td-chip.redo{border-color:color-mix(in srgb,var(--accent2) 45%,var(--line))}
+.td-chip.new{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.td-strip{margin-top:16px}
+
+/* 配速那节现在有两张图, 各自一个小标题 */
+.pc-sub-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.pc-sub-h b{font-size:13.5px;font-weight:600}
+.pc-sub-h .hint{font-size:11.5px;color:var(--dim)}
+.pc-split{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
+
+/* 详情页右上角的打卡按钮 */
+.d-head-r{display:flex;align-items:center;gap:9px}
+.attempt-btn{background:var(--chip);color:var(--fg);border:1px solid var(--line);
+  border-radius:8px;padding:5px 12px;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.attempt-btn:hover{background:var(--panel2);filter:none}
+.attempt-btn.on{background:color-mix(in srgb,var(--accent2) 18%,transparent);
+  border-color:color-mix(in srgb,var(--accent2) 50%,var(--line));color:var(--accent2)}
+
+@media (max-width:900px){.td-lanes{grid-template-columns:1fr}}
+.td-strip-k{font:600 10.5px/1 Consolas,monospace;letter-spacing:.09em;color:var(--dim);
+  margin-bottom:7px}

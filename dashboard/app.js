@@ -227,6 +227,50 @@ async function openDetail(id) {
   exitEdit();                 // always open in rendered (preview) mode
   buildSolTabs(d);
   $('#overlay').classList.remove('hidden');
+  $('#attempt-msg').textContent = '';
+  renderAttemptBtn();                       // 先按已有缓存画一版
+  loadAttempts().then(renderAttemptBtn);    // 第一次打开时缓存是空的, 拉回来再画一次
+}
+
+// ---- 「＋ 做了一遍」: 日课那两半唯一的入口 ----------------------------------
+// 故意**不碰 familiarity** —— 打卡说的是"我动手了", 升不升档是另一件事。合成一个动作的话
+// 又会变成"只有做好了才算做过", 日课就退回原来那个只奖励升档的样子(见 AT_META 那段)。
+// 一天一题只记一次, 再点一下是撤销(手滑用)。
+function renderAttemptBtn() {
+  const b = $('#d-attempt');
+  if (!b || !CURRENT) return;
+  const a = attemptToday(CURRENT.id);
+  b.classList.toggle('on', !!a);
+  if (a) {
+    const m = AT_META[a.kind] || { label: a.kind };
+    b.textContent = `✓ 今天记过 · ${m.label}`;
+    b.title = `打卡时 ${a.fam === null || a.fam === undefined ? '未评' : 'L' + a.fam} → 计入「${m.label}」。点一下撤销`;
+  } else {
+    // 按钮上先说清这一下会记进哪一半。判据来自服务端(detail 的 attempt_next), 不在这儿重算
+    const nx = CURRENT.attempt_next || {};
+    const m = AT_META[nx.kind] || AT_META.warm;
+    const L = famOf(CURRENT);
+    b.textContent = '＋ 做了一遍';
+    b.title = `记一次「做了一遍」→ 计入「${m.label}」（${
+      nx.first ? '以前没碰过' : '以前做过'}，当前 ${L === null ? '未评' : 'L' + L}）。`
+      + '不改熟练度，做成什么样都算数';
+  }
+}
+
+async function punchAttempt() {
+  if (!CURRENT) return;
+  const had = !!attemptToday(CURRENT.id);
+  const r = await api('/api/attempts', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: CURRENT.id, op: had ? 'undo' : 'punch' }),
+  });
+  if (!r || r.ok === false) { $('#attempt-msg').textContent = (r && r.error) || '记不上'; return; }
+  ATTEMPTS = null;                    // 重新拉一份, 别在前端猜服务端写了什么
+  await loadAttempts();
+  renderAttemptBtn();
+  $('#attempt-msg').textContent = had ? '已撤销' : '记下了';
+  setTimeout(() => { if ($('#attempt-msg')) $('#attempt-msg').textContent = ''; }, 1800);
+  if (VIEW === 'grid') { renderToday(); renderPace(); }   // 后面那张日课条跟着变
 }
 
 // ---- editable tag chips (structures / paradigms / techniques) ----
@@ -1267,6 +1311,7 @@ const RV = Vue.createApp({
 // 不落第二份统计 —— 手改了某题的 meta.json 或者删掉 data.db 重建, 这里跟着变, 不会对不上。
 let REVIEWS = null;                 // reviews.jsonl 的全部行; null = 还没拉过
 let EDITS = null;                   // edits.jsonl 的全部行(标签/熟练度改动); null = 还没拉过
+let ATTEMPTS = null;                // attempts.jsonl 的全部行(做题打卡); null = 还没拉过
 
 const RATE_LABEL = { 1: '忘了', 2: '勉强', 3: '想起来了', 4: '很熟' };
 const FORECAST_DAYS = 30;           // 到期预测往前看多远
@@ -1967,7 +2012,14 @@ function buildGrid() {
   </section>`;
 
   // --- the grid itself: tiers down, stages across ---
+  // 「见过」= 建了文件夹(题面已经抓到本地)。它是阶梯的地板, 不是一档深度 ——
+  // 按"有没有 rec"数, 不看 familiarity, 所以**不**放进 PLAN.stages: 那边的
+  // 「S{n} 及以上」是按 depth >= n 数的, 塞个 s=0 进去会变成 100% 全选。
+  // 单调性照样成立: depthOf(undefined) === 0, 所以 S1 的题必然也建了文件夹。
+  const SEEN = PLAN.seen || { t: '见过', d: '建了文件夹：题面已经抓到本地' };
+  const seen = (t) => all.filter((p) => p.tier === t && p.rec).length;
   let m = '<div class="gr-matrix"><div></div>';
+  m += `<div class="gr-colh" data-s="seen"><span class="gr-colh-t">${esc(SEEN.t)}</span><span class="gr-colh-d">${esc(SEEN.d)}</span></div>`;
   for (const st of PLAN.stages)
     m += `<div class="gr-colh" data-s="${st.s}"><span class="gr-colh-t">${esc(st.t)}</span><span class="gr-colh-d">${esc(st.d)}</span></div>`;
   for (const tr of PLAN.tiers) {
@@ -1978,6 +2030,11 @@ function buildGrid() {
         <span class="gr-rowh-nm">${esc(tr.name)}<span class="gr-jump-x">▾</span></span>
         <span class="gr-rowh-n">本层 ${N} 题 · 做完题单累计 ${esc(tr.cum)}</span></button>
       <span class="gr-rowh-d">${esc(tr.desc)}</span></div>`;
+    const sn = seen(tr.t), spct = N ? Math.round((sn / N) * 100) : 0;
+    m += `<div class="gr-cell seen${sn ? '' : ' zero'}">
+      <div class="gr-cell-top"><span class="gr-frac">${sn}<small>/${N}</small></span><span class="gr-pct">${spct}%</span></div>
+      <div class="gr-bar"><i class="sseen" style="width:${spct}%"></i></div>
+      <div class="gr-cell-foot">&nbsp;</div></div>`;
     for (const st of PLAN.stages) {
       const n = reached(tr.t, st.s);
       const pct = N ? Math.round((n / N) * 100) : 0;
@@ -2068,10 +2125,12 @@ function buildGrid() {
 
   $('#grid-view').innerHTML = `
     ${hero}
+    <section class="gr-sec gr-sec-today" id="gr-today"><p class="empty-hint">读取打卡记录…</p></section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进 S1、S2 三列。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进见过、S1、S2 四列。首列「见过」只数文件夹，不看熟练度。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
       ${m}
       <div class="gr-legend">
+        <span class="gr-key"><i class="sseen"></i>建了文件夹 · 见过</span>
         <span class="gr-key"><i class="s0"></i>L4 / 未评 · 还没到 S1</span>
         <span class="gr-key"><i class="s1"></i>L3 → S1 思路清楚</span>
         <span class="gr-key"><i class="s2"></i>L1–L2 → S2 能写对</span>
@@ -2082,15 +2141,16 @@ function buildGrid() {
     </section>
     <section class="gr-sec" id="gr-pace"><p class="empty-hint">读取历史…</p></section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">4</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
       ${t}
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">4</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">5</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
       和详情页那个下拉是同一个字段。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
       <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
       ${g}
     </section>`;
+  renderToday();         // 异步: 要等 attempts.jsonl
   renderPace();          // 异步: 要等 edits.jsonl
 }
 
@@ -2175,6 +2235,166 @@ async function startProblem(id, chip) {
 
 
 
+// ---- 做题打卡 / 日课: 复习重做 + 新题, 两半各自计数 ---------------------------
+// 日课**不能**接着从 familiarity 跃迁算。那样只有"升档"才得分, 于是重做一道 L4 没升上去
+// = 白干、诚实降档 = 倒扣, 唯一的最优策略变成挑软柿子 + 把自己评高 —— 恰好是刷题里最该
+// 避免的两件事。所以这里读的是 attempts.jsonl: 记的是**动作**(哪天做了哪道题、打卡当时
+// 是什么档), 效果一概不参与, 重做完更差了照样算今天做过。
+//
+// 分档在服务端定死一处(server.py 的 attempt_state), 前端不重算 —— 重算迟早会和那边分叉,
+// 而按钮上的预告和真正落盘的那一笔必须是同一个答案。规则是**先问以前碰过没有, 再看档位**:
+//   new  = 之前没打过卡, 且(从没评过档 或 文件夹是今天才建的)
+//   redo = 碰过 + 打卡时 L3 / L3.5 / L4
+//   warm = 其余(打卡时 L0-L2), 记一行但不占额度 —— 重刷熟题不该能凑满日课
+// 顺序不能反: 只看档位的话, "今天新建 → 做一遍 → 不会 → 评 L4 → 打卡"会被算成复习重做,
+// 新题就洗成了复习。反过来"有没有文件夹"也不能单独当判据 —— 📋 TODO 会提前把空文件夹建出来。
+// **档位看的是打卡那一刻**, 打完卡再改熟练度不回头改写这一笔。
+const AT_META = {
+  redo: { label: '复习重做', cls: 'b-redo', tip: '以前做过 · 打卡时 L3 / L3.5 / L4' },
+  new:  { label: '新题',     cls: 'b-new',  tip: '以前没碰过 · 第一次做' },
+  warm: { label: '巩固',     cls: 'b-warm', tip: '以前做过 · 打卡时已 L0–L2 · 不占额度' },
+};
+const AT_LANES = ['redo', 'new'];         // 有额度的两半, 顺序 = 展示顺序
+const AT_ALL = ['redo', 'new', 'warm'];
+const TD_STRIP_DAYS = 14;                 // 日课条下面那排小柱子往回看多久
+
+async function loadAttempts() {
+  if (ATTEMPTS === null) {
+    try { ATTEMPTS = (await api('/api/attempts')).attempts || []; } catch { ATTEMPTS = []; }
+  }
+  return ATTEMPTS;
+}
+
+const attemptToday = (id) => (ATTEMPTS || []).find((a) => a.id === id && a.date === todayStr());
+
+function attemptCounts(date) {
+  const c = { redo: 0, new: 0, warm: 0 };
+  for (const a of (ATTEMPTS || [])) if (a.date === date && c[a.kind] !== undefined) c[a.kind]++;
+  return c;
+}
+
+// 额度手改 plan.json 的 phases[].daily, 跟着当前阶段走 —— 冻结期 new 是 0,
+// 那一段的 adds 本来就写着"一题新的都不加"。
+function dailyQuota() {
+  if (!PLAN || !PLAN.phases || !PLAN.phases.length) return { redo: 0, new: 0 };
+  const d = datePhases().live.daily || {};
+  return { redo: +d.redo || 0, new: +d.new || 0 };
+}
+
+function todayHTML() {
+  const today = todayStr();
+  const q = dailyQuota();
+  const c = attemptCounts(today);
+  const recs = byId();
+
+  const lane = (k) => {
+    const n = c[k], N = q[k];
+    const pct = N ? Math.min(100, Math.round((100 * n) / N)) : (n ? 100 : 0);
+    const met = N ? n >= N : true;
+    return `<div class="td-lane${met ? ' met' : ''}">
+      <div class="td-lane-h"><b>${esc(AT_META[k].label)}</b><span class="hint">${esc(AT_META[k].tip)}</span></div>
+      <div class="td-lane-n"><b>${n}</b><small>/${N}</small><span class="td-gap${met ? ' met' : ''}">${
+        N === 0 ? '这阶段不排' : n >= N ? '已达标 ✓' : '还差 ' + (N - n) + ' 题'}</span></div>
+      <div class="td-bar"><i class="${AT_META[k].cls}" style="width:${pct}%"></i></div></div>`;
+  };
+
+  // 今天打过卡的题。用 .gr-chip 的壳, 点一下开详情这件事就白捡了(#grid-view 那个委托监听)
+  const done = (ATTEMPTS || []).filter((a) => a.date === today).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  const chips = done.map((a) => {
+    const rec = recs.get(a.id);
+    const L = rec ? famOf(rec) : null;
+    const famTxt = (a.fam === null || a.fam === undefined) ? '未评' : 'L' + a.fam;
+    return `<button class="gr-chip td-chip ${esc(a.kind)}" data-id="${a.id}"
+        title="${esc(AT_META[a.kind] ? AT_META[a.kind].label : a.kind)} · 打卡时 ${esc(famTxt)} — 点击打开题目">
+        <span class="gr-st s${depthOf(rec)}">${esc(famInfo(L).short)}</span>
+        <span class="gr-id">${a.id}</span>
+        <span class="gr-nm">${esc(rec ? rec.title : '')}</span></button>`;
+  }).join('');
+
+  const cols = [];
+  const win = { redo: 0, new: 0, warm: 0 };      // 图例只数这排柱子看得见的那几天
+  for (let i = TD_STRIP_DAYS - 1; i >= 0; i--) {
+    const d = dAdd(today, -i);
+    const cc = attemptCounts(d);
+    for (const k of AT_ALL) win[k] += cc[k];
+    const hit = AT_ALL.filter((k) => cc[k]);
+    cols.push({
+      label: i === 0 ? '今天' : (i % 5 === 0 ? mmdd(d) : ''),
+      on: i === 0,
+      tip: `${d}${i === 0 ? ' (今天)' : ''} · ` + (hit.length
+        ? hit.map((k) => `${AT_META[k].label} ${cc[k]}`).join(' · ') : '没打卡'),
+      parts: AT_ALL.map((k) => ({ cls: AT_META[k].cls, n: cc[k] })),
+    });
+  }
+
+  return `<div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>今天</h2>
+      <p>两半分开记，先问<b>以前碰过没有</b>再看档位：<b>复习重做</b> = 以前做过的题、
+      打卡时还在 L3 / L3.5 / L4；<b>新题</b> = 以前没碰过、第一次做。
+      <b>做成什么样不影响这两格</b> —— 重做完更差了照样算数，否则升档就成了唯一得分方式，
+      刷题会自动滑向「挑软柿子 + 把自己评高」。两半互相顶不了。
+      在题目详情页右上角按<b>「＋ 做了一遍」</b>打卡（一天一题只记一次，点第二下撤销）。</p></div>
+    <div class="td-lanes">${AT_LANES.map(lane).join('')}
+      <div class="td-side">
+        <div class="td-side-k">巩固</div>
+        <div class="td-side-n">${c.warm}</div>
+        <div class="td-side-d">以前做过、打卡时已 L0–L2，<br>记下来但不占额度</div></div></div>
+    ${done.length ? `<div class="td-done"><span class="td-done-k">今天打过卡</span>
+      <div class="gr-chips td-chips">${chips}</div></div>` : ''}
+    <div class="td-strip">
+      <div class="td-strip-k">最近 ${TD_STRIP_DAYS} 天</div>
+      ${chartHTML(cols, 54)}
+      ${slegend(AT_ALL.map((k) => [AT_META[k].cls, AT_META[k].label, win[k]]))}</div>`;
+}
+
+async function renderToday() {
+  if (!$('#gr-today')) return;
+  await loadAttempts();
+  const box = $('#gr-today');        // 等这一下的功夫可能已经切走/重画了
+  if (box) box.innerHTML = todayHTML();
+}
+
+// 每天的两半, 和上面那条覆盖曲线并排看 —— 那条只有升档才动, 这条只要动手就动。
+function redoHTML() {
+  const today = todayStr();
+  const q = dailyQuota();
+  const { live } = datePhases();
+  const from = (live && live.from && live.from > dAdd(today, -60)) ? live.from : dAdd(today, -29);
+  const days = [];
+  for (let d = from; d <= today; d = dAdd(d, 1)) days.push(d);
+  if (!days.length) return '';
+
+  const counts = days.map(attemptCounts);
+  const sum = (k) => counts.reduce((s, c) => s + c[k], 0);
+  const metDays = counts.filter((c, i) => days[i] <= today && q.redo && c.redo >= q.redo).length;
+  const cols = days.map((d, i) => {
+    const cc = counts[i];
+    const hit = AT_ALL.filter((k) => cc[k]);
+    return {
+      label: d === today ? '今天' : (i % 5 === 0 ? mmdd(d) : ''),
+      on: d === today,
+      tip: `${d}${d === today ? ' (今天)' : ''} · ` + (hit.length
+        ? hit.map((k) => `${AT_META[k].label} ${cc[k]}`).join(' · ') : '没打卡'),
+      parts: AT_ALL.map((k) => ({ cls: AT_META[k].cls, n: cc[k] })),
+    };
+  });
+  const avg = (k) => (days.length ? sum(k) / days.length : 0);
+  return `<div class="pc-sub-h"><b>每天做了几道（不看效果）</b>
+      <span class="hint">${esc(days[0])} 起 · 每列一天 · 目标 复习重做 ${q.redo} · 新题 ${q.new} 题/天
+        · 复习达标 ${metDays}/${days.length} 天</span></div>
+    <div class="pc-tiles">
+      ${['redo', 'new'].map((k) => `<div class="pc-t">
+        <b>${pcFmt(avg(k))}</b><span>${esc(AT_META[k].label)} 日均</span>
+        <em>目标 ${q[k]} · 期内共 ${sum(k)} 次</em></div>`).join('')}
+      <div class="pc-t"><b>${sum('warm')}</b><span>巩固（不占额度）</span>
+        <em>以前做过 · 打卡时已 L0–L2</em></div>
+    </div>
+    ${chartHTML(cols, 84)}
+    ${slegend(AT_ALL.map((k) => [AT_META[k].cls, AT_META[k].label, sum(k)]))}
+    <p class="gr-note">这两块回答的不是同一个问题：上面那条是<b>覆盖爬到哪</b>（只有升档才动，
+    所以它天生只认结果）；下面这条是<b>今天有没有真的坐下来做</b>（只要打卡就动，不认结果）。
+    只看上面会奖励挑软柿子，只看下面会奖励瞎忙 —— 两条一起看才对得上。</p>`;
+}
+
 // ---- 配速: 把这一格剩下的题均摊到阶段的每一天, 看实际爬得比计划快还是慢 ------
 // 数据和「掌握度时间轴」同一条路: edits.jsonl 逐日回放, 不落第二份统计。
 //
@@ -2194,9 +2414,11 @@ function paceOptions() {
 const pcFmt = (n) => n.toFixed(1).replace(/\.0$/, '');
 
 function paceHTML() {
-  const head = (body) => `<div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>配速</h2>
-    <p>把目标格<b>剩下</b>的题均摊到阶段的每一天，和实际爬到的高度比 ——
-    计划线的起点是<b>阶段开始那天的实际值</b>，不是 0，否则开局就凭空"领先"一大截。</p></div>${body}`;
+  const head = (body) => `<div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>配速</h2>
+    <p>两张图：上面是<b>覆盖配速</b>——把目标格<b>剩下</b>的题均摊到阶段的每一天，和实际爬到的高度比
+    （计划线起点是<b>阶段开始那天的实际值</b>，不是 0，否则开局就凭空"领先"一大截）；
+    下面是<b>每天的做题量</b>，复习重做和新题分开，只看做没做、不看做没做好。</p></div>${body}
+    <div class="pc-split">${redoHTML()}</div>`;
   if (!PLAN || PLAN.error) return head('');
   const opts = paceOptions();
   const kOf = (o) => `${o.tier}:${o.stage}`;
@@ -2285,7 +2507,9 @@ function paceHTML() {
     ${tile(pcFmt(needPer), '剩下要的节奏 题/天', `还剩 ${leftDays} 天 · 还差 ${total - now} 题`)}
   </div>`;
 
-  return head(`<div class="pc-head">${tabs}
+  return head(`<div class="pc-sub-h"><b>覆盖配速（爬到 S${sel.stage} 的题数）</b>
+      <span class="hint">只有熟练度升档才会动 —— 重做没升上去在这张图上看不见，那是下面那张的事</span></div>
+    <div class="pc-head">${tabs}
       <span class="hint">阶段 ${ph.n}「${esc(ph.name)}」${esc(ph.from.slice(5))} – ${esc(ph.to.slice(5))}
         · 共 ${span} 天 · 历史自 ${esc(firstDay)}${lastDay < todayStr() ? '(日志最后一天 ' + esc(lastDay) + ')' : ''}</span></div>
     ${tiles}${svg}
@@ -2302,6 +2526,7 @@ async function renderPace() {
   if (EDITS === null) {
     try { EDITS = (await api('/api/edits')).edits || []; } catch { EDITS = []; }
   }
+  await loadAttempts();               // 下半张"每天做了几道"读的是打卡日志
   const box = $('#gr-pace');            // 等待期间可能已经重画/切走了, 重新拿一次
   if (!box) return;
   box.innerHTML = paceHTML();
@@ -2370,6 +2595,7 @@ on('#grid-view', 'click', (e) => {
   if (e.target.closest('.gr-st')) return void cycleL(id);
   openDetail(id);
 });
+on('#d-attempt', 'click', punchAttempt);
 on('#close', 'click', closeDetail);
 on('#save-note', 'click', () => { saveNote(); exitEdit(); });
 on('#note-preview', 'dblclick', enterEdit);

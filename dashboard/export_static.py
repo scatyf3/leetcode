@@ -11,6 +11,7 @@
     /api/syntax          -> api/syntax.json
     /api/problems        -> api/problems.json
     /api/problems/98     -> api/problems/98.json
+    /api/attempts        -> api/attempts.json
     /api/notes           -> api/notes.json
     /api/notes/x.md      -> api/notes/x.md.json
     /api/structures/array-> api/structures/array.json
@@ -76,6 +77,7 @@ def export(out: Path) -> dict:
     write_json(api / "lists.json", server.read_lists())   # 题单定义, 只读站照样能看进度
     write_json(api / "reviews.json", {"reviews": server.read_reviews()})  # 📈 进度的历史部分
     write_json(api / "edits.json", {"edits": server.read_edits()})      # 标签改动时间轴
+    write_json(api / "attempts.json", {"attempts": server.read_attempts()})  # 做题打卡: 日课那两半
 
     # 分组标签 = 看板上可点开的通用 trick 文档, 两个维度各导一份
     docs = 0
