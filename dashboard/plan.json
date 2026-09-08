@@ -1,6 +1,6 @@
 {
   "source": "NeetCode 150 · 按 pattern group 分层，不按列表顺序",
-  "note": "计划的真相源。每组的 tag 指向 paradigms/ 或 structures/ 里那份通用 trick 文档，点组标题打开。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4, 含半档 L1.5 / L3.5) 算出。",
+  "note": "计划的真相源。每个 phase 的 daily 是当天的两半额度 (redo = 重做之前 L3/L3.5/L4 的题, 只看做没做、不看做没做好; new = 开新题), 手改这里就是改日课。每组的 tag 指向 paradigms/ 或 structures/ 里那份通用 trick 文档，点组标题打开。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4, 含半档 L1.5 / L3.5) 算出。",
 
   "familiarity": [
     { "l": 0, "t": "L0", "d": "英语讲得清" },
@@ -11,6 +11,8 @@
     { "l": 3.5, "t": "L3.5", "d": "方向对 · 但只是直觉" },
     { "l": 4, "t": "L4", "d": "思路都不知道" }
   ],
+
+  "seen": { "t": "见过", "d": "建了文件夹：题面已经抓到本地，读过一遍 — 阶梯的地板" },
 
   "stages": [
     { "s": 1, "t": "S1 · 思路清楚", "d": "L0–L3（不含 L3.5）：至少说得出该用哪个范式" },
@@ -26,18 +28,22 @@
 
   "phases": [
     { "n": 1, "name": "打模式底", "from": "2026-09-04", "to": "2026-09-25", "hrs": "18 hr/周",
+      "daily": { "redo": 2, "new": 3 },
       "goal": "第一层 → S2",
       "adds": "核心八模式全组 + 网格 BFS/DFS + 四题 1-D DP；挑 15 题顺手用英语讲 60 秒。卡 25 分钟就看题解，当天重做，三天后再重做。",
       "serves": "服务 9 月底 OA" },
     { "n": 2, "name": "补第二梯队", "from": "2026-09-25", "to": "2026-10-15", "hrs": "18 hr/周",
+      "daily": { "redo": 2, "new": 3 },
       "goal": "第二层 → S2　第一层 → S3",
       "adds": "回溯、1-D DP 其余、区间、图论其余、Tries 其余。每周 1–2 次 mock 起 — mock 是 S3 唯一的真实检验。",
       "serves": "服务 10 月初电面" },
     { "n": 3, "name": "啃长尾", "from": "2026-10-15", "to": "2026-11-05", "hrs": "12–18 hr/周",
+      "daily": { "redo": 3, "new": 2 },
       "goal": "第三层 → S2",
       "adds": "2-D DP、高级图论、贪心。S3 不再单练，全交给 mock。撞 PhD 文书期，文书压成 background，两周搞定。",
       "serves": "服务 11 月初 onsite" },
     { "n": 4, "name": "冻结", "from": "2026-11-05", "to": null, "hrs": "5 hr/周",
+      "daily": { "redo": 3, "new": 0 },
       "goal": "位置不动",
       "adds": "一题新的都不加。错题 spaced repetition + 每周 1 次 mock，带宽转向 OSS subsystem。",
       "serves": "防退化，不扩覆盖" }

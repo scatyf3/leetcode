@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>求职看板</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="app" v-cloak>
+  <header>
+    <h1>求职看板 <span class="sub">AI infra · 三档 × 8 周</span></h1>
+    <div class="actions">
+      <nav class="views">
+        <button v-for="v in VIEWS" :key="v.k" class="view-tab" :class="{active: view===v.k}"
+                @click="setView(v.k)" v-text="v.t"></button>
+      </nav>
+      <span class="count" v-text="headline"></span>
+      <span class="msg" v-text="msg"></span>
+    </div>
+  </header>
+
+  <main>
+    <!-- ══════════ 时间线 ══════════ -->
+    <section v-show="view==='timeline'" class="wrap">
+      <p class="lede">
+        Budget 用<b>投递数</b>计价(你能排进日历的量), target 用 <b>onsite 数</b>计价。
+        转化率只是连接两者的参数 —— 它是<b>待测量的, 不是待假设的</b>。
+        <span class="dim" v-text="anchorLine"></span>
+      </p>
+
+      <div class="weeks">
+        <div v-for="w in weeks" :key="w.w" class="wk"
+             :class="{now: w.w===weekNow, past: w.w<weekNow, gate: w.gate}">
+          <div class="wk-l">
+            <div class="wk-n">W{{ w.w }}</div>
+            <div class="wk-d" v-text="w.date"></div>
+            <div v-if="w.w===weekNow" class="wk-tag">本周</div>
+          </div>
+          <div class="wk-r">
+            <div class="wk-head">
+              <span class="wk-focus" v-text="w.focus"></span>
+              <span v-if="w.gate" class="gate-pill">决策点</span>
+            </div>
+            <div v-if="w.plannedTotal" class="wk-bars">
+              <div v-for="p in w.plan" :key="p.tier" class="wk-bar">
+                <span class="tier-chip" :class="'t'+p.tier" v-text="p.tier"></span>
+                <div class="bar"><i :style="{width: p.pct+'%'}" :class="'t'+p.tier"></i></div>
+                <span class="wk-num" :class="{done: p.actual>=p.n}">
+                  {{ p.actual }} / {{ p.n }}
+                </span>
+              </div>
+            </div>
+            <div v-else-if="w.actualTotal" class="wk-bars">
+              <span class="dim">计划无投递 · 实际投了 {{ w.actualTotal }} 家</span>
+            </div>
+            <p v-if="w.note" class="wk-note" v-text="w.note"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="gate-box" :class="gate.cls">
+        <div class="gate-h">W3 校准 · C 档实测首响率 <b v-text="pct(rate.C1)"></b>
+          <span class="dim">({{ st('C').contact }} / {{ st('C').applied }} 家)</span></div>
+        <div class="gate-v"><b v-text="gate.verdict"></b> — <span v-text="gate.action"></span></div>
+        <p class="gate-n" v-text="plan.funnel && plan.funnel[0].trap"></p>
+      </div>
+    </section>
+
+    <!-- ══════════ 公司 ══════════ -->
+    <section v-show="view==='board'" class="wrap">
+      <div class="toolbar">
+        <div class="groupby">
+          <button v-for="f in ['all','C','B','A']" :key="f" class="gb-btn"
+                  :class="{on: tierF===f}" @click="tierF=f" v-text="f==='all'?'全部':f+' 档'"></button>
+        </div>
+        <div class="groupby">
+          <button class="gb-btn" :class="{on: liveOnly}" @click="liveOnly=!liveOnly">只看在跑</button>
+          <button class="gb-btn" :class="{on: bridgeOnly}" @click="bridgeOnly=!bridgeOnly">只看桥接型</button>
+        </div>
+        <div class="add" v-if="!ro">
+          <input v-model="newName" placeholder="加公司… Enter" @keyup.enter="add" spellcheck="false">
+          <select v-model="newTier"><option>C</option><option>B</option><option>A</option></select>
+        </div>
+      </div>
+
+      <div v-for="g in groups" :key="g.k" class="group">
+        <div class="group-label">
+          <div class="group-name">{{ g.t }}</div>
+          <div class="group-count">{{ g.rows.length }} 家 · 预算 {{ g.budget }}</div>
+          <div class="group-bar">
+            <i class="s-applied" :style="{flex: g.b.applied - g.b.contact}"></i>
+            <i class="s-contact" :style="{flex: g.b.contact - g.b.onsite}"></i>
+            <i class="s-onsite"  :style="{flex: g.b.onsite}"></i>
+            <i class="s-pool"    :style="{flex: Math.max(0, g.budget - g.b.applied)}"></i>
+          </div>
+          <div class="group-count">投 {{ g.b.applied }} · 响 {{ g.b.contact }} · 场 {{ g.b.onsite }}</div>
+        </div>
+        <div class="rows">
+          <div class="row rhead">
+            <span>公司</span><span>类别</span><span>规模</span><span>内推</span>
+            <span>阶段</span><span>结局</span><span>投递</span><span>OA 截止</span><span>备注</span>
+          </div>
+          <div v-for="a in g.rows" :key="a.id" class="row" :class="{dead: a.outcome==='rejected'||a.outcome==='withdrawn'}">
+            <span class="c-name">
+              <b v-text="a.n"></b>
+              <em v-if="a.bridge" class="bridge" title="桥接型: 够 C 档难度, 又离 AI infra 近">桥</em>
+              <span v-if="a.d" class="hint" v-text="a.d"></span>
+            </span>
+            <span class="dim" v-text="a.cat"></span>
+            <span class="dim" v-text="sizeT(a.size)"></span>
+            <span><select :value="a.referral" :disabled="ro" @change="set(a,'referral',$event.target.value)"
+                          :class="'ref-'+a.referral">
+              <option value="none">—</option><option value="asked">已请求</option><option value="got">已到位</option>
+            </select></span>
+            <span><select :value="a.status" :disabled="ro" @change="set(a,'status',$event.target.value)"
+                          :class="'st-'+a.status">
+              <option value="pool">池子</option><option value="applied">已投</option>
+              <option value="oa">OA</option><option value="screen">电面</option><option value="onsite">onsite</option>
+            </select></span>
+            <span><select :value="a.outcome" :disabled="ro" @change="set(a,'outcome',$event.target.value)"
+                          :class="'oc-'+(a.outcome||'live')">
+              <option value="">在跑</option><option value="offer">offer</option>
+              <option value="rejected">被拒</option><option value="withdrawn">撤回</option>
+            </select></span>
+            <span><input type="date" :value="a.applied" :disabled="ro" @change="set(a,'applied',$event.target.value)"></span>
+            <span><input type="date" :value="a.due" :disabled="ro" @change="set(a,'due',$event.target.value)"
+                         :class="dueCls(a)"></span>
+            <span><input :value="a.note" :disabled="ro" placeholder="…" spellcheck="false"
+                         @change="set(a,'note',$event.target.value)"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ 漏斗 ══════════ -->
+    <section v-show="view==='funnel'" class="wrap">
+      <p class="lede">
+        盯<b>三个分层</b>转化率而不是一个 —— 每一层低了, 要修的东西完全不同。
+        这才是转化率的真正用途: <b>定位问题在哪一层</b>, 而不是用来算 budget。
+      </p>
+
+      <div class="funnel">
+        <div v-for="s in funnelRows" :key="s.k" class="fn">
+          <div class="fn-h">
+            <span class="fn-t" v-text="s.t"></span>
+            <span class="fn-r" :class="s.cls">
+              <b v-text="pct(s.r)"></b>
+              <em>先验 {{ pct(s.prior) }}</em>
+            </span>
+          </div>
+          <div class="fn-bar">
+            <i :style="{width: Math.min(100, s.r*100/Math.max(s.prior*2,.01))+'%'}" :class="s.cls"></i>
+            <u :style="{left: Math.min(100, 50)+'%'}"></u>
+          </div>
+          <div class="fn-n">{{ s.num }} / {{ s.den }} 家
+            <span class="dim">· 低了说明 {{ s.diagnose }} → {{ s.fix }}</span></div>
+        </div>
+      </div>
+
+      <h3>按档</h3>
+      <table class="tbl">
+        <tr><th>档</th><th>池子</th><th>预算</th><th>已投</th><th>首响</th><th>首响率</th><th>onsite</th><th>offer</th></tr>
+        <tr v-for="t in plan.tiers" :key="t.k">
+          <td><span class="tier-chip" :class="'t'+t.k" v-text="t.k"></span></td>
+          <td v-text="st(t.k).pool"></td>
+          <td class="dim" v-text="t.budget"></td>
+          <td v-text="st(t.k).applied"></td>
+          <td v-text="st(t.k).contact"></td>
+          <td><b v-text="pct(div(st(t.k).contact, st(t.k).applied))"></b>
+              <em class="dim"> / {{ pct(t.prior) }}</em></td>
+          <td v-text="st(t.k).onsite"></td>
+          <td v-text="st(t.k).offer"></td>
+        </tr>
+        <tr class="sum">
+          <td>合计</td><td v-text="st().pool"></td>
+          <td class="dim" v-text="budgetTotal"></td>
+          <td v-text="st().applied"></td><td v-text="st().contact"></td>
+          <td><b v-text="pct(rate.all1)"></b></td>
+          <td v-text="st().onsite"></td><td v-text="st().offer"></td>
+        </tr>
+      </table>
+
+      <div class="target">
+        目标 <b>{{ plan.target && plan.target.onsite }}</b> 个 onsite ·
+        当前 <b>{{ st().onsite }}</b> ——
+        <span v-text="plan.target && plan.target.why" class="dim"></span>
+      </div>
+    </section>
+
+    <!-- ══════════ 方法 ══════════ -->
+    <section v-show="view==='method'" class="wrap method">
+      <div class="cards">
+        <article v-for="t in plan.tiers" :key="t.k" class="card">
+          <h3><span class="tier-chip" :class="'t'+t.k" v-text="t.k"></span> {{ t.t }}
+            <em>{{ t.budget }} 家 · W{{ t.weeks[0] }}–W{{ t.weeks[1] }}</em></h3>
+          <p v-text="t.d"></p>
+          <p class="why" v-text="t.why"></p>
+          <p class="how">怎么投 — <span v-text="t.how"></span></p>
+        </article>
+      </div>
+
+      <h3>排 tier 不需要偏好</h3>
+      <p class="para" v-text="plan.rules && plan.rules.tier_rule"></p>
+
+      <h3>三个可查的代理指标</h3>
+      <ul class="list"><li v-for="s in plan.signals" :key="s.t"><b v-text="s.t"></b> — <span v-text="s.d"></span></li></ul>
+
+      <h3>cooldown</h3>
+      <table class="tbl small">
+        <tr><th>规模</th><th></th><th>假设</th><th>归档</th></tr>
+        <tr v-for="c in (plan.rules ? plan.rules.cooldown_heuristic : [])" :key="c.size">
+          <td v-text="sizeT(c.size)"></td><td class="dim" v-text="c.t"></td>
+          <td v-text="c.months"></td><td class="dim" v-text="c.tier_hint"></td>
+        </tr>
+      </table>
+      <p class="para" v-text="plan.rules && plan.rules.cooldown_note"></p>
+
+      <h3>渠道</h3>
+      <p class="para" v-text="plan.channel_rule"></p>
+      <ul class="list"><li v-for="c in plan.channels" :key="c.t">
+        <b><a v-if="c.u" :href="c.u" target="_blank" rel="noopener" v-text="c.t"></a><span v-else v-text="c.t"></span></b>
+        — <span v-text="c.d"></span></li></ul>
+
+      <h3>搜索关键词</h3>
+      <p><span v-for="k in kw.use" :key="k" class="kw ok" v-text="k"></span></p>
+      <p><span v-for="k in kw.avoid" :key="k" class="kw no" v-text="k"></span></p>
+      <p class="para" v-text="kw.avoid_why"></p>
+      <p class="para" v-text="kw.mle_note"></p>
+
+      <h3>两份简历</h3>
+      <ul class="list"><li v-for="r in plan.resumes" :key="r.k"><b v-text="r.t"></b> — <span v-text="r.d"></span></li></ul>
+    </section>
+  </main>
+</div>
+
+<script src="vendor/vue.global.prod.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

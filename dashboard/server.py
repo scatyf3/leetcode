@@ -43,6 +43,7 @@ SCRATCH = "scratch.md"             # 随想收件箱: 速记先落这里, 想清
 PORT = 8765
 REVIEW_LOG = HERE / "reviews.jsonl"   # 每次评分追加一行, git 追踪, 留给以后跑 FSRS 优化器
 EDIT_LOG = HERE / "edits.jsonl"       # 每次改标签/难度/状态追加一行, git 追踪, 留给以后画"标签什么时候长出来的"
+ATTEMPT_LOG = HERE / "attempts.jsonl"  # 每次「做了一遍」打卡追加一行, git 追踪, 日课/配速的复习那半边靠它
 SESSION_FILE = HERE / "session.json"  # 当前这轮复习的队列快照, **易失状态**, 不进 git
 _REVIEW_LOCK = threading.Lock()       # ThreadingHTTPServer + meta.json 读改写 + 日志追加, 必须串行
 VENDOR_FILES = ("/vendor/vue.global.prod.js", "/vendor/marked.min.js")
@@ -224,6 +225,9 @@ def get_detail(pid: int):
     card = m.get("fsrs") or fsrs.new_card()
     d["fsrs"] = card
     d["fsrs_preview"] = fsrs.preview(card, today_str())   # {"1":1,"2":1,"3":2,"4":8} 天
+    # 现在打卡会记进哪一半。**判据只写在服务端一处**(attempt_state), 前端照抄这个字段就行 ——
+    # 在 JS 里重算一遍迟早会和这边分叉, 而按钮上的预告和真正落盘的那一笔必须是同一个答案。
+    d["attempt_next"] = attempt_state(d["id"], d.get("familiarity"))
     return d
 
 
@@ -412,6 +416,93 @@ def log_problem_created(pid: int):
     """
     write_edit_rows([{"ts": int(time.time()), "date": today_str(), "id": pid,
                       "field": "exists", "from": None, "to": True}])
+
+
+# ---------------------------------------------------- 做题打卡 (attempts) ---
+# 为什么要单开一份日志: edits.jsonl 只记**升降档**, 于是"重做一遍 L4 但没升上去"在全库
+# 没有任何痕迹。日课要是继续从它算, 唯一的得分方式就是让 familiarity 变好看 —— 挑软柿子、
+# 把自己评高, 而真正该做的重做因为"不出成绩"反而被系统惩罚。这份日志记的是**动作**:
+# 哪天动手做了哪道题、当时是什么档。效果一概不参与。
+
+def folder_born(pid: int):
+    """这道题的文件夹是哪天建的 —— edits.jsonl 里那条 exists: null -> true 的日期。
+
+    按写入顺序取**第一条**(backfill_edits.py 从 git 回填的那截也在里面)。
+    找不到就是 None: 日志开写之前就存在的老题, 一律当"很久以前就有了"。
+    """
+    for e in read_edits():
+        if e.get("id") == pid and e.get("field") == "exists" and e.get("to"):
+            return e.get("date")
+    return None
+
+
+def attempt_state(pid: int, fam) -> dict:
+    """这一笔算哪半边。**先问"以前碰过没有", 再看档位** —— 顺序不能反。
+
+    只看档位会漏一个大洞: 今天点 + 建文件夹、做了一遍、发现完全不会评成 L4, 再打卡 ——
+    档位是 4, 于是被算成"复习重做"。新题就这么洗成了复习, reward hack 只是换了个地方。
+
+    反过来"有没有文件夹"也不能单独当判据: 📋 TODO 会**提前**把空文件夹建出来(把题加进
+    todo.md 那一刻就建了), 那些题有文件夹、没评档、也确实还没做过, 它们才是真正的新题。
+
+    所以判据是**以前碰过没有**, 文件夹的生日只是它的一个信号:
+      new  = 之前没打过卡, 且(从没评过档 或 文件夹是今天才建的)
+      redo = 碰过 + 打卡时 L3 / L3.5 / L4
+      warm = 其余(打卡时 L0–L2), 记一行但不占额度
+    """
+    today = today_str()
+    seen = any(a.get("id") == pid and a.get("date", "") < today for a in read_attempts())
+    born = folder_born(pid)
+    first = (not seen) and (fam is None or born == today)
+    if first:
+        kind = "new"
+    elif fam is not None and fam >= 3:
+        kind = "redo"
+    else:
+        kind = "warm"
+    return {"kind": kind, "first": first, "born": born, "seen": seen, "fam": fam}
+
+
+def read_attempts() -> list:
+    """attempts.jsonl 全部行: 哪天做了哪道题。"""
+    return read_jsonl(ATTEMPT_LOG)
+
+
+def log_attempt(pid: int, undo: bool = False) -> dict:
+    """打一次卡, 或撤销今天这道题的那次。
+
+    **一天一题最多一条** —— 同一道题反复点不该刷出额度, 重复打卡直接返回已有的那条。
+    撤销会真的把今天那行删掉(整份重写): 这是留给手滑的, 只能删当天当题这一条,
+    历史日期的记录碰不到。
+    """
+    with db() as con:
+        r = con.execute("SELECT folder FROM problems WHERE id=?", (pid,)).fetchone()
+    if not r:
+        return {"ok": False, "error": "没这道题"}
+    today = today_str()
+    with _REVIEW_LOCK:   # 和评分/存 meta 同一把锁: 都是"读整个文件 -> 改 -> 写回"
+        rows = read_attempts()
+        mine = [a for a in rows if a.get("id") == pid and a.get("date") == today]
+        if undo:
+            if mine:
+                keep = [a for a in rows
+                        if not (a.get("id") == pid and a.get("date") == today)]
+                tmp = ATTEMPT_LOG.with_suffix(".jsonl.tmp")
+                tmp.write_text("".join(json.dumps(a, ensure_ascii=False) + "\n" for a in keep),
+                               encoding="utf-8")
+                os.replace(tmp, ATTEMPT_LOG)
+            return {"ok": True, "logged": False, "kind": None}
+        if mine:
+            return {"ok": True, "logged": True, "dup": True,
+                    "kind": mine[0].get("kind"), "fam": mine[0].get("fam")}
+        fam = fam_level(read_meta(r["folder"]))
+        st = attempt_state(pid, fam)
+        # born/seen 一起写进去: 日后想复盘"这一笔当初凭什么算成新题"不用再猜
+        row = {"ts": int(time.time()), "date": today, "id": pid,
+               "kind": st["kind"], "fam": fam, "born": st["born"], "seen": st["seen"]}
+        with ATTEMPT_LOG.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return {"ok": True, "logged": True, "kind": row["kind"], "fam": fam}
 
 
 def save_meta(pid: int, payload: dict):
@@ -693,6 +784,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"reviews": read_reviews()})
         if path == "/api/edits":
             return self._send(200, {"edits": read_edits()})
+        if path == "/api/attempts":
+            return self._send(200, {"attempts": read_attempts()})
         if path == "/api/notes":
             return self._send(200, list_notes())
         m = re.match(r"^/api/notes/(.+)$", path)
@@ -713,6 +806,14 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/sync":
             return self._send(200, {"synced": sync()})
+        if path == "/api/attempts":
+            # 「做了一遍」打卡。op=undo 撤销今天这道题的那一次(手滑用)。
+            body = self._body_json()
+            try:
+                pid = int(body.get("id"))
+            except (TypeError, ValueError):
+                return self._send(400, {"ok": False, "error": "缺 id"})
+            return self._send(200, log_attempt(pid, body.get("op") == "undo"))
         if path == "/api/scratch":
             return self._send(200, append_scratch(self._body_json().get("text", "")))
         if path == "/api/review/session":
