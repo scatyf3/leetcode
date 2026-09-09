@@ -10,7 +10,6 @@ const VIEWS = [
   { k: 'timeline', t: '时间线' },
   { k: 'board', t: '公司' },
   { k: 'funnel', t: '漏斗' },
-  { k: 'method', t: '方法' },
 ];
 const SIZE = { large: '大厂', mid: '中型', small: '小' };
 const CONTACT = ['oa', 'screen', 'onsite'];      // 「首次真人接触 / OA」以上的阶段
@@ -30,13 +29,15 @@ createApp({
       VIEWS,
       plan: {},
       apps: [],
-      method: '',
       view: localStorage.getItem('jb-view') || 'timeline',
       tierF: 'all',
       liveOnly: false,
       bridgeOnly: false,
       newName: '',
       newTier: 'C',
+      open: '',
+      bulkOpen: false,
+      bulkText: '',
       msg: '',
       // 只读静态站(GitHub Pages)由 static-shim.js 挂上 .ro —— 那边没有写接口
       ro: document.documentElement.classList.contains('ro'),
@@ -55,25 +56,13 @@ createApp({
 
     budgetTotal() { return (this.plan.tiers || []).reduce((s, t) => s + t.budget, 0); },
 
-    /** 本周该主攻哪一档 —— 按时间线的窗口, 落在窗口之后就一直算最后那档 */
+    /** 本周该主攻哪一组 —— 按时间线的窗口, 落在窗口之后就一直算最后那组 */
     tierNow() {
       const ts = this.plan.tiers || [];
       const hit = ts.find((t) => this.weekNow >= t.weeks[0] && this.weekNow <= t.weeks[1]);
       if (hit) return hit.k;
       const started = ts.filter((t) => this.weekNow > t.weeks[1]);
       return started.length ? started[started.length - 1].k : (ts[0] || {}).k;
-    },
-
-    /** 方法那页 = jobs/method.md。marked 是 vendored 的(和 dashboard 同一份, MIT),
-        不走 CDN、不需要构建 —— 掉了也只是退成纯文本, 不该让整页炸。 */
-    methodHtml() {
-      if (!this.method) return '';
-      if (typeof marked === 'undefined') {
-        console.warn('[md] marked 没加载 —— 退化成纯文本。检查 vendor/marked.min.js');
-        return '<pre>' + this.md(this.method) + '</pre>';
-      }
-      return marked.parse(this.method, { gfm: true, breaks: false })
-        .replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
     },
 
     /** 每周实际投了几家, 按 tier 分桶。key = 'W|tier' */
@@ -130,12 +119,12 @@ createApp({
       });
     },
 
-    /** W3 校准点: 拿 C 档实测首响率去查 plan.rules.w3_gate */
+    /** W3 校准点: 拿 C 实测首响率去查 plan.rules.w3_gate */
     gate() {
       const rules = (this.plan.rules || {}).w3_gate || [];
       const C = this.st('C');
       if (C.applied < 10) {
-        return { cls: 'thin', verdict: '样本不足', action: `C 档已投 ${C.applied} 家 —— 至少投满 10 家再看这个数, 否则只是噪音。` };
+        return { cls: 'thin', verdict: '样本不足', action: `C 已投 ${C.applied} 家 —— 至少投满 10 家再看这个数, 否则只是噪音。` };
       }
       return rules.find((r) => this.rate.C1 >= r.min) || rules[rules.length - 1] || {};
     },
@@ -154,6 +143,8 @@ createApp({
           return { k: t.k, t: t.t, d: t.d, role: t.role, budget: t.budget, rows, b: this.bucket(this.apps.filter((a) => a.tier === t.k)) };
         });
     },
+
+    bulkCount() { return this.bulkText.split('\n').filter((x) => x.trim()).length; },
 
     headline() {
       const A = this.st();
@@ -210,6 +201,32 @@ createApp({
       this.flash('已保存');
     },
 
+    async del(a) {
+      if (this.ro || !confirm(`删掉 ${a.n}?`)) return;
+      const r = await fetch('/api/apps/' + a.id, { method: 'DELETE' }).catch(() => null);
+      if (!r || !r.ok) return this.flash('删除失败');
+      // 后端把 id 记进 dropped, 所以下次启动不会被 plan.json 的 pool 种回来
+      this.apps = this.apps.filter((x) => x.id !== a.id);
+      this.open = '';
+      this.flash('已删除');
+    },
+
+    async addBulk() {
+      const names = this.bulkText.split('\n').map((x) => x.trim()).filter(Boolean);
+      if (!names.length || this.ro) return;
+      const r = await fetch('/api/apps/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ names, tier: this.newTier }),
+      });
+      if (!r.ok) return this.flash('添加失败');
+      const { added } = await r.json();
+      this.apps.push(...added);
+      this.bulkText = '';
+      this.bulkOpen = false;
+      this.flash(`加了 ${added.length} 家`);
+    },
+
     async add() {
       const n = this.newName.trim();
       if (!n || this.ro) return;
@@ -225,16 +242,12 @@ createApp({
     },
 
     async load() {
-      const [p, a, m] = await Promise.all([
+      const [p, a] = await Promise.all([
         fetch('/api/plan').then((r) => r.json()),
         fetch('/api/apps').then((r) => r.json()),
-        fetch('/api/method').then((r) => r.json()).catch(() => ({})),
       ]);
       this.plan = p;
       this.apps = a.apps || [];
-      this.method = m.content || '';
-      // 公开站没有投递数据 -> 时间线和漏斗全是 0, 直接落在「方法」那页
-      if (this.ro && !this.apps.length) this.view = 'method';
     },
   },
 

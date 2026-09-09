@@ -27,7 +27,6 @@ from urllib.parse import urlparse, unquote
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
 PLAN = HERE / "plan.json"
-METHOD = HERE / "method.md"        # 方法论散文, 手写 markdown —— 结构化的东西才进 plan.json
 APPS = DATA / "applications.json"
 EVENTS = DATA / "events.jsonl"
 PORT = 8766                       # 不是 8765 —— 那个是 LeetCode 看板, 两个要能同时开
@@ -47,11 +46,6 @@ MIME = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=ut
 def read_plan() -> dict:
     return json.loads(PLAN.read_text(encoding="utf-8"))
 
-
-def read_method() -> dict:
-    """方法论那页的正文。没有这个文件也别让页面炸 —— 退成空字符串。"""
-    txt = METHOD.read_text(encoding="utf-8") if METHOD.exists() else ""
-    return {"file": METHOD.name, "content": txt}
 
 
 def slug(name: str) -> str:
@@ -81,27 +75,51 @@ def blank(entry: dict, plan_seed: bool) -> dict:
     }
 
 
+def _read_file() -> dict:
+    if not APPS.exists():
+        return {"apps": [], "dropped": []}
+    d = json.loads(APPS.read_text(encoding="utf-8"))
+    d.setdefault("apps", [])
+    d.setdefault("dropped", [])
+    return d
+
+
 def load_apps() -> list:
-    """读盘 + 用 plan.json 的 pool 补齐新公司(不覆盖已有状态)。"""
+    """读盘 + 用 plan.json 的 pool 补齐新公司(不覆盖已有状态、不复活删过的)。"""
     DATA.mkdir(exist_ok=True)
-    apps = []
-    if APPS.exists():
-        apps = json.loads(APPS.read_text(encoding="utf-8")).get("apps", [])
+    d = _read_file()
+    apps, dropped = d["apps"], set(d["dropped"])
     have = {a["id"] for a in apps}
     added = 0
     for e in read_plan().get("pool", []):
-        if slug(e["n"]) not in have:
+        sid = slug(e["n"])
+        # dropped 是**整理的结果**: 手动删过的不该在下次启动时被 pool 种回来
+        if sid not in have and sid not in dropped:
             apps.append(blank(e, True))
-            have.add(slug(e["n"]))
+            have.add(sid)
             added += 1
     if added or not APPS.exists():
-        save_apps(apps)
+        save_apps(apps, d["dropped"])
     return apps
 
 
-def save_apps(apps: list) -> None:
+def save_apps(apps: list, dropped=None) -> None:
     DATA.mkdir(exist_ok=True)
-    APPS.write_text(json.dumps({"apps": apps}, ensure_ascii=False, indent=1), encoding="utf-8")
+    if dropped is None:
+        dropped = _read_file()["dropped"]
+    APPS.write_text(json.dumps({"apps": apps, "dropped": dropped}, ensure_ascii=False, indent=1),
+                    encoding="utf-8")
+
+
+def drop_app(app_id: str) -> bool:
+    d = _read_file()
+    apps = [a for a in d["apps"] if a["id"] != app_id]
+    if len(apps) == len(d["apps"]):
+        return False
+    dropped = d["dropped"] + ([app_id] if app_id not in d["dropped"] else [])
+    save_apps(apps, dropped)
+    log_event(app_id, "dropped", "", "")
+    return True
 
 
 def log_event(app_id: str, field: str, old, new) -> None:
@@ -143,6 +161,31 @@ def patch(app_id: str, body: dict) -> dict | None:
         save_apps(apps)
         return a
     return None
+
+
+def add_many(names: list, tier: str) -> list:
+    """一行一个公司名地粘进来 —— 整理名单时基本都是成批来的, 不是一家一家点。
+
+    重名**跳过**而不是建第二条: 粘过来的清单十有八九和现有名单有重叠,
+    默默建一堆 xxx-2 会把你已有的状态藏起来。单个添加仍然允许重名(见 add_app)。
+    """
+    have = {a["id"] for a in load_apps()}
+    dropped = set(_read_file()["dropped"])
+    out = []
+    for n in names:
+        n = n.strip()
+        sid = slug(n)
+        if not n or sid in have:
+            continue
+        if sid in dropped:                       # 之前手动删过的, 重新粘进来就当恢复
+            d = _read_file()
+            save_apps(d["apps"], [x for x in d["dropped"] if x != sid])
+        try:
+            out.append(add_app({"n": n, "tier": tier}))
+            have.add(sid)
+        except ValueError:
+            pass
+    return out
 
 
 def add_app(body: dict) -> dict:
@@ -221,8 +264,6 @@ class Handler(BaseHTTPRequestHandler):
         path = unquote(urlparse(self.path).path)
         if path == "/api/plan":
             return self._send(read_plan())
-        if path == "/api/method":
-            return self._send(read_method())
         if path == "/api/apps":
             return self._send({"apps": load_apps()})
         if path == "/api/stats":
@@ -243,12 +284,23 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(data)
 
     def do_POST(self):
-        if unquote(urlparse(self.path).path) != "/api/apps":
+        path = unquote(urlparse(self.path).path)
+        if path == "/api/apps/bulk":
+            b = self._body()
+            return self._send({"added": add_many(b.get("names") or [], b.get("tier") or "C")})
+        if path != "/api/apps":
             return self._send({"error": "not found"}, 404)
         try:
             return self._send(add_app(self._body()))
         except ValueError as e:
             return self._send({"error": str(e)}, 400)
+
+    def do_DELETE(self):
+        m = re.fullmatch(r"/api/apps/([^/]+)", unquote(urlparse(self.path).path))
+        if not m:
+            return self._send({"error": "not found"}, 404)
+        return self._send({"ok": True}) if drop_app(m.group(1)) \
+            else self._send({"error": "no such app"}, 404)
 
     def do_PUT(self):
         path = unquote(urlparse(self.path).path)

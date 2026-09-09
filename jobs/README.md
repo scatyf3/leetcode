@@ -1,6 +1,6 @@
 # 求职看板
 
-AI infra 求职的**三档分层 + 8 周时间线**。和 LeetCode 看板同一套架构:纯 Python 标准库、
+AI infra 求职的**三组分层 + 8 周时间线**。和 LeetCode 看板同一套架构:纯 Python 标准库、
 无构建前端、Vue 从 `vendor/` 本地加载,**零依赖、无需 pip 安装**。
 
 ```bash
@@ -16,7 +16,6 @@ python jobs/server.py        # http://localhost:8766
 | **时间线**(首屏) | 这周该投哪一档、投几家?进度落后没有? |
 | **公司** | 每家现在到哪一步了?内推到位没?OA 哪天截止? |
 | **漏斗** | 三层转化率各是多少、对着先验是高是低?**问题在哪一层?** |
-| **方法** | 分层判据、cooldown 启发式、渠道、关键词 —— 这一页是唯一会上 Pages 的 |
 
 首屏落在时间线,因为一开页要先答「这周该干什么」;漏斗是发现节奏不对之后的第二跳。
 切过一次就记住(`localStorage` 的 `jb-view`)。
@@ -26,12 +25,12 @@ python jobs/server.py        # http://localhost:8766
 **这个仓库是 public 的。** 所以数据按敏感度切开:
 
 ```
-jobs/plan.json                ← 方法论 + 候选池。git 追踪 → 上 Pages。手改这个文件就是改计划
+jobs/plan.json                ← 计划 + 候选池。git 追踪 → 上 Pages。手改这个文件就是改计划
 jobs/data/applications.json   ← 你的投递状态。**已 gitignore,永不出仓库**
 jobs/data/events.jsonl        ← 每次状态流转追加一行(只记 diff),同样 gitignore
 ```
 
-线上那份是「三档怎么分、8 周怎么排」,不是「我投了谁、被谁拒了」。
+线上那份是「C/B/A 怎么分、8 周怎么排」,不是「我投了谁、被谁拒了」。
 `export_static.py` 里的 `EXPORT_APPLICATIONS = False` 是唯一的开关 ——
 默认导出的 `api/apps.json` 是个空壳,公开站的时间线和漏斗就是一排 0,方法那页是全的。
 
