@@ -31,13 +31,23 @@ APPS = DATA / "applications.json"
 EVENTS = DATA / "events.jsonl"
 PORT = 8766                       # 不是 8765 —— 那个是 LeetCode 看板, 两个要能同时开
 
-STATUSES = ["pool", "applied", "oa", "screen", "onsite"]   # 单调推进的「到达过的最高阶段」
-OUTCOMES = ["", "rejected", "withdrawn", "offer"]          # 结局和阶段正交: 可以「OA 阶段被拒」
+STATUSES = ["pool", "todo", "applied", "oa", "screen", "onsite"]  # 单调推进的「到达过的最高阶段」
+# pool = 还没决定投不投; todo = 看过 JD 决定要投、排队中; applied 起才算真的投出去了
+OUTCOMES = ["", "rejected", "withdrawn", "closed", "offer"]   # 结局和阶段正交: 可以「OA 阶段被拒」
+# closed = 「没招」: 本轮没坑。招满了 / 还没开 / 压根不招 entry level 统统算这个 ——
+#   一次 board 快照分不出这三种(下架的岗不在 API 里), 而且对本轮决策是同一个动作。
+#   要分清只能靠时间: 每天存一份 board, 几周后自己的历史数据会说话。
+#   和 rejected 分开是因为诊断不同:
+#     rejected 多 -> 简历有问题;  没招 多 -> 动作太慢, 窗口没接住
 REFERRALS = ["none", "asked", "got"]
 
 # 前端可以改的字段。白名单而不是黑名单 —— 免得哪天前端多塞个键就写进磁盘
 EDITABLE = {"n", "tier", "cat", "size", "bridge", "d", "role", "url",
-            "referral", "status", "outcome", "applied", "due", "note"}
+            "referral", "status", "outcome", "applied", "due", "note",
+            "resume", "essay",      # 投递数据: 这次用的哪版魔改简历 / 小作文原文
+            # board 扫描的观测。一次快照分不出「招完了」和「没开过」(下架的岗不在
+            # API 里), 但同一家扫很多次之后这几个数字自己会说话。由 scan_board.py 写。
+            "board", "scan_at", "scan_n", "scan_ng", "scan_mid", "scan_sr"}
 
 MIME = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
         ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8"}
@@ -71,8 +81,38 @@ def blank(entry: dict, plan_seed: bool) -> dict:
         "applied": "",
         "due": "",
         "note": "",
+        "resume": "",
+        "essay": "",
+        # 这家公司下面挂的岗位。公司一行 = 一条投递流程(漏斗的分母), 岗位是它的
+        # 明细 —— 同一个 ATS 下的几个 req 拆成几条 jd, 但仍然只算一家。
+        "jds": [],
+        "board": "",        # 板子的 JSON API 地址(Greenhouse / Ashby), 复扫用
+        "scan_at": "",      # 上次扫的日期
+        "scan_n": None,     # 在招总数
+        "scan_ng": None,    # entry level / new grad 的工程岗 <- 关键那个数
+        "scan_mid": None,   # 中级工程岗
+        "scan_sr": None,    # 资深工程岗
         "seed": 1 if plan_seed else 0,
     }
+
+
+def sync_main(a: dict) -> None:
+    """把 role / url 同步成「主岗」那条 jd —— 导出和只读静态站还在读这两个字段。"""
+    js = a.get("jds") or []
+    if not js:
+        return
+    m = next((j for j in js if j.get("pick")), js[0])
+    a["role"], a["url"] = m.get("role", ""), m.get("url", "")
+
+
+def migrate_jds(a: dict) -> bool:
+    """老记录只有 role / url 两个平字段, 铺成第一条 jd。返回是否动过。"""
+    if isinstance(a.get("jds"), list):
+        return False
+    role, url = a.get("role", ""), a.get("url", "")
+    a["jds"] = [{"id": "j1", "role": role, "url": url, "loc": "", "lv": "",
+                 "note": "", "pick": 1}] if (role or url) else []
+    return True
 
 
 def _read_file() -> dict:
@@ -91,14 +131,26 @@ def load_apps() -> list:
     apps, dropped = d["apps"], set(d["dropped"])
     have = {a["id"] for a in apps}
     added = 0
+    moved = sum(migrate_jds(a) for a in apps)
+    # 播种的去重键是**公司名**, 不是 id ——「NVIDIA 中国」slug 出来是 nvidia, 和
+    # 母公司撞。按 id 去重的话它要么永远进不来, 要么每次 load 都再加一条。
+    have_names = {a["n"] for a in apps}
     for e in read_plan().get("pool", []):
+        if e["n"] in have_names:
+            continue
         sid = slug(e["n"])
-        # dropped 是**整理的结果**: 手动删过的不该在下次启动时被 pool 种回来
-        if sid not in have and sid not in dropped:
-            apps.append(blank(e, True))
-            have.add(sid)
-            added += 1
-    if added or not APPS.exists():
+        if sid in dropped:      # 手动删过的不该被 pool 种回来
+            continue
+        base, i = sid, 2
+        while sid in have:      # id 撞了就换一个, 条目照加
+            sid, i = f"{base}-{i}", i + 1
+        a = blank(e, True)
+        a["id"] = sid
+        apps.append(a)
+        have.add(sid)
+        have_names.add(e["n"])
+        added += 1
+    if added or moved or not APPS.exists():
         save_apps(apps, d["dropped"])
     return apps
 
@@ -155,7 +207,7 @@ def patch(app_id: str, body: dict) -> dict | None:
             # 状态推进到 applied 而没填日期 -> 补今天, 省得每次手点日历
             log_event(app_id, k, a.get(k), v)
             a[k] = v
-            if k == "status" and v != "pool" and not a.get("applied"):
+            if k == "status" and v not in ("pool", "todo") and not a.get("applied"):
                 a["applied"] = date.today().isoformat()
                 log_event(app_id, "applied", "", a["applied"])
         save_apps(apps)
@@ -204,6 +256,71 @@ def add_app(body: dict) -> dict:
     return a
 
 
+JD_FIELDS = {"role", "url", "loc", "lv", "note"}
+
+
+def _find(apps: list, app_id: str) -> dict | None:
+    return next((a for a in apps if a["id"] == app_id), None)
+
+
+def add_jd(app_id: str, body: dict) -> dict | None:
+    apps = load_apps()
+    a = _find(apps, app_id)
+    if a is None:
+        return None
+    js = a.setdefault("jds", [])
+    n = max((int(j["id"][1:]) for j in js if re.fullmatch(r"j\d+", j["id"])), default=0) + 1
+    j = {"id": f"j{n}", "role": (body.get("role") or "").strip(),
+         "url": (body.get("url") or "").strip(), "loc": (body.get("loc") or "").strip(),
+         "lv": body.get("lv") or "", "note": (body.get("note") or "").strip(),
+         "pick": 1 if not js else 0}      # 第一条自动成为主岗
+    js.append(j)
+    sync_main(a)
+    save_apps(apps)
+    log_event(app_id, "jd+", "", j["role"] or j["url"])
+    return a
+
+
+def patch_jd(app_id: str, jid: str, body: dict) -> dict | None:
+    apps = load_apps()
+    a = _find(apps, app_id)
+    if a is None:
+        return None
+    j = next((x for x in (a.get("jds") or []) if x["id"] == jid), None)
+    if j is None:
+        return None
+    for k, v in body.items():
+        if k in JD_FIELDS and j.get(k) != v:
+            log_event(app_id, f"jd.{jid}.{k}", j.get(k), v)
+            j[k] = v
+    if body.get("pick"):                  # 主岗唯一 —— 设一条就清掉其余
+        for x in a["jds"]:
+            x["pick"] = 1 if x["id"] == jid else 0
+    sync_main(a)
+    save_apps(apps)
+    return a
+
+
+def drop_jd(app_id: str, jid: str) -> dict | None:
+    apps = load_apps()
+    a = _find(apps, app_id)
+    if a is None:
+        return None
+    js = a.get("jds") or []
+    keep = [x for x in js if x["id"] != jid]
+    if len(keep) == len(js):
+        return None
+    a["jds"] = keep
+    if keep and not any(x.get("pick") for x in keep):   # 删掉的是主岗 -> 顺位补上
+        keep[0]["pick"] = 1
+    if not keep:
+        a["role"], a["url"] = "", ""
+    sync_main(a)
+    save_apps(apps)
+    log_event(app_id, "jd-", jid, "")
+    return a
+
+
 def week_of(iso: str, anchor: str) -> int | None:
     """把一个日期换算成计划里的第几周。anchor 之前的一律算 W0。"""
     if not iso:
@@ -223,7 +340,7 @@ def stats() -> dict:
     anchor = plan.get("anchor", date.today().isoformat())
 
     def bucket(rows):
-        applied = [a for a in rows if a["status"] != "pool"]
+        applied = [a for a in rows if a["status"] not in ("pool", "todo")]
         contact = [a for a in applied if a["status"] in ("oa", "screen", "onsite")]
         onsite = [a for a in applied if a["status"] == "onsite"]
         offer = [a for a in applied if a["outcome"] == "offer"]
@@ -288,6 +405,10 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/apps/bulk":
             b = self._body()
             return self._send({"added": add_many(b.get("names") or [], b.get("tier") or "C")})
+        m = re.fullmatch(r"/api/apps/([^/]+)/jds", path)
+        if m:
+            a = add_jd(m.group(1), self._body())
+            return self._send(a) if a else self._send({"error": "no such app"}, 404)
         if path != "/api/apps":
             return self._send({"error": "not found"}, 404)
         try:
@@ -296,7 +417,12 @@ class Handler(BaseHTTPRequestHandler):
             return self._send({"error": str(e)}, 400)
 
     def do_DELETE(self):
-        m = re.fullmatch(r"/api/apps/([^/]+)", unquote(urlparse(self.path).path))
+        path = unquote(urlparse(self.path).path)
+        m = re.fullmatch(r"/api/apps/([^/]+)/jds/([^/]+)", path)
+        if m:
+            a = drop_jd(m.group(1), m.group(2))
+            return self._send(a) if a else self._send({"error": "no such jd"}, 404)
+        m = re.fullmatch(r"/api/apps/([^/]+)", path)
         if not m:
             return self._send({"error": "not found"}, 404)
         return self._send({"ok": True}) if drop_app(m.group(1)) \
@@ -304,6 +430,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         path = unquote(urlparse(self.path).path)
+        m = re.fullmatch(r"/api/apps/([^/]+)/jds/([^/]+)", path)
+        if m:
+            a = patch_jd(m.group(1), m.group(2), self._body())
+            return self._send(a) if a else self._send({"error": "no such jd"}, 404)
         m = re.fullmatch(r"/api/apps/([^/]+)", path)
         if not m:
             return self._send({"error": "not found"}, 404)
