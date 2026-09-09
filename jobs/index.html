@@ -9,7 +9,7 @@
 <body>
 <div id="app" v-cloak>
   <header>
-    <h1>求职看板 <span class="sub">AI infra · 三档 × 8 周</span></h1>
+    <h1>求职看板 <span class="sub">AI infra · C / B / A × 8 周</span></h1>
     <div class="actions">
       <nav class="views">
         <button v-for="v in VIEWS" :key="v.k" class="view-tab" :class="{active: view===v.k}"
@@ -20,8 +20,8 @@
     </div>
   </header>
 
-  <!-- 策略条 —— 三档的**用途**, 不是难度。放在 header 下面而不是某个视图里,
-       因为不管你在看时间线还是在翻公司表, 「这一档是拿来干嘛的」都得在视线里。 -->
+  <!-- 策略条 —— C / B / A 各是什么。放在 header 下面而不是某个视图里,
+       因为不管你在看时间线还是在翻公司表, 「这一组是什么」都得在视线里。 -->
   <div class="strategy">
     <div class="st-steps">
       <template v-for="(t, i) in plan.tiers" :key="t.k">
@@ -41,20 +41,14 @@
     <!-- ══════════ 时间线 ══════════ -->
     <section v-show="view==='timeline'" class="wrap">
       <div class="legend">
-        <p class="legend-h">
-          三档按<b>「搞砸了能不能重来」</b>排, 不按想去程度 ——
-          你没面过、没和组里的人聊过、不知道薪资, 现在的偏好是低信息量的。
-          <span class="dim">偏好在 W3–W4 面过几家之后才长得出来, 那时再回来调 A 档名单。</span>
-        </p>
+        <p class="legend-h">C 先投, 然后 B, A 放最后。</p>
         <div class="cards">
           <article v-for="t in plan.tiers" :key="t.k" class="card lg-card">
             <h3>
               <span class="tier-chip" :class="'t'+t.k" v-text="t.k"></span>
               <span class="lg-role" v-text="t.role"></span>
-              <span class="lg-axis" v-text="t.t"></span>
               <em>{{ t.budget }} 家 · W{{ t.weeks[0] }}–W{{ t.weeks[1] }}</em>
             </h3>
-            <p class="lg-role-d" v-html="md(t.role_d)"></p>
             <p v-html="md(t.d)"></p>
           </article>
         </div>
@@ -97,7 +91,7 @@
       </div>
 
       <div class="gate-box" :class="gate.cls">
-        <div class="gate-h">W3 校准 · C 档实测首响率 <b v-text="pct(rate.C1)"></b>
+        <div class="gate-h">W3 校准 · C 实测首响率 <b v-text="pct(rate.C1)"></b>
           <span class="dim">({{ st('C').contact }} / {{ st('C').applied }} 家)</span></div>
         <div class="gate-v"><b v-text="gate.verdict"></b> — <span v-text="gate.action"></span></div>
         <p class="gate-n" v-html="md(plan.funnel && plan.funnel[0].trap)"></p>
@@ -109,7 +103,7 @@
       <div class="toolbar">
         <div class="groupby">
           <button v-for="f in ['all','C','B','A']" :key="f" class="gb-btn"
-                  :class="{on: tierF===f}" @click="tierF=f" v-text="f==='all'?'全部':f+' 档'"></button>
+                  :class="{on: tierF===f}" @click="tierF=f" v-text="f==='all'?'全部':f"></button>
         </div>
         <div class="groupby">
           <button class="gb-btn" :class="{on: liveOnly}" @click="liveOnly=!liveOnly">只看在跑</button>
@@ -118,6 +112,17 @@
         <div class="add" v-if="!ro">
           <input v-model="newName" placeholder="加公司… Enter" @keyup.enter="add" spellcheck="false">
           <select v-model="newTier"><option>C</option><option>B</option><option>A</option></select>
+          <button class="gb-btn" @click="bulkOpen = !bulkOpen">批量</button>
+        </div>
+      </div>
+      <!-- 整理名单基本都是成批来的(从 Hiring Cafe / HN 帖里拷一列), 不是一家一家点 -->
+      <div v-if="bulkOpen && !ro" class="bulk">
+        <textarea v-model="bulkText" spellcheck="false"
+          placeholder="一行一个公司名，粘进来…&#10;Cloudflare&#10;Datadog&#10;Glean"></textarea>
+        <div class="bulk-foot">
+          <select v-model="newTier"><option>C</option><option>B</option><option>A</option></select>
+          <button @click="addBulk">加 {{ bulkCount }} 家进 {{ newTier }}</button>
+          <span class="hint">已存在的同名公司会自动跳过重名，不会覆盖你已有的状态</span>
         </div>
       </div>
 
@@ -126,7 +131,6 @@
           <div class="group-name">
             <span class="tier-chip" :class="'t'+g.k" v-text="g.k"></span>{{ g.role }}
           </div>
-          <div class="group-sub" v-text="g.t"></div>
           <div class="group-def" v-html="md(g.d)"></div>
           <div class="group-count">{{ g.rows.length }} 家 · 预算 {{ g.budget }}</div>
           <div class="group-bar">
@@ -139,17 +143,26 @@
         </div>
         <div class="rows">
           <div class="row rhead">
-            <span>公司</span><span>类别</span><span>规模</span><span>内推</span>
+            <span></span><span>公司</span><span>组</span><span>类别</span><span>内推</span>
             <span>阶段</span><span>结局</span><span>投递</span><span>OA 截止</span><span>备注</span>
           </div>
-          <div v-for="a in g.rows" :key="a.id" class="row" :class="{dead: a.outcome==='rejected'||a.outcome==='withdrawn'}">
+          <template v-for="a in g.rows" :key="a.id">
+          <div class="row" :class="{dead: a.outcome==='rejected'||a.outcome==='withdrawn', open: open===a.id}">
+            <span><button v-if="!ro" class="more" :class="{on: open===a.id}"
+                          @click="open = open===a.id ? '' : a.id"
+                          :title="open===a.id ? '收起' : '改名字 / careers 链接 / 岗位 / 删除'">⋯</button></span>
             <span class="c-name">
-              <b v-text="a.n"></b>
-              <em v-if="a.bridge" class="bridge" title="桥接型: 够 C 档难度, 又离 AI infra 近">桥</em>
+              <a v-if="a.url" :href="a.url" target="_blank" rel="noopener" v-text="a.n"></a>
+              <b v-else v-text="a.n"></b>
+              <em v-if="a.bridge" class="bridge" title="桥接型: general infra, 但离 AI infra 近">桥</em>
               <span v-if="a.d" class="hint" v-text="a.d"></span>
             </span>
-            <span class="dim" v-text="a.cat"></span>
-            <span class="dim" v-text="sizeT(a.size)"></span>
+            <span><select :value="a.tier" :disabled="ro" @change="set(a,'tier',$event.target.value)"
+                          :class="'tr-'+a.tier" title="换组">
+              <option>C</option><option>B</option><option>A</option>
+            </select></span>
+            <span><input :value="a.cat" :disabled="ro" placeholder="—" spellcheck="false"
+                         @change="set(a,'cat',$event.target.value)"></span>
             <span><select :value="a.referral" :disabled="ro" @change="set(a,'referral',$event.target.value)"
                           :class="'ref-'+a.referral">
               <option value="none">—</option><option value="asked">已请求</option><option value="got">已到位</option>
@@ -170,6 +183,23 @@
             <span><input :value="a.note" :disabled="ro" placeholder="…" spellcheck="false"
                          @change="set(a,'note',$event.target.value)"></span>
           </div>
+          <!-- 详情: 整理名单时才用到的字段, 平时不占列宽 -->
+          <div v-if="open===a.id && !ro" class="detail">
+            <label>公司名<input :value="a.n" @change="set(a,'n',$event.target.value)" spellcheck="false"></label>
+            <label>岗位<input :value="a.role" @change="set(a,'role',$event.target.value)"
+                             placeholder="Infrastructure Engineer" spellcheck="false"></label>
+            <label>careers 链接<input :value="a.url" @change="set(a,'url',$event.target.value)"
+                             placeholder="https://…" spellcheck="false"></label>
+            <label>规模<select :value="a.size" @change="set(a,'size',$event.target.value)">
+              <option value="large">大厂 &gt;5000</option><option value="mid">中型 200-5000</option>
+              <option value="small">小 &lt;200</option></select></label>
+            <label>一句话<input :value="a.d" @change="set(a,'d',$event.target.value)"
+                             placeholder="一句话" spellcheck="false"></label>
+            <label class="ck"><input type="checkbox" :checked="!!a.bridge"
+                   @change="set(a,'bridge',$event.target.checked?1:0)">桥接型</label>
+            <button class="danger" @click="del(a)">删掉这家</button>
+          </div>
+          </template>
         </div>
       </div>
     </section>
@@ -199,9 +229,9 @@
         </div>
       </div>
 
-      <h3>按档</h3>
+      <h3>按组</h3>
       <table class="tbl">
-        <tr><th>档</th><th>池子</th><th>预算</th><th>已投</th><th>首响</th><th>首响率</th><th>onsite</th><th>offer</th></tr>
+        <tr><th>组</th><th>池子</th><th>预算</th><th>已投</th><th>首响</th><th>首响率</th><th>onsite</th><th>offer</th></tr>
         <tr v-for="t in plan.tiers" :key="t.k">
           <td><span class="tier-chip" :class="'t'+t.k" v-text="t.k"></span></td>
           <td v-text="st(t.k).pool"></td>
@@ -228,19 +258,10 @@
         <span class="dim" v-html="md(plan.target && plan.target.why)"></span>
       </div>
     </section>
-
-    <!-- ══════════ 方法 ══════════ -->
-    <!-- 整页就是 jobs/method.md 渲染出来的。这里**不放任何 v-for/字段绑定** ——
-         散文写在 markdown 里手改, 页面只负责渲染; 会算数的东西留在 plan.json。 -->
-    <section v-show="view==='method'" class="wrap">
-      <div class="md" v-html="methodHtml"></div>
-      <p class="md-src">正文在 <code>jobs/method.md</code> · 改完刷新即可</p>
-    </section>
   </main>
 </div>
 
 <script src="vendor/vue.global.prod.js"></script>
-<script src="vendor/marked.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

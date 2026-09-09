@@ -24,8 +24,7 @@ DEFAULT_OUT = HERE.parent / "dist" / "jobs"
 # ← 唯一的开关。False = 线上只有 plan.json 那份方法论, 公司状态一概不出仓库。
 EXPORT_APPLICATIONS = False
 
-SITE_FILES = ["app.js", "styles.css", "static-shim.js",
-              "vendor/vue.global.prod.js", "vendor/marked.min.js"]
+SITE_FILES = ["app.js", "styles.css", "static-shim.js", "vendor/vue.global.prod.js"]
 
 
 def write_json(path: Path, obj):
@@ -39,7 +38,6 @@ def export(out: Path) -> dict:
     api = out / "api"
 
     write_json(api / "plan.json", server.read_plan())
-    write_json(api / "method.json", server.read_method())    # 方法论正文, 公开站的主体
 
     if EXPORT_APPLICATIONS:
         apps = server.load_apps()

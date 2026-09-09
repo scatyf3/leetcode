@@ -1,5 +1,6 @@
 /* 调色板和 dashboard/styles.css 保持一致 —— 两个看板是同一套东西的两半 */
 :root{
+  --tC:#54c78b; --tB:#e2b04a; --tA:#e06c75;
   --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
   --fg:#e6e8ee; --dim:#9aa3b2; --accent:#6ea8fe; --accent2:#7ee0a8;
   --chip:#242a35;
@@ -129,11 +130,42 @@ main{padding:18px 20px 60px}
 .rows{flex:1;min-width:0;overflow-x:auto}
 .row{display:grid;column-gap:10px;align-items:center;padding:5px 12px;
   border-bottom:1px solid var(--line);
-  grid-template-columns:minmax(210px,1.5fr) 104px 52px 92px 96px 88px 136px 136px minmax(110px,1fr)}
+  grid-template-columns:26px minmax(190px,1.4fr) 58px 108px 90px 94px 86px 132px 132px minmax(104px,1fr)}
 .row:last-child{border-bottom:0}
 .row.rhead{color:var(--dim);font:11px/1.6 Consolas,monospace;background:var(--panel2);
   position:sticky;top:0}
 .row.dead{opacity:.45}
+.row.open{background:var(--panel2)}
+.c-name a{color:var(--fg);font-weight:650;text-decoration:none}
+.c-name a:hover{color:var(--accent);text-decoration:underline}
+select.tr-C{color:var(--tC,#54c78b)}select.tr-B{color:var(--tB,#e2b04a)}select.tr-A{color:var(--tA,#e06c75)}
+/* 行首而不是行尾 —— 放右边的话窗口一窄就被挤出横向滚动区, 等于没有 */
+.more{background:var(--chip);color:var(--dim);border:0;border-radius:5px;padding:1px 5px;
+  line-height:1.2;font-size:14px}
+.more:hover{background:var(--accent);color:#fff}
+.more.on{background:var(--accent);color:#fff}
+
+/* 整理名单时才用到的字段 —— 平时不占列宽, 展开才出现 */
+.detail{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;
+  padding:12px 14px 14px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.detail label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--dim)}
+.detail input,.detail select{background:var(--bg);color:var(--fg);border:1px solid var(--line);
+  border-radius:6px;padding:4px 7px;font-size:12.5px;font-family:inherit;min-width:150px}
+.detail label.ck{flex-direction:row;align-items:center;gap:5px;font-size:12.5px;color:var(--fg)}
+.detail label.ck input{min-width:0}
+.detail .danger{margin-left:auto;background:transparent;color:var(--hard,#e06c75);
+  border:1px solid var(--hard,#e06c75)}
+.detail .danger:hover{background:var(--hard,#e06c75);color:#fff}
+
+/* 批量粘贴 */
+.bulk{margin:-4px 0 14px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px}
+.bulk textarea{width:100%;min-height:110px;background:var(--bg);color:var(--fg);
+  border:1px solid var(--line);border-radius:7px;padding:8px 10px;font:12.5px/1.6 Consolas,monospace;
+  resize:vertical}
+.bulk-foot{display:flex;align-items:center;gap:9px;margin-top:9px;flex-wrap:wrap}
+.bulk-foot select{background:var(--bg);color:var(--fg);border:1px solid var(--line);
+  border-radius:7px;padding:5px 8px;font-family:inherit}
 .c-name{display:flex;align-items:baseline;gap:6px;min-width:0}
 .c-name .hint{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bridge{background:var(--accent);color:#fff;border-radius:4px;font:10px/14px sans-serif;
