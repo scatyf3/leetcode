@@ -1,3 +1,3 @@
-同步递归两棵树。两个都空 → True；一空一非空 → False；否则值相等且左右子树都相同。
 
-⚠ 三个 base case 的顺序就是全部内容，不需要 is_leaf 之类的额外判断。
+1. tree的递归退出条件都从none开始而不是最后一个leaf，否则很麻烦
+2. 结构抑制 => dfs调left和right，别忘了value一致
