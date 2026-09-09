@@ -17,7 +17,7 @@
   ],
   "difficulty": "hard",
   "status": "review",
-  "familiarity": 4,
+  "familiarity": 2,
   "complexity": {
     "time": "O(log n) 插入 / O(1) 取中位数",
     "space": "O(n)"
