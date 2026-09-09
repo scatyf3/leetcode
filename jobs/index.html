@@ -9,7 +9,7 @@
 <body>
 <div id="app" v-cloak>
   <header>
-    <h1>求职看板 <span class="sub">AI infra · C / B / A × 8 周</span></h1>
+    <h1>求职看板</h1>
     <div class="actions">
       <nav class="views">
         <button v-for="v in VIEWS" :key="v.k" class="view-tab" :class="{active: view===v.k}"
@@ -102,16 +102,18 @@
     <section v-show="view==='board'" class="wrap">
       <div class="toolbar">
         <div class="groupby">
-          <button v-for="f in ['all','C','B','A']" :key="f" class="gb-btn"
+          <button v-for="f in ['all','C','B','A','D']" :key="f" class="gb-btn"
                   :class="{on: tierF===f}" @click="tierF=f" v-text="f==='all'?'全部':f"></button>
         </div>
         <div class="groupby">
           <button class="gb-btn" :class="{on: liveOnly}" @click="liveOnly=!liveOnly">只看在跑</button>
           <button class="gb-btn" :class="{on: bridgeOnly}" @click="bridgeOnly=!bridgeOnly">只看桥接型</button>
+          <button class="gb-btn" :class="{on: ngOnly}" @click="ngOnly=!ngOnly"
+                  title="watch_boards.py 扫到当前有 entry / new grad 岗的">只看 new grad</button>
         </div>
         <div class="add" v-if="!ro">
           <input v-model="newName" placeholder="加公司… Enter" @keyup.enter="add" spellcheck="false">
-          <select v-model="newTier"><option>C</option><option>B</option><option>A</option></select>
+          <select v-model="newTier"><option>C</option><option>B</option><option>A</option><option>D</option></select>
           <button class="gb-btn" @click="bulkOpen = !bulkOpen">批量</button>
         </div>
       </div>
@@ -120,18 +122,19 @@
         <textarea v-model="bulkText" spellcheck="false"
           placeholder="一行一个公司名，粘进来…&#10;Cloudflare&#10;Datadog&#10;Glean"></textarea>
         <div class="bulk-foot">
-          <select v-model="newTier"><option>C</option><option>B</option><option>A</option></select>
+          <select v-model="newTier"><option>C</option><option>B</option><option>A</option><option>D</option></select>
           <button @click="addBulk">加 {{ bulkCount }} 家进 {{ newTier }}</button>
           <span class="hint">已存在的同名公司会自动跳过重名，不会覆盖你已有的状态</span>
         </div>
       </div>
 
+      <!-- 主视图只读: 一眼扫状态。所有编辑都在点开的详情里 —— 表格里塞满下拉框
+           的时候, 扫一眼和改一格是打架的, 而扫的次数多得多。 -->
       <div v-for="g in groups" :key="g.k" class="group">
         <div class="group-label">
           <div class="group-name">
             <span class="tier-chip" :class="'t'+g.k" v-text="g.k"></span>{{ g.role }}
           </div>
-          <div class="group-def" v-html="md(g.d)"></div>
           <div class="group-count">{{ g.rows.length }} 家 · 预算 {{ g.budget }}</div>
           <div class="group-bar">
             <i class="s-applied" :style="{flex: g.b.applied - g.b.contact}"></i>
@@ -143,63 +146,204 @@
         </div>
         <div class="rows">
           <div class="row rhead">
-            <span></span><span>公司</span><span>组</span><span>类别</span><span>内推</span>
-            <span>阶段</span><span>结局</span><span>投递</span><span>OA 截止</span><span>备注</span>
+            <span>公司</span><span>类别</span><span>板子</span><span>内推</span><span>阶段</span>
+            <span>结局</span><span>投递</span><span>OA 截止</span><span>备注</span>
           </div>
-          <template v-for="a in g.rows" :key="a.id">
-          <div class="row" :class="{dead: a.outcome==='rejected'||a.outcome==='withdrawn', open: open===a.id}">
-            <span><button v-if="!ro" class="more" :class="{on: open===a.id}"
-                          @click="open = open===a.id ? '' : a.id"
-                          :title="open===a.id ? '收起' : '改名字 / careers 链接 / 岗位 / 删除'">⋯</button></span>
+          <div v-for="a in g.rows" :key="a.id" class="row rclick" tabindex="0"
+               :class="{dead: a.outcome==='rejected'||a.outcome==='withdrawn'||a.outcome==='closed'}"
+               @click="edit(a)" @keyup.enter="edit(a)">
             <span class="c-name">
-              <a v-if="a.url" :href="a.url" target="_blank" rel="noopener" v-text="a.n"></a>
-              <b v-else v-text="a.n"></b>
-              <em v-if="a.bridge" class="bridge" title="桥接型: general infra, 但离 AI infra 近">桥</em>
-              <span v-if="a.d" class="hint" v-text="a.d"></span>
+              <b v-text="a.n"></b>
+              <em v-if="a.bridge" class="bridge" title="general infra, 但离 AI infra 近">桥</em>
+              <em v-if="a.ng" class="ngtag" title="板子上当前有 entry / new grad 岗">NG</em>
+              <em v-if="(a.jds||[]).length" class="haslink"
+                  :title="'记了 '+a.jds.length+' 条岗位'">JD ×{{ a.jds.length }}</em>
+              <span v-if="a.role" class="hint" v-text="a.role"></span>
             </span>
-            <span><select :value="a.tier" :disabled="ro" @change="set(a,'tier',$event.target.value)"
-                          :class="'tr-'+a.tier" title="换组">
-              <option>C</option><option>B</option><option>A</option>
-            </select></span>
-            <span><input :value="a.cat" :disabled="ro" placeholder="—" spellcheck="false"
-                         @change="set(a,'cat',$event.target.value)"></span>
-            <span><select :value="a.referral" :disabled="ro" @change="set(a,'referral',$event.target.value)"
-                          :class="'ref-'+a.referral">
-              <option value="none">—</option><option value="asked">已请求</option><option value="got">已到位</option>
-            </select></span>
-            <span><select :value="a.status" :disabled="ro" @change="set(a,'status',$event.target.value)"
-                          :class="'st-'+a.status">
-              <option value="pool">池子</option><option value="applied">已投</option>
-              <option value="oa">OA</option><option value="screen">电面</option><option value="onsite">onsite</option>
-            </select></span>
-            <span><select :value="a.outcome" :disabled="ro" @change="set(a,'outcome',$event.target.value)"
-                          :class="'oc-'+(a.outcome||'live')">
-              <option value="">在跑</option><option value="offer">offer</option>
-              <option value="rejected">被拒</option><option value="withdrawn">撤回</option>
-            </select></span>
-            <span><input type="date" :value="a.applied" :disabled="ro" @change="set(a,'applied',$event.target.value)"></span>
-            <span><input type="date" :value="a.due" :disabled="ro" @change="set(a,'due',$event.target.value)"
-                         :class="dueCls(a)"></span>
-            <span><input :value="a.note" :disabled="ro" placeholder="…" spellcheck="false"
-                         @change="set(a,'note',$event.target.value)"></span>
+            <span class="dim" v-text="a.cat || '—'"></span>
+            <span class="scan" :title="scanTip(a)">
+              <template v-if="a.scan_at">
+                <i class="ng" :class="{hit: a.scan_ng}" v-text="'ng ' + a.scan_ng"></i><i
+                   class="sr" v-text="'sr ' + a.scan_sr"></i>
+              </template>
+              <i v-else class="dim">—</i>
+            </span>
+            <span><i class="pill" :class="'ref-'+a.referral" v-text="REF[a.referral]"></i></span>
+            <span><i class="pill" :class="'st-'+a.status" v-text="ST[a.status]"></i></span>
+            <span><i class="pill" :class="'oc-'+(a.outcome||'live')" v-text="OC[a.outcome]"></i></span>
+            <span class="mono dim" v-text="a.applied || '—'"></span>
+            <span class="mono" :class="dueCls(a)" v-text="a.due || '—'"></span>
+            <span class="dim ell" v-text="a.note || (a.resume || a.essay ? '有投递数据' : '')"></span>
           </div>
-          <!-- 详情: 整理名单时才用到的字段, 平时不占列宽 -->
-          <div v-if="open===a.id && !ro" class="detail">
-            <label>公司名<input :value="a.n" @change="set(a,'n',$event.target.value)" spellcheck="false"></label>
-            <label>岗位<input :value="a.role" @change="set(a,'role',$event.target.value)"
-                             placeholder="Infrastructure Engineer" spellcheck="false"></label>
-            <label>careers 链接<input :value="a.url" @change="set(a,'url',$event.target.value)"
-                             placeholder="https://…" spellcheck="false"></label>
-            <label>规模<select :value="a.size" @change="set(a,'size',$event.target.value)">
-              <option value="large">大厂 &gt;5000</option><option value="mid">中型 200-5000</option>
-              <option value="small">小 &lt;200</option></select></label>
-            <label>一句话<input :value="a.d" @change="set(a,'d',$event.target.value)"
-                             placeholder="一句话" spellcheck="false"></label>
-            <label class="ck"><input type="checkbox" :checked="!!a.bridge"
-                   @change="set(a,'bridge',$event.target.checked?1:0)">桥接型</label>
-            <button class="danger" @click="del(a)">删掉这家</button>
+        </div>
+      </div>
+
+      <!-- 详情: 点行打开, 所有字段在这儿改 -->
+      <div v-if="cur" class="ov" @click.self="cur = null">
+        <div class="dlg">
+          <div class="dlg-head">
+            <span class="tier-chip" :class="'t'+cur.tier" v-text="cur.tier"></span>
+            <b v-text="cur.n"></b>
+            <a v-if="cur.url" :href="cur.url" target="_blank" rel="noopener" class="jd-open">打开 JD ↗</a>
+            <span class="msg" v-text="msg"></span>
+            <button class="x" @click="cur = null">✕</button>
           </div>
-          </template>
+
+          <div class="dlg-body">
+            <div class="fgrid">
+              <label>公司名<input :value="cur.n" @change="set(cur,'n',$event.target.value)" spellcheck="false"></label>
+              <label>组<select :value="cur.tier" @change="set(cur,'tier',$event.target.value)">
+                <option>C</option><option>B</option><option>A</option><option>D</option></select></label>
+              <label>类别<input :value="cur.cat" @change="set(cur,'cat',$event.target.value)"
+                     placeholder="大厂平台 / agent dev / ML 平台" spellcheck="false"></label>
+              <label>规模<select :value="cur.size" @change="set(cur,'size',$event.target.value)">
+                <option value="large">大厂 &gt;5000</option><option value="mid">中型 200-5000</option>
+                <option value="small">小 &lt;200</option></select></label>
+              <label class="wide">招聘板<span class="fh">watch_boards.py 用它扫 new grad 岗;猜不到就手填</span>
+                <input :value="cur.board" @change="set(cur,'board',$event.target.value)"
+                     placeholder="greenhouse:airbnb / ashby:modal / - 表示没有" spellcheck="false"></label>
+            </div>
+
+            <div class="fgrid">
+              <label>内推<select :value="cur.referral" @change="set(cur,'referral',$event.target.value)">
+                <option value="none">—</option><option value="asked">已请求</option>
+                <option value="got">已到位</option></select></label>
+              <label>阶段<select :value="cur.status" @change="set(cur,'status',$event.target.value)">
+                <option value="pool">池子</option><option value="todo">未投递</option><option value="applied">已投</option>
+                <option value="oa">OA</option><option value="screen">电面</option>
+                <option value="onsite">onsite</option></select></label>
+              <label>结局<select :value="cur.outcome" @change="set(cur,'outcome',$event.target.value)">
+                <option value="">在跑</option><option value="offer">offer</option>
+                <option value="rejected">被拒</option><option value="closed">没招</option>
+                <option value="withdrawn">撤回</option></select></label>
+              <label>投递日期<input type="date" :value="cur.applied"
+                     @change="set(cur,'applied',$event.target.value)"></label>
+              <label>OA 截止<input type="date" :value="cur.due"
+                     @change="set(cur,'due',$event.target.value)"></label>
+              <label class="ck"><input type="checkbox" :checked="!!cur.bridge"
+                     @change="set(cur,'bridge',$event.target.checked?1:0)">桥接型</label>
+            </div>
+
+            <!-- 岗位: 一家公司下面可以挂好几条 req。公司那一行仍然只算一条投递流程,
+                 所以这里加多少条都不会稀释漏斗 —— 见 README 的「公司 vs 岗位」。 -->
+            <div class="jdbox">
+              <div class="jd-h">
+                岗位 <span class="dim">{{ (cur.jds||[]).length }} 条</span>
+                <span class="fh">「主」= 公司那一行显示的岗位,也是导出时用的那条</span>
+                <button v-if="!ro" class="gb-btn" @click="addJd(cur)">+ 加一条</button>
+              </div>
+              <p v-if="!(cur.jds||[]).length" class="jd-empty">还没记岗位。查到 JD 后加进来。</p>
+              <div v-for="j in (cur.jds||[])" :key="j.id" class="jd" :class="{main: j.pick}">
+                <div class="jd-top">
+                  <button class="jd-pick" :class="{on: j.pick}" :disabled="ro || !!j.pick"
+                          :title="j.pick ? '这条是主岗' : '设为主岗'" @click="pickJd(cur,j)">主</button>
+                  <input class="jd-role" :value="j.role" :disabled="ro"
+                         @change="setJd(cur,j,'role',$event.target.value)"
+                         placeholder="JD 上的原标题，别翻译别简写" spellcheck="false">
+                  <select class="jd-lv" :value="j.lv" :disabled="ro"
+                          @change="setJd(cur,j,'lv',$event.target.value)">
+                    <option value="">档位—</option><option value="ng">entry/NG</option>
+                    <option value="mid">中级</option><option value="sr">资深</option>
+                  </select>
+                  <input class="jd-loc" :value="j.loc" :disabled="ro"
+                         @change="setJd(cur,j,'loc',$event.target.value)"
+                         placeholder="地点" spellcheck="false">
+                  <a v-if="j.url" :href="j.url" target="_blank" rel="noopener" class="jd-go" title="打开 JD">↗</a>
+                  <button v-if="!ro" class="jd-x" @click="delJd(cur,j)" title="删掉这条">✕</button>
+                </div>
+                <input class="jd-url" :value="j.url" :disabled="ro"
+                       @change="setJd(cur,j,'url',$event.target.value)"
+                       placeholder="https://… JD 直链，不是公司首页" spellcheck="false">
+                <input class="jd-note" :value="j.note" :disabled="ro"
+                       @change="setJd(cur,j,'note',$event.target.value)"
+                       placeholder="一句话事实：年限、技术栈、JD 里点名的东西" spellcheck="false">
+              </div>
+            </div>
+
+            <div v-if="cur.scan_at" class="scanbox">
+              <div class="scan-h">板子扫描 · <span class="mono" v-text="cur.scan_at"></span></div>
+              <div class="scan-nums">
+                <b :class="{hit: cur.scan_ng}">{{ cur.scan_ng }}</b><u>entry / new grad</u>
+                <b>{{ cur.scan_mid }}</b><u>中级</u>
+                <b>{{ cur.scan_sr }}</b><u>资深</u>
+                <b class="dim">{{ cur.scan_n }}</b><u>在招总数</u>
+              </div>
+              <div class="scan-f">
+                <a v-if="cur.board" :href="cur.board" target="_blank" rel="noopener" v-text="cur.board"></a>
+                <span class="mono">python3 jobs/scan_board.py {{ cur.id }}</span>
+              </div>
+            </div>
+
+            <div class="fstack">
+              <label>魔改简历<span class="fh">这次投用的哪一版、改了什么</span>
+                <textarea :value="cur.resume" @change="set(cur,'resume',$event.target.value)"
+                  spellcheck="false" placeholder="e.g. base + 把 vLLM PR 提到第一条, summary 换成 inference infra"></textarea></label>
+              <label>小作文<span class="fh">cover letter / why-us,存原文</span>
+                <textarea :value="cur.essay" @change="set(cur,'essay',$event.target.value)"
+                  spellcheck="false"></textarea></label>
+              <label>备注<textarea :value="cur.note" @change="set(cur,'note',$event.target.value)"
+                  spellcheck="false" placeholder="面经、联系人、下一步…"></textarea></label>
+            </div>
+          </div>
+
+          <div class="dlg-foot">
+            <button class="danger" @click="del(cur)">删掉这家</button>
+            <button @click="cur = null">完成</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ 岗位 ══════════ -->
+    <!-- 公司视图回答「这家走到哪一步了」, 这里回答「现在手上有哪些坑可投」。
+         同一家的多个 req 在这儿各占一行, 但公司那边仍然只算一家 —— 漏斗不受影响。 -->
+    <section v-show="view==='jds'" class="wrap">
+      <div class="toolbar">
+        <div class="groupby">
+          <button v-for="f in ['all','C','B','A','D']" :key="f" class="gb-btn"
+                  :class="{on: jdTierF===f}" @click="jdTierF=f" v-text="f==='all'?'全部':f"></button>
+        </div>
+        <div class="groupby">
+          <button v-for="f in [['all','全档'],['ng','entry/NG'],['mid','中级'],['sr','资深']]" :key="f[0]"
+                  class="gb-btn" :class="{on: jdLvF===f[0]}" @click="jdLvF=f[0]" v-text="f[1]"></button>
+        </div>
+        <div class="groupby">
+          <button class="gb-btn" :class="{on: liveOnly}" @click="liveOnly=!liveOnly">只看在跑</button>
+        </div>
+        <div class="add">
+          <input v-model="jdQ" placeholder="搜岗位 / 公司 / 地点…" spellcheck="false">
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-label">
+          <div class="group-name">{{ jdRows.length }} 条岗位</div>
+          <div class="group-count" v-if="jdGap">
+            还有 {{ jdGap }} 家一条都没记 —— 那是没查过 JD 的欠账
+          </div>
+        </div>
+        <div class="rows">
+          <div class="row jdrow rhead">
+            <span>组</span><span>公司</span><span>岗位</span><span>档位</span>
+            <span>地点</span><span>阶段</span><span>备注</span><span></span>
+          </div>
+          <p v-if="!jdRows.length" class="jd-empty">没有符合条件的岗位。</p>
+          <div v-for="r in jdRows" :key="r.a.id + r.j.id" class="row jdrow rclick" tabindex="0"
+               :class="{dead: r.a.outcome==='rejected'||r.a.outcome==='withdrawn'||r.a.outcome==='closed'}"
+               @click="openFrom(r)" @keyup.enter="openFrom(r)">
+            <span><i class="tier-chip" :class="'t'+r.a.tier" v-text="r.a.tier"></i></span>
+            <span class="c-name">
+              <b v-text="r.a.n"></b>
+              <em v-if="r.j.pick && (r.a.jds||[]).length > 1" class="mainmark" title="主岗">主</em>
+            </span>
+            <span class="ell" v-text="r.j.role || '(没填标题)'"></span>
+            <span><i class="pill" :class="'lv-'+(r.j.lv||'none')" v-text="LV[r.j.lv||'']"></i></span>
+            <span class="dim ell" v-text="r.j.loc || '—'"></span>
+            <span><i class="pill" :class="'st-'+r.a.status" v-text="ST[r.a.status]"></i></span>
+            <span class="dim ell" v-text="r.j.note"></span>
+            <span><a v-if="r.j.url" :href="r.j.url" target="_blank" rel="noopener"
+                     class="jd-go" @click.stop title="打开 JD">↗</a></span>
+          </div>
         </div>
       </div>
     </section>

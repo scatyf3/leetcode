@@ -9,9 +9,16 @@ const { createApp } = Vue;
 const VIEWS = [
   { k: 'timeline', t: '时间线' },
   { k: 'board', t: '公司' },
+  { k: 'jds', t: '岗位' },
   { k: 'funnel', t: '漏斗' },
 ];
+// 岗位的资历档。和 scan_board.py / watch_boards.py 的分桶用同一套词, 免得两处对不上。
+const LV = { '': '—', ng: 'entry/NG', mid: '中级', sr: '资深' };
 const SIZE = { large: '大厂', mid: '中型', small: '小' };
+// 主视图是只读的, 所以枚举值要有给人看的中文label
+const REF = { none: '—', asked: '已请求', got: '已到位' };
+const ST = { pool: '池子', todo: '未投递', applied: '已投', oa: 'OA', screen: '电面', onsite: 'onsite' };
+const OC = { '': '在跑', offer: 'offer', rejected: '被拒', closed: '没招', withdrawn: '撤回' };
 const CONTACT = ['oa', 'screen', 'onsite'];      // 「首次真人接触 / OA」以上的阶段
 
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -26,16 +33,21 @@ const daysBetween = (a, b) =>
 createApp({
   data() {
     return {
-      VIEWS,
+      VIEWS, REF, ST, OC, LV,
       plan: {},
       apps: [],
       view: localStorage.getItem('jb-view') || 'timeline',
       tierF: 'all',
       liveOnly: false,
       bridgeOnly: false,
+      ngOnly: false,
       newName: '',
       newTier: 'C',
-      open: '',
+      jdTierF: 'all',
+      jdLvF: 'all',
+      jdQ: '',
+      jdOpen: null,        // 详情里正在展开编辑的那条 jd
+      cur: null,
       bulkOpen: false,
       bulkText: '',
       msg: '',
@@ -69,7 +81,7 @@ createApp({
     actualByWeek() {
       const m = {};
       for (const a of this.apps) {
-        if (!a.applied || a.status === 'pool') continue;
+        if (!a.applied || a.status === 'pool' || a.status === 'todo') continue;
         const w = Math.max(0, Math.floor(daysBetween(this.anchor, a.applied) / 7));
         m[w + '|' + a.tier] = (m[w + '|' + a.tier] || 0) + 1;
         m[w] = (m[w] || 0) + 1;
@@ -136,7 +148,9 @@ createApp({
           let rows = this.apps.filter((a) => a.tier === t.k);
           if (this.liveOnly) rows = rows.filter((a) => !a.outcome || a.outcome === 'offer');
           if (this.bridgeOnly) rows = rows.filter((a) => a.bridge);
+          if (this.ngOnly) rows = rows.filter((a) => a.ng);
           rows.sort((x, y) =>
+            ((y.ng || 0) - (x.ng || 0)) ||
             (y.bridge - x.bridge) ||
             (this.rank(y) - this.rank(x)) ||
             x.n.localeCompare(y.n));
@@ -146,6 +160,31 @@ createApp({
 
     bulkCount() { return this.bulkText.split('\n').filter((x) => x.trim()).length; },
 
+    // 岗位视图: 把每家的 jds 摊平成一张表。公司仍是漏斗的分母 —— 这里只是明细,
+    // 所以每行带的是**所属公司的**阶段/结局, 岗位本身不单独记状态。
+    jdRows() {
+      const order = (this.plan.tiers || []).map((t) => t.k);
+      const q = this.jdQ.trim().toLowerCase();
+      const out = [];
+      for (const a of this.apps) {
+        if (this.jdTierF !== 'all' && a.tier !== this.jdTierF) continue;
+        if (this.liveOnly && a.outcome && a.outcome !== 'offer') continue;
+        for (const j of a.jds || []) {
+          if (this.jdLvF !== 'all' && (j.lv || '') !== this.jdLvF) continue;
+          if (q && !(`${a.n} ${j.role} ${j.loc} ${j.note}`.toLowerCase().includes(q))) continue;
+          out.push({ a, j });
+        }
+      }
+      out.sort((x, y) =>
+        (order.indexOf(x.a.tier) - order.indexOf(y.a.tier)) ||
+        x.a.n.localeCompare(y.a.n) ||
+        (y.j.pick - x.j.pick));
+      return out;
+    },
+
+    // 摊平后有多少家公司还一条岗位都没记 —— 这个数就是「还没查 JD」的欠账
+    jdGap() { return this.apps.filter((a) => !(a.jds || []).length).length; },
+
     headline() {
       const A = this.st();
       return `已投 ${A.applied}/${this.budgetTotal} · 首响 ${A.contact} · onsite ${A.onsite} · offer ${A.offer}`;
@@ -154,6 +193,13 @@ createApp({
 
   methods: {
     setView(k) { this.view = k; localStorage.setItem('jb-view', k); },
+    edit(a) { this.cur = a; },
+
+    scanTip(a) {
+      if (!a.scan_at) return '还没扫过 —— python3 jobs/scan_board.py ' + a.id;
+      return `${a.scan_at} 扫: 在招 ${a.scan_n} 个, 工程岗里 entry ${a.scan_ng} · `
+        + `中级 ${a.scan_mid} · 资深 ${a.scan_sr}`;
+    },
 
     /** plan.json 里的散文带 **强调** —— 先转义再只认这一个记号, 不引第二个 markdown 库。
         转义在前, 所以 plan.json 里就算写了 <script> 也只会当字面量显示。 */
@@ -165,10 +211,11 @@ createApp({
     sizeT(s) { return SIZE[s] || s; },
     div(a, b) { return b ? a / b : 0; },
     pct(r) { return (r * 100).toFixed(0) + '%'; },
-    rank(a) { return ['pool', 'applied', 'oa', 'screen', 'onsite'].indexOf(a.status); },
+    rank(a) { return ['pool', 'todo', 'applied', 'oa', 'screen', 'onsite'].indexOf(a.status); },
 
     bucket(rows) {
-      const applied = rows.filter((a) => a.status !== 'pool');
+      // pool 和 todo 都还没投出去 —— 漏斗的分母从 applied 才开始
+      const applied = rows.filter((a) => a.status !== 'pool' && a.status !== 'todo');
       return {
         pool: rows.length,
         applied: applied.length,
@@ -201,13 +248,67 @@ createApp({
       this.flash('已保存');
     },
 
+    // ── 岗位 ──────────────────────────────────────────────────────────
+    // 全部走 /api/apps/<id>/jds, 后端回整条公司记录 —— 主岗同步(role/url)在那边做,
+    // 前端直接整条替换, 不自己拼状态。
+    async jdCall(a, url, opt) {
+      if (this.ro) return null;
+      const r = await fetch(url, opt).catch(() => null);
+      if (!r || !r.ok) { this.flash('保存失败'); return null; }
+      const fresh = await r.json();
+      Object.assign(a, fresh);
+      if (this.cur && this.cur.id === a.id) Object.assign(this.cur, fresh);
+      const i = this.apps.findIndex((x) => x.id === a.id);
+      if (i >= 0) Object.assign(this.apps[i], fresh);
+      this.flash('已保存');
+      return fresh;
+    },
+
+    addJd(a) {
+      return this.jdCall(a, `/api/apps/${a.id}/jds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: '', url: '' }),
+      }).then((f) => { if (f) this.jdOpen = f.jds[f.jds.length - 1].id; });
+    },
+
+    setJd(a, j, field, value) {
+      if (j[field] === value) return;
+      j[field] = value;                                  // 乐观更新
+      return this.jdCall(a, `/api/apps/${a.id}/jds/${j.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [field]: value }),
+      });
+    },
+
+    pickJd(a, j) {
+      return this.jdCall(a, `/api/apps/${a.id}/jds/${j.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pick: 1 }),
+      });
+    },
+
+    delJd(a, j) {
+      if (this.ro || !confirm(`删掉这条岗位?\n${j.role || j.url || '(空)'}`)) return;
+      return this.jdCall(a, `/api/apps/${a.id}/jds/${j.id}`, { method: 'DELETE' });
+    },
+
+    // 岗位视图里点一行 -> 跳回公司详情, 并把这条岗位展开
+    openFrom(row) {
+      this.jdOpen = row.j.id;
+      this.view = 'board';
+      this.edit(row.a);
+    },
+
     async del(a) {
       if (this.ro || !confirm(`删掉 ${a.n}?`)) return;
       const r = await fetch('/api/apps/' + a.id, { method: 'DELETE' }).catch(() => null);
       if (!r || !r.ok) return this.flash('删除失败');
       // 后端把 id 记进 dropped, 所以下次启动不会被 plan.json 的 pool 种回来
       this.apps = this.apps.filter((x) => x.id !== a.id);
-      this.open = '';
+      this.cur = null;
       this.flash('已删除');
     },
 
