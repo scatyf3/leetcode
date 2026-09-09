@@ -13,3 +13,7 @@ __pycache__/
 
 # 静态站导出产物 (export_static.py, CI 里现建现扔)
 dist/
+
+# 求职看板的**投递状态** —— 仓库是 public 的, 公司名/被拒记录/内推人一概不进 git。
+# 方法论和候选池在 jobs/plan.json, 那份是追踪的(见 jobs/README.md 的「隐私」)。
+jobs/data/

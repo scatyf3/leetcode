@@ -30,6 +30,7 @@ createApp({
       VIEWS,
       plan: {},
       apps: [],
+      method: '',
       view: localStorage.getItem('jb-view') || 'timeline',
       tierF: 'all',
       liveOnly: false,
@@ -54,7 +55,26 @@ createApp({
 
     budgetTotal() { return (this.plan.tiers || []).reduce((s, t) => s + t.budget, 0); },
 
-    kw() { return this.plan.keywords || { use: [], avoid: [] }; },
+    /** 本周该主攻哪一档 —— 按时间线的窗口, 落在窗口之后就一直算最后那档 */
+    tierNow() {
+      const ts = this.plan.tiers || [];
+      const hit = ts.find((t) => this.weekNow >= t.weeks[0] && this.weekNow <= t.weeks[1]);
+      if (hit) return hit.k;
+      const started = ts.filter((t) => this.weekNow > t.weeks[1]);
+      return started.length ? started[started.length - 1].k : (ts[0] || {}).k;
+    },
+
+    /** 方法那页 = jobs/method.md。marked 是 vendored 的(和 dashboard 同一份, MIT),
+        不走 CDN、不需要构建 —— 掉了也只是退成纯文本, 不该让整页炸。 */
+    methodHtml() {
+      if (!this.method) return '';
+      if (typeof marked === 'undefined') {
+        console.warn('[md] marked 没加载 —— 退化成纯文本。检查 vendor/marked.min.js');
+        return '<pre>' + this.md(this.method) + '</pre>';
+      }
+      return marked.parse(this.method, { gfm: true, breaks: false })
+        .replace(/<a href=/g, '<a target="_blank" rel="noopener" href=');
+    },
 
     /** 每周实际投了几家, 按 tier 分桶。key = 'W|tier' */
     actualByWeek() {
@@ -131,7 +151,7 @@ createApp({
             (y.bridge - x.bridge) ||
             (this.rank(y) - this.rank(x)) ||
             x.n.localeCompare(y.n));
-          return { k: t.k, t: t.t, budget: t.budget, rows, b: this.bucket(this.apps.filter((a) => a.tier === t.k)) };
+          return { k: t.k, t: t.t, d: t.d, role: t.role, budget: t.budget, rows, b: this.bucket(this.apps.filter((a) => a.tier === t.k)) };
         });
     },
 
@@ -143,6 +163,14 @@ createApp({
 
   methods: {
     setView(k) { this.view = k; localStorage.setItem('jb-view', k); },
+
+    /** plan.json 里的散文带 **强调** —— 先转义再只认这一个记号, 不引第二个 markdown 库。
+        转义在前, 所以 plan.json 里就算写了 <script> 也只会当字面量显示。 */
+    md(s) {
+      return String(s == null ? '' : s)
+        .replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+        .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+    },
     sizeT(s) { return SIZE[s] || s; },
     div(a, b) { return b ? a / b : 0; },
     pct(r) { return (r * 100).toFixed(0) + '%'; },
@@ -197,12 +225,16 @@ createApp({
     },
 
     async load() {
-      const [p, a] = await Promise.all([
+      const [p, a, m] = await Promise.all([
         fetch('/api/plan').then((r) => r.json()),
         fetch('/api/apps').then((r) => r.json()),
+        fetch('/api/method').then((r) => r.json()).catch(() => ({})),
       ]);
       this.plan = p;
       this.apps = a.apps || [];
+      this.method = m.content || '';
+      // 公开站没有投递数据 -> 时间线和漏斗全是 0, 直接落在「方法」那页
+      if (this.ro && !this.apps.length) this.view = 'method';
     },
   },
 

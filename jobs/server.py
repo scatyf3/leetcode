@@ -27,6 +27,7 @@ from urllib.parse import urlparse, unquote
 HERE = Path(__file__).resolve().parent
 DATA = HERE / "data"
 PLAN = HERE / "plan.json"
+METHOD = HERE / "method.md"        # 方法论散文, 手写 markdown —— 结构化的东西才进 plan.json
 APPS = DATA / "applications.json"
 EVENTS = DATA / "events.jsonl"
 PORT = 8766                       # 不是 8765 —— 那个是 LeetCode 看板, 两个要能同时开
@@ -45,6 +46,12 @@ MIME = {".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=ut
 
 def read_plan() -> dict:
     return json.loads(PLAN.read_text(encoding="utf-8"))
+
+
+def read_method() -> dict:
+    """方法论那页的正文。没有这个文件也别让页面炸 —— 退成空字符串。"""
+    txt = METHOD.read_text(encoding="utf-8") if METHOD.exists() else ""
+    return {"file": METHOD.name, "content": txt}
 
 
 def slug(name: str) -> str:
@@ -214,6 +221,8 @@ class Handler(BaseHTTPRequestHandler):
         path = unquote(urlparse(self.path).path)
         if path == "/api/plan":
             return self._send(read_plan())
+        if path == "/api/method":
+            return self._send(read_method())
         if path == "/api/apps":
             return self._send({"apps": load_apps()})
         if path == "/api/stats":
