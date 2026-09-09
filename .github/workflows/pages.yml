@@ -1,4 +1,6 @@
 # 把看板导出成只读静态站发到 GitHub Pages -> https://scatyf3.github.io/leetcode/
+#   /        LeetCode 看板
+#   /jobs/   求职看板(只有方法论, 没有投递数据)
 # 写入口在构建时就被剥掉了(见 dashboard/static-shim.js), 线上没有任何可写接口。
 name: Deploy dashboard
 
@@ -25,6 +27,10 @@ jobs:
         with:
           python-version: '3.12'
       - run: python dashboard/export_static.py dist   # 纯标准库, 没有依赖要装
+      # 求职看板挂在 /jobs/ 子路径。**必须在 dashboard 之后** —— 那个 export 会先
+      # rmtree(dist) 重建, 反过来跑的话 dist/jobs 会被它整个删掉。
+      # 线上只有方法论, 投递状态不导出(见 jobs/export_static.py 的 EXPORT_APPLICATIONS)。
+      - run: python jobs/export_static.py dist/jobs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
