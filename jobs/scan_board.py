@@ -35,11 +35,17 @@ API = "http://localhost:8766"
 
 # 资历分档。先判 NG(它会撞上 "Associate" 这类词), 再判 SR, 都不中算 mid。
 NG = re.compile(r"new.?grad|university|campus|\bgraduate\b|intern\b|entry.?level|"
-                r"apprentice|associate engineer|\bjunior\b|\bI\b$|early career", re.I)
+                r"apprentice|associate engineer|\bjunior\b|early career", re.I)
+# 结尾的罗马数字 I 只在不带资历词时才算初级 ——「Staff Software Engineer I」是 staff 档里的一级
+LEVEL_I = re.compile(r"\bI\b\s*$")
 SR = re.compile(r"\bsenior\b|\bstaff\b|\bprincipal\b|\blead\b|\bdirector\b|\bhead\b|"
                 r"\bmanager\b|\barchitect\b|\bvp\b|\bdistinguished\b|\bfellow\b", re.I)
-# 只有工程岗进 ng/mid/sr 的分档 —— 设计/运营/市场的 entry level 对你没意义
-ENG = re.compile(r"engineer|developer|\bswe\b|programmer|scientist, (ml|machine)", re.I)
+# 只有工程岗进 ng/mid/sr 的分档 —— 设计/运营/市场的 entry level 对你没意义。
+# AI lab / 初创常把工程岗叫 Member of Technical Staff, 不带 engineer 字样
+ENG = re.compile(r"engineer|developer|\bswe\b|programmer|scientist, (ml|machine)|"
+                 r"technical staff|\bmts\b", re.I)
+# 「Member of Technical Staff」里的 staff 不是资历 —— 判 SR 前先抹掉, 否则 MTS 全算资深
+MTS = re.compile(r"member of technical staff", re.I)
 
 
 def fetch(url: str):
@@ -65,8 +71,9 @@ def titles(slug: str) -> tuple[list[str], str]:
 
 def classify(ts: list[str]) -> dict:
     eng = [t for t in ts if ENG.search(t)]
-    ng = [t for t in eng if NG.search(t)]
-    sr = [t for t in eng if t not in ng and SR.search(t)]
+    senior = lambda t: SR.search(MTS.sub("", t))
+    ng = [t for t in eng if NG.search(t) or (LEVEL_I.search(t) and not senior(t))]
+    sr = [t for t in eng if t not in ng and senior(t)]
     return {"scan_n": len(ts), "scan_ng": len(ng),
             "scan_sr": len(sr), "scan_mid": len(eng) - len(ng) - len(sr)}
 
@@ -119,8 +126,10 @@ def main():
     flags = {x for x in sys.argv[1:] if x.startswith("--")}
     slug = None
     if "--slug" in sys.argv:
-        slug = sys.argv[sys.argv.index("--slug") + 1]
-        args = [a for a in args if a != slug]
+        i = sys.argv.index("--slug") + 1
+        slug = sys.argv[i]
+        # 按位置删, 不按值删 —— slug 和公司 id 同名时(preference-model)按值会把公司也删掉
+        args = [x for j, x in enumerate(sys.argv[1:], 1) if j != i and not x.startswith("--")]
     dry = "--dry" in flags
 
     rows = apps()

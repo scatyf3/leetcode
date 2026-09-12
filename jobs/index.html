@@ -102,7 +102,7 @@
     <section v-show="view==='board'" class="wrap">
       <div class="toolbar">
         <div class="groupby">
-          <button v-for="f in ['all','C','B','A','D']" :key="f" class="gb-btn"
+          <button v-for="f in ['all', ...tierKeys]" :key="f" class="gb-btn"
                   :class="{on: tierF===f}" @click="tierF=f" v-text="f==='all'?'全部':f"></button>
         </div>
         <div class="groupby">
@@ -113,7 +113,7 @@
         </div>
         <div class="add" v-if="!ro">
           <input v-model="newName" placeholder="加公司… Enter" @keyup.enter="add" spellcheck="false">
-          <select v-model="newTier"><option>C</option><option>B</option><option>A</option><option>D</option></select>
+          <select v-model="newTier"><option v-for="k in tierKeys" :key="k" v-text="k"></option></select>
           <button class="gb-btn" @click="bulkOpen = !bulkOpen">批量</button>
         </div>
       </div>
@@ -122,7 +122,7 @@
         <textarea v-model="bulkText" spellcheck="false"
           placeholder="一行一个公司名，粘进来…&#10;Cloudflare&#10;Datadog&#10;Glean"></textarea>
         <div class="bulk-foot">
-          <select v-model="newTier"><option>C</option><option>B</option><option>A</option><option>D</option></select>
+          <select v-model="newTier"><option v-for="k in tierKeys" :key="k" v-text="k"></option></select>
           <button @click="addBulk">加 {{ bulkCount }} 家进 {{ newTier }}</button>
           <span class="hint">已存在的同名公司会自动跳过重名，不会覆盖你已有的状态</span>
         </div>
@@ -193,7 +193,7 @@
             <div class="fgrid">
               <label>公司名<input :value="cur.n" @change="set(cur,'n',$event.target.value)" spellcheck="false"></label>
               <label>组<select :value="cur.tier" @change="set(cur,'tier',$event.target.value)">
-                <option>C</option><option>B</option><option>A</option><option>D</option></select></label>
+                <option v-for="k in tierKeys" :key="k" v-text="k"></option></select></label>
               <label>类别<input :value="cur.cat" @change="set(cur,'cat',$event.target.value)"
                      placeholder="大厂平台 / agent dev / ML 平台" spellcheck="false"></label>
               <label>规模<select :value="cur.size" @change="set(cur,'size',$event.target.value)">
@@ -248,6 +248,10 @@
                   <input class="jd-loc" :value="j.loc" :disabled="ro"
                          @change="setJd(cur,j,'loc',$event.target.value)"
                          placeholder="地点" spellcheck="false">
+                  <button class="jd-txt" :class="{on: jdOpen===j.id, has: j.text}"
+                          @click="jdOpen = jdOpen===j.id ? null : j.id"
+                          :title="j.text ? '看 / 改存下来的 JD 原文' : '粘一份 JD 原文存着'"
+                          v-text="j.text ? '原文 ' + (j.text.length/1000).toFixed(1) + 'k' : '+ 原文'"></button>
                   <a v-if="j.url" :href="j.url" target="_blank" rel="noopener" class="jd-go" title="打开 JD">↗</a>
                   <button v-if="!ro" class="jd-x" @click="delJd(cur,j)" title="删掉这条">✕</button>
                 </div>
@@ -257,6 +261,11 @@
                 <input class="jd-note" :value="j.note" :disabled="ro"
                        @change="setJd(cur,j,'note',$event.target.value)"
                        placeholder="一句话事实：年限、技术栈、JD 里点名的东西" spellcheck="false">
+                <!-- 原文快照: 岗位下架后链接就 404 了, 面试前回看要求全靠这份 -->
+                <textarea v-if="jdOpen===j.id" class="jd-text" :value="j.text" :disabled="ro"
+                          @change="setJd(cur,j,'text',$event.target.value.trim())"
+                          placeholder="把 JD 全文粘进来（离开输入框自动保存）。Greenhouse / Ashby / Lever 的可以跑 python3 jobs/fetch_jd.py <公司> 自动抓"
+                          spellcheck="false"></textarea>
               </div>
             </div>
 
@@ -300,7 +309,7 @@
     <section v-show="view==='jds'" class="wrap">
       <div class="toolbar">
         <div class="groupby">
-          <button v-for="f in ['all','C','B','A','D']" :key="f" class="gb-btn"
+          <button v-for="f in ['all', ...tierKeys]" :key="f" class="gb-btn"
                   :class="{on: jdTierF===f}" @click="jdTierF=f" v-text="f==='all'?'全部':f"></button>
         </div>
         <div class="groupby">

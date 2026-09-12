@@ -68,6 +68,9 @@ createApp({
 
     budgetTotal() { return (this.plan.tiers || []).reduce((s, t) => s + t.budget, 0); },
 
+    // 组名从 plan.json 现读 —— 下拉和筛选按钮别写死, 加一组只改 plan.json
+    tierKeys() { return (this.plan.tiers || []).map((t) => t.k); },
+
     /** 本周该主攻哪一组 —— 按时间线的窗口, 落在窗口之后就一直算最后那组 */
     tierNow() {
       const ts = this.plan.tiers || [];
@@ -171,7 +174,8 @@ createApp({
         if (this.liveOnly && a.outcome && a.outcome !== 'offer') continue;
         for (const j of a.jds || []) {
           if (this.jdLvF !== 'all' && (j.lv || '') !== this.jdLvF) continue;
-          if (q && !(`${a.n} ${j.role} ${j.loc} ${j.note}`.toLowerCase().includes(q))) continue;
+          // 原文也搜 —— 「哪几家点名了 Triton」这种问题只有原文答得了
+          if (q && !(`${a.n} ${j.role} ${j.loc} ${j.note} ${j.text || ''}`.toLowerCase().includes(q))) continue;
           out.push({ a, j });
         }
       }

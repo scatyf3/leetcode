@@ -19,21 +19,33 @@
     "space": "O(V)"
   },
   "quiz": {
-    "idea": "哈希表兼任 visited 和映射",
+    "q": "核心思路？DFS 还是 BFS？",
+    "idea": "遍历全图边走边克隆，DFS / BFS 都行",
     "wrong": [
-      "先建全部节点再连边",
-      "拓扑排序后按序复制",
-      "并查集合并连通分量后逐个复制"
+      "只能 DFS：得等邻居先克隆完才能连边",
+      "只能 BFS：DFS 在环上会无限递归",
+      "拓扑排序后，按入度从低到高逐个复制"
+    ],
+    "then": [
+      {
+        "q": "哈希表的 trick？",
+        "idea": "原→克隆 dict 兼 visited，先登记后递归",
+        "wrong": [
+          "原→克隆 dict 兼 visited，先递归后登记",
+          "set 记 visited，回溯时再按顺序连边",
+          "克隆→原节点 dict，连边时再反查原图"
+        ]
+      }
     ]
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-07",
-    "last_review": "2026-09-06",
-    "stability": 1.2931,
-    "difficulty": 5.112170705601056,
-    "reps": 1,
-    "lapses": 0,
-    "last_rating": 2
+    "due": "2026-09-11",
+    "last_review": "2026-09-10",
+    "stability": 0.45012466246777877,
+    "difficulty": 8.378632117467106,
+    "reps": 2,
+    "lapses": 1,
+    "last_rating": 1
   }
 }

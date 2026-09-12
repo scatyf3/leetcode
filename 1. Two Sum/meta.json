@@ -14,6 +14,18 @@
   "difficulty": "easy",
   "status": "solved",
   "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "哈希存补数→下标，先查后存",
+    "wrong": [
+      "先把所有数存进 set 再查补数",
+      "对每个数二分查找它的补数",
+      "前缀和 + 哈希记录出现次数"
+    ]
+  },
   "fsrs": {
     "state": "review",
     "due": "2026-11-05",

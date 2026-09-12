@@ -1,4 +1,5 @@
 # 981. Time Based Key-Value Store
+<<<<<<< Updated upstream
 
 怎么存，一个key，对应t,value的list pairt，这里相比于我们的方案，`{key:{timestamp:value}}` 的好处是t和val有序
 
@@ -18,3 +19,16 @@ P:      T    T    T    F    F
 2. 有重复元素时，三分支的 == 就 return 是有害的。a = [1,2,2,2,5]，求「最后一个 ≤ 2」：
   1. 三分支：mid=2，a[2]==2，立刻 return 2 —— 但答案是下标 3。它返回的是随便某一个匹配位置，取决于二分路径。
   2. 搜缝 P = a[i] <= 2：T T T T F → r = 3 
+=======
+store (key,value,timestamp)
+given a key, return nearest(according to timestamp) value 
+
+hashmap key => (some storage related to timestamp and value)
+
+key => (timestamp => value)
+
+first intuition: 
+stack, but no time seq
+
+hashmap timestamp => value, use binary search
+>>>>>>> Stashed changes

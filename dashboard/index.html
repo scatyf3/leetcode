@@ -75,6 +75,9 @@
             <option>solved</option><option>review</option><option>todo</option>
           </select>
         </label>
+        <label class="tf sel paused-toggle">暂停复习
+          <input type="checkbox" id="e-paused">
+        </label>
         <label class="tf sel">熟练度
           <select id="e-familiarity">
             <option value="">— 未评</option>
@@ -237,6 +240,8 @@
             <button v-else class="rv-next" @click="skip">下一题 <em>空格</em></button>
             <button class="ghost rv-defer" :class="{ off: !queue.length }" @click="defer"
                     title="不评分 · 不写 FSRS —— 只把当前这张挪到本次会话的最后再问一遍">↓ 押到队尾 <em>0</em></button>
+            <button v-if="!isSyntax && !readOnly" class="ghost rv-pause" @click="pause"
+                    title="这阵子都别问: 不评分, 以后不进复习队列, interval 一起冻住 —— 在详情页取消勾选恢复">⏸ 暂停</button>
           </div>
         </template>
       </div>

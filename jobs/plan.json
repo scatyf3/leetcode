@@ -58,6 +58,18 @@
         1,
         2
       ]
+    },
+    {
+      "k": "E",
+      "role": "美国中资",
+      "d": "中资公司在美国的 infra / AI infra 岗 (TikTok / ByteDance 等)。校招批量开、窗口在秋季前段。",
+      "budget": 15,
+      "cost_min": 10,
+      "prior": 0.06,
+      "weeks": [
+        1,
+        2
+      ]
     }
   ],
   "funnel": [

@@ -1,6 +1,6 @@
 /* 调色板和 dashboard/styles.css 保持一致 —— 两个看板是同一套东西的两半 */
 :root{
-  --tC:#54c78b; --tB:#e2b04a; --tA:#e06c75; --tD:#7f8ce0;
+  --tC:#54c78b; --tB:#e2b04a; --tA:#e06c75; --tD:#7f8ce0; --tE:#c678dd;
   --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --line:#2a2f3a;
   --fg:#e6e8ee; --dim:#9aa3b2; --accent:#6ea8fe; --accent2:#7ee0a8;
   --chip:#242a35;
@@ -63,7 +63,7 @@ main{padding:18px 20px 60px}
 /* 档色 chip */
 .tier-chip{display:inline-block;min-width:17px;text-align:center;border-radius:5px;
   font:11px/17px Consolas,monospace;font-weight:700;color:#0f1115;padding:0 4px}
-.tier-chip.tA{background:var(--tA)}.tier-chip.tD{background:var(--tD)}.tier-chip.tB{background:var(--tB)}.tier-chip.tC{background:var(--tC)}
+.tier-chip.tA{background:var(--tA)}.tier-chip.tD{background:var(--tD)}.tier-chip.tB{background:var(--tB)}.tier-chip.tC{background:var(--tC)}.tier-chip.tE{background:var(--tE)}
 
 /* ─────────── 三档判据: 首屏就得答「A/B/C 是什么」, 不该逼人切到「方法」页 ─────────── */
 .legend{margin-bottom:20px}
@@ -96,7 +96,7 @@ main{padding:18px 20px 60px}
 .wk-bar{display:flex;align-items:center;gap:7px;min-width:190px}
 .bar{flex:1;height:6px;background:var(--chip);border-radius:3px;overflow:hidden}
 .bar i{display:block;height:100%}
-.bar i.tA{background:var(--tA)}.bar i.tD{background:var(--tD)}.bar i.tB{background:var(--tB)}.bar i.tC{background:var(--tC)}
+.bar i.tA{background:var(--tA)}.bar i.tD{background:var(--tD)}.bar i.tB{background:var(--tB)}.bar i.tC{background:var(--tC)}.bar i.tE{background:var(--tE)}
 .wk-num{font:11.5px/1 Consolas,monospace;color:var(--dim);min-width:48px;text-align:right}
 .wk-num.done{color:var(--good)}
 .wk-note{color:var(--dim);margin:4px 0 0;font-size:13px;max-width:760px}
@@ -138,7 +138,7 @@ main{padding:18px 20px 60px}
 .row.open{background:var(--panel2)}
 .c-name a{color:var(--fg);font-weight:650;text-decoration:none}
 .c-name a:hover{color:var(--accent);text-decoration:underline}
-select.tr-C{color:var(--tC)}select.tr-B{color:var(--tB)}select.tr-A{color:var(--tA)}select.tr-D{color:var(--tD)}
+select.tr-C{color:var(--tC)}select.tr-B{color:var(--tB)}select.tr-A{color:var(--tA)}select.tr-D{color:var(--tD)}select.tr-E{color:var(--tE)}
 /* 行首而不是行尾 —— 放右边的话窗口一窄就被挤出横向滚动区, 等于没有 */
 .more{background:var(--chip);color:var(--dim);border:0;border-radius:5px;padding:1px 5px;
   line-height:1.2;font-size:14px}
@@ -356,3 +356,9 @@ input.due-bad{border-color:var(--bad);color:var(--bad)}
 .jd-x:hover{color:var(--bad)}
 .jd-url,.jd-note{width:100%;font-size:12px}
 .jd-url{font-family:Consolas,monospace;color:var(--dim)}
+.jd-txt{background:var(--chip);color:var(--thin);border:0;border-radius:5px;
+  padding:3px 7px;font-size:11px;flex:none;white-space:nowrap}
+.jd-txt.has{color:var(--dim)}
+.jd-txt.on{background:var(--accent);color:#fff}
+.jd-text{width:100%;min-height:260px;resize:vertical;font-size:12px;line-height:1.55;
+  font-family:inherit;box-sizing:border-box}

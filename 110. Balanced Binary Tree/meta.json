@@ -4,5 +4,17 @@
   "techniques": [],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "后序求高度，失衡返回 -1 剪枝",
+    "wrong": [
+      "只比根的左右子树高度差",
+      "检查每个节点是否都有两个孩子",
+      "最大深度与最小深度差不超过 1"
+    ]
+  }
 }

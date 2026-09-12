@@ -256,7 +256,8 @@ def add_app(body: dict) -> dict:
     return a
 
 
-JD_FIELDS = {"role", "url", "loc", "lv", "note"}
+# text = JD 原文的本地快照。岗位一下架 ATS 链接就 404, 面试前想回看要求就没了。
+JD_FIELDS = {"role", "url", "loc", "lv", "note", "text"}
 
 
 def _find(apps: list, app_id: str) -> dict | None:
@@ -273,6 +274,7 @@ def add_jd(app_id: str, body: dict) -> dict | None:
     j = {"id": f"j{n}", "role": (body.get("role") or "").strip(),
          "url": (body.get("url") or "").strip(), "loc": (body.get("loc") or "").strip(),
          "lv": body.get("lv") or "", "note": (body.get("note") or "").strip(),
+         "text": (body.get("text") or "").strip(),
          "pick": 1 if not js else 0}      # 第一条自动成为主岗
     js.append(j)
     sync_main(a)
@@ -291,7 +293,10 @@ def patch_jd(app_id: str, jid: str, body: dict) -> dict | None:
         return None
     for k, v in body.items():
         if k in JD_FIELDS and j.get(k) != v:
-            log_event(app_id, f"jd.{jid}.{k}", j.get(k), v)
+            if k == "text":               # 原文动辄几千字, 事件日志只记长度
+                log_event(app_id, f"jd.{jid}.text", len(j.get(k) or ""), len(v or ""))
+            else:
+                log_event(app_id, f"jd.{jid}.{k}", j.get(k), v)
             j[k] = v
     if body.get("pick"):                  # 主岗唯一 —— 设一条就清掉其余
         for x in a["jds"]:
