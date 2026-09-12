@@ -24,5 +24,15 @@
       "比高度和节点数是否相同",
       "中序遍历结果相同即可判定"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-18",
+    "last_review": "2026-09-10",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
   }
 }

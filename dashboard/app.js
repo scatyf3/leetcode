@@ -131,17 +131,18 @@ function famBar(items) {
 function rowHTML(p) {
   const diff = p.difficulty || 'none';
   const todo = p.status === 'todo' ? ' todo' : '';
+  const paused = p.paused ? ' paused' : '';
   // 另一个维度(按结构分组时是范式, 反之是结构)单独占一列 —— 这一列是"× 范式"里的
   // 那个乘号, 竖着能扫才有意义, 所以别和 trick 混在同一个右对齐的口袋里。
   const paras = p[otherDim()].map((x) => `<span class="tag para">${esc(x)}</span>`).join('');
   // trick 是这道题的注脚, 不是维度: 压到最后一格, 颜色也调轻
   const tricks = p.techniques.map((x) => `<span class="tag trick">${esc(x)}</span>`).join('');
   const f = famOf(p);
-  return `<div class="row${todo}" data-id="${p.id}">
+  return `<div class="row${todo}${paused}" data-id="${p.id}">
     <span class="dot ${diff}" title="${diff}"></span>
     <span class="fam ${famCls(f)}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(famInfo(f).label)})">${famInfo(f).short}</span>
     <span class="row-id">#${p.id}</span>
-    <span class="row-title">${esc(p.title)}</span>
+    <span class="row-title">${p.paused ? `<i class="paused-mark" title="暂停复习中(自 ${esc(p.paused)})">⏸</i>` : ''}${esc(p.title)}</span>
     <span class="row-para">${paras || '<span class="tag-none" title="还没标范式">—</span>'}</span>
     <span class="row-trick">${tricks}</span>
   </div>`;
@@ -220,6 +221,8 @@ async function openDetail(id) {
   $('#e-difficulty').value = d.difficulty || '';
   $('#e-status').value = d.status || 'solved';
   $('#e-familiarity').value = famOf(d) === null ? '' : String(famOf(d));
+  $('#e-paused').checked = !!d.paused;
+  $('#e-paused').title = d.paused ? `自 ${d.paused} 起暂停` : '勾上后不进复习队列, interval 也一起冻住';
   $('#note-file').textContent = d.note_file;
   $('#note-edit').value = d.note;
   $('#note-msg').textContent = '';
@@ -348,6 +351,7 @@ async function autoSaveMeta() {
     structures: TAGS.structures, paradigms: TAGS.paradigms, techniques: TAGS.techniques,
     difficulty: $('#e-difficulty').value, status: $('#e-status').value,
     familiarity: $('#e-familiarity').value === '' ? null : +$('#e-familiarity').value,
+    paused: $('#e-paused').checked,        // 服务端幂等: 已经暂停的再发 true 不会重新计时
   };
   await putMeta(CURRENT.id, body);
   $('#meta-msg').textContent = '已保存 ✓';
@@ -846,7 +850,9 @@ function savedDeck() {
 // 队列范围: 到期的卡 + 还没进过复习的。题目那边"还没进过"要先够格(status 是 solved/review,
 // 没想出来过的思路谈不上复习); 语法卡只要写在 syntax/*.md 里就算数, 没有这一层。
 function queuePool(deck = 'problems') {
-  const rows = deckRows(deck);
+  // 暂停的题整个不进队列(徽章也就不数它)。调度数据原样留着 —— 恢复时服务端把 due / last_review
+  // 一起往后推停掉的天数, 所以回来时不会是一大片逾期(见 server.set_paused)。
+  const rows = deckRows(deck).filter((p) => !p.paused);
   const fresh = deck === 'syntax' ? rows : rows.filter(rvEligible);
   return [...rows.filter(isDue), ...fresh.filter((p) => !isCard(p))];
 }
@@ -911,16 +917,29 @@ function cxPool(correct) {
 // 改成 true 就能把「时间/空间复杂度？」那道题恢复出来, 其余逻辑都还在。
 const QUIZ_CX = false;
 
+// quiz 可以拆成几步问: 顶层 {q?, idea, wrong} 是第一问, then: [{q, idea, wrong}, ...] 接着问。
+// 比如 133 先问「DFS 还是 BFS」, 再问「哈希表怎么用」—— 一句话塞两个考点, 选对了也分不清是哪个会了。
+// 第一问的块总是在(没写选项时模板显示提示), then 里没写 idea 的直接跳过。
+// idea 写成数组就是**多选**: 几个都对、要全选中才算对。用在「两种说法其实是一回事」的题上
+// (139: 图的可达性 = 一维 DP) —— 单选里放一个「两者都行」, 做多了会发现"都行"那项总是对的。
 function buildQuiz(d) {
   const q = d.quiz || {};
   const cx = cxText(d.complexity);
   const mk = (correct, wrongs) => {
-    if (!correct || wrongs.length < 1) return null;
-    const opts = shuffle([correct, ...wrongs.slice(0, 3)]);
-    return { opts, correct: opts.indexOf(correct), pick: -1 };
+    const rights = [].concat(correct || []).filter(Boolean);
+    if (!rights.length || wrongs.length < 1) return null;
+    const opts = shuffle([...rights, ...wrongs.slice(0, 4 - rights.length)]);   // 总共至多 4 项(ABCD)
+    return { opts, correct: rights.map((t) => opts.indexOf(t)), multi: rights.length > 1, pick: [] };
   };
+  const steps = [q, ...(Array.isArray(q.then) ? q.then : [])];
   return {
-    idea: q.idea ? mk(q.idea, q.wrong || []) : null,
+    ideas: steps
+      .map((s, i) => {
+        const state = s.idea ? mk(s.idea, s.wrong || []) : null;
+        const label = s.q || (i ? '然后呢？' : '思路是哪个？');
+        return { key: `idea${i}`, label: state && state.multi ? `${label}（多选）` : label, state };
+      })
+      .filter((b, i) => i === 0 || b.state),
     cx: QUIZ_CX && cx ? mk(cx, shuffle(cxPool(cx)).slice(0, 3)) : null,
   };
 }
@@ -937,7 +956,7 @@ const RV = Vue.createApp({
       d: null,                       // 当前这道的详情; null = 队列空了(显示收尾屏)
       loading: false,                // 拉详情中。不加这个会先闪一下"没有到期的题"
       revealed: false,
-      quiz: { idea: null, cx: null },
+      quiz: { ideas: [], cx: null },
       items: [], active: 0,          // 揭晓后的 note / 各解法 tab
       editing: false, draft: '', amsg: '',
       attempt: '',                   // 揭晓前自己默写的那一遍。**只活在这一张卡的这一次**:
@@ -945,7 +964,8 @@ const RV = Vue.createApp({
       note: '',                      // 顶部那行临时提示(写失败 / 已经是队尾)
       busy: false,                   // 评分->取下一题这一整段在飞。见 rate() 上面那段注释
       failMsg: '',                   // 拉下一题失败时的收尾屏文案(替掉"复习完了")
-      deferred: [],                  // 这一轮按过「押到队尾」的题, 按发生顺序, 可重复
+      deferred: [],                  // 今天(当前牌组)按过「押到队尾」的题, 按发生顺序, 可重复
+      startGen: 0,                   // start() 的代号: 异步拉 carry 期间被新的 start() 顶掉就作废
       mode: savedMode(),
       deck: savedDeck(),             // 'problems' | 'syntax'
       counts: { problems: 0, syntax: 0 },   // 标在牌组按钮上的到期数
@@ -991,16 +1011,18 @@ const RV = Vue.createApp({
     // 空白/只有空格的不算写过: 揭晓后就不必贴一个空框上去
     mine() { return this.attempt.trim(); },
     // 选择题只有题目牌组有 —— 它测的是"该用哪个模板"的辨别力, 语法卡没有这个维度
-    hasQuiz() { return !this.isSyntax && !!(this.quiz.idea || this.quiz.cx); },
+    hasQuiz() { return !this.isSyntax && (this.quiz.ideas.some((b) => b.state) || !!this.quiz.cx); },
     quizBlocks() {
-      const b = [{ key: 'idea', label: '思路是哪个？', state: this.quiz.idea }];
+      const b = [...this.quiz.ideas];
       if (this.quiz.cx) b.push({ key: 'cx', label: '时间 / 空间复杂度？', state: this.quiz.cx });
       return b;                                    // cx 关掉时整块不占位
     },
     verdict() {
       if (!this.revealed) return { cls: '', text: '' };
-      const v = (st) => (!st || st.pick < 0 ? '' : st.pick === st.correct ? 'ok' : 'no');
-      const vs = [v(this.quiz.idea), v(this.quiz.cx)].filter(Boolean);
+      // 多选要**恰好**选中全部正确项才算对: 漏一个、多一个都是错
+      const v = (st) => (!st || !st.pick.length ? ''
+        : st.pick.length === st.correct.length && st.pick.every((i) => st.correct.includes(i)) ? 'ok' : 'no');
+      const vs = [...this.quiz.ideas.map((b) => v(b.state)), v(this.quiz.cx)].filter(Boolean);
       if (!vs.length) return { cls: '', text: '' };
       const allOk = vs.every((x) => x === 'ok');
       return {
@@ -1054,9 +1076,9 @@ const RV = Vue.createApp({
   methods: {
     fmtInterval,                                   // 模板里要用
 
-    // 把当前队列快照发给后端存成 dashboard/session.json。**单向**: 只写不读,
-    // 前端从不拿它做决定 —— 队列仍然是每次开面板现算的。存它只是为了在浏览器外面
-    // 也能看见"现在队列长什么样 / 哪几道被押到队尾了"。失败了不影响复习。
+    // 把当前队列快照发给后端存成 dashboard/session.json。队列仍然是每次开面板现算的,
+    // 快照里只有 deferred(今天押过队尾的)会被 start() 经 /api/review/carry 读回来。
+    // 失败了不影响复习, 顶多是关掉重开后押过的题回到原位。
     syncSession() {
       if (this.readOnly) return;                   // 只读站没有写接口
       api('/api/review/session', {
@@ -1068,13 +1090,39 @@ const RV = Vue.createApp({
       }).catch(() => { /* 存不上就算了, 这不是数据源 */ });
     },
 
-    start() {
+    // 队列每次现算, 但今天这一轮里有两类题不能因为关掉重开就走样(见 server.review_carry):
+    //   押过队尾的 -> 还在现算队列里, 挪回队尾;
+    //   今天最后一次评 1 的 -> due 已是明天, 现算里没有, 追加到队尾。
+    // 只动**现算队列里本来就有**或**牌组里还在**的 id —— 改了语法卡标题留下的旧 id 会被
+    // 自然滤掉, "关掉重开就好"那条恢复路径照旧有效。
+    async start() {
+      const deck = this.deck;
+      const gen = ++this.startGen;
       this.counts = updateReviewBadge();
-      this.queue = buildQueue(this.mode, this.deck);
+      this.open = true;
+      this.d = null;
+      this.loading = true;                 // 拉 carry 期间别闪"没有到期的题"
+      let carry = { deferred: [], again: [] };
+      if (!this.readOnly) {
+        try {
+          carry = await api(`/api/review/carry?deck=${deck}`);
+        } catch (e) {
+          console.error('[review] 拉今天的押队尾/评 1 记录失败, 按现算队列来', e);
+        }
+      }
+      // 等的时候又开了一次 / 切了牌组(都会再进 start(), 由新的那次接手), 或者已经关掉了
+      if (gen !== this.startGen || !this.open) return;
+      this.loading = false;
+      const queue = buildQueue(this.mode, deck);
+      const inDeck = new Set(deckRows(deck).map((p) => p.id));
+      const deferred = (carry.deferred || []).filter((id) => inDeck.has(id));
+      // 押了好几次的按最后一次的先后排, 和会话内 push 到队尾的效果一致
+      const tail = [...new Set([...deferred].reverse())].reverse().filter((id) => queue.includes(id));
+      const again = (carry.again || []).filter((id) => inDeck.has(id) && !queue.includes(id));
+      this.queue = [...queue.filter((id) => !tail.includes(id)), ...tail, ...again];
       this.done = 0;
       this.total = this.queue.length;
-      this.deferred = [];
-      this.open = true;
+      this.deferred = deferred;             // 接着记, 不从零开始 —— 否则下次同步就把今天押过的冲掉了
       this.next();
     },
 
@@ -1160,11 +1208,15 @@ const RV = Vue.createApp({
 
     pick(state, i) {
       if (this.revealed) return;                       // 揭晓后不能再改答案
-      state.pick = state.pick === i ? -1 : i;          // 再点一下取消
+      const has = state.pick.includes(i);              // 再点一下取消
+      if (state.multi) state.pick = has ? state.pick.filter((x) => x !== i) : [...state.pick, i];
+      else state.pick = has ? [] : [i];                // 单选: 点别的就换过去
     },
     optClass(state, i) {
-      if (!this.revealed) return { picked: state.pick === i };
-      return { done: true, right: i === state.correct, wrong: i !== state.correct && i === state.pick };
+      const picked = state.pick.includes(i), right = state.correct.includes(i);
+      if (!this.revealed) return { picked };
+      // missed 只在多选里标: 单选没选的那项本来就是"没作答", 不算漏
+      return { done: true, right, wrong: picked && !right, missed: state.multi && right && !picked };
     },
 
     reveal() {
@@ -1227,6 +1279,31 @@ const RV = Vue.createApp({
       this.queue.push(this.d.id);                      // done/total 都不动: 这道题还欠着
       this.deferred.push(this.d.id);
       this.next();                                     // next() 里会同步给后端
+    },
+
+    // 暂停当前这道: 不评分, 从本轮队列里整个拿掉(押过队尾 / 评 1 追加的也一起), 以后也不再进队列,
+    // 直到在详情页取消勾选。和押队尾的区别 —— 押队尾是"等会儿再问", 这个是"这阵子都别问"。
+    async pause() {
+      if (!this.d || this.busy || this.isSyntax || this.readOnly) return;
+      const id = this.d.id;
+      this.busy = true;
+      let ok = false;
+      try { ok = (await putMeta(id, { paused: true })).ok; } catch { ok = false; }
+      if (!ok) {
+        this.busy = false;
+        this.note = '⚠ 没暂停成功(服务没起?) —— 这道还在';
+        return;
+      }
+      const p = PROBLEMS.find((x) => x.id === id);
+      if (p) p.paused = todayStr();
+      this.queue = this.queue.filter((x) => x !== id);
+      this.deferred = this.deferred.filter((x) => x !== id);
+      this.total = this.done + this.queue.length;   // 这道不再算进本轮
+      try {
+        buildPanel();
+        this.counts = updateReviewBadge();
+      } catch (e) { console.error('[review] 刷新看板失败', e); }
+      try { await this.next(); } finally { this.busy = false; }
     },
 
     // busy 是**去重闸**, 不是转圈动画: 一次评分要走 POST -> 刷看板 -> 再 GET 下一题,
@@ -2606,6 +2683,7 @@ on('#note-edit', 'blur', () => exitEdit(true));   // click away = save + render
 on('#e-difficulty', 'change', autoSaveMeta);
 on('#e-status', 'change', autoSaveMeta);
 on('#e-familiarity', 'change', autoSaveMeta);
+on('#e-paused', 'change', autoSaveMeta);
 
 // chip editor: remove on ✕, add on Enter/comma, delete-last on Backspace
 document.addEventListener('click', (e) => {

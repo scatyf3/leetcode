@@ -8,5 +8,27 @@
   "techniques": [],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "左右指针跳过非字母数字再比",
+    "wrong": [
+      "只留字母转小写后反转比较",
+      "统计频次，奇数次字符至多一个",
+      "相邻字符两两比较是否相等"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-10",
+    "stability": 0.212,
+    "difficulty": 6.4133,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 1
+  }
 }

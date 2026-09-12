@@ -4,5 +4,27 @@
   "techniques": [],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 1
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "递归取左右深度较大者 + 1",
+    "wrong": [
+      "左深 + 右深 + 1，递归求和",
+      "只沿左孩子走到底计数",
+      "节点总数取 log₂ 向上取整"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-18",
+    "last_review": "2026-09-10",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
 }

@@ -13,14 +13,26 @@
   "difficulty": "medium",
   "status": "solved",
   "familiarity": 4,
+  "complexity": {
+    "time": "O(n^2)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "先转置，再把每行反转",
+    "wrong": [
+      "先转置，再把每列反转",
+      "沿副对角线翻转一次即可",
+      "逐层把每行向右循环平移"
+    ]
+  },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-08",
-    "last_review": "2026-09-03",
-    "stability": 4.546029441066125,
-    "difficulty": 5.102286904192293,
-    "reps": 2,
-    "lapses": 0,
-    "last_rating": 3
+    "due": "2026-09-11",
+    "last_review": "2026-09-10",
+    "stability": 0.9496168256204234,
+    "difficulty": 8.375383379153895,
+    "reps": 3,
+    "lapses": 1,
+    "last_rating": 1
   }
 }

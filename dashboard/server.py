@@ -23,10 +23,10 @@ import sqlite3
 import sys
 import threading
 import time
-from datetime import date
+from datetime import date, timedelta
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote, parse_qs
 
 import fsrs              # FSRS-6 调度算法(见 dashboard/fsrs.py)
 import scaffold          # 题号/题名 -> 建题目文件夹(见 dashboard/scaffold.py)
@@ -124,12 +124,13 @@ SCHEMA = """CREATE TABLE problems(
     structures TEXT, paradigms TEXT, techniques TEXT,
     difficulty TEXT, status TEXT,
     familiarity REAL, complexity TEXT,   -- REAL: 阶梯有半档(L1.5)
-    due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT
+    due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT,
+    paused TEXT                          -- 暂停复习的起始日期, "" = 没暂停
 )"""
 
 COLUMNS = ("id", "title", "folder", "structures", "paradigms", "techniques",
            "difficulty", "status", "familiarity", "complexity",
-           "due", "stability", "reps", "last_review", "fsrs_state")
+           "due", "stability", "reps", "last_review", "fsrs_state", "paused")
 
 
 def init_db():
@@ -163,6 +164,7 @@ def sync():
                 int(f.get("reps") or 0),
                 f.get("last_review", ""),
                 f.get("state", ""),
+                m.get("paused") or "",
             )
         )
     cols = ",".join(COLUMNS)
@@ -371,7 +373,7 @@ def append_scratch(text: str) -> dict:
     return {"ok": True, "file": SCRATCH}
 
 
-LOGGED_FIELDS = ("structures", "paradigms", "techniques", "difficulty", "status", "familiarity")
+LOGGED_FIELDS = ("structures", "paradigms", "techniques", "difficulty", "status", "familiarity", "paused")
 LIST_FIELDS = ("structures", "paradigms", "techniques")
 
 
@@ -505,6 +507,34 @@ def log_attempt(pid: int, undo: bool = False) -> dict:
     return {"ok": True, "logged": True, "kind": row["kind"], "fam": fam}
 
 
+def set_paused(meta: dict, on: bool, today: str):
+    """暂停 / 恢复复习。meta["paused"] 存的是**开始暂停的那天**, 不是布尔。
+
+    暂停期间连 interval 一起冻住: 恢复时把 fsrs 的 due 和 last_review 一起往后推
+    "停了多少天"。只推 due 的话, 下次评分算 elapsed_days 会把暂停那段也算进去,
+    FSRS 以为你隔了很久才想起来, stability 会被高估;两个一起推, 这张卡就像那几天不存在。
+    重复暂停 / 重复恢复都是空操作 —— 前端每次保存都发全量字段, 不能每发一次就重新计时。
+    """
+    since = meta.get("paused")
+    if on:
+        if not since:
+            meta["paused"] = today
+        return
+    if not since:
+        return
+    meta.pop("paused", None)
+    try:
+        days = (date.fromisoformat(today) - date.fromisoformat(since)).days
+    except ValueError:
+        return                               # 手改坏了的日期: 只解除暂停, 不动调度
+    card = meta.get("fsrs")
+    if days <= 0 or not card:
+        return
+    for k in ("due", "last_review"):
+        if card.get(k):
+            card[k] = (date.fromisoformat(card[k]) + timedelta(days=days)).isoformat()
+
+
 def save_meta(pid: int, payload: dict):
     with db() as con:
         r = con.execute("SELECT folder FROM problems WHERE id=?", (pid,)).fetchone()
@@ -517,6 +547,8 @@ def save_meta(pid: int, payload: dict):
         for k in ("structures", "paradigms", "techniques", "difficulty", "status", "complexity", "quiz"):
             if k in payload:
                 meta[k] = payload[k]
+        if "paused" in payload:
+            set_paused(meta, bool(payload["paused"]), today_str())
         if "familiarity" in payload:
             # 0 是 L0(英语讲得清), 不是"未评" —— 未评就是没有这个键
             v = payload["familiarity"]
@@ -564,9 +596,9 @@ def _label(pid, titles: dict) -> dict:
 def write_session(body: dict) -> dict:
     """把前端这一轮复习的队列快照落盘(覆盖写)。
 
-    这是**易失状态, 不是数据源** —— 关掉面板它就没意义了, 所以不进 git、不参与调度、
-    也没有任何东西会去读它做决定。存它只有一个目的: 让浏览器外面(比如我)能看见
-    "现在队列长什么样、哪几道被押到队尾了"。前端每次动队列就覆盖一次。
+    这是**易失状态, 不是数据源** —— 不进 git、不参与 FSRS 调度。前端每次动队列就覆盖一次。
+    大部分字段只给浏览器外面(比如我)看"现在队列长什么样"; 唯一会被读回去做决定的是
+    `defers`(今天押过队尾的题), 见 review_carry()。
     """
     with db() as con:
         titles = {r["id"]: r["title"] for r in con.execute("SELECT id, title FROM problems")}
@@ -600,7 +632,18 @@ def write_session(body: dict) -> dict:
         # 押到队尾的记录, 按发生顺序, 同一道押两次就出现两次
         "deferred": [_label(i, titles) for i in ids("deferred")],
     }
-    SESSION_FILE.write_text(json.dumps(snap, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # 今天押过队尾的题, 两个牌组分开存。body 只带**当前**牌组的那份, 另一个牌组的
+    # 从旧文件原样带过来 —— 否则切到语法卡一同步, 题目那边押过的就被覆盖没了。
+    # 日期不是今天的整份作废, 过了零点自动清零。
+    today = today_str()
+    old = read_session().get("defers") or {}
+    defers = {k: (old.get(k) or []) if old.get("date") == today else [] for k in ("problems", "syntax")}
+    defers[deck] = ids("deferred")
+    snap["defers"] = {"date": today, **defers}
+    # 原子写: review_carry() 会读它, 读到写了一半的文件就等于把今天押过的全丢了
+    tmp = SESSION_FILE.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(snap, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, SESSION_FILE)
     return {"ok": True}
 
 
@@ -609,6 +652,30 @@ def read_session() -> dict:
         return json.loads(SESSION_FILE.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         return {"open": False, "queue": [], "deferred": [], "note": "还没有过复习会话"}
+
+
+def review_carry(deck: str) -> dict:
+    """今天这一轮里, 关掉面板再打开时不该丢的两类题。
+
+    前端的队列每次开面板都现算(到期 + 没进过复习的), 这两类在现算里会走样:
+    - deferred: 押过队尾的。没评分所以还在队里, 但会回到按 due 排的原位 —— 押了等于没押。
+                来源是 session.json 的 defers(押队尾不写 reviews.jsonl, 见 README)。
+    - again:    今天**最后一次**评分是 1 的。评完 due 已经是明天, 现算根本不会把它排进来,
+                可会话内的约定是"忘了就今天再问一遍"。来源是 reviews.jsonl, 不用另记。
+                看"最后一次"是因为评 1 之后重问又评了 3 的, 就不该再回来。
+    前端拿到后只做重排/追加, 不在现算队列里、也不在牌组里的 id 一律忽略。
+    """
+    today = today_str()
+    d = read_session().get("defers") or {}
+    deferred = (d.get(deck) or []) if d.get("date") == today else []
+    last = {}                                   # id -> 今天最后一次的评分, 按那一次的时间排序
+    for e in read_jsonl(REVIEW_LOG):
+        if e.get("date") != today or (e.get("deck") or "problems") != deck:
+            continue
+        last.pop(e.get("id"), None)             # 先删再插, 让 dict 顺序跟着最后一次走
+        last[e.get("id")] = e.get("rating")
+    again = [i for i, r in last.items() if r == 1 and i is not None]
+    return {"date": today, "deferred": deferred, "again": again}
 
 
 def review_card(pid: int, rating: int):
@@ -778,6 +845,11 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, read_lists())
         if path == "/api/review/session":
             return self._send(200, read_session())
+        if path == "/api/review/carry":
+            deck = (parse_qs(urlparse(self.path).query).get("deck") or ["problems"])[0]
+            if deck not in ("problems", "syntax"):
+                return self._send(400, {"error": "bad deck"})
+            return self._send(200, review_carry(deck))
         if path == "/api/syntax":
             return self._send(200, syntax_list())
         if path == "/api/reviews":

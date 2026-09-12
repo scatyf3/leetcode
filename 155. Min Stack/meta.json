@@ -6,5 +6,27 @@
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(1)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "辅助栈同步存当前最小值",
+    "wrong": [
+      "只用一个变量记录最小值",
+      "getMin 时扫一遍整个栈",
+      "额外维护最小堆，pop 时删除"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-12",
+    "last_review": "2026-09-10",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  }
 }

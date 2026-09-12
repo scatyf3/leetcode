@@ -6,9 +6,10 @@
     "binary-search"
   ],
   "techniques": [
-    "半开区间 [l, r) 模板",
-    "循环不变量: 答案始终在 [l, r) 内",
-    "找第一个满足条件的位置,而不是找目标本身"
+    "闭区间 [l, r] 模板: r = n-1 配 while l <= r",
+    "循环不变量: 答案始终在 [l, r] 内",
+    "收缩两边都跨过 mid (mid 已经和 target 比过)",
+    "出循环 = 区间空了 = 没找到, return -1"
   ],
   "difficulty": "easy",
   "status": "solved",
@@ -17,12 +18,22 @@
     "space": "O(1)"
   },
   "quiz": {
-    "idea": "半开区间 [l, r) 二分",
+    "idea": "闭区间二分，while l <= r，命中就返回",
     "wrong": [
-      "闭区间 [l, r]，命中就返回",
-      "线性扫描直到找到 target",
-      "三分法切成三段"
+      "闭区间二分，while l < r，命中就返回",
+      "闭区间二分，大于时收缩写 r = mid",
+      "线性扫描直到找到 target"
     ]
   },
-  "familiarity": 2
+  "familiarity": 2,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-18",
+    "last_review": "2026-09-10",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  }
 }

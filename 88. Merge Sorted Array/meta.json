@@ -22,5 +22,15 @@
       "拼接后调用排序",
       "二分找插入位逐个插入"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-12",
+    "last_review": "2026-09-10",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
   }
 }

@@ -16,5 +16,27 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 1.5
+  "familiarity": 1.5,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "计数后按频次分桶，倒序收 k 个",
+    "wrong": [
+      "计数后维护大小 k 的最大堆",
+      "按元素值排序后取最后 k 个",
+      "滑动窗口统计窗口内最高频"
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-11",
+    "last_review": "2026-09-10",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

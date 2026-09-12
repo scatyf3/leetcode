@@ -472,6 +472,7 @@
 {"ts": 1789001713, "date": "2026-09-09", "id": 17, "field": "exists", "from": null, "to": true}
 {"ts": 1789001798, "date": "2026-09-09", "id": 131, "field": "exists", "from": null, "to": true}
 {"ts": 1789002088, "date": "2026-09-09", "id": 51, "field": "exists", "from": null, "to": true}
+<<<<<<< Updated upstream
 {"ts": 1789165122, "date": "2026-09-11", "id": 981, "field": "exists", "from": null, "to": true}
 {"ts": 1789165128, "date": "2026-09-11", "id": 981, "field": "familiarity", "from": null, "to": 3.5}
 {"ts": 1789181184, "date": "2026-09-11", "id": 138, "field": "exists", "from": null, "to": true}
@@ -481,3 +482,16 @@
 {"ts": 1789191194, "date": "2026-09-12", "id": 2, "field": "familiarity", "from": null, "to": 1.5}
 {"ts": 1789191196, "date": "2026-09-12", "id": 2, "field": "familiarity", "from": 1.5, "to": 1}
 {"ts": 1789191227, "date": "2026-09-12", "id": 287, "field": "exists", "from": null, "to": true}
+=======
+{"ts": 1789067936, "date": "2026-09-10", "id": 190, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 191, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 338, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 435, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 56, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 57, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789073473, "date": "2026-09-10", "id": 153, "field": "familiarity", "from": 3, "to": 3.5}
+{"ts": 1789073475, "date": "2026-09-10", "id": 153, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1789073481, "date": "2026-09-10", "id": 153, "field": "familiarity", "from": 3, "to": 1.5}
+{"ts": 1789161710, "date": "2026-09-11", "id": 981, "field": "exists", "from": null, "to": true}
+{"ts": 1789163285, "date": "2026-09-11", "id": 981, "field": "familiarity", "from": null, "to": 3.5}
+>>>>>>> Stashed changes

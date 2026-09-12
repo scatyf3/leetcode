@@ -4,5 +4,17 @@
   "techniques": [],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "后序返回深度，更新左深+右深",
+    "wrong": [
+      "根的左深度 + 右深度即直径",
+      "左右子树直径取较大者 + 1",
+      "最大深度减一后再乘以二"
+    ]
+  }
 }
