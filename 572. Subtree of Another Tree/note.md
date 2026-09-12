@@ -1,3 +1,8 @@
+## pass2
+1. 外层递归，对当前root，左右子树，递归调用is same，如果root递归到none则没找到
+2. 内层递归，一个is same即可，link到另外一道题
+
+## pass1
 很神秘，这里不能dfs包办一切，dfs包办的failure case是
 
 ```
@@ -16,3 +21,4 @@ root:  2 (A)        subRoot:  2 (S)
 外层递归的唯一作用，就是在每个节点上都持有一份完整的 subRoot。它提供的不是"另一种遍历"，而是回溯点。
 
 而且edgecase好复杂，一个好办法是列表列举，是否cover掉全部edge case
+

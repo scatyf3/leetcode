@@ -21,7 +21,6 @@ class TimeMap:
                 r = mid - 1
         # 退出: [0..r] 全 T, [l..] 全 F → r = 最后一个 <= timestamp
         return self.vals[key][r] if r >= 0 else ""
-<<<<<<< Updated upstream
 
         
 
@@ -46,5 +45,3 @@ timeMap.set("foo", "bar2", 4); // store the key "foo" and value "bar2" along wit
 timeMap.get("foo", 4);         // return "bar2"
 timeMap.get("foo", 5);         // return "bar2"
 '''
-=======
->>>>>>> Stashed changes

@@ -6,7 +6,7 @@
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3,
+  "familiarity": 1,
   "complexity": {
     "time": "O(1)",
     "space": "O(n)"
