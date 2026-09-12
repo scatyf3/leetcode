@@ -472,3 +472,12 @@
 {"ts": 1789001713, "date": "2026-09-09", "id": 17, "field": "exists", "from": null, "to": true}
 {"ts": 1789001798, "date": "2026-09-09", "id": 131, "field": "exists", "from": null, "to": true}
 {"ts": 1789002088, "date": "2026-09-09", "id": 51, "field": "exists", "from": null, "to": true}
+{"ts": 1789165122, "date": "2026-09-11", "id": 981, "field": "exists", "from": null, "to": true}
+{"ts": 1789165128, "date": "2026-09-11", "id": 981, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789181184, "date": "2026-09-11", "id": 138, "field": "exists", "from": null, "to": true}
+{"ts": 1789187758, "date": "2026-09-12", "id": 138, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789188008, "date": "2026-09-12", "id": 138, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789188019, "date": "2026-09-12", "id": 2, "field": "exists", "from": null, "to": true}
+{"ts": 1789191194, "date": "2026-09-12", "id": 2, "field": "familiarity", "from": null, "to": 1.5}
+{"ts": 1789191196, "date": "2026-09-12", "id": 2, "field": "familiarity", "from": 1.5, "to": 1}
+{"ts": 1789191227, "date": "2026-09-12", "id": 287, "field": "exists", "from": null, "to": true}
