@@ -329,6 +329,13 @@ python dashboard/backfill_edits.py --write  # 真写
 - **层标签可点** → 跳到下面「题目」区这一层的第一组。
 - **灰掉的组**（Math & Geometry / Bit Manipulation）在第三层里低优先：迁移性最低、OA 命中率最低，时间不够先砍它们。
   第三层内部的取舍顺序是 2-D DP > Advanced Graphs > Greedy > 这两组，从后往前砍。
+- **每组按题单分框**。实线框是 NeetCode 150（就是 `groups[].problems`，算进度）；
+  下面的虚线框是 `lists.json` 里其他题单**补的**题 —— 只放 NeetCode 150 没有的，每题全页只出现一次，
+  一道题同时在 Hot 100 和 Top Interview 150 里就进排前面那个的框。虚线框**只看不计**：
+  不进格子、不进组右上角的 x/y、不进目标，框头自己带一个「S1 及以上 / 框内题数」。
+  题卡右边的 `B H T` 角标说这题还在哪些题单里（Blind 75 / Hot 100 / Top Interview 150），悬停看全名。
+  归组靠 `plan.json` 的 `extras` 那张「题单分类 → 组名」表；对不上任何组的分类进页面最底下的「其他」组。
+  表里写错组名不会报错，只会把那个分类挪进「其他」并在 console 里 warn 一行。
 
 ### 今天（日课）
 
@@ -440,6 +447,8 @@ L4 思路都不知道           ├─→ 还没到 S1
 - `tiers` / `groups[].tier` — 哪些 group 算第几层
 - `phases` — 时间线四段的日期、周投入、目标、说明
 - `targets` — 哪个阶段该点亮哪个格子（`{phase, tier, stage}`）
+- `extras.lists` — 每组下面那几个虚线框：`{name, short, map}`，`name` 对 `lists.json` 的题单名，
+  `map` 是「分类 → 组名」，顺序就是框的顺序和去重优先级
 - `groups[].tag` — 这一组挂到哪份 trick 文档（`{kind: "paradigms"|"structures", name}`），
   组标题就是链到它。指向一份还不存在的文档也没关系 —— 点开是空的，写完保存就建出来了。
 

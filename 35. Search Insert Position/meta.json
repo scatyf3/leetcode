@@ -14,7 +14,7 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 4,
+  "familiarity": 1,
   "complexity": {
     "time": "O(log n)",
     "space": "O(1)"

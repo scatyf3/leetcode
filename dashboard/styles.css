@@ -509,6 +509,16 @@ main{padding:18px 20px;overflow:auto}
 /* 建题进行中 / 建不出来 —— 和题单那格 (.lchip.busy/.failed) 同一套语汇 */
 .gr-chip.busy{opacity:.6;cursor:progress}
 .gr-chip.failed{border-color:var(--hard)}
+/* 组内按题单分框: 实线是 NeetCode 150(算进度), 虚线是其他题单补的题(只看不计) */
+.gr-box{border:1px solid var(--line);border-radius:10px;padding:5px 8px 8px;margin-top:8px;min-width:0}
+.gr-box .gr-chips{margin-top:4px}
+.gr-box-h{display:flex;align-items:center;gap:6px;font:600 10.5px/1.6 Consolas,monospace;color:var(--dim)}
+.gr-box-h b{color:var(--accent2);font-weight:600}
+.gr-box-c{margin-left:auto;font-weight:400;font-variant-numeric:tabular-nums}
+.gr-xboxes{display:flex;flex-wrap:wrap;gap:0 8px}
+.gr-box-x{border-style:dashed;min-width:min(100%,230px)}
+/* 题卡角标: 这题还在哪些题单里(B / H / T), 悬停看全名 */
+.gr-src{flex:none;font:600 9.5px/1 Consolas,monospace;color:var(--dim);letter-spacing:.5px}
 
 /* 全局轻提示: 在坐标系上建题这类动作发生在弹窗之外, 没别的地方写反馈 */
 #flash{position:fixed;left:50%;bottom:24px;z-index:50;
