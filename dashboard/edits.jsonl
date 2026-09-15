@@ -516,3 +516,32 @@
 {"ts": 1789240193, "date": "2026-09-12", "id": 155, "field": "familiarity", "from": 2, "to": 1}
 {"ts": 1789240459, "date": "2026-09-12", "id": 572, "field": "familiarity", "from": 3, "to": 1}
 {"ts": 1789330713, "date": "2026-09-13", "id": 128, "field": "familiarity", "from": 3.5, "to": 1}
+{"ts": 1789410155, "date": "2026-09-14", "id": 105, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1789410310, "date": "2026-09-14", "id": 973, "field": "exists", "from": null, "to": true}
+{"ts": 1789410469, "date": "2026-09-14", "id": 973, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1789410487, "date": "2026-09-14", "id": 215, "field": "exists", "from": null, "to": true}
+{"ts": 1789414221, "date": "2026-09-14", "id": 215, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1789414226, "date": "2026-09-14", "id": 621, "field": "exists", "from": null, "to": true}
+{"ts": 1789418866, "date": "2026-09-14", "id": 621, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789419802, "date": "2026-09-14", "id": 355, "field": "exists", "from": null, "to": true}
+{"ts": 1789423090, "date": "2026-09-14", "id": 355, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1789423188, "date": "2026-09-14", "id": 355, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789423226, "date": "2026-09-14", "id": 355, "field": "familiarity", "from": 3, "to": 3.5}
+{"ts": 1789424655, "date": "2026-09-14", "id": 200, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789425077, "date": "2026-09-14", "id": 36, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789426513, "date": "2026-09-14", "id": 355, "field": "paused", "from": null, "to": "2026-09-14"}
+{"ts": 1789426680, "date": "2026-09-14", "id": 138, "field": "structures", "added": ["linked-list", "hash-table"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 138, "field": "paradigms", "added": ["hash"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 138, "field": "techniques", "added": ["两趟: 先建节点填表, 再查表连指针", "key 是原节点本身, 不是 val(val 可重复)"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 230, "field": "structures", "added": ["tree"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 230, "field": "paradigms", "added": ["dfs"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 230, "field": "techniques", "added": ["BST 中序遍历 = 升序序列", "数到第 k 个就停"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 235, "field": "structures", "added": ["tree"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 235, "field": "paradigms", "added": ["dfs"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 235, "field": "techniques", "added": ["BST 大小关系决定往哪边走", "相等也算分叉点: node 本身可能就是 p 或 q", "递归传子节点, 别写成 root"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 1448, "field": "structures", "added": ["tree"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 1448, "field": "paradigms", "added": ["dfs"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 1448, "field": "techniques", "added": ["路径最大值当参数往下传", "相等也算 good: 用 >="], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "structures", "added": ["hash-table", "heap"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "paradigms", "added": ["design", "heap"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "techniques", "added": ["先列每个 API 读写哪些状态", "全局自增 time 排序, tweetId 不代表时间", "getNewsFeed = 合并 k 个有序列表", "unfollow 用 set.discard"], "removed": []}

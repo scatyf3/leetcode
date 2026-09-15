@@ -1,8 +1,38 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "BST 大小关系决定往哪边走",
+    "相等也算分叉点: node 本身可能就是 p 或 q",
+    "递归传子节点, 别写成 root"
+  ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-16",
+    "last_review": "2026-09-14",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  },
+  "complexity": {
+    "time": "O(h)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "从根往下：p、q 都小往左，都大往右，否则当前就是",
+    "wrong": [
+      "从根往下：p、q 都小往右，都大往左，否则当前就是",
+      "从根往下：严格 p < node < q 才返回，等于时继续往下",
+      "先中序遍历成升序数组，取 p、q 下标正中间的节点"
+    ]
+  }
 }

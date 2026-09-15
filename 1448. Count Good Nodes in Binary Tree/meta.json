@@ -1,8 +1,37 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "路径最大值当参数往下传",
+    "相等也算 good: 用 >="
+  ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-15",
+    "last_review": "2026-09-14",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "DFS 把根到当前的路径最大值往下传，val ≥ 它就计数",
+    "wrong": [
+      "DFS 取子树返回的最大值往上比，val ≥ 它就计数",
+      "层序遍历，val ≥ 本层已见过的最大值就计数",
+      "DFS 把路径最大值往下传，val 严格大于它才计数"
+    ]
+  }
 }

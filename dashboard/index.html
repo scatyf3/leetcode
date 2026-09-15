@@ -190,6 +190,29 @@
               </div>
             </div>
 
+            <!-- 给 agent 的批注(dashboard/card-comments.jsonl)。放在答案卡**上面**:
+                 揭晓后底下还有笔记 / 解法 tab, 放最底下一打开就在视口外。
+                 揭晓前只报条数不显示内容 —— 批注和 agent 的回复多半会提到正确答案 -->
+            <div v-if="showCmt" class="rv-cmt" ref="cmt">
+              <div class="rv-q-label">给 agent 的批注</div>
+              <template v-if="revealed">
+                <div v-for="c in cardComments" :key="c.cid" class="rv-cmt-item" :class="c.status">
+                  <span class="rv-cmt-st" v-text="CMT_ST[c.status] || c.status"></span>
+                  <span class="rv-cmt-text" v-text="c.text"></span>
+                  <span class="hint" v-text="c.date"></span>
+                  <span v-if="c.status === 'open'" class="rv-cmt-x" @click="dropComment(c)">撤回</span>
+                  <div v-if="c.reply" class="rv-cmt-reply" v-text="'↳ ' + c.reply"></div>
+                </div>
+              </template>
+              <div v-else-if="cardComments.length" class="rv-q-hint"
+                   v-text="'这张卡有 ' + cardComments.length + ' 条批注 —— 揭晓后显示(防剧透)'"></div>
+              <template v-if="cbox">
+                <textarea id="rv-cmt-box" ref="cbox" v-model="cdraft" spellcheck="false"
+                          placeholder="这张卡哪儿不对… 例: 干扰项 B 其实也能 AC / 答案卡漏了触发条件"></textarea>
+                <div class="rv-q-hint"><b>Ctrl+Enter</b> 存 · <b>Esc</b> 收起(草稿留着)。存完不用管 —— 攒够了跟 agent 说「处理卡片批注」。</div>
+              </template>
+            </div>
+
             <!-- 答案卡: 标签 + 复杂度 + 一句话思路。note/解法退成次要 tab -->
             <div v-if="revealed" id="rv-answer">
               <!-- 你刚才写的, 原样贴在答案卡**上面** —— 要比的两半挨着才比得动 -->
@@ -242,6 +265,8 @@
                     title="不评分 · 不写 FSRS —— 只把当前这张挪到本次会话的最后再问一遍">↓ 押到队尾 <em>0</em></button>
             <button v-if="!isSyntax && !readOnly" class="ghost rv-pause" @click="pause"
                     title="这阵子都别问: 不评分, 以后不进复习队列, interval 一起冻住 —— 在详情页取消勾选恢复">⏸ 暂停</button>
+            <button v-if="!readOnly" class="ghost rv-cmt-btn" @click="openComment"
+                    title="给 agent 留一句这张卡哪儿不对 —— 攒着让 agent 统一改, 不评分、不影响调度">💬 批注 <em>c</em><b v-if="openComments" v-text="openComments"></b></button>
           </div>
         </template>
       </div>
