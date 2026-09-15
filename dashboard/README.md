@@ -151,10 +151,23 @@ dashboard/
 **答案卡可以就地改**：揭晓后点右上角「改一下」（或双击思路区），`Ctrl+S` 存、`Esc` 取消。
 刚回忆完的那一刻脑子最热，此时把它压缩成一句话最准。
 
+**给 agent 的批注**：卡本身有毛病、又不是一句话能当场改完的（干扰项其实也能 AC、答案卡和 note 对不上、
+语法卡背面漏了一种情况……），按 `c` 或右下角 `💬 批注` 记一句，`Ctrl+Enter` 存，`Esc` 收起（草稿留着，换卡才清）。
+**两个牌组都能批，揭晓前后都能批**，不评分、不动调度。攒够了跟 agent 说一句「处理卡片批注」，
+它按 `.claude/skills/card-comments/SKILL.md` 把所有待改的一次清掉。
+
+- 存在 `dashboard/card-comments.jsonl`（git 追踪，不导出到只读站），一条批注一行，两个牌组共用，靠 `deck` 区分。
+  是一个集中文件而不是 `meta.json` 里的字段：语法卡没有 per-card 的 meta，而 agent 第一步就是「找出所有没处理的」。
+- 处理完**不删**，改成 `done` / `skip` 并带一句 `reply`。卡上的批注区会显示状态和回复 ——
+  **揭晓后才显示内容**，揭晓前只报条数，因为批注和回复多半会提到正确答案。
+- 还没处理的可以点「撤回」；处理过的撤不回（那是改卡的记录）。
+- 命令行：`python dashboard/card_comments.py` 列待处理的，`done <cid> "回复"` / `skip <cid> "回复"` / `reopen <cid>` 改状态。
+
 | 键 | 作用 |
 |----|------|
 | `空格` | 显示答案（揭晓后不响应，防手滑跳过不评分） |
 | `1` `2` `3` `4` | 忘了 / 勉强 / 想起来了 / 很熟 —— 按钮上直接标着各自的下次间隔 |
+| `c` | 给 agent 写批注（框里 `Ctrl+Enter` 存，`Esc` 收起） |
 | `Esc` | 退出 |
 
 - **算法**：FSRS-6，`dashboard/fsrs.py`，逐函数移植自
@@ -463,6 +476,8 @@ L4 思路都不知道           ├─→ 还没到 S1
 | PUT  | `/api/problems/{id}/answer` | 保存答案卡到 answer.md（内容为空则删掉该文件） |
 | POST | `/api/review/{id}`       | `{"rating": 1..4}` 评一次分（写 meta.json + reviews.jsonl）；`{"op":"reset"}` 退回非卡片 |
 | POST | `/api/sync`              | 重扫文件夹、重建索引 |
+| GET  | `/api/card-comments`     | `card-comments.jsonl` 全部行（两个牌组的卡片批注） |
+| POST | `/api/card-comments`     | `{"deck","id","title","text"}` 记一条；`{"op":"delete","cid"}` 撤回一条还没处理的 |
 | GET  | `/api/plan`              | 坐标系的分层 + 时间线 |
 | PUT  | `/api/problems/{id}/meta`| `{familiarity}` 传 `null` = 取消评级（删键），坐标系就用这个 |
 

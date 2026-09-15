@@ -962,6 +962,8 @@ const RV = Vue.createApp({
       attempt: '',                   // 揭晓前自己默写的那一遍。**只活在这一张卡的这一次**:
                                      // 不发给后端、不写 syntax/*.md、换一张就清空
       note: '',                      // 顶部那行临时提示(写失败 / 已经是队尾)
+      comments: [],                  // card-comments.jsonl 全部行(两个牌组), 开面板时拉一次
+      cbox: false, cdraft: '',       // 批注框开没开 / 草稿。Esc 收起不清草稿, 换卡才清
       busy: false,                   // 评分->取下一题这一整段在飞。见 rate() 上面那段注释
       failMsg: '',                   // 拉下一题失败时的收尾屏文案(替掉"复习完了")
       deferred: [],                  // 今天(当前牌组)按过「押到队尾」的题, 按发生顺序, 可重复
@@ -974,6 +976,7 @@ const RV = Vue.createApp({
       DECKS: [{ k: 'problems', label: '题目' }, { k: 'syntax', label: '语法' }],
       KEYS: 'ABCD',
       RATE: { 1: ['忘了', '想不起来'], 2: ['勉强', '想了很久'], 3: ['想起来了', '正常'], 4: ['很熟', '秒答'] },
+      CMT_ST: { open: '待改', done: '已改', skip: '没改' },
     };
   },
 
@@ -1010,6 +1013,14 @@ const RV = Vue.createApp({
     canWrite() { return this.isSyntax; },
     // 空白/只有空格的不算写过: 揭晓后就不必贴一个空框上去
     mine() { return this.attempt.trim(); },
+    // 这张卡上的批注。题号在 jsonl 里是整数、语法卡 id 是字符串, 统一按字符串比
+    cardComments() {
+      if (!this.d) return [];
+      const id = String(this.d.id);
+      return this.comments.filter((c) => c.deck === this.deck && String(c.id) === id);
+    },
+    openComments() { return this.cardComments.filter((c) => c.status === 'open').length; },
+    showCmt() { return !this.readOnly && (this.cbox || this.cardComments.length > 0); },
     // 选择题只有题目牌组有 —— 它测的是"该用哪个模板"的辨别力, 语法卡没有这个维度
     hasQuiz() { return !this.isSyntax && (this.quiz.ideas.some((b) => b.state) || !!this.quiz.cx); },
     quizBlocks() {
@@ -1102,6 +1113,7 @@ const RV = Vue.createApp({
       this.open = true;
       this.d = null;
       this.loading = true;                 // 拉 carry 期间别闪"没有到期的题"
+      this.loadComments();                 // 不等它: 批注是旁支, 慢了顶多晚一点显示
       let carry = { deferred: [], again: [] };
       if (!this.readOnly) {
         try {
@@ -1152,6 +1164,7 @@ const RV = Vue.createApp({
       this.editing = false;
       this.amsg = '';
       this.attempt = '';                                 // 上一张写的别串到这张来
+      this.cbox = false; this.cdraft = '';               // 批注草稿同理
       this.revealed = false;                             // 先落下答案, 再去拉
       const id = this.queue.shift();
       if (id === undefined) { this.d = null; return; }   // 队列空了 -> 收尾屏
@@ -1224,6 +1237,7 @@ const RV = Vue.createApp({
       // 焦点还留在默写框里的话, 接下来的 1-4 会被 onKey 的 TEXTAREA 那道闸放行 ——
       // 表现是"揭晓了但评不了分, 键盘像死了"。趁 DOM 还没重渲染(框是 v-if)先抬走焦点。
       if (this.$refs.write && document.activeElement === this.$refs.write) this.$refs.write.blur();
+      if (this.$refs.cbox && document.activeElement === this.$refs.cbox) this.$refs.cbox.blur();
       this.revealed = true;
       // 语法卡的背面就是全部, 没有次要 tab —— items 留空, 模板里那一块整个不占位
       this.items = this.isSyntax ? []
@@ -1246,6 +1260,54 @@ const RV = Vue.createApp({
       this.$nextTick(() => this.$refs.aedit && this.$refs.aedit.focus());
     },
     cancelEdit() { this.editing = false; },
+
+    // 给 agent 的批注: 复习时只记「哪儿不对」, 不当场改 —— 攒进 dashboard/card-comments.jsonl,
+    // 之后跟 agent 说一句「处理卡片批注」统一改(见 .claude/skills/card-comments)。
+    // 和「改一下」的分工: 那个是自己一句话就能改完的; 这个是要查 note / 对全库口径 / 重写干扰项的。
+    async loadComments() {
+      if (this.readOnly) return;                   // 只读站不导出批注
+      try {
+        this.comments = (await api('/api/card-comments')).comments || [];
+      } catch (e) { console.error('[review] 拉卡片批注失败', e); }
+    },
+    openComment() {
+      if (!this.d || this.readOnly) return;
+      this.cbox = true;
+      this.$nextTick(() => {
+        if (this.$refs.cmt) this.$refs.cmt.scrollIntoView({ block: 'nearest' });
+        if (this.$refs.cbox) this.$refs.cbox.focus();
+      });
+    },
+    closeComment() {
+      if (this.$refs.cbox) this.$refs.cbox.blur();
+      this.cbox = false;
+    },
+    async sendComment() {
+      const text = this.cdraft.trim();
+      if (!text || !this.d) return;
+      let r;
+      try {
+        r = await api('/api/card-comments', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ deck: this.deck, id: this.d.id, title: this.d.title, text }),
+        });
+      } catch { r = null; }
+      if (!r || !r.ok) { this.note = `⚠ 批注没存上${r && r.error ? ': ' + r.error : '(服务没起?)'}`; return; }
+      this.comments.push(r.comment);
+      this.cdraft = '';
+      this.closeComment();
+    },
+    async dropComment(c) {
+      let r;
+      try {
+        r = await api('/api/card-comments', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ op: 'delete', cid: c.cid }),
+        });
+      } catch { r = null; }
+      if (!r || !r.ok) { this.note = `⚠ 没撤回${r && r.error ? ': ' + r.error : ''}`; return; }
+      this.comments = this.comments.filter((x) => x.cid !== c.cid);
+    },
     async saveAnswer() {
       if (!this.editing) return;
       const content = this.draft;
@@ -1353,6 +1415,11 @@ const RV = Vue.createApp({
 
     // 键盘由 app.js 末尾那个全局 handler 转进来 —— 保持和其它 overlay 同一套分发顺序
     onKey(e) {
+      // 批注框里: 只认 Ctrl+Enter 存, 其余键都是打字 —— 必须在默写框那条 Ctrl+Enter 揭晓**之前**
+      if (this.$refs.cbox && document.activeElement === this.$refs.cbox) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { this.sendComment(); return true; }
+        return false;
+      }
       if (this.editing && (e.ctrlKey || e.metaKey) && e.key === 's') { this.saveAnswer(); return true; }
       // 默写框里空格是空格, 所以另给一个揭晓键。这条必须在下面那道修饰键闸**之前**
       if (!this.revealed && this.canWrite && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
@@ -1361,6 +1428,7 @@ const RV = Vue.createApp({
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.keyCode === 229) return false;
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return false;
       if (e.key === 'w' && !this.revealed && this.canWrite) { this.focusWrite(); return true; }
+      if (e.key === 'c' && !this.readOnly) { this.openComment(); return true; }
       if (e.key === ' ') {
         if (!this.revealed) this.reveal();
         else if (this.readOnly) this.skip();     // 只读站没有评分按钮, 空格 = 下一题
@@ -1372,6 +1440,10 @@ const RV = Vue.createApp({
       return false;
     },
     onEsc() {
+      // 批注框里 Esc = 收起框, 草稿留在 cdraft 里(再按 c 还在)
+      if (this.$refs.cbox && document.activeElement === this.$refs.cbox) {
+        this.closeComment(); return;
+      }
       // 在默写框里按 Esc 只退出输入框。直接关面板会把刚写的一起吞掉(attempt 不存盘),
       // 而 Esc 恰恰是打字时最容易顺手按的那个键
       if (this.$refs.write && document.activeElement === this.$refs.write) {

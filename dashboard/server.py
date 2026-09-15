@@ -31,6 +31,7 @@ from urllib.parse import urlparse, unquote, parse_qs
 import fsrs              # FSRS-6 调度算法(见 dashboard/fsrs.py)
 import scaffold          # 题号/题名 -> 建题目文件夹(见 dashboard/scaffold.py)
 import syntax            # 第二个牌组: 语法卡(见 dashboard/syntax.py)
+import card_comments     # 复习时给 agent 留的卡片批注(见 dashboard/card_comments.py)
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -852,6 +853,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, review_carry(deck))
         if path == "/api/syntax":
             return self._send(200, syntax_list())
+        if path == "/api/card-comments":
+            return self._send(200, {"comments": card_comments.read_all()})
         if path == "/api/reviews":
             return self._send(200, {"reviews": read_reviews()})
         if path == "/api/edits":
@@ -890,6 +893,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, append_scratch(self._body_json().get("text", "")))
         if path == "/api/review/session":
             return self._send(200, write_session(self._body_json()))
+        if path == "/api/card-comments":
+            # {deck, id, title, text} 记一条; {op: "delete", cid} 撤回一条还没处理的
+            body = self._body_json()
+            if body.get("op") == "delete":
+                return self._send(200, card_comments.delete(str(body.get("cid") or "")))
+            return self._send(200, card_comments.add(body.get("deck"), body.get("id"),
+                                                     str(body.get("title") or ""), body.get("text", "")))
         m = re.match(r"^/api/review/(\d+)$", path)
         if m:
             pid = int(m.group(1))

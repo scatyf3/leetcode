@@ -26,5 +26,15 @@
       "闭区间二分，没找到返回 r",
       "线性扫描第一个 >= target"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-16",
+    "last_review": "2026-09-14",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
   }
 }

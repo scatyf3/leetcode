@@ -1,8 +1,38 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "linked-list",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "两趟: 先建节点填表, 再查表连指针",
+    "key 是原节点本身, 不是 val(val 可重复)"
+  ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3.5
+  "familiarity": 3.5,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-16",
+    "last_review": "2026-09-14",
+    "stability": 2.3065,
+    "difficulty": 2.118103970459016,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 3
+  },
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "两趟：先建全部新节点存 原→新 表，再查表连 next / random",
+    "wrong": [
+      "一趟：边建节点边连 random，random 还没建的就先跳过",
+      "表存 val→新节点，第二趟按 random.val 查表连 random",
+      "一趟复制 next，新节点的 random 直接指向原节点的 random"
+    ]
+  }
 }

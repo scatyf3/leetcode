@@ -1,8 +1,37 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "BST 中序遍历 = 升序序列",
+    "数到第 k 个就停"
+  ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4
+  "familiarity": 4,
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-22",
+    "last_review": "2026-09-14",
+    "stability": 8.2956,
+    "difficulty": 1.0,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 4
+  },
+  "complexity": {
+    "time": "O(h + k)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "中序遍历（左-根-右）得升序，第 k 个访问到的就是",
+    "wrong": [
+      "前序遍历（根-左-右）收集节点值，取第 k 个",
+      "层序遍历，按层从上到下第 k 个出现的就是",
+      "从根一直往左孩子走 k 步，停下的节点就是"
+    ]
+  }
 }

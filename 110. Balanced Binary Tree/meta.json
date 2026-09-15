@@ -16,5 +16,15 @@
       "检查每个节点是否都有两个孩子",
       "最大深度与最小深度差不超过 1"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-15",
+    "last_review": "2026-09-14",
+    "stability": 0.212,
+    "difficulty": 6.4133,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 1
   }
 }

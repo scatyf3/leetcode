@@ -16,5 +16,15 @@
       "左右子树直径取较大者 + 1",
       "最大深度减一后再乘以二"
     ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-09-15",
+    "last_review": "2026-09-14",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
   }
 }

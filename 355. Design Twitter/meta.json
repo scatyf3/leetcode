@@ -1,0 +1,44 @@
+{
+  "structures": [
+    "hash-table",
+    "heap"
+  ],
+  "paradigms": [
+    "design",
+    "heap"
+  ],
+  "techniques": [
+    "先列每个 API 读写哪些状态",
+    "全局自增 time 排序, tweetId 不代表时间",
+    "getNewsFeed = 合并 k 个有序列表",
+    "unfollow 用 set.discard"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3.5,
+  "paused": "2026-09-14",
+  "complexity": {
+    "time": "getNewsFeed O(F + 10 log F)，其余 O(1)",
+    "space": "O(U + T)"
+  },
+  "quiz": {
+    "q": "状态怎么设计？哪条是对的？",
+    "idea": "全局自增 time 排序，feed 里自己的推文也算",
+    "wrong": [
+      "按 tweetId 从大到小取，id 越大推文越新",
+      "每个用户各自从 0 计时，feed 按时间合并",
+      "feed 只合并关注的人，自己的推文不算进去"
+    ],
+    "then": [
+      {
+        "q": "getNewsFeed 的算法内核对应哪道经典题？",
+        "idea": "合并 k 个有序列表：每人最新一条入堆，弹一条补一条",
+        "wrong": [
+          "LRU：哈希表 + 双向链表，按访问时间挪到表头",
+          "数据流中位数：大顶堆 + 小顶堆两边保持平衡",
+          "单调栈：栈里维护时间递减，栈顶 10 条就是"
+        ]
+      }
+    ]
+  }
+}
