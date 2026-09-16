@@ -3,8 +3,7 @@
     "array"
   ],
   "paradigms": [
-    "two-pointer",
-    "hash"
+    "two-pointer"
   ],
   "techniques": [
     "排序建立单调性",
@@ -13,10 +12,10 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3,
+  "familiarity": 2,
   "complexity": {
     "time": "O(n²)",
-    "space": "O(n)"
+    "space": "O(1)"
   },
   "quiz": {
     "idea": "固定第一个数，退化成两数之和",

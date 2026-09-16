@@ -56,6 +56,80 @@
     { "phase": 3, "tier": 3, "stage": 2 }
   ],
 
+  "extras": {
+    "note": "坐标系里每组下面, 按题单各框一框 NeetCode 150 没有的题。只看, 不计进格子、组计数和目标。lists 的顺序 = 框的顺序 = 去重优先级(一道题在两个题单里, 只进排前面那个的框)。map 是「题单分类 → 组名」, 组名要和 groups[].name 一字不差; 写 \"其他\" 或没写的分类进页面最底下的「其他」组。short 是题卡上的角标。",
+    "lists": [
+      { "name": "Blind 75", "short": "B", "map": {} },
+      { "name": "Hot 100", "short": "H", "map": {
+          "哈希": "Arrays & Hashing",
+          "双指针": "Two Pointers",
+          "滑动窗口": "Sliding Window",
+          "子串": "Sliding Window",
+          "普通数组": "其他",
+          "矩阵": "Math & Geometry",
+          "链表": "Linked List",
+          "二叉树": "Trees",
+          "图论": "Graphs · 其余",
+          "回溯": "Backtracking",
+          "二分查找": "Binary Search",
+          "栈": "Stack",
+          "堆": "Heap / Priority Queue",
+          "贪心算法": "Greedy",
+          "动态规划": "1-D DP · 其余",
+          "多维动态规划": "2-D DP",
+          "技巧": "其他"
+      }},
+      { "name": "Top Interview 150", "short": "T", "map": {
+          "数组 / 字符串": "其他",
+          "双指针": "Two Pointers",
+          "滑动窗口": "Sliding Window",
+          "矩阵": "Math & Geometry",
+          "哈希表": "Arrays & Hashing",
+          "区间": "Intervals",
+          "栈": "Stack",
+          "链表": "Linked List",
+          "二叉树 通用": "Trees",
+          "二叉树 BFS": "Trees",
+          "图 通用": "Graphs · 其余",
+          "图 BFS": "Graphs · 其余",
+          "字典树": "Tries · 其余",
+          "回溯": "Backtracking",
+          "分治": "Trees",
+          "Kadane": "Greedy",
+          "二分查找": "Binary Search",
+          "堆": "Heap / Priority Queue",
+          "位运算": "Bit Manipulation",
+          "数学": "Math & Geometry",
+          "一维 DP": "1-D DP · 其余",
+          "多维 DP": "2-D DP"
+      }},
+      { "name": "leetcode必吃榜", "short": "必", "map": {
+          "矩阵模拟": "Math & Geometry",
+          "二分查找": "Binary Search",
+          "链表": "Linked List",
+          "排序": "其他",
+          "递归 / DP 入门": "1-D DP · 其余",
+          "栈 / 队列 / 单调栈": "Stack",
+          "二叉树 · 遍历 / BST / 构造": "Trees",
+          "数组 / 字符串": "其他",
+          "滑动窗口": "Sliding Window",
+          "堆 / Top K": "Heap / Priority Queue",
+          "区间": "Intervals",
+          "双指针 · 接雨水": "Two Pointers",
+          "N 皇后": "Backtracking",
+          "二叉树 · LCA / 路径和": "Trees",
+          "回溯 · 子集 / 排列": "Backtracking",
+          "二分图": "Graphs · 其余",
+          "一维 DP · Jump Game / Word Break": "1-D DP · 其余",
+          "二维 DP · 编辑距离 / 正方形": "2-D DP",
+          "图 · BFS / 拓扑": "Graphs · 其余",
+          "DP 进阶": "2-D DP",
+          "Word Search": "Backtracking",
+          "股票": "2-D DP"
+      }}
+    ]
+  },
+
   "groups": [
     { "name": "Arrays & Hashing", "tier": 1, "tags": [
         { "kind": "structures", "name": "array" },
