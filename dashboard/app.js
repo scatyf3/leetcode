@@ -2104,6 +2104,40 @@ function planProblems() {
   return out;
 }
 
+// 其他题单(lists.json)在坐标系每组下面的框。只补 NeetCode 150 没有的题, 每题全页只出现一次:
+// plan.json extras.lists 的顺序就是去重优先级。归到哪组看那张「分类 → 组名」表。
+// 只是看的 —— 不进 planProblems, 所以格子、组计数、目标都不受影响。
+const OTHER_GROUP = '其他';
+function planExtras() {
+  const byGroup = new Map();           // 组名 -> [{list, short, items: [[id, title]]}]
+  const srcOf = new Map();             // id -> 出现在哪些题单(简称), 题卡角标用
+  const nc = new Set(PLAN.groups.flatMap((g) => g.problems.map((p) => p[0])));
+  const names = new Set(PLAN.groups.map((g) => g.name));
+  const placed = new Set();
+  for (const d of (PLAN.extras?.lists || [])) {
+    const def = LISTS?.lists?.[d.name];
+    if (!def) { console.warn(`plan.json extras: lists.json 里没有题单「${d.name}」`); continue; }
+    for (const [cat, items] of Object.entries(def.categories)) {
+      let grp = d.map?.[cat] || OTHER_GROUP;
+      if (grp !== OTHER_GROUP && !names.has(grp)) {
+        console.warn(`plan.json extras: ${d.name} · ${cat} 指向不存在的组「${grp}」, 先放进${OTHER_GROUP}`);
+        grp = OTHER_GROUP;
+      }
+      for (const [id, title] of items) {
+        const s = srcOf.get(id) || srcOf.set(id, []).get(id);
+        if (!s.includes(d.short)) s.push(d.short);
+        if (nc.has(id) || placed.has(id)) continue;
+        placed.add(id);
+        const boxes = byGroup.get(grp) || byGroup.set(grp, []).get(grp);
+        let box = boxes.find((b) => b.list === d.name);
+        if (!box) boxes.push(box = { list: d.name, short: d.short, items: [] });
+        box.items.push([id, title]);
+      }
+    }
+  }
+  return { byGroup, srcOf };
+}
+
 function buildGrid() {
   if (!PLAN) return;
   if (PLAN.error) { $('#grid-view').innerHTML = `<p class="empty-hint">${esc(PLAN.error)}</p>`; return; }
@@ -2224,28 +2258,44 @@ function buildGrid() {
     const d = depthOf({ familiarity: f.l });
     famTip[f.l] = `${f.t} ${f.d} → ${d ? 'S' + d : '还没到 S1'}`;
   }
-  const depths = new Map(all.map((p) => [p.id, p.depth]));
   const seenTier = new Set();          // 每层第一组挂锚点, 给上面的行标签跳
+  const X = planExtras();
+  const listName = new Map((PLAN.extras?.lists || []).map((d) => [d.short, d.name]));
+  const startedOf = (ids) => ids.filter((id) => depthOf(recs.get(id)) >= 1).length;
+  // 两个点击区: 左边徽章翻熟练度(或建文件夹), 右边题名打开详情。
+  // 内层 span 的 title 会盖住外层 button 的, 所以悬停提示也各说各的。
+  // skip = 题卡所在那个框的题单简称 —— 角标只说「还在哪些别的题单里」。
+  const chipHTML = (id, title, diff, skip) => {
+    const rec = recs.get(id);
+    const L = rec ? famOf(rec) : undefined;        // undefined = 还没建文件夹
+    const d = depthOf(rec);
+    const badge = rec === undefined ? '+' : famInfo(L).short;
+    const tip = rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
+      : L === null ? '还没评熟练度 — 点击标 L4' : famTip[L];
+    const src = (X.srcOf.get(id) || []).filter((s) => s !== skip);
+    return `<button class="gr-chip" data-id="${id}" data-d="${d}" title="${esc(title)} — ${
+      rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）' : '点击打开题目'}">
+        <span class="gr-st s${d}" title="${esc(title)} — ${esc(tip)}">${badge}</span>
+        <span class="gr-id">${id}</span>
+        <span class="gr-nm">${esc(title)}</span>
+        ${src.length ? `<span class="gr-src" title="也在 ${
+          esc(src.map((s) => listName.get(s)).join(' / '))}">${esc(src.join(' '))}</span>` : ''}
+        <span class="dot ${diff}"></span></button>`;
+  };
+  const xBoxes = (name) => (X.byGroup.get(name) || []).map((b) => {
+    const k = Math.min(b.items.length, 5);         // 题少的框窄一点, 好几个框能并排
+    return `<div class="gr-box gr-box-x" style="flex:${k} 1 ${k * 215}px">
+      <div class="gr-box-h" title="${esc(b.list)} 里有、NeetCode 150 没有的题 —— 只看, 不计进度">
+        ${esc(b.list)} <b>+${b.items.length}</b>
+        <span class="gr-box-c">${startedOf(b.items.map((p) => p[0]))}/${b.items.length}</span></div>
+      <div class="gr-chips">${b.items.map(([id, t]) =>
+        chipHTML(id, t, recs.get(id)?.difficulty || 'none', b.short)).join('')}</div></div>`;
+  }).join('');
   let g = '';
   for (const grp of PLAN.groups) {
-    const started = grp.problems.filter((p) => (depths.get(p[0]) || 0) >= 1).length;
+    const started = startedOf(grp.problems.map((p) => p[0]));
     const label = `第 ${grp.tier} 层${grp.low ? ' · 低优先' : ''}`;
-    const chips = grp.problems.map((p) => {
-      const rec = recs.get(p[0]);
-      const L = rec ? famOf(rec) : undefined;        // undefined = 还没建文件夹
-      const d = depthOf(rec);
-      const badge = rec === undefined ? '+' : famInfo(L).short;
-      const tip = rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
-        : L === null ? '还没评熟练度 — 点击标 L4' : famTip[L];
-      // 两个点击区: 左边徽章翻熟练度(或建文件夹), 右边题名打开详情。
-      // 内层 span 的 title 会盖住外层 button 的, 所以悬停提示也各说各的。
-      return `<button class="gr-chip" data-id="${p[0]}" data-d="${d}" title="${esc(p[1])} — ${
-        rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）' : '点击打开题目'}">
-          <span class="gr-st s${d}" title="${esc(p[1])} — ${esc(tip)}">${badge}</span>
-          <span class="gr-id">${p[0]}</span>
-          <span class="gr-nm">${esc(p[1])}</span>
-          <span class="dot ${p[2]}"></span></button>`;
-    }).join('');
+    const chips = grp.problems.map((p) => chipHTML(p[0], p[1], p[2])).join('');
     const anchor = seenTier.has(grp.tier) ? '' : ` id="gr-tier-${grp.tier}"`;
     seenTier.add(grp.tier);
     // 组标题 -> 这个 pattern 的通用 trick 文档, 和矩阵视图点组标签是同一个 overlay
@@ -2269,8 +2319,13 @@ function buildGrid() {
         ${grp.sub ? `<span class="gr-sub">${esc(grp.sub)}</span>` : ''}
         <span class="gr-grp-c"><b>${started}</b>/${grp.problems.length}<i class="gr-grp-bar"><u
           style="width:${Math.round((started / grp.problems.length) * 100)}%"></u></i></span></div>
-      <div class="gr-chips">${chips}</div></div>`;
+      <div class="gr-box"><div class="gr-box-h">NeetCode 150</div><div class="gr-chips">${chips}</div></div>
+      ${X.byGroup.has(grp.name) ? `<div class="gr-xboxes">${xBoxes(grp.name)}</div>` : ''}</div>`;
   }
+  if (X.byGroup.has(OTHER_GROUP)) g += `<div class="gr-grp">
+      <div class="gr-grp-h"><h3>${OTHER_GROUP}</h3>
+        <span class="gr-sub">题单分类对不上上面任何一组的题 · 归组规则在 plan.json 的 extras</span></div>
+      <div class="gr-xboxes">${xBoxes(OTHER_GROUP)}</div></div>`;
 
   $('#grid-view').innerHTML = `
     ${hero}
@@ -2694,6 +2749,8 @@ async function switchView(v) {
   try { localStorage.setItem('lc-view2', v); } catch (e) { /* private mode */ }
   if (v === 'grid') {
     if (!PLAN) PLAN = await api('/api/plan');
+    // 每组下面那几个题单框要用; 拉不到就只画 NeetCode 150, 不拦着坐标系
+    if (!LISTS) { try { LISTS = await api('/api/lists'); } catch { LISTS = null; } }
     buildGrid();
   } else {
     buildPanel();
