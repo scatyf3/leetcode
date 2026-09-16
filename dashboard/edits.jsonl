@@ -545,3 +545,6 @@
 {"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "structures", "added": ["hash-table", "heap"], "removed": []}
 {"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "paradigms", "added": ["design", "heap"], "removed": []}
 {"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "techniques", "added": ["先列每个 API 读写哪些状态", "全局自增 time 排序, tweetId 不代表时间", "getNewsFeed = 合并 k 个有序列表", "unfollow 用 set.discard"], "removed": []}
+{"ts": 1789441438, "date": "2026-09-14", "id": 200, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789442034, "date": "2026-09-14", "id": 394, "field": "exists", "from": null, "to": true}
+{"ts": 1789442703, "date": "2026-09-14", "id": 739, "field": "familiarity", "from": 1, "to": 3}
