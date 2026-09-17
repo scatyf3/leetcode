@@ -1,5 +1,10 @@
 # 22. Generate Parentheses
 
+## talk
+
+1. 回溯 Backtracking
+2. 隐式树 Implicit tree
+
 ## 思路
 
 1. 回溯
