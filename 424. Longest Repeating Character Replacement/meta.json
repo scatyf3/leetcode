@@ -14,7 +14,7 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3,
+  "familiarity": 2,
   "complexity": {
     "time": "O(n·|Σ|)",
     "space": "O(|Σ|)"
@@ -29,12 +29,12 @@
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-22",
-    "last_review": "2026-09-06",
-    "stability": 16.17726320265468,
-    "difficulty": 2.111214235785395,
-    "reps": 2,
+    "due": "2026-11-13",
+    "last_review": "2026-09-25",
+    "stability": 48.97848412579893,
+    "difficulty": 4.748284761594571,
+    "reps": 3,
     "lapses": 0,
-    "last_rating": 3
+    "last_rating": 2
   }
 }

@@ -2104,6 +2104,68 @@ function planProblems() {
   return out;
 }
 
+// ---- 账本: 四档互斥的覆盖 / 掌握分解 --------------------------------------
+// 「格子」那张表是**累计**的(S2 那列含 S3), 回答"推到哪了"。这张是**互斥**四档,
+// 回答另一个问题: 手上还欠着多少。
+//
+//   没建 ──▶ 见过 ──▶ 摸过 ┬─▶ S2 达标
+//                          └─▶ 欠账(摸过但没到 L2)
+//
+// 欠账是格子上数不出来的那个数: depth 把 L3 算进 S1, 于是矩阵看着有进度, 那题离
+// "写得对"其实还差一档。欠账涨 = 在囤题, 欠账掉 = 在消化。**不设阈值** —— 只报数,
+// 开不开新题当场自己判断。
+// 会员题单独摘出来, 不算进"该做还没做": 它们做不掉, 混在缺口里每次看都像背着一笔还不了的债。
+// 口径跟 dashboard/progress.py 一字不差 —— 那边是同一张表的命令行版。
+function ledgerOf(rows, premium) {
+  const t = { n: rows.length, seen: 0, touched: 0, s2: 0, debt: 0, absent: 0, prem: 0 };
+  for (const p of rows) {
+    if (!p.rec) { premium.has(p.id) ? t.prem++ : t.absent++; continue; }
+    t.seen++;                       // 见过 = 建了文件夹, 含已经摸过的
+    const L = famOf(p.rec);
+    if (L === null) continue;       // 建了但没评 —— 停在地板上
+    t.touched++;
+    if (L <= 2) t.s2++; else t.debt++;
+  }
+  return t;
+}
+
+function ledgerSection(all) {
+  // 会员名单在 lists.json 里。拉不到的时候**说出来** —— 那 6 道会静默混进「没建」,
+  // 数字错了却一切正常的样子, 比少画一列糟得多。
+  const premium = new Set(LISTS?.premium || []);
+  const noPrem = !LISTS;
+  const cell = (v, cls) => `<td class="${cls || ''}">${v || '<i class="gr-led-0">·</i>'}</td>`;
+  const line = (label, rows, cls) => {
+    const t = ledgerOf(rows, premium);
+    return `<tr class="${cls || ''}"><th>${esc(label)}</th>
+      <td class="gr-led-n">${t.n}</td>
+      ${cell(t.seen)}${cell(t.touched)}
+      <td class="gr-led-s2">${t.s2}<small>${t.n ? Math.round((t.s2 / t.n) * 100) : 0}%</small></td>
+      ${cell(t.debt, 'gr-led-debt')}
+      ${cell(t.absent)}
+      ${cell(t.prem ? t.prem : 0, 'gr-led-prem')}</tr>`;
+  };
+  const body = PLAN.tiers.map((tr) =>
+    line(tierName(tr.t), all.filter((p) => p.tier === tr.t))).join('');
+  return `<section class="gr-sec">
+    <div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>账本</h2>
+      <p>上面那张格子是<b>累计</b>的，一道题同时计进好几列；这张四档<b>互斥</b>，横着加起来就是题数。
+      它多出来的那列是<b>欠账</b> —— 摸过但没到 L2 的题。格子把 L3 算进 S1，所以矩阵上看着有进度的题，
+      离「写得对」其实还差一档，欠账就是那批。数字涨 = 在囤题，掉 = 在消化；不设阈值，开不开新题自己判断。
+      会员题做不掉，单独一列，不算缺口。</p></div>
+    <table class="gr-led">
+      <thead><tr><th></th><th>共</th><th>见过</th><th>摸过</th><th>S2</th>
+        <th class="gr-led-debt">欠账</th><th>没建</th><th class="gr-led-prem">会员</th></tr></thead>
+      <tbody>${body}</tbody>
+      <tfoot>${line('合计', all, 'gr-led-sum')}</tfoot>
+    </table>
+    <p class="gr-note">${noPrem ? '<b class="gr-led-warn">lists.json 没拉到</b>，会员题这列空着，'
+      + '那几道暂时混在「没建」里 —— Sync 一下再看。<br>' : ''}同一张表的命令行版:
+      <span class="mono">python dashboard/progress.py</span>
+      （加 <span class="mono">--debt</span> 列出每一道欠账题，<span class="mono">--todo</span> 列出没建的）。</p>
+  </section>`;
+}
+
 // 其他题单(lists.json)在坐标系每组下面的框。只补 NeetCode 150 没有的题, 每题全页只出现一次:
 // plan.json extras.lists 的顺序就是去重优先级。归到哪组看那张「分类 → 组名」表。
 // 只是看的 —— 不进 planProblems, 所以格子、组计数、目标都不受影响。
@@ -2343,13 +2405,14 @@ function buildGrid() {
       <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
       否则会攒下一整个月「做得出但讲不清」的题。</p>
     </section>
+    ${ledgerSection(all)}
     <section class="gr-sec" id="gr-pace"><p class="empty-hint">读取历史…</p></section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">4</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">5</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
       ${t}
     </section>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">5</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">6</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
       和详情页那个下拉是同一个字段。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
       <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
       ${g}
@@ -2618,7 +2681,7 @@ function paceOptions() {
 const pcFmt = (n) => n.toFixed(1).replace(/\.0$/, '');
 
 function paceHTML() {
-  const head = (body) => `<div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>配速</h2>
+  const head = (body) => `<div class="gr-sec-h"><h2><span class="gr-sec-n">4</span>配速</h2>
     <p>两张图：上面是<b>覆盖配速</b>——把目标格<b>剩下</b>的题均摊到阶段的每一天，和实际爬到的高度比
     （计划线起点是<b>阶段开始那天的实际值</b>，不是 0，否则开局就凭空"领先"一大截）；
     下面是<b>每天的做题量</b>，复习重做和新题分开，只看做没做、不看做没做好。</p></div>${body}

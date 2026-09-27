@@ -1,65 +1,61 @@
-# 第一版尝试, 没通过。一个设计问题 + 若干实现问题:
-#
-# 设计问题(根子): 让 need 在计数归零时 del 掉键, 用 len(need)==0 当判定。
-#   a. 滑动窗口的"进"和"出"必须是一对**逆操作**, 而 del 是破坏性、不可逆的。
-#      字符移出窗口时 need 里已经没这个键, `if s2[l] in need` 恒 False, 需求恢复不回来。
-#      反例 s1="abc" s2="abxc": 窗口滑到 "bxc" 时 need 已空 -> 假阳性 True(正确答案 False)。
-#      随机对拍 20000 组错 925 组。
-#   b. 本质是在用容器的 size 隐式编码状态量, 逼着自己为了把 size 压到 0 去破坏数据本身。
-#      原则: 别用容器的 size / 键的存在性表达状态, 状态就显式存一个 int。
-#
-# 实现问题:
-#   1. Counter 是 dict, 没有 .remove() -> AttributeError。删键要用 del need[c]
-#   2. `if need[s2[i]]==0` 写在 `if s2[i] in need` 的**块外**: s1 里没有的字符
-#      读出来是 0(Counter 缺失键返回 0 且不插入), 条件成立 -> del 不存在的键 -> KeyError
-#   3. 滑动循环里加减方向和初始化循环相反: 右进写成 +=1、左出写成 -=1, 应该反过来
-#      (统一为: 进字符 -> 需求减, 出字符 -> 需求加)
-#   4. len(s1) > len(s2) 时初始化循环 range(s1len) 直接越界, 开头没挡
-#   5. 残留 print
-#
-# 修正版见 sol2.py。
-from collections import Counter
+from collections import Counter        # 本地跑要 import, LeetCode 上不写也能过
+
 
 class Solution:
     def checkInclusion(self, s1: str, s2: str) -> bool:
         '''
-        双指针+counter，枚举右，invalid收缩左，可以快速收缩或者l+=1
+        Input:
+        - s1, s2: str, 1 <= len <= 1e4, 全小写字母
+        Target: s2 里是否存在某个长度为 len(s1) 的子串, 恰好是 s1 的一个排列
+        Return: 存在与否
+        Output: bool
 
-        agent：我混了两种，定长窗口和高级
+        解法: 定长滑动窗口 + 两个 Counter 直接比较   O(26n) 时间 / O(26) 空间
 
-        naive定长扫描，l-r+，每次检查窗口里是否valid
+        核心观察: 窗口是**定长**的。
+          s1 的排列长度恒为 n = len(s1), 所以这题不是「枚举 r, invalid 时收缩 l」
+          那种变长窗口 —— 左边界恒等于 r - n, 连 l 这个变量都不用存。
+          每步只做三件事: 进 s2[r], 出 s2[r-n], 比一次。
+          判据见 notes/sliding-window-template.md: 窗口长度被题面钉死 -> 定长。
 
-        检查窗口里是否valid的操作怎么做，hash吗，其实可以小数组, copy+如果全0。
-        那这个复杂度全都在这个小数组上了吗，感觉比较辅料
-
-        搞个need的set即可
+        为什么敢用 O(26n) 的全量比较而不做增量维护, 见 note.md「三条砍掉的路」。
         '''
-        s1len=len(s1)
-        s2len=len(s2)
-        need = Counter()
-        for c in s1:
-            need[c]+=1
-        # check counter
-        for i in range(s1len):
-            if s2[i] in need:
-                need[s2[i]]-=1
-            if need[s2[i]]==0:
-                need.remove(s2[i])
-        if len(need)==0:
+        n, m = len(s1), len(s2)
+        if n > m:                      # s1 比 s2 长, 不可能塞得下
+            return False
+
+        need = Counter(s1)             # s1 的字符分布, 建好就不动
+        win  = Counter(s2[:n])         # 当前窗口的字符分布
+        if win == need:
             return True
-        print(need)
-        l = 0
-        r = s1len # first invalid
-        while r<s2len:
-            if s2[r] in need: # 忽略和s1 need无关的东西
-                need[s2[r]]+=1
-            if s2[l] in need:
-                need[s2[l]]-=1
-            if need[s2[l]]==0:
-                need.remove(s2[l])
-            if len(need)==0:
+
+        for r in range(n, m):
+            win[s2[r]] += 1            # 进
+            win[s2[r - n]] -= 1        # 出
+            if win == need:
                 return True
-            print(need)
-            r+=1
-            l+=1
         return False
+
+        '''
+        唯一要知道的语义坑: Counter 计数减到 0 的键**不会**自动删除, 会以 {'a': 0}
+        的形式留在字典里。但 Python **3.10+** 的 Counter.__eq__ 改成了多重集语义,
+        会忽略 0 计数:
+            Counter({'a': 0}) == Counter()   ->   True
+        所以这里直接 win == need 是对的, 不用手动 del。
+        (3.9 及更早继承 dict.__eq__, 上面那句是 False, 那时才需要清理; LeetCode 是 3.11+。)
+
+        另一个相关的坑: win[c] -= 1 对不存在的键会**顺手插入** -1(复合赋值先读后写),
+        而纯读取 win[c] 返回 0 但不插入。这里两边都无害 —— win 记的是「窗口里有几个」,
+        缺席 == 0 是忠实表示, 删不删都不丢信息, += 1 也能把它正确复活。
+
+        Test Cases:
+        ("ab",   "eidbaooo")     -> True    经典样例, "ba" 在中间
+        ("ab",   "eidboaoo")     -> False   字符都有但不连续
+        ("abc",  "abxc")         -> False   「删键」写法在这里假阳性, 见 note.md
+        ("ab",   "axxxb")        -> False   「不收缩左边界」写法在这里假阳性
+        ("ab",   "aab")          -> True    「不收缩左边界」写法在这里假阴性
+        ("a",    "a")            -> True    最小规模
+        ("ab",   "a")            -> False   len(s1) > len(s2), 走开头的早返回
+        ("adc",  "dcda")         -> True    答案是末尾的 "cda"
+        ("hello","ooolleoooleh") -> False   重数不匹配(o 太多), 只看字符集会误判
+        '''
