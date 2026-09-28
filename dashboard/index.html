@@ -90,7 +90,25 @@
             <option value="4">L4 思路都不知道</option>
           </select>
         </label>
+        <label class="tf sel pit-field" title="这题真栽过的实现细节, 一两行。复习揭晓时和思路一起翻出来">坑
+          <input type="text" id="e-pit" placeholder="例: 跳重复的几个分支必须互斥" spellcheck="false">
+        </label>
+        <label class="tf sel" title="这题属于哪个坑的变体簇。弱题可以靠同簇另外两道 clean 关掉">变体簇
+          <input type="text" id="e-cluster" placeholder="例: sorted-dedup" spellcheck="false" list="cluster-list">
+          <datalist id="cluster-list"></datalist>
+        </label>
         <span id="meta-msg" class="msg">改动自动保存</span>
+      </div>
+
+      <!-- 打卡之后补一句做成什么样: 额度只看做没做, 这一行只喂弱题列表 -->
+      <div id="d-result" class="d-result hidden">
+        <span class="d-result-k">这一遍</span>
+        <button class="d-res" data-res="clean" title="一次过, 没 debug">一次过</button>
+        <button class="d-res" data-res="bug" title="思路对, 细节错了一两次">小 bug</button>
+        <button class="d-res" data-res="wrong-idea" title="思路本身不对 / 看了题解">思路错</button>
+        <button class="d-res d-attack" data-attack="1" title="这一笔算攻坚额度(弱题的变体簇)">攻坚</button>
+        <input type="text" id="d-res-pit" placeholder="这次踩的坑(一句话, 回车存)" spellcheck="false">
+        <span id="d-res-msg" class="msg"></span>
       </div>
 
       <div class="split">
@@ -236,6 +254,7 @@
                 </div>
                 <div v-show="!editing" class="rv-idea" title="双击编辑"
                      @dblclick="startEdit" v-html="ideaHtml"></div>
+                <div v-if="!isSyntax && d.pit" class="rv-pit"><b>坑</b><span v-text="d.pit"></span></div>
                 <textarea v-show="editing" id="rv-aedit-box" ref="aedit" v-model="draft"
                           spellcheck="false" placeholder="一句话思路… Ctrl+S 保存，Esc 取消"></textarea>
               </div>

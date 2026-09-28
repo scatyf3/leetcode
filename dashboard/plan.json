@@ -1,6 +1,6 @@
 {
   "source": "NeetCode 150 · 按 pattern group 分层，不按列表顺序",
-  "note": "计划的真相源。每个 phase 的 daily 是当天的两半额度 (redo = 重做之前 L3/L3.5/L4 的题, 只看做没做、不看做没做好; new = 开新题), 手改这里就是改日课。每组的 tag 指向 paradigms/ 或 structures/ 里那份通用 trick 文档，点组标题打开。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4, 含半档 L1.5 / L3.5) 算出。",
+  "note": "计划的真相源。每个 phase 的 weekly 是**一周**的额度 (redo = 重做之前 L3/L3.5/L4 的题; new = 开新题; attack = 攻坚弱题的变体), 只看做没做、不看做没做好; 手改这里就是改周课。milestones 是两周一次的对表点。每组的 tag 指向 paradigms/ 或 structures/ 里那份通用 trick 文档，点组标题打开。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4, 含半档 L1.5 / L3.5) 算出。",
 
   "familiarity": [
     { "l": 0, "t": "L0", "d": "英语讲得清" },
@@ -22,38 +22,76 @@
 
   "tiers": [
     { "t": 1, "name": "第一层", "cum": "≈75",  "desc": "核心八模式 + 网格搜索 + 四题 DP" },
-    { "t": 2, "name": "第二层", "cum": "≈110", "desc": "回溯 · 区间 · 图 · DP 补齐" },
-    { "t": 3, "name": "第三层", "cum": "≈150", "desc": "2-D DP · 高级图论 · 贪心；灰色两组低优先，要砍从这里砍" }
+    { "t": 2, "name": "第二层", "cum": "≈110", "desc": "只做回溯 + 图（阶段 3）；区间 / DP 其余 / Tries 其余 灰掉" },
+    { "t": 3, "name": "第三层", "cum": "≈150", "desc": "整层砍掉，除非时间多出来" }
+  ],
+
+  "review_cap": 10,
+  "min_day": "最低日 = 只刷到期闪卡（至多 review_cap 张），不开新题。摆烂/急事那天做到这条就算没断。",
+  "rules": [
+    "按周算预算，一周按 5 个工作日排、留 2 天缓冲；错过的新题直接作废，不补，只顺延里程碑。",
+    "每两周对一次表：落后就砍下一阶段的尾巴，不压缩当前阶段。",
+    "攻坚额度只做弱题的变体簇（同一个坑换题），不重做原题；弱题列表空了额度还给新题。",
+    "有了具体面试：面前 1–2 周切到那家公司的 tag，优先于本计划。"
   ],
 
   "phases": [
-    { "n": 1, "name": "打模式底", "from": "2026-09-04", "to": "2026-09-25", "hrs": "18 hr/周",
-      "daily": { "redo": 2, "new": 3 },
+    { "n": 1, "name": "打模式底", "from": "2026-09-04", "to": "2026-09-27", "hrs": "18 hr/周（计划）",
+      "weekly": { "redo": 10, "new": 15, "attack": 0 },
       "goal": "第一层 → S2",
-      "adds": "核心八模式全组 + 网格 BFS/DFS + 四题 1-D DP；挑 15 题顺手用英语讲 60 秒。卡 25 分钟就看题解，当天重做，三天后再重做。",
-      "serves": "服务 9 月底 OA" },
-    { "n": 2, "name": "补第二梯队", "from": "2026-09-25", "to": "2026-10-15", "hrs": "18 hr/周",
-      "daily": { "redo": 2, "new": 3 },
-      "goal": "第二层 → S2　第一层 → S3",
-      "adds": "回溯、1-D DP 其余、区间、图论其余、Tries 其余。每周 1–2 次 mock 起 — mock 是 S3 唯一的真实检验。",
-      "serves": "服务 10 月初电面" },
-    { "n": 3, "name": "啃长尾", "from": "2026-10-15", "to": "2026-11-05", "hrs": "12–18 hr/周",
-      "daily": { "redo": 3, "new": 2 },
-      "goal": "第三层 → S2",
-      "adds": "2-D DP、高级图论、贪心。S3 不再单练，全交给 mock。撞 PhD 文书期，文书压成 background，两周搞定。",
-      "serves": "服务 11 月初 onsite" },
-    { "n": 4, "name": "冻结", "from": "2026-11-05", "to": null, "hrs": "5 hr/周",
-      "daily": { "redo": 3, "new": 0 },
+      "adds": "原计划 9/25 第一层 77 题全部 S2；实际收尾 36/77，落后约 3.5 周。计划本身按「一半时间做科研」做不到，9/27 重排。",
+      "serves": "已结束 · 复盘：日额度 5 题从没达到过" },
+    { "n": 2, "name": "补第一层", "from": "2026-09-27", "to": "2026-10-25", "hrs": "≈45–60 min/天",
+      "weekly": { "redo": 4, "new": 6, "attack": 2 },
+      "goal": "第一层 ≥ 72/77 → S2",
+      "adds": "顺序：Trees → Heap → 网格 → Stack / Binary Search / Linked List / Sliding Window / DP 四题。L3/L4 的老题重做比开新题快，先清它们。10/11 起每周 1 次 mock。",
+      "serves": "服务 10 月 OA / 电面" },
+    { "n": 3, "name": "图 + 回溯", "from": "2026-10-25", "to": "2026-11-08", "hrs": "≈45–60 min/天",
+      "weekly": { "redo": 3, "new": 7, "attack": 2 },
+      "goal": "Graphs 其余 + Backtracking（17 题）→ S2",
+      "adds": "只做这两组。Intervals / 1-D DP 其余 / Tries 其余 / 第三层全部砍掉，有空再说。第一层 → S3 不单练，交给 mock。",
+      "serves": "服务 11 月面试 · 11/8 是硬线（PhD 申请季）" },
+    { "n": 4, "name": "冻结", "from": "2026-11-08", "to": null, "hrs": "≈5 hr/周",
+      "weekly": { "redo": 5, "new": 0, "attack": 0 },
       "goal": "位置不动",
-      "adds": "一题新的都不加。错题 spaced repetition + 每周 1 次 mock，带宽转向 OSS subsystem。",
+      "adds": "一题新的都不加。闪卡 + 每周 1 次 mock；mock 挂在哪类就补哪类。",
       "serves": "防退化，不扩覆盖" }
   ],
 
   "targets": [
     { "phase": 1, "tier": 1, "stage": 2 },
-    { "phase": 2, "tier": 2, "stage": 2 },
-    { "phase": 2, "tier": 1, "stage": 3 },
-    { "phase": 3, "tier": 3, "stage": 2 }
+    { "phase": 2, "tier": 1, "stage": 2, "n": 72 },
+    { "phase": 3, "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"] }
+  ],
+
+  "milestones": [
+    { "date": "2026-10-11", "tier": 1, "stage": 2, "n": 56, "focus": "Trees + Heap + 网格", "mock": "第 1 次 mock" },
+    { "date": "2026-10-25", "tier": 1, "stage": 2, "n": 72, "focus": "第一层剩下的零碎", "mock": "mock 过半" },
+    { "date": "2026-11-08", "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"], "focus": "Graphs 其余 + Backtracking", "mock": "mock 基本稳定 → 冻结" }
+  ],
+
+  "mock": {
+    "minutes": 25,
+    "count": 2,
+    "note": "从 NeetCode 150 里还没建文件夹的非 hard 题 + 其他题单里没建过的题随机抽。只记 AC 了没、范式判断对了没。"
+  },
+
+  "topics": [
+    { "name": "Roblox OA · 实现模拟", "short": "RBX",
+      "note": "CodeSignal 风格：40–80 行一次写对，隐藏测试卡边界。每题写完先过三件事再提交：最大输入、窗口/边界开闭、样例没覆盖的隐含假设。会员题(💰)做不了就跳过。时间不够只做每节加粗那道。",
+      "sections": [
+        { "name": "网格 / 状态模拟", "key": 289, "problems": [[289, "Game of Life"], [1861, "Rotating the Box"], [529, "Minesweeper"], [1706, "Where Will the Ball Fall"], [794, "Valid Tic-Tac-Toe State"], [723, "Candy Crush 💰"]] },
+        { "name": "时间窗口计数", "key": 933, "problems": [[933, "Number of Recent Calls"], [1604, "Alert Using Same Key-Card Three or More Times"], [1797, "Design Authentication Manager"], [362, "Design Hit Counter 💰"], [359, "Logger Rate Limiter 💰"]] },
+        { "name": "更新中维护聚合 · 懒删除堆", "key": 2034, "problems": [[2034, "Stock Price Fluctuation"], [2353, "Design a Food Rating System"], [1845, "Seat Reservation Manager"], [480, "Sliding Window Median"]] },
+        { "name": "日志 / 调用栈解析", "key": 636, "problems": [[636, "Exclusive Time of Functions"], [71, "Simplify Path"], [811, "Subdomain Visit Count"], [609, "Find Duplicate File in System"], [1152, "Analyze User Website Visit Pattern 💰"]] },
+        { "name": "操作序列 / 系统设计实现", "key": 2043, "problems": [[2043, "Simple Bank System"], [2502, "Design Memory Allocator"]] },
+        { "name": "连通块 · 哈希 + 前缀和", "key": 560, "problems": [[1254, "Number of Closed Islands"], [560, "Subarray Sum Equals K"], [523, "Continuous Subarray Sum"]] }
+      ] },
+    { "name": "Infra 实操", "short": "INF",
+      "note": "AI infra 公司常考、题单覆盖不好的设计题。",
+      "sections": [
+        { "name": "", "key": 146, "problems": [[146, "LRU Cache"], [460, "LFU Cache"], [380, "Insert Delete GetRandom O(1)"], [355, "Design Twitter"], [981, "Time Based Key-Value Store"], [295, "Find Median from Data Stream"], [621, "Task Scheduler"], [23, "Merge k Sorted Lists"], [207, "Course Schedule"]] }
+      ] }
   ],
 
   "extras": {
@@ -245,7 +283,7 @@
       [17, "Letter Combinations of a Phone Number", "medium"],
       [51, "N-Queens", "hard"]
     ]},
-    { "name": "1-D DP · 其余", "tier": 2, "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
+    { "name": "1-D DP · 其余", "tier": 2, "low": true, "sub": "11/8 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
       [746, "Min Cost Climbing Stairs", "easy"],
       [5, "Longest Palindromic Substring", "medium"],
       [647, "Palindromic Substrings", "medium"],
@@ -255,7 +293,7 @@
       [300, "Longest Increasing Subsequence", "medium"],
       [416, "Partition Equal Subset Sum", "medium"]
     ]},
-    { "name": "Intervals", "tier": 2, "tag": { "kind": "paradigms", "name": "intervals" }, "problems": [
+    { "name": "Intervals", "tier": 2, "low": true, "sub": "11/8 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "intervals" }, "problems": [
       [57, "Insert Interval", "medium"],
       [56, "Merge Intervals", "medium"],
       [435, "Non-overlapping Intervals", "medium"],
@@ -273,12 +311,12 @@
       [684, "Redundant Connection", "medium"],
       [127, "Word Ladder", "hard"]
     ]},
-    { "name": "Tries · 其余", "tier": 2, "sub": "212 是 Trie × Backtracking，必须排在回溯之后", "tag": { "kind": "structures", "name": "trie" }, "problems": [
+    { "name": "Tries · 其余", "tier": 2, "low": true, "sub": "11/8 前不做 · 212 是 Trie × Backtracking，排在回溯之后", "tag": { "kind": "structures", "name": "trie" }, "problems": [
       [211, "Design Add and Search Words", "medium"],
       [212, "Word Search II", "hard"]
     ]},
 
-    { "name": "2-D DP", "tier": 3, "tag": { "kind": "paradigms", "name": "2d-dp" }, "problems": [
+    { "name": "2-D DP", "tier": 3, "low": true, "sub": "砍掉 · 除非时间多出来", "tag": { "kind": "paradigms", "name": "2d-dp" }, "problems": [
       [62, "Unique Paths", "medium"],
       [1143, "Longest Common Subsequence", "medium"],
       [309, "Buy and Sell Stock With Cooldown", "medium"],
@@ -291,7 +329,7 @@
       [312, "Burst Balloons", "hard"],
       [10, "Regular Expression Matching", "hard"]
     ]},
-    { "name": "Advanced Graphs", "tier": 3, "tag": { "kind": "structures", "name": "graph" }, "problems": [
+    { "name": "Advanced Graphs", "tier": 3, "low": true, "sub": "砍掉 · 除非时间多出来", "tag": { "kind": "structures", "name": "graph" }, "problems": [
       [1584, "Min Cost to Connect All Points", "medium"],
       [743, "Network Delay Time", "medium"],
       [787, "Cheapest Flights Within K Stops", "medium"],
@@ -299,7 +337,7 @@
       [778, "Swim in Rising Water", "hard"],
       [269, "Alien Dictionary", "hard"]
     ]},
-    { "name": "Greedy", "tier": 3, "sub": "每题一个 trick，迁移性最低 — 排最后，砍起来最不心疼", "tag": { "kind": "paradigms", "name": "greedy" }, "problems": [
+    { "name": "Greedy", "tier": 3, "low": true, "sub": "每题一个 trick，迁移性最低 — 排最后，砍起来最不心疼", "tag": { "kind": "paradigms", "name": "greedy" }, "problems": [
       [53, "Maximum Subarray", "medium"],
       [55, "Jump Game", "medium"],
       [45, "Jump Game II", "medium"],

@@ -865,9 +865,10 @@ main{padding:18px 20px;overflow:auto}
 .chart i.b-redo,.skey i.b-redo,.td-bar i.b-redo{background:var(--accent2)}
 .chart i.b-new,.skey i.b-new,.td-bar i.b-new{background:var(--accent)}
 .chart i.b-warm,.skey i.b-warm,.td-bar i.b-warm{background:var(--line)}
+.chart i.b-attack,.skey i.b-attack,.td-bar i.b-attack{background:var(--fam35)}
 
 .gr-sec-today{margin-bottom:34px}
-.td-lanes{display:grid;grid-template-columns:1fr 1fr minmax(130px,.6fr);gap:10px}
+.td-lanes{display:grid;grid-template-columns:1fr 1fr 1fr minmax(130px,.6fr);gap:10px}
 .td-lane{background:var(--panel);border:1px solid var(--line);border-radius:11px;
   padding:12px 14px 13px;display:flex;flex-direction:column;gap:7px}
 .td-lane.met{border-color:color-mix(in srgb,var(--accent2) 45%,var(--line))}
@@ -932,3 +933,94 @@ main{padding:18px 20px;overflow:auto}
 .gr-led-sum th,.gr-led-sum td{border-bottom:0;border-top:1px solid var(--line);
   padding-top:9px;font-weight:650}
 .gr-led-warn{color:var(--fam4);font-weight:600}
+
+/* ---- 本周: 最低日 ---- */
+.td-min{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 12px;
+  padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel)}
+.td-min.met{border-color:var(--accent2)}
+.td-min-k{font-size:11.5px;color:var(--dim);letter-spacing:.04em}
+.td-min b{font-size:14px}
+.td-min.met b{color:var(--accent2)}
+
+/* ---- hero: 里程碑 ---- */
+.gr-hero-ms{grid-column:1/-1;padding:16px 20px;background:var(--panel)}
+.gr-ms-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px}
+.gr-ms{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.gr-ms.met{border-color:var(--accent2)}
+.gr-ms.missed{border-color:var(--hard)}
+.gr-ms-d{font-weight:650;font-size:16px;min-width:52px;display:flex;flex-direction:column}
+.gr-ms-d small{font-weight:400;font-size:11px;color:var(--dim)}
+.gr-ms.missed .gr-ms-d small{color:var(--hard)}
+.gr-ms-b{flex:1;display:flex;flex-direction:column;gap:5px;min-width:0}
+.gr-ms-t{font-size:13px}
+.gr-ms-n{font-size:11.5px;color:var(--dim)}
+.gr-ms-n b{color:var(--fg)}
+
+/* ---- 攻坚 · mock ---- */
+.dr-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px}
+@media (max-width:900px){.dr-grid{grid-template-columns:1fr}}
+.dr-col{min-width:0}
+.dr-w{display:grid;grid-template-columns:minmax(180px,260px) 1fr;gap:4px 12px;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--line)}
+.dr-w .gr-chip{grid-row:span 3}
+.dr-why{font-size:12px;color:var(--fam35)}
+.dr-pit{font-size:12.5px}
+.dr-pit b{font-size:11px;color:var(--dim);margin-right:6px}
+.dr-pit.none,.dr-cl.none{color:var(--dim);font-size:11.5px}
+.dr-cl{font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
+.dr-mock-cur{padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel);margin-bottom:12px}
+.dr-mock-h{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.dr-timer{font-family:ui-monospace,Menlo,monospace;font-size:15px;color:var(--accent)}
+.dr-timer.over{color:var(--hard)}
+.dr-drop{margin-left:auto;background:transparent;color:var(--dim);border:1px solid var(--line);padding:3px 9px;font-size:12px}
+.dr-mp{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;padding:6px 0;border-top:1px solid var(--line)}
+.dr-mp a{color:var(--fg);text-decoration:none}
+.dr-mp a:hover{color:var(--accent)}
+.dr-yns{margin-left:auto;font-size:12px;color:var(--dim);white-space:nowrap}
+.dr-yn{background:var(--chip);color:var(--dim);padding:2px 9px;margin-left:3px;border:1px solid var(--line)}
+.dr-yn.on.y{background:var(--accent2);color:#fff;border-color:transparent}
+.dr-yn.on.n{background:var(--hard);color:#fff;border-color:transparent}
+.dr-draw{font-size:14px;padding:9px 16px}
+.dr-hist{border-collapse:collapse;font-size:12.5px;width:100%}
+.dr-hist th,.dr-hist td{text-align:left;padding:4px 10px 4px 0;border-bottom:1px solid var(--line)}
+.dr-hist th{color:var(--dim);font-weight:500}
+.dr-hist small{color:var(--dim)}
+
+/* ---- 详情: 这一遍的结果 + 坑 ---- */
+.d-result{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 16px;
+  border-bottom:1px solid var(--line);background:var(--panel2)}
+.d-result.hidden{display:none}
+.d-result-k{font-size:12px;color:var(--dim)}
+.d-res{background:var(--chip);color:var(--fg);border:1px solid var(--line);padding:4px 10px}
+.d-res.on[data-res="clean"]{background:var(--accent2);color:#fff}
+.d-res.on[data-res="bug"]{background:var(--medium);color:#fff}
+.d-res.on[data-res="wrong-idea"]{background:var(--hard);color:#fff}
+.d-res.d-attack.on{background:var(--fam35);color:#fff}
+#d-res-pit{flex:1;min-width:180px;background:var(--bg);color:var(--fg);border:1px solid var(--line);
+  border-radius:6px;padding:5px 8px;font-size:12.5px}
+.pit-field input,#e-cluster{background:var(--bg);color:var(--fg);border:1px solid var(--line);
+  border-radius:6px;padding:4px 7px;font-size:12.5px}
+.pit-field input{width:260px}
+#e-cluster{width:130px}
+.rv-pit{margin-top:10px;padding:8px 10px;border-left:3px solid var(--fam35);background:var(--panel2);
+  border-radius:4px;font-size:13px}
+.rv-pit b{font-size:11px;color:var(--fam35);margin-right:8px}
+
+/* ---- 精简: 折叠区 ---- */
+.gr-more,.gr-lowbox{margin:0 0 28px}
+.gr-more>summary,.gr-lowbox>summary{cursor:pointer;color:var(--dim);font-size:13px;padding:10px 14px;
+  border:1px dashed var(--line);border-radius:10px;list-style:none}
+.gr-more>summary::before,.gr-lowbox>summary::before{content:"▸ ";}
+.gr-more[open]>summary::before,.gr-lowbox[open]>summary::before{content:"▾ ";}
+.gr-more[open]>summary,.gr-lowbox[open]>summary{margin-bottom:20px}
+
+/* ---- 专题 ---- */
+.tp{border:1px solid var(--line);border-radius:11px;background:var(--panel);padding:10px 14px;margin-bottom:10px}
+.tp>summary{cursor:pointer;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;list-style:none}
+.tp>summary::before{content:"▸";color:var(--dim)}
+.tp[open]>summary::before{content:"▾"}
+.tp-c{font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--accent)}
+.tp-sec{margin-top:12px}
+.tp-sec-h{font-size:12px;color:var(--dim);margin-bottom:6px}
+.gr-chip.tp-key{border:1.5px solid var(--accent)}
+.gr-chip.tp-key .gr-nm,.gr-chip.tp-key .gr-id{font-weight:700;color:var(--fg)}

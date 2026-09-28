@@ -78,6 +78,8 @@ def export(out: Path) -> dict:
     write_json(api / "reviews.json", {"reviews": server.read_reviews()})  # 📈 进度的历史部分
     write_json(api / "edits.json", {"edits": server.read_edits()})      # 标签改动时间轴
     write_json(api / "attempts.json", {"attempts": server.read_attempts()})  # 做题打卡: 日课那两半
+    write_json(api / "weak.json", server.weak_list())                 # 攻坚: 弱题列表
+    write_json(api / "mock.json", {"mocks": server.read_mocks()})     # 随机两题 mock 的历史
 
     # 分组标签 = 看板上可点开的通用 trick 文档, 两个维度各导一份
     docs = 0

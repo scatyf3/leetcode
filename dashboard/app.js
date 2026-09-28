@@ -222,6 +222,8 @@ async function openDetail(id) {
   $('#e-status').value = d.status || 'solved';
   $('#e-familiarity').value = famOf(d) === null ? '' : String(famOf(d));
   $('#e-paused').checked = !!d.paused;
+  $('#e-pit').value = d.pit || '';
+  $('#e-cluster').value = d.cluster || '';
   $('#e-paused').title = d.paused ? `自 ${d.paused} 起暂停` : '勾上后不进复习队列, interval 也一起冻住';
   $('#note-file').textContent = d.note_file;
   $('#note-edit').value = d.note;
@@ -243,6 +245,7 @@ function renderAttemptBtn() {
   const b = $('#d-attempt');
   if (!b || !CURRENT) return;
   const a = attemptToday(CURRENT.id);
+  renderResultRow(a);
   b.classList.toggle('on', !!a);
   if (a) {
     const m = AT_META[a.kind] || { label: a.kind };
@@ -260,6 +263,43 @@ function renderAttemptBtn() {
   }
 }
 
+// 打卡后那一行: 做成什么样 + 算不算攻坚 + 踩了什么坑。没打卡时藏起来 ——
+// 点任何一个结果按钮都会先替你打卡(服务端 set_attempt_result 兜底), 所以藏不藏只是省地方。
+function renderResultRow(a) {
+  const row = $('#d-result');
+  if (!row) return;
+  row.classList.toggle('hidden', !a || isReadOnly());
+  if (!a) return;
+  row.querySelectorAll('.d-res[data-res]').forEach((x) =>
+    x.classList.toggle('on', x.dataset.res === a.result));
+  const at = row.querySelector('.d-attack');
+  if (at) at.classList.toggle('on', !!a.attack);
+  const pit = $('#d-res-pit');
+  if (pit && document.activeElement !== pit) pit.value = a.pit || '';
+  // 变体簇的补全: 全库已经出现过的簇名
+  const dl = $('#cluster-list');
+  if (dl) {
+    const cs = [...new Set(PROBLEMS.map((p) => p.cluster).filter(Boolean))];
+    dl.innerHTML = cs.map((c) => `<option value="${esc(c)}">`).join('');
+  }
+}
+
+async function setResult(patch) {
+  if (!CURRENT) return;
+  const r = await api('/api/attempts', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: CURRENT.id, op: 'result', ...patch }),
+  });
+  const msg = $('#d-res-msg');
+  if (!r || r.ok === false) { if (msg) msg.textContent = (r && r.error) || '记不上'; return; }
+  ATTEMPTS = null;
+  WEAK = null;
+  await loadAttempts();
+  renderAttemptBtn();
+  if (msg) { msg.textContent = '记下了'; setTimeout(() => { msg.textContent = ''; }, 1500); }
+  if (VIEW === 'grid') { renderToday(); renderPace(); renderDrill(); }
+}
+
 async function punchAttempt() {
   if (!CURRENT) return;
   const had = !!attemptToday(CURRENT.id);
@@ -269,11 +309,12 @@ async function punchAttempt() {
   });
   if (!r || r.ok === false) { $('#attempt-msg').textContent = (r && r.error) || '记不上'; return; }
   ATTEMPTS = null;                    // 重新拉一份, 别在前端猜服务端写了什么
+  WEAK = null;
   await loadAttempts();
   renderAttemptBtn();
   $('#attempt-msg').textContent = had ? '已撤销' : '记下了';
   setTimeout(() => { if ($('#attempt-msg')) $('#attempt-msg').textContent = ''; }, 1800);
-  if (VIEW === 'grid') { renderToday(); renderPace(); }   // 后面那张日课条跟着变
+  if (VIEW === 'grid') { renderToday(); renderPace(); renderDrill(); }   // 后面那张周课条跟着变
 }
 
 // ---- editable tag chips (structures / paradigms / techniques) ----
@@ -352,6 +393,7 @@ async function autoSaveMeta() {
     difficulty: $('#e-difficulty').value, status: $('#e-status').value,
     familiarity: $('#e-familiarity').value === '' ? null : +$('#e-familiarity').value,
     paused: $('#e-paused').checked,        // 服务端幂等: 已经暂停的再发 true 不会重新计时
+    pit: $('#e-pit').value, cluster: $('#e-cluster').value.trim(),
   };
   await putMeta(CURRENT.id, body);
   $('#meta-msg').textContent = '已保存 ✓';
@@ -878,6 +920,10 @@ function orderQueue(pool, mode = 'fsrs', deck = 'problems') {
 
 // 三种模式的**范围完全一样**, 所以徽章和 📈 里的数字跟模式无关
 const buildQueue = (mode = 'fsrs', deck = 'problems') => orderQueue(queuePool(deck), mode, deck);
+// 每天复习上限(两个牌组各算各的)。PLAN 在坐标系视图才会拉, 没拉到就按 10。
+const rvCap = () => (PLAN && +PLAN.review_cap) || 10;
+const reviewedToday = (deck) => deckRows(deck).filter((p) => p.last_review === todayStr()).length;
+const rvCapLeft = (deck) => Math.max(0, rvCap() - reviewedToday(deck));
 const deckDue = (deck) => queuePool(deck).length;
 
 function updateReviewBadge() {
@@ -1125,7 +1171,9 @@ const RV = Vue.createApp({
       // 等的时候又开了一次 / 切了牌组(都会再进 start(), 由新的那次接手), 或者已经关掉了
       if (gen !== this.startGen || !this.open) return;
       this.loading = false;
-      const queue = buildQueue(this.mode, deck);
+      // 每天上限 review_cap 张(plan.json, 默认 10): 今天已经评过的先扣掉。
+      // 逾期堆得再多也不一次清 —— 多出来的留在明天的队列里, 不欠账也不补课。
+      const queue = buildQueue(this.mode, deck).slice(0, rvCapLeft(deck));
       const inDeck = new Set(deckRows(deck).map((p) => p.id));
       const deferred = (carry.deferred || []).filter((id) => inDeck.has(id));
       // 押了好几次的按最后一次的先后排, 和会话内 push 到队尾的效果一致
@@ -2100,8 +2148,17 @@ function planProblems() {
   const out = [];
   for (const g of PLAN.groups)
     for (const p of g.problems)
-      out.push({ id: p[0], tier: g.tier, rec: rec.get(p[0]), depth: depthOf(rec.get(p[0])) });
+      out.push({ id: p[0], tier: g.tier, grp: g.name, rec: rec.get(p[0]), depth: depthOf(rec.get(p[0])) });
   return out;
+}
+
+// 目标/里程碑的口径: 某层(可再限定几组) 达到某深度的题数, 对一个目标数 n(缺省 = 全数)
+function goalOf(all, x) {
+  const rows = all.filter((p) => p.tier === x.tier && (!x.groups || x.groups.includes(p.grp)));
+  const N = x.n || rows.length;
+  const n = rows.filter((p) => p.depth >= x.stage).length;
+  const label = x.groups ? x.groups.join(' + ') : tierName(x.tier);
+  return { N, n, label, pct: N ? Math.min(100, Math.round((n / N) * 100)) : 0 };
 }
 
 // ---- 账本: 四档互斥的覆盖 / 掌握分解 --------------------------------------
@@ -2215,21 +2272,20 @@ function buildGrid() {
 
   $('#sub').textContent = '覆盖 × 深度 · NeetCode 150';
   $('#count').textContent =
-    `${all.filter((p) => p.rec).length}/${all.length} 有文件夹 · 阶段 ${live.n}`;
+    `S2 ${all.filter((p) => p.depth >= 2).length}/${all.length} · 阶段 ${live.n}`;
 
   // --- 概览条: 首屏第一眼只需要回答两件事 —— 我在哪个阶段, 这阶段要把哪几格推到底。
   // 下面的矩阵/时间线/题目都是它的展开, 所以这里只放数字和差额, 不重复解释。
   const goals = PLAN.targets.filter((x) => x.phase === live.n).map((x) => {
-    const N = size(x.tier), n = reached(x.tier, x.stage), pct = N ? Math.round((n / N) * 100) : 0;
+    const { N, n, pct, label } = goalOf(all, x);
     return `<div class="gr-hg">
-      <div class="gr-hg-t">${esc(tierName(x.tier))}<span
+      <div class="gr-hg-t">${esc(label)}<span
         class="gr-hg-ar">→</span>${esc(stageName(x.stage))}</div>
       <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
       <div class="gr-hg-n"><b>${n}</b><small>/${N}</small><span class="gr-hg-gap${n >= N ? ' met' : ''}">${
         n >= N ? '已达标 ✓' : '还差 ' + (N - n) + ' 题'}</span></div></div>`;
   }).join('');
   // 底下这排是**跨层**的总计 —— 上面的矩阵只按层拆, 全局这三个数在那儿看不到。
-  const built = all.filter((p) => p.rec).length;
   const stat = (label, n, cls) => {
     const pct = Math.round((n / all.length) * 100);
     return `<div class="gr-st4">
@@ -2237,9 +2293,21 @@ function buildGrid() {
       <div class="gr-st4-n"><b>${n}</b><small>/${all.length}</small></div>
       <div class="gr-st4-bar"><i class="${cls}" style="width:${pct}%"></i></div></div>`;
   };
-  const stats = stat('已建文件夹', built, 'built')
-    + PLAN.stages.map((st) => stat(`S${st.s} 及以上`, all.filter((x) => x.depth >= st.s).length, `s${st.s}`)).join('');
+  const stats = PLAN.stages.map((st) => stat(`S${st.s} 及以上`, all.filter((x) => x.depth >= st.s).length, `s${st.s}`)).join('');
   const dl = daysLeft(live);
+  // 里程碑: 两周一次的对表点。过了日期没到数的标红 —— 规则是砍下一段的尾巴, 不压缩这一段
+  const todayS = todayStr();
+  const ms = (PLAN.milestones || []).map((x) => {
+    const { N, n, pct, label } = goalOf(all, x);
+    const days = Math.round((parseDay(x.date) - today) / 864e5);
+    const st = n >= N ? 'met' : x.date < todayS ? 'missed' : 'open';
+    return `<div class="gr-ms ${st}">
+      <div class="gr-ms-d">${esc(mmdd(x.date))}<small>${
+        st === 'met' ? '✓' : days >= 0 ? `还有 ${days} 天` : `过了 ${-days} 天`}</small></div>
+      <div class="gr-ms-b"><div class="gr-ms-t">${esc(x.focus || label)}</div>
+        <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
+        <div class="gr-ms-n"><b>${n}</b>/${N} · ${esc(label)} → S${x.stage}${x.mock ? ' · ' + esc(x.mock) : ''}</div></div></div>`;
+  }).join('');
   const hero = `<section class="gr-hero">
     <div class="gr-hero-l">
       <div class="gr-hero-k">现在</div>
@@ -2254,6 +2322,8 @@ function buildGrid() {
       <div class="gr-hero-goals">${goals || '<span class="gr-hg-gap">这阶段没设目标格</span>'}</div>
       <div class="gr-hero-cov">${stats}</div>
     </div>
+    ${ms ? `<div class="gr-hero-ms"><div class="gr-hero-k">里程碑 · 每两周对一次表，落后就砍下一段的尾巴</div>
+      <div class="gr-ms-row">${ms}</div></div>` : ''}
   </section>`;
 
   // --- the grid itself: tiers down, stages across ---
@@ -2353,7 +2423,7 @@ function buildGrid() {
       <div class="gr-chips">${b.items.map(([id, t]) =>
         chipHTML(id, t, recs.get(id)?.difficulty || 'none', b.short)).join('')}</div></div>`;
   }).join('');
-  let g = '';
+  let g = '', gl = '';           // gl = 低优先/砍掉的组, 折在最底下
   for (const grp of PLAN.groups) {
     const started = startedOf(grp.problems.map((p) => p[0]));
     const label = `第 ${grp.tier} 层${grp.low ? ' · 低优先' : ''}`;
@@ -2375,7 +2445,7 @@ function buildGrid() {
         ? `<h3><span class="gr-nm-plain">${esc(grp.name)}</span>${
              tags.map((t) => docBtn(t, `${esc(t.name)} →`, ' gr-doc-multi')).join('')}</h3>`
         : `<h3>${esc(grp.name)}</h3>`;
-    g += `<div class="gr-grp${grp.low ? ' low' : ''}"${anchor}>
+    const add = `<div class="gr-grp${grp.low ? ' low' : ''}"${anchor}>
       <div class="gr-grp-h">${head}
         <span class="gr-tier${grp.low ? ' low' : ''}" data-t="${grp.tier}">${label}</span>
         ${grp.sub ? `<span class="gr-sub">${esc(grp.sub)}</span>` : ''}
@@ -2383,8 +2453,9 @@ function buildGrid() {
           style="width:${Math.round((started / grp.problems.length) * 100)}%"></u></i></span></div>
       <div class="gr-box"><div class="gr-box-h">NeetCode 150</div><div class="gr-chips">${chips}</div></div>
       ${X.byGroup.has(grp.name) ? `<div class="gr-xboxes">${xBoxes(grp.name)}</div>` : ''}</div>`;
+    if (grp.low) gl += add; else g += add;
   }
-  if (X.byGroup.has(OTHER_GROUP)) g += `<div class="gr-grp">
+  if (X.byGroup.has(OTHER_GROUP)) gl += `<div class="gr-grp">
       <div class="gr-grp-h"><h3>${OTHER_GROUP}</h3>
         <span class="gr-sub">题单分类对不上上面任何一组的题 · 归组规则在 plan.json 的 extras</span></div>
       <div class="gr-xboxes">${xBoxes(OTHER_GROUP)}</div></div>`;
@@ -2392,6 +2463,9 @@ function buildGrid() {
   $('#grid-view').innerHTML = `
     ${hero}
     <section class="gr-sec gr-sec-today" id="gr-today"><p class="empty-hint">读取打卡记录…</p></section>
+    <section class="gr-sec" id="gr-drill"><p class="empty-hint">读取弱题 / mock…</p></section>
+    ${topicsHTML()}
+    <details class="gr-more"><summary>更多：格子 · 账本 · 配速 · 时间线</summary>
     <section class="gr-sec">
       <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进见过、S1、S2 四列。首列「见过」只数文件夹，不看熟练度。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
       ${m}
@@ -2411,13 +2485,14 @@ function buildGrid() {
       <div class="gr-sec-h"><h2><span class="gr-sec-n">5</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
       ${t}
     </section>
+    </details>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">6</span>题目</h2><p>点方块循环熟练度 <span class="mono">— → L4 → L3 → L2 → L1 → L0</span>，写回该题 meta.json，
-      和详情页那个下拉是同一个字段。没建文件夹的显示 <span class="mono">+</span>，点一下抓题面建目录。
-      <b>灰掉的组</b>低优先，时间不够先砍它们。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>题目</h2><p>点方块翻熟练度，点题名开详情，<span class="mono">+</span> = 还没建文件夹。</p></div>
       ${g}
+      ${gl ? `<details class="gr-lowbox"><summary>低优先 / 已砍的组 · 其他题单补充</summary>${gl}</details>` : ''}
     </section>`;
   renderToday();         // 异步: 要等 attempts.jsonl
+  renderDrill();         // 异步: 要等 /api/weak + /api/mock
   renderPace();          // 异步: 要等 edits.jsonl
 }
 
@@ -2520,9 +2595,10 @@ const AT_META = {
   redo: { label: '复习重做', cls: 'b-redo', tip: '以前做过 · 打卡时 L3 / L3.5 / L4' },
   new:  { label: '新题',     cls: 'b-new',  tip: '以前没碰过 · 第一次做' },
   warm: { label: '巩固',     cls: 'b-warm', tip: '以前做过 · 打卡时已 L0–L2 · 不占额度' },
+  attack: { label: '攻坚',   cls: 'b-attack', tip: '弱题的变体簇 · 打卡后在详情页点「攻坚」' },
 };
-const AT_LANES = ['redo', 'new'];         // 有额度的两半, 顺序 = 展示顺序
-const AT_ALL = ['redo', 'new', 'warm'];
+const AT_LANES = ['redo', 'new', 'attack'];   // 有额度的三份, 顺序 = 展示顺序
+const AT_ALL = ['redo', 'new', 'attack', 'warm'];
 const TD_STRIP_DAYS = 14;                 // 日课条下面那排小柱子往回看多久
 
 async function loadAttempts() {
@@ -2534,25 +2610,54 @@ async function loadAttempts() {
 
 const attemptToday = (id) => (ATTEMPTS || []).find((a) => a.id === id && a.date === todayStr());
 
+// 标了攻坚的那一笔只进攻坚那格, 不再同时算新题/重做 —— 一笔不能吃两份额度
 function attemptCounts(date) {
-  const c = { redo: 0, new: 0, warm: 0 };
-  for (const a of (ATTEMPTS || [])) if (a.date === date && c[a.kind] !== undefined) c[a.kind]++;
+  const c = { redo: 0, new: 0, warm: 0, attack: 0 };
+  for (const a of (ATTEMPTS || [])) {
+    if (a.date !== date) continue;
+    const k = a.attack ? 'attack' : a.kind;
+    if (c[k] !== undefined) c[k]++;
+  }
   return c;
+}
+
+// 一周从周一算。周课额度在 plan.json 的 phases[].weekly
+const weekStart = (d) => { const t = dParse(d); const k = (t.getDay() + 6) % 7; return dAdd(d, -k); };
+function weekCounts(date = todayStr()) {
+  const c = { redo: 0, new: 0, warm: 0, attack: 0 };
+  for (let d = weekStart(date); d <= date; d = dAdd(d, 1)) {
+    const x = attemptCounts(d);
+    for (const k in c) c[k] += x[k];
+  }
+  return c;
+}
+function weeklyQuota() {
+  if (!PLAN || !PLAN.phases || !PLAN.phases.length) return { redo: 0, new: 0, attack: 0 };
+  const w = datePhases().live.weekly || {};
+  return { redo: +w.redo || 0, new: +w.new || 0, attack: +w.attack || 0 };
 }
 
 // 额度手改 plan.json 的 phases[].daily, 跟着当前阶段走 —— 冻结期 new 是 0,
 // 那一段的 adds 本来就写着"一题新的都不加"。
+// 日均只给「每天做了几道」那张图画参考线用: 周额度按 5 个工作日摊。旧写法 daily 照样认。
 function dailyQuota() {
-  if (!PLAN || !PLAN.phases || !PLAN.phases.length) return { redo: 0, new: 0 };
-  const d = datePhases().live.daily || {};
-  return { redo: +d.redo || 0, new: +d.new || 0 };
+  if (!PLAN || !PLAN.phases || !PLAN.phases.length) return { redo: 0, new: 0, attack: 0 };
+  const live = datePhases().live;
+  if (live.weekly) {
+    const w = weeklyQuota(), r1 = (n) => Math.round((n / 5) * 10) / 10;
+    return { redo: r1(w.redo), new: r1(w.new), attack: r1(w.attack) };
+  }
+  const d = live.daily || {};
+  return { redo: +d.redo || 0, new: +d.new || 0, attack: 0 };
 }
 
 function todayHTML() {
   const today = todayStr();
-  const q = dailyQuota();
-  const c = attemptCounts(today);
+  const q = weeklyQuota();
+  const c = weekCounts(today);
   const recs = byId();
+  const wk0 = weekStart(today);
+  const wkLeft = 7 - Math.round((dParse(today) - dParse(wk0)) / 864e5);   // 含今天
 
   const lane = (k) => {
     const n = c[k], N = q[k];
@@ -2561,7 +2666,7 @@ function todayHTML() {
     return `<div class="td-lane${met ? ' met' : ''}">
       <div class="td-lane-h"><b>${esc(AT_META[k].label)}</b><span class="hint">${esc(AT_META[k].tip)}</span></div>
       <div class="td-lane-n"><b>${n}</b><small>/${N}</small><span class="td-gap${met ? ' met' : ''}">${
-        N === 0 ? '这阶段不排' : n >= N ? '已达标 ✓' : '还差 ' + (N - n) + ' 题'}</span></div>
+        N === 0 ? '这阶段不排' : n >= N ? '本周达标 ✓' : '本周还差 ' + (N - n) + ' 题'}</span></div>
       <div class="td-bar"><i class="${AT_META[k].cls}" style="width:${pct}%"></i></div></div>`;
   };
 
@@ -2579,7 +2684,7 @@ function todayHTML() {
   }).join('');
 
   const cols = [];
-  const win = { redo: 0, new: 0, warm: 0 };      // 图例只数这排柱子看得见的那几天
+  const win = { redo: 0, new: 0, warm: 0, attack: 0 };   // 图例只数这排柱子看得见的那几天
   for (let i = TD_STRIP_DAYS - 1; i >= 0; i--) {
     const d = dAdd(today, -i);
     const cc = attemptCounts(d);
@@ -2594,12 +2699,18 @@ function todayHTML() {
     });
   }
 
-  return `<div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>今天</h2>
-      <p>两半分开记，先问<b>以前碰过没有</b>再看档位：<b>复习重做</b> = 以前做过的题、
-      打卡时还在 L3 / L3.5 / L4；<b>新题</b> = 以前没碰过、第一次做。
-      <b>做成什么样不影响这两格</b> —— 重做完更差了照样算数，否则升档就成了唯一得分方式，
-      刷题会自动滑向「挑软柿子 + 把自己评高」。两半互相顶不了。
-      在题目详情页右上角按<b>「＋ 做了一遍」</b>打卡（一天一题只记一次，点第二下撤销）。</p></div>
+  // 最低日: 只要把今天的闪卡刷到上限(或刷空), 这一天就算没断
+  const cap = rvCap();
+  const done_ = reviewedToday('problems') + reviewedToday('syntax');
+  const left = Math.min(deckDue('problems'), rvCapLeft('problems')) + Math.min(deckDue('syntax'), rvCapLeft('syntax'));
+  const minMet = left === 0;            // 刷到上限, 或者今天本来就没有到期的
+  const minDay = `<div class="td-min${minMet ? ' met' : ''}">
+      <span class="td-min-k">最低日</span>
+      <b>${minMet ? '今天已达标 ✓' : `闪卡还剩 ${left} 张`}</b>
+      <span class="hint">今天评过 ${done_} 张 · 每个牌组上限 ${cap} 张/天 · ${esc(PLAN.min_day || '')}</span></div>`;
+  return `<div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>本周</h2>
+      <p>${esc(mmdd(wk0))} 周一起 · 还剩 ${wkLeft} 天 · 错过的不补。只看做没做；做成什么样在详情页打卡后补，喂弱题列表。</p></div>
+    ${minDay}
     <div class="td-lanes">${AT_LANES.map(lane).join('')}
       <div class="td-side">
         <div class="td-side-k">巩固</div>
@@ -2607,10 +2718,192 @@ function todayHTML() {
         <div class="td-side-d">以前做过、打卡时已 L0–L2，<br>记下来但不占额度</div></div></div>
     ${done.length ? `<div class="td-done"><span class="td-done-k">今天打过卡</span>
       <div class="gr-chips td-chips">${chips}</div></div>` : ''}
-    <div class="td-strip">
-      <div class="td-strip-k">最近 ${TD_STRIP_DAYS} 天</div>
-      ${chartHTML(cols, 54)}
-      ${slegend(AT_ALL.map((k) => [AT_META[k].cls, AT_META[k].label, win[k]]))}</div>`;
+`;
+}
+
+// ---- 攻坚 + mock ---------------------------------------------------------------
+// 覆盖(格子)之外的两个数: 弱题还剩几道没关、随机没见过的题能不能做对。
+// 弱题: server.weak_list 算(忘过 ≥2 次, 或最近一次打卡不是 clean), 关掉靠同簇另外两道 clean 或之后重做 clean。
+// mock: 抽题/记结果都在 server, 这里只画 + 计时。计时器只是显示, 不拦你。
+let WEAK = null;
+let MOCKS = null;
+let MOCK_TIMER = null;
+const lcUrl = (p) => (p.slug ? `https://leetcode.com/problems/${p.slug}/`
+  : `https://leetcode.com/problemset/?search=${p.id}`);
+
+function mockOpen(m) {                 // 还有题没记 AC 的那一轮, 且是这两天抽的
+  return m && m.date >= dAdd(todayStr(), -1)
+    && m.problems.some((p) => !(m.results || {})[p.id] || (m.results[p.id].ac === undefined));
+}
+
+function mockWeeks() {
+  const wk = new Map();
+  for (const m of (MOCKS || [])) {
+    const k = weekStart(m.date);
+    const w = wk.get(k) || wk.set(k, { rounds: 0, n: 0, ac: 0, pat: 0, patN: 0 }).get(k);
+    w.rounds++;
+    for (const p of m.problems) {
+      const r = (m.results || {})[p.id] || {};
+      if (r.ac !== undefined) { w.n++; if (r.ac) w.ac++; }
+      if (r.pattern !== undefined) { w.patN++; if (r.pattern) w.pat++; }
+    }
+  }
+  return [...wk.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 8);
+}
+
+function drillHTML() {
+  const recs = byId();
+  const chip = (id, title) => {
+    const rec = recs.get(id);
+    return `<button class="gr-chip" data-id="${id}" title="${esc(title)} — ${rec ? '点击打开题目' : '还没建文件夹 — 点击建'}">
+      <span class="gr-st s${depthOf(rec)}">${rec ? esc(famInfo(famOf(rec)).short) : '+'}</span>
+      <span class="gr-id">${id}</span><span class="gr-nm">${esc(title)}</span></button>`;
+  };
+  // 弱题
+  const W = WEAK || { open: [], closed: [] };
+  const wrow = (r) => `<div class="dr-w">
+      ${chip(r.id, r.title)}
+      <span class="dr-why">${esc(r.why)}</span>
+      ${r.pit ? `<span class="dr-pit"><b>坑</b>${esc(r.pit)}</span>` : '<span class="dr-pit none">还没写坑 —— 打开题目在「坑」里写一行</span>'}
+      ${r.cluster ? `<span class="dr-cl" title="同簇另外两道不同的题 clean 就关掉">${esc(r.cluster)} ${r.cluster_clean.length}/2</span>`
+        : '<span class="dr-cl none" title="挂了簇才能靠变体关掉">没挂簇</span>'}</div>`;
+  const weak = `<div class="dr-col">
+      <div class="pc-sub-h"><b>弱题 · 还开着 ${W.open.length} 道</b>
+        <span class="hint">已关 ${W.closed.length} 道 · 进度看这个数在不在缩短，不看 L 值</span></div>
+      ${W.open.length ? W.open.map(wrow).join('') : '<p class="empty-hint">没有开着的弱题 —— 攻坚额度这周还给新题。</p>'}
+      <p class="gr-note">关掉：同簇另外两道 clean，或之后重做 clean。同一题连 3 次不 clean 就换变体。</p></div>`;
+
+  // mock
+  const cur = (MOCKS || []).slice().reverse().find(mockOpen);
+  let mock;
+  if (cur) {
+    const res = cur.results || {};
+    const yn = (p, k, v, t) => {
+      const on = (res[p.id] || {})[k] === v;
+      return `<button class="dr-yn${on ? ' on ' + (v ? 'y' : 'n') : ''}" data-mock="${esc(cur.mid)}"
+        data-id="${p.id}" data-k="${k}" data-v="${v ? 1 : 0}">${t}</button>`;
+    };
+    mock = `<div class="dr-mock-cur">
+        <div class="dr-mock-h"><b>这一轮 · ${esc(cur.date.slice(5))}</b>
+          <span id="mock-timer" class="dr-timer" data-ts="${cur.ts}" data-min="${cur.minutes}"></span>
+          <button class="dr-drop" data-drop="${esc(cur.mid)}" title="抽错了/没开始做: 撤掉这一轮, 题放回池子">作废</button></div>
+        ${cur.problems.map((p) => `<div class="dr-mp">
+          <a href="${lcUrl(p)}" target="_blank" rel="noopener"><b>${p.id}</b> ${esc(p.title)}</a>
+          <span class="hint">${esc(p.src || '')}</span>
+          <span class="dr-yns">AC ${yn(p, 'ac', true, '✓')}${yn(p, 'ac', false, '✗')}
+            　范式 ${yn(p, 'pattern', true, '✓')}${yn(p, 'pattern', false, '✗')}</span></div>`).join('')}
+        <p class="gr-note">每题 ${cur.minutes} 分钟（计时器是这一轮的总时长），不看笔记、不看题解。先写下你判断的范式再开写。计时只是显示，到点自己停。</p></div>`;
+  } else {
+    mock = `<div class="dr-mock-cur"><button id="mock-draw" class="dr-draw">抽 ${esc(String((PLAN.mock || {}).count || 2))} 道没见过的题</button>
+      <p class="gr-note">${esc((PLAN.mock || {}).note || '')}</p></div>`;
+  }
+  const weeks = mockWeeks();
+  const pct = (a, b) => (b ? Math.round((100 * a) / b) + '%' : '—');
+  const hist = weeks.length ? `<table class="dr-hist"><thead><tr><th>周</th><th>轮</th><th>AC</th><th>范式对</th></tr></thead><tbody>${
+    weeks.map(([k, w]) => `<tr><td>${esc(mmdd(k))}</td><td>${w.rounds}</td>
+      <td>${w.ac}/${w.n} <small>${pct(w.ac, w.n)}</small></td><td>${w.pat}/${w.patN} <small>${pct(w.pat, w.patN)}</small></td></tr>`).join('')
+  }</tbody></table>` : '<p class="empty-hint">还没做过 mock。</p>';
+
+  return `<div class="gr-sec-h"><h2><span class="gr-sec-n">↯</span>攻坚 · Mock</h2>
+      <p>覆盖之外的两个数：弱题还开着几道 · 没见过的题能不能做对。mock 挂在哪类，下周补哪类。</p></div>
+    <div class="dr-grid">${weak}
+      <div class="dr-col"><div class="pc-sub-h"><b>Mock · 随机两题</b>
+        <span class="hint">每周 1 次 · 只记 AC 和范式判断</span></div>${mock}${hist}</div></div>`;
+}
+
+// ---- 专题(plan.topics): 按小节排的一组题, 不计进 NC150 进度、mock 不抽 ---------------
+// 题卡和坐标系同一套壳, 点 + 建文件夹 / 点题名开详情都走 #grid-view 那个委托监听。
+function topicsHTML() {
+  const T = PLAN.topics || [];
+  if (!T.length) return '';
+  const recs = byId();
+  const chip = (id, title, key) => {
+    const rec = recs.get(id);
+    return `<button class="gr-chip${key ? ' tp-key' : ''}" data-id="${id}" title="${key ? '本节代表题 · ' : ''}${esc(title)} — ${rec ? '点击打开题目' : '还没建文件夹 — 点击建'}">
+      <span class="gr-st s${depthOf(rec)}">${rec ? esc(famInfo(famOf(rec)).short) : '+'}</span>
+      <span class="gr-id">${id}</span><span class="gr-nm">${esc(title)}</span></button>`;
+  };
+  // 每节的代表题(sec.key)排第一个、加粗 —— 时间不够就只做这几道
+  const ordered = (x) => [...x.problems].sort((a, b) => (b[0] === x.key) - (a[0] === x.key));
+  const one = (t, i) => {
+    const ids = t.sections.flatMap((x) => x.problems.map((p) => p[0]));
+    const done = ids.filter((id) => depthOf(recs.get(id)) >= 2).length;
+    const keys = t.sections.map((x) => x.key).filter(Boolean);
+    const kdone = keys.filter((id) => depthOf(recs.get(id)) >= 2).length;
+    return `<details class="tp"${i === 0 ? ' open' : ''}><summary><b>${esc(t.name)}</b>
+        <span class="tp-c">${keys.length ? `代表题 ${kdone}/${keys.length} · ` : ''}全部 ${done}/${ids.length} 到 S2</span><span class="hint">${esc(t.note || '')}</span></summary>
+      ${t.sections.map((x) => `<div class="tp-sec">${x.name ? `<div class="tp-sec-h">${esc(x.name)}</div>` : ''}
+        <div class="gr-chips">${ordered(x).map(([id, tt]) => chip(id, tt, id === x.key)).join('')}</div></div>`).join('')}
+    </details>`;
+  };
+  return `<section class="gr-sec"><div class="gr-sec-h"><h2><span class="gr-sec-n">◆</span>专题</h2>
+      <p>针对具体公司 / 岗位的题组，写在 plan.json 的 topics。不计进 NeetCode 150 进度，mock 也不抽。</p></div>
+    ${T.map(one).join('')}</section>`;
+}
+
+function tickMock() {
+  const el = $('#mock-timer');
+  if (!el) { clearInterval(MOCK_TIMER); MOCK_TIMER = null; return; }
+  const total = (+el.dataset.min) * 60 * (MOCKS_CUR_N || 2);
+  const gone = Math.floor(Date.now() / 1000) - (+el.dataset.ts);
+  const left = total - gone;
+  const f = (x) => `${Math.floor(Math.abs(x) / 60)}:${String(Math.abs(x) % 60).padStart(2, '0')}`;
+  el.textContent = left >= 0 ? `剩 ${f(left)}` : `超时 ${f(left)}`;
+  el.classList.toggle('over', left < 0);
+}
+let MOCKS_CUR_N = 2;
+
+async function renderDrill() {
+  if (!$('#gr-drill')) return;
+  const jobs = [];
+  if (WEAK === null) jobs.push(api('/api/weak').then((r) => { WEAK = r; }).catch(() => { WEAK = { open: [], closed: [] }; }));
+  if (MOCKS === null) jobs.push(api('/api/mock').then((r) => { MOCKS = r.mocks || []; }).catch(() => { MOCKS = []; }));
+  await Promise.all(jobs);
+  const box = $('#gr-drill');
+  if (!box) return;
+  // 旧 server 没这两个接口 -> 返回 {error: "not found"}。别卡在"读取中", 直接说原因
+  if (!WEAK || !Array.isArray(WEAK.open) || !Array.isArray(MOCKS)) {
+    WEAK = null; MOCKS = null;
+    box.innerHTML = `<p class="empty-hint">攻坚 · Mock 读不到 —— server 还是旧代码。
+      Ctrl+C 停掉，重新 <span class="mono">python dashboard/server.py</span> 再刷新。</p>`;
+    return;
+  }
+  try {
+    box.innerHTML = drillHTML();
+  } catch (e) {
+    console.error('[drill]', e);
+    box.innerHTML = `<p class="empty-hint">攻坚 · Mock 画不出来: ${esc(String(e))}</p>`;
+    return;
+  }
+  const cur = (MOCKS || []).slice().reverse().find(mockOpen);
+  MOCKS_CUR_N = cur ? cur.problems.length : 2;
+  if (MOCK_TIMER) clearInterval(MOCK_TIMER);
+  MOCK_TIMER = cur ? setInterval(tickMock, 1000) : null;
+  if (cur) tickMock();
+  const post = (body) => api('/api/mock', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const draw = box.querySelector('#mock-draw');
+  if (draw) draw.addEventListener('click', async () => {
+    if (isReadOnly()) return;
+    draw.disabled = true;
+    const r = await post({ op: 'draw' });
+    if (!r || r.ok === false) { flash((r && r.error) || '抽不出来'); draw.disabled = false; return; }
+    MOCKS = null; renderDrill();
+  });
+  box.querySelectorAll('[data-mock]').forEach((b) => b.addEventListener('click', async () => {
+    if (isReadOnly()) return;
+    const body = { op: 'result', mid: b.dataset.mock, id: +b.dataset.id };
+    body[b.dataset.k] = b.dataset.v === '1';
+    const r = await post(body);
+    if (!r || r.ok === false) return void flash((r && r.error) || '记不上');
+    MOCKS = null; renderDrill();
+  }));
+  const drop = box.querySelector('[data-drop]');
+  if (drop) drop.addEventListener('click', async () => {
+    if (isReadOnly()) return;
+    await post({ op: 'drop', mid: drop.dataset.drop });
+    MOCKS = null; renderDrill();
+  });
 }
 
 async function renderToday() {
@@ -2876,6 +3169,20 @@ on('#e-difficulty', 'change', autoSaveMeta);
 on('#e-status', 'change', autoSaveMeta);
 on('#e-familiarity', 'change', autoSaveMeta);
 on('#e-paused', 'change', autoSaveMeta);
+on('#e-pit', 'change', autoSaveMeta);
+on('#e-cluster', 'change', autoSaveMeta);
+on('#d-result', 'click', (e) => {
+  const b = e.target.closest('.d-res');
+  if (!b || !CURRENT) return;
+  if (b.dataset.attack) {
+    const a = attemptToday(CURRENT.id);
+    return void setResult({ attack: !(a && a.attack) });
+  }
+  setResult({ result: b.dataset.res });
+});
+on('#d-res-pit', 'keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); setResult({ pit: e.target.value }); }
+});
 
 // chip editor: remove on ✕, add on Enter/comma, delete-last on Backspace
 document.addEventListener('click', (e) => {

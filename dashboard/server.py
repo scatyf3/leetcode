@@ -45,6 +45,7 @@ PORT = 8765
 REVIEW_LOG = HERE / "reviews.jsonl"   # 每次评分追加一行, git 追踪, 留给以后跑 FSRS 优化器
 EDIT_LOG = HERE / "edits.jsonl"       # 每次改标签/难度/状态追加一行, git 追踪, 留给以后画"标签什么时候长出来的"
 ATTEMPT_LOG = HERE / "attempts.jsonl"  # 每次「做了一遍」打卡追加一行, git 追踪, 日课/配速的复习那半边靠它
+MOCK_LOG = HERE / "mock.jsonl"         # 随机抽题模拟面试, 一轮一行(抽题时追加, 记结果时整份重写), git 追踪
 SESSION_FILE = HERE / "session.json"  # 当前这轮复习的队列快照, **易失状态**, 不进 git
 _REVIEW_LOCK = threading.Lock()       # ThreadingHTTPServer + meta.json 读改写 + 日志追加, 必须串行
 VENDOR_FILES = ("/vendor/vue.global.prod.js", "/vendor/marked.min.js")
@@ -126,12 +127,13 @@ SCHEMA = """CREATE TABLE problems(
     difficulty TEXT, status TEXT,
     familiarity REAL, complexity TEXT,   -- REAL: 阶梯有半档(L1.5)
     due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT,
-    paused TEXT                          -- 暂停复习的起始日期, "" = 没暂停
+    paused TEXT,                         -- 暂停复习的起始日期, "" = 没暂停
+    cluster TEXT                         -- 变体簇名, "" = 没挂
 )"""
 
 COLUMNS = ("id", "title", "folder", "structures", "paradigms", "techniques",
            "difficulty", "status", "familiarity", "complexity",
-           "due", "stability", "reps", "last_review", "fsrs_state", "paused")
+           "due", "stability", "reps", "last_review", "fsrs_state", "paused", "cluster")
 
 
 def init_db():
@@ -166,6 +168,7 @@ def sync():
                 f.get("last_review", ""),
                 f.get("state", ""),
                 m.get("paused") or "",
+                m.get("cluster") or "",
             )
         )
     cols = ",".join(COLUMNS)
@@ -225,6 +228,8 @@ def get_detail(pid: int):
     d["answer"] = af.read_text(encoding="utf-8", errors="replace") if af.exists() else ""
     # 选择题: 正确的一句话思路 + 3 个"这道题上似是而非"的干扰项(手写在 meta.json 里)
     d["quiz"] = m.get("quiz") or {}
+    d["pit"] = m.get("pit") or ""
+    d["cluster"] = m.get("cluster") or ""
     card = m.get("fsrs") or fsrs.new_card()
     d["fsrs"] = card
     d["fsrs_preview"] = fsrs.preview(card, today_str())   # {"1":1,"2":1,"3":2,"4":8} 天
@@ -508,6 +513,47 @@ def log_attempt(pid: int, undo: bool = False) -> dict:
     return {"ok": True, "logged": True, "kind": row["kind"], "fam": fam}
 
 
+ATTEMPT_RESULTS = ("clean", "bug", "wrong-idea")
+
+
+def set_attempt_result(pid: int, result, attack=None, pit=None) -> dict:
+    """给今天这道题的那一笔打卡补上**做成什么样**。
+
+    打卡本身(做没做)和结果分开记: 额度只看做没做, 结果只喂弱题列表。
+    result: clean 一次过 / bug 小 bug / wrong-idea 思路错; attack: 这一笔算攻坚额度;
+    pit: 这次踩到的坑(自由文本, 一句话)。没打过卡就先打一笔再补。
+    """
+    if result is not None and result not in ATTEMPT_RESULTS:
+        return {"ok": False, "error": "result 只能是 " + " / ".join(ATTEMPT_RESULTS)}
+    today = today_str()
+    if not any(a.get("id") == pid and a.get("date") == today for a in read_attempts()):
+        r = log_attempt(pid)
+        if not r.get("ok"):
+            return r
+    with _REVIEW_LOCK:
+        rows = read_attempts()
+        hit = None
+        for a in rows:
+            if a.get("id") == pid and a.get("date") == today:
+                hit = a
+                if result is not None:
+                    a["result"] = result
+                if attack is not None:
+                    if attack:
+                        a["attack"] = True
+                    else:
+                        a.pop("attack", None)
+                if pit is not None:
+                    if str(pit).strip():
+                        a["pit"] = str(pit).strip()
+                    else:
+                        a.pop("pit", None)
+        tmp = ATTEMPT_LOG.with_suffix(".jsonl.tmp")
+        tmp.write_text("".join(json.dumps(a, ensure_ascii=False) + "\n" for a in rows), encoding="utf-8")
+        os.replace(tmp, ATTEMPT_LOG)
+    return {"ok": True, "attempt": hit}
+
+
 def set_paused(meta: dict, on: bool, today: str):
     """暂停 / 恢复复习。meta["paused"] 存的是**开始暂停的那天**, 不是布尔。
 
@@ -548,6 +594,15 @@ def save_meta(pid: int, payload: dict):
         for k in ("structures", "paradigms", "techniques", "difficulty", "status", "complexity", "quiz"):
             if k in payload:
                 meta[k] = payload[k]
+        # 坑 = 这题真栽过的实现细节(一两行), 揭晓答案时和思路一起翻出来;
+        # cluster = 这题属于哪个坑的变体簇(如 sorted-dedup), 攻坚时按簇关坑。空串 = 删掉
+        for k in ("pit", "cluster"):
+            if k in payload:
+                v = str(payload[k] or "").strip()
+                if v:
+                    meta[k] = v
+                else:
+                    meta.pop(k, None)
         if "paused" in payload:
             set_paused(meta, bool(payload["paused"]), today_str())
         if "familiarity" in payload:
@@ -804,6 +859,163 @@ def read_lists() -> dict:
         return {"lists": {}, "premium": []}
 
 
+# ------------------------------------------------------------ 弱题 / 攻坚 ----
+def weak_list() -> dict:
+    """弱题 = 复习忘过 ≥ 2 次, 或最近一次打卡不是 clean。
+
+    关掉的两种方式(都不靠重做原题刷出来):
+      1. 这题之后又被做了一遍且 clean(通常是 FSRS 过段时间自己排回来的那次);
+      2. 它挂了 cluster, 且从它变弱那天起, 同一 cluster 里**另外两道不同的题**打卡 clean。
+    进度不看 L 值, 看这张表的长度。
+    """
+    atts = read_attempts()
+    by_id = {}
+    for a in atts:
+        by_id.setdefault(a.get("id"), []).append(a)
+    metas = {pid: (title, read_meta(folder)) for pid, title, folder in scan_folders()}
+    clean_by_cluster = {}
+    for pid, (_, m) in metas.items():
+        c = m.get("cluster")
+        if not c:
+            continue
+        for a in by_id.get(pid, []):
+            if a.get("result") == "clean":
+                clean_by_cluster.setdefault(c, []).append((a.get("date", ""), pid))
+    last_again = {}                          # 每题最后一次复习评「忘了」(1) 的日期
+    for r in read_reviews():
+        if r.get("rating") == 1 and not r.get("deck") in ("syntax",):
+            last_again[r.get("id")] = max(last_again.get(r.get("id"), ""), r.get("date", ""))
+    open_, closed = [], []
+    for pid, (title, m) in metas.items():
+        lapses = int((m.get("fsrs") or {}).get("lapses") or 0)
+        rated = sorted((a for a in by_id.get(pid, []) if a.get("result")),
+                       key=lambda a: (a.get("date", ""), a.get("ts", 0)))
+        bad = [a for a in rated if a.get("result") != "clean"]
+        if not (lapses >= 2 or bad):
+            continue
+        # 变弱的那天: 最近一次非 clean 打卡 / 最近一次复习评 1, 取晚的
+        since = max(bad[-1]["date"] if bad else "", last_again.get(pid, ""))
+        last = rated[-1] if rated else None
+        why = []
+        if lapses >= 2:
+            why.append(f"复习忘过 {lapses} 次")
+        if bad:
+            why.append(f"{bad[-1]['date'][5:]} {bad[-1]['result']}")
+        c = m.get("cluster")
+        sibs = sorted({q for d, q in clean_by_cluster.get(c, []) if q != pid and d >= since}) if c else []
+        row = {"id": pid, "title": title, "lapses": lapses, "since": since,
+               "last_result": last.get("result") if last else None,
+               "last_date": last.get("date") if last else None,
+               "pit": m.get("pit") or "", "cluster": c or "",
+               "cluster_clean": sibs, "why": " · ".join(why)}
+        redone = bool(last and last.get("result") == "clean" and last.get("date", "") >= since
+                      and (not bad or last is not bad[-1]))
+        (closed if redone or len(sibs) >= 2 else open_).append(row)
+    key = lambda r: (-r["lapses"], r["id"])
+    return {"open": sorted(open_, key=key), "closed": sorted(closed, key=key)}
+
+
+# ------------------------------------------------------------ mock 抽题 ----
+def read_mocks() -> list:
+    return read_jsonl(MOCK_LOG)
+
+
+def _write_mocks(rows: list):
+    tmp = MOCK_LOG.with_suffix(".jsonl.tmp")
+    tmp.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows), encoding="utf-8")
+    os.replace(tmp, MOCK_LOG)
+
+
+def mock_pool() -> list:
+    """没见过的题: NeetCode 150 里没做过的 medium + 其他题单里没做过的 medium(砍掉的组除外)。
+
+    排除: 会员题、plan.topics 里的专题题(自己排, 不给 mock 抽)、以前 mock 抽到过的。
+    """
+    plan = read_plan()
+    lists = read_lists()
+    # 建了文件夹但 status 还是 todo、也从没打过卡的题, 其实还没见过 —— 照样可以抽
+    touched = {a.get("id") for a in read_attempts()}
+    have = {pid for pid, _, folder in scan_folders()
+            if pid in touched or read_meta(folder).get("status", "solved") != "todo"}
+    prem = set(lists.get("premium") or [])
+    # 专题(plan.topics)里的题自己排, 不给 mock 抽
+    infra = {x[0] for t in plan.get("topics", []) for sec in t.get("sections", []) for x in sec.get("problems", [])}
+    drawn = {p.get("id") for r in read_mocks() for p in r.get("problems", [])}
+    skip = have | prem | infra | drawn
+    low = {g["name"] for g in plan.get("groups", []) if g.get("low")}
+    pool = {}
+    for g in plan.get("groups", []):
+        if g.get("low"):                      # 砍掉的组不抽 —— mock 要测的是计划里的东西
+            continue
+        for p in g.get("problems", []):
+            if p[0] not in skip and (len(p) < 3 or p[2] == "medium"):
+                pool[p[0]] = {"id": p[0], "title": p[1], "src": "NeetCode 150 · " + g["name"]}
+    maps = {d["name"]: d.get("map") or {} for d in (plan.get("extras") or {}).get("lists", [])}
+    for name, d in (lists.get("lists") or {}).items():
+        for cat, items in (d.get("categories") or {}).items():
+            if maps.get(name, {}).get(cat) in low:
+                continue
+            for it in items:
+                if it[0] not in skip and it[0] not in pool:
+                    pool[it[0]] = {"id": it[0], "title": it[1], "src": name + " · " + cat}
+    return list(pool.values())
+
+
+def draw_mock() -> dict:
+    import random
+    plan = read_plan()
+    cfg = plan.get("mock") or {}
+    k = int(cfg.get("count") or 2)
+    pool = mock_pool()
+    try:                                        # 题号 -> slug/难度, 有缓存就不联网
+        idx = {x["id"]: x for x in scaffold.load_index()}
+    except Exception:
+        idx = {}
+    # 其他题单的题没标难度 —— 有清单时只留 medium, 和 NeetCode 那半边同一个难度带
+    if idx:
+        pool = [p for p in pool if str((idx.get(p["id"]) or {}).get("difficulty", "")).lower() == "medium"]
+    if len(pool) < k:
+        return {"ok": False, "error": "没见过的题不够抽了"}
+    pick = random.sample(pool, k)
+    for p in pick:
+        x = idx.get(p["id"]) or {}
+        p["slug"] = x.get("slug") or ""
+        p["difficulty"] = x.get("difficulty") or ""
+    row = {"mid": time.strftime("%Y%m%d-%H%M%S"), "ts": int(time.time()), "date": today_str(),
+           "minutes": int(cfg.get("minutes") or 25), "problems": pick, "results": {}}
+    with _REVIEW_LOCK:
+        with MOCK_LOG.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+    return {"ok": True, "mock": row, "pool": len(pool)}
+
+
+def mock_result(mid: str, pid: int, ac, pattern) -> dict:
+    """记一道: ac = 限时内 AC 了没; pattern = 范式判断对了没。两个都能单独改。"""
+    with _REVIEW_LOCK:
+        rows = read_mocks()
+        hit = next((r for r in rows if r.get("mid") == mid), None)
+        if not hit or not any(p.get("id") == pid for p in hit.get("problems", [])):
+            return {"ok": False, "error": "没这轮 / 这轮没这题"}
+        res = hit.setdefault("results", {}).setdefault(str(pid), {})
+        if ac is not None:
+            res["ac"] = bool(ac)
+        if pattern is not None:
+            res["pattern"] = bool(pattern)
+        _write_mocks(rows)
+    return {"ok": True, "mock": hit}
+
+
+def mock_drop(mid: str) -> dict:
+    """撤掉一轮(抽错了/没开始做)。抽到过的题跟着放回题池。"""
+    with _REVIEW_LOCK:
+        rows = read_mocks()
+        keep = [r for r in rows if r.get("mid") != mid]
+        if len(keep) == len(rows):
+            return {"ok": False, "error": "没这轮"}
+        _write_mocks(keep)
+    return {"ok": True}
+
+
 # ------------------------------------------------------------------- http ----
 class Handler(BaseHTTPRequestHandler):
     def _send(self, code, body, ctype="application/json"):
@@ -861,6 +1073,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"edits": read_edits()})
         if path == "/api/attempts":
             return self._send(200, {"attempts": read_attempts()})
+        if path == "/api/weak":
+            return self._send(200, weak_list())
+        if path == "/api/mock":
+            return self._send(200, {"mocks": read_mocks()})
         if path == "/api/notes":
             return self._send(200, list_notes())
         m = re.match(r"^/api/notes/(.+)$", path)
@@ -888,7 +1104,25 @@ class Handler(BaseHTTPRequestHandler):
                 pid = int(body.get("id"))
             except (TypeError, ValueError):
                 return self._send(400, {"ok": False, "error": "缺 id"})
+            if body.get("op") == "result":
+                return self._send(200, set_attempt_result(pid, body.get("result"),
+                                                          body.get("attack"), body.get("pit")))
             return self._send(200, log_attempt(pid, body.get("op") == "undo"))
+        if path == "/api/mock":
+            body = self._body_json()
+            op = body.get("op")
+            if op == "draw":
+                return self._send(200, draw_mock())
+            if op == "drop":
+                return self._send(200, mock_drop(str(body.get("mid") or "")))
+            if op == "result":
+                try:
+                    pid = int(body.get("id"))
+                except (TypeError, ValueError):
+                    return self._send(400, {"ok": False, "error": "缺 id"})
+                return self._send(200, mock_result(str(body.get("mid") or ""), pid,
+                                                   body.get("ac"), body.get("pattern")))
+            return self._send(400, {"ok": False, "error": "op 只能是 draw / result / drop"})
         if path == "/api/scratch":
             return self._send(200, append_scratch(self._body_json().get("text", "")))
         if path == "/api/review/session":
