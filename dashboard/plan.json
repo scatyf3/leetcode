@@ -80,6 +80,12 @@
     { "name": "Roblox OA · 实现模拟", "short": "RBX",
       "note": "CodeSignal 风格：40–80 行一次写对，隐藏测试卡边界。每题写完先过三件事再提交：最大输入、窗口/边界开闭、样例没覆盖的隐含假设。会员题(💰)做不了就跳过。时间不够只做每节加粗那道。",
       "sections": [
+        { "name": "矩阵旋转 · 坐标映射", "key": 1914,
+          "note": "映射背熟，别现场推：顺时针 (i,j)→(j,n-1-i)，逆时针 (i,j)→(n-1-j,i)，转置 (i,j)→(j,i)。主对角线 i==j，反对角线 i+j==n-1。带条件跳过格子的变体：照常算目标位置，跳过不动的格子。",
+          "problems": [[48, "Rotate Image"], [1886, "Determine Whether Matrix Can Be Obtained By Rotation"], [2319, "Check if Matrix Is X-Matrix"], [867, "Transpose Matrix"], [1914, "Cyclically Rotating a Grid"]] },
+        { "name": "后缀 / 前缀 Trie · 配对计数", "key": 3045,
+          "note": "后缀问题 = 串反转后建 Trie。数「一个是另一个的前/后缀」的 pair：插之前沿路累加途经节点（不含终点）的结尾数 + 终点的经过数（已含相等），O(总长度)，替代两两比较的 O(n²·L)。",
+          "problems": [[208, "Implement Trie (Prefix Tree)"], [3042, "Count Prefix and Suffix Pairs I"], [3045, "Count Prefix and Suffix Pairs II"], [820, "Short Encoding of Words"], [2416, "Sum of Prefix Scores of Strings"], [3093, "Longest Common Suffix Queries"], [1032, "Stream of Characters"]] },
         { "name": "网格 / 状态模拟", "key": 289, "problems": [[289, "Game of Life"], [1861, "Rotating the Box"], [529, "Minesweeper"], [1706, "Where Will the Ball Fall"], [794, "Valid Tic-Tac-Toe State"], [723, "Candy Crush 💰"]] },
         { "name": "时间窗口计数", "key": 933, "problems": [[933, "Number of Recent Calls"], [1604, "Alert Using Same Key-Card Three or More Times"], [1797, "Design Authentication Manager"], [362, "Design Hit Counter 💰"], [359, "Logger Rate Limiter 💰"]] },
         { "name": "更新中维护聚合 · 懒删除堆", "key": 2034, "problems": [[2034, "Stock Price Fluctuation"], [2353, "Design a Food Rating System"], [1845, "Seat Reservation Manager"], [480, "Sliding Window Median"]] },

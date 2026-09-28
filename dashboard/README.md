@@ -394,7 +394,7 @@ python dashboard/backfill_edits.py --write  # 真写
 - **Mock**（`/api/mock`，`mock.jsonl`）：从没做过的 medium 里随机抽 `plan.mock.count` 道
   （NeetCode 150 未做 + 其他题单未做，砍掉的组、会员题、`plan.topics` 里的专题题、抽过的都不抽）。
   只记 AC 和范式判断对没对，按周汇总。抽错了点「作废」，题放回池子。
-- **专题**：`plan.topics`（如 Roblox OA · 实现模拟、Infra 实操），按小节列题，不计进度、mock 不抽，自己排。加新专题直接往这个数组里写。
+- **专题**：`plan.topics`（如 Roblox OA · 实现模拟、Infra 实操），按小节列题，不计进度、mock 不抽，自己排。加新专题直接往这个数组里写。小节可带 `note`（显示在小节标题下），写这一类题的要点。
 - **里程碑**：`plan.milestones`，hero 下面一排。每两周对一次表，落后就砍下一段的尾巴。
 
 ### 配速（计划 vs 实际）

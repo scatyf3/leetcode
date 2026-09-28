@@ -2833,6 +2833,7 @@ function topicsHTML() {
     return `<details class="tp"${i === 0 ? ' open' : ''}><summary><b>${esc(t.name)}</b>
         <span class="tp-c">${keys.length ? `代表题 ${kdone}/${keys.length} · ` : ''}全部 ${done}/${ids.length} 到 S2</span><span class="hint">${esc(t.note || '')}</span></summary>
       ${t.sections.map((x) => `<div class="tp-sec">${x.name ? `<div class="tp-sec-h">${esc(x.name)}</div>` : ''}
+        ${x.note ? `<p class="tp-sec-note">${esc(x.note)}</p>` : ''}
         <div class="gr-chips">${ordered(x).map(([id, tt]) => chip(id, tt, id === x.key)).join('')}</div></div>`).join('')}
     </details>`;
   };

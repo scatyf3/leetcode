@@ -1022,5 +1022,6 @@ main{padding:18px 20px;overflow:auto}
 .tp-c{font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--accent)}
 .tp-sec{margin-top:12px}
 .tp-sec-h{font-size:12px;color:var(--dim);margin-bottom:6px}
+.tp-sec-note{font-size:12.5px;line-height:1.6;color:var(--fg);margin:0 0 8px;white-space:pre-line}
 .gr-chip.tp-key{border:1.5px solid var(--accent)}
 .gr-chip.tp-key .gr-nm,.gr-chip.tp-key .gr-id{font-weight:700;color:var(--fg)}
