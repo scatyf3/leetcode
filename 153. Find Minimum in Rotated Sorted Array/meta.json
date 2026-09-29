@@ -6,9 +6,8 @@
     "binary-search"
   ],
   "techniques": [
-    "和 nums[r] 比而不是 nums[l]",
-    "r = mid 不能 mid-1",
-    "已升序早退"
+    "判据 nums[i] > nums[-1] 划出 T…T F…F",
+    "闭区间找第一个 F，返回 nums[l]"
   ],
   "difficulty": "medium",
   "status": "solved",
@@ -18,21 +17,34 @@
     "space": "O(1)"
   },
   "quiz": {
-    "idea": "二分，拿 mid 和 nums[r] 比",
+    "q": "要二分，先把数组划成 T…T F…F。判据是？",
+    "idea": "nums[i] > nums[-1]：大段为 T，小段为 F",
     "wrong": [
-      "拿 nums[mid] 和 nums[l] 比",
-      "线性扫描找下降点",
-      "两段里各求一次最小"
+      "nums[i] > nums[0]：大段为 T，小段为 F",
+      "nums[i] > nums[i+1]：下降点为 T，其余为 F",
+      "nums[i] < nums[i-1]：谷底为 T，其余为 F"
+    ],
+    "then": [
+      {
+        "q": "闭区间 [l, r] 找第一个 F，怎么收、返回啥？",
+        "idea": "mid 是 T 则 l = mid+1，否则 r = mid-1，返回 nums[l]",
+        "wrong": [
+          "mid 是 T 则 l = mid+1，否则 r = mid-1，返回 nums[r]",
+          "mid 是 T 则 r = mid-1，否则 l = mid+1，返回 nums[l]",
+          "mid 是 T 则 l = mid+1，否则 r = mid-1，返回 nums[mid]"
+        ]
+      }
     ]
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-15",
-    "last_review": "2026-09-06",
-    "stability": 9.256336055423047,
-    "difficulty": 4.73459100485191,
-    "reps": 6,
-    "lapses": 0,
-    "last_rating": 2
-  }
+    "due": "2026-10-01",
+    "last_review": "2026-09-29",
+    "stability": 1.5485299764078937,
+    "difficulty": 8.241498082432292,
+    "reps": 8,
+    "lapses": 1,
+    "last_rating": 3
+  },
+  "paused": "2026-09-29"
 }

@@ -30,6 +30,17 @@
           <div id="todo-list" class="todo-list"></div>
         </div>
       </div>
+      <div class="todo-wrap pause-wrap">
+        <button id="open-paused" class="ghost" title="暂停复习中的题: 恢复 / 再加">⏸ 暂停<span id="paused-n" class="todo-n hidden"></span></button>
+        <div id="paused-pop" class="todo-pop hidden">
+          <div class="todo-head">
+            <span class="mono">暂停复习中</span>
+            <span id="paused-msg" class="msg"></span>
+          </div>
+          <input id="paused-in" placeholder="题号,Enter 暂停这道" spellcheck="false">
+          <div id="paused-list" class="todo-list"></div>
+        </div>
+      </div>
       <button id="open-review" class="ghost">🧠 复习<span id="review-n" class="todo-n hidden"></span></button>
       <button id="open-stats" class="ghost" title="复习进度: 到期预测 / 记忆强度 / 历史">📈 进度</button>
       <button id="open-lists" class="ghost">📊 题单</button>
@@ -227,7 +238,8 @@
               <template v-if="cbox">
                 <textarea id="rv-cmt-box" ref="cbox" v-model="cdraft" spellcheck="false"
                           placeholder="这张卡哪儿不对… 例: 干扰项 B 其实也能 AC / 答案卡漏了触发条件"></textarea>
-                <div class="rv-q-hint"><b>Ctrl+Enter</b> 存 · <b>Esc</b> 收起(草稿留着)。存完不用管 —— 攒够了跟 agent 说「处理卡片批注」。</div>
+                <div class="rv-q-hint"><button class="ghost" :disabled="!cdraft.trim()" @click="sendComment">存</button>
+                  或 <b>Ctrl+Enter</b> · <b>Esc</b> 收起(草稿留着)。存完不用管 —— 攒够了跟 agent 说「处理卡片批注」。</div>
               </template>
             </div>
 

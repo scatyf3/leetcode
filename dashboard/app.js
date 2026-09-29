@@ -405,6 +405,7 @@ async function reloadKeepOpen() {
   PROBLEMS = await api('/api/problems');
   buildPanel();
   if (VIEW === 'grid') buildGrid();   // 从坐标系点进来的, 格子和 #count/#sub 都要还回去
+  renderPaused();                     // 详情页勾 / 取消「暂停复习」, ⏸ 上的角标跟着变
 }
 
 // ---- note: render-by-default, double-click to edit source ----
@@ -933,6 +934,7 @@ function updateReviewBadge() {
   $('#review-n').classList.toggle('hidden', !total);
   const btn = $('#open-review');
   if (btn) btn.title = `题目 ${n.problems} 道 · 语法 ${n.syntax} 张`;
+  renderPaused();                      // 复习面板里按 ⏸ 暂停也走这儿
   return n;
 }
 
@@ -2088,9 +2090,76 @@ function closeTodoPop() { $('#todo-pop').classList.add('hidden'); }
 async function toggleTodoPop() {
   const pop = $('#todo-pop');
   if (!pop.classList.contains('hidden')) return closeTodoPop();
+  closePausedPop();
   await loadTodo();                   // 每次打开都重读, 拿到我在别处的改动
   pop.classList.remove('hidden');
   $('#todo-in').focus();
+}
+
+// ---- ⏸ 暂停: 暂停中的题一览, 就地恢复 / 按题号再加 ----------------------------
+// 真相还是各题 meta.json 的 paused(见 server.set_paused), 这里只是个集中入口 ——
+// 以前要恢复得一道道点进详情取消勾选, 暂停的一多就忘了哪些还停着。
+let PAUSED_MSG_T = null;
+function flashPaused(msg, ms = 2500) {
+  clearTimeout(PAUSED_MSG_T);
+  $('#paused-msg').textContent = msg;
+  PAUSED_MSG_T = setTimeout(() => ($('#paused-msg').textContent = ''), ms);
+}
+
+const daysSince = (d) => Math.round((new Date(todayStr()) - new Date(d)) / 864e5);
+
+function renderPaused() {
+  const rows = PROBLEMS.filter((p) => p.paused)
+    .sort((a, b) => a.paused.localeCompare(b.paused) || a.id - b.id);   // 停得最久的在上
+  $('#paused-n').textContent = rows.length;
+  $('#paused-n').classList.toggle('hidden', !rows.length);
+  $('#paused-list').innerHTML = rows.length
+    ? rows.map((p) => {
+        const n = daysSince(p.paused);
+        return `<div class="todo-item">
+          <span class="dot ${p.difficulty || 'none'}" title="${p.difficulty || 'none'}"></span>
+          <span class="todo-text openable" data-open="${p.id}" title="打开 #${p.id}">${p.id} ${esc(p.title)}</span>
+          <span class="paused-since" title="自 ${esc(p.paused)} 起暂停">${n > 0 ? `${n} 天` : '今天'}</span>
+          <button class="paused-resume" data-id="${p.id}" title="恢复复习: due 一起往后推 ${n} 天">恢复</button>
+        </div>`;
+      }).join('')
+    : '<div class="todo-empty">没有暂停中的题。</div>';
+
+  $('#paused-list').querySelectorAll('.paused-resume').forEach((el) =>
+    el.addEventListener('click', () => setPaused(+el.dataset.id, false)));
+  $('#paused-list').querySelectorAll('.todo-text.openable').forEach((el) =>
+    el.addEventListener('click', () => { closePausedPop(); openDetail(+el.dataset.open); }));
+}
+
+async function setPaused(id, on) {
+  let ok = false;
+  try { ok = (await putMeta(id, { paused: on })).ok; } catch { ok = false; }
+  if (!ok) return flashPaused('没存上(服务没起?)');
+  PROBLEMS = await api('/api/problems');           // 恢复会改 due, 得重拉
+  buildPanel();
+  updateReviewBadge();                             // 里面顺带 renderPaused
+  flashPaused(on ? `#${id} 已暂停` : `#${id} 已恢复 ✓`);
+}
+
+function addPaused() {
+  const raw = $('#paused-in').value.trim().replace(/^#/, '');
+  if (!raw) return;
+  const p = PROBLEMS.find((x) => x.id === +raw);
+  if (!p) return flashPaused(`看板里没有 #${raw}`);
+  if (p.paused) return flashPaused(`#${p.id} 已经在暂停了`);
+  $('#paused-in').value = '';
+  setPaused(p.id, true);
+}
+
+function closePausedPop() { $('#paused-pop').classList.add('hidden'); }
+
+function togglePausedPop() {
+  const pop = $('#paused-pop');
+  if (!pop.classList.contains('hidden')) return closePausedPop();
+  closeTodoPop();
+  renderPaused();
+  pop.classList.remove('hidden');
+  $('#paused-in').focus();
 }
 
 function esc(s) {
@@ -2103,7 +2172,6 @@ function esc(s) {
 // a cell counts problems at that stage *or deeper*, so S3 also feeds S1 and S2.
 let PLAN = null;   // dashboard/plan.json — the curriculum, hand-edited
 const tierName = (t) => (PLAN.tiers.find((x) => x.t === t) || {}).name || `第 ${t} 层`;
-const stageName = (sv) => (PLAN.stages.find((x) => x.s === sv) || {}).t || `S${sv}`;
 let VIEW = 'board';
 
 // 深度不另存: 由每题 meta.json 的 familiarity 算出来。一个字段, 一条阶梯:
@@ -2161,6 +2229,35 @@ function goalOf(all, x) {
   return { N, n, label, pct: N ? Math.min(100, Math.round((n / N) * 100)) : 0 };
 }
 
+// 「现在对的是哪个里程碑」: 日期还没过、也还没达标的第一个; 全过了就最后一个
+function curMilestone() {
+  const MS = PLAN.milestones || [];
+  const all = planProblems(), t = todayStr();
+  return MS.find((x) => x.date >= t && goalOf(all, x).n < goalOf(all, x).N)
+    || MS.find((x) => x.date >= t) || MS[MS.length - 1] || null;
+}
+
+// 口径相同(同层 · 同组 · 同深度)的里程碑串成一条链 —— 进度图画的是一整条链的折线计划,
+// 例如第一层 → S2 的 10/11 56 题、10/25 72 题。链的起点 = 第一个点所在阶段的开始日。
+const msKey = (x) => `${x.tier}|${x.stage}|${(x.groups || []).join('+')}`;
+function msChains() {
+  const by = new Map();
+  for (const x of [...(PLAN.milestones || [])].sort((a, b) => a.date.localeCompare(b.date))) {
+    const k = msKey(x);
+    (by.get(k) || by.set(k, []).get(k)).push(x);
+  }
+  return [...by.entries()].map(([k, pts]) => {
+    const d0 = pts[0].date;
+    const ph = PLAN.phases.find((p) => p.from < d0 && (!p.to || d0 <= p.to));
+    return { k, pts, from: ph ? ph.from : dAdd(d0, -14) };
+  });
+}
+
+// 坐标系里几个折叠区的展开状态(题目 / 其他), 存本地
+function gridFolds() {
+  try { return new Set(JSON.parse(localStorage.getItem('lc-grid-folds') || '[]')); } catch (e) { return new Set(); }
+}
+
 // ---- 账本: 四档互斥的覆盖 / 掌握分解 --------------------------------------
 // 「格子」那张表是**累计**的(S2 那列含 S3), 回答"推到哪了"。这张是**互斥**四档,
 // 回答另一个问题: 手上还欠着多少。
@@ -2205,7 +2302,7 @@ function ledgerSection(all) {
   const body = PLAN.tiers.map((tr) =>
     line(tierName(tr.t), all.filter((p) => p.tier === tr.t))).join('');
   return `<section class="gr-sec">
-    <div class="gr-sec-h"><h2><span class="gr-sec-n">3</span>账本</h2>
+    <div class="gr-sec-h"><h2><span class="gr-sec-n">≡</span>账本</h2>
       <p>上面那张格子是<b>累计</b>的，一道题同时计进好几列；这张四档<b>互斥</b>，横着加起来就是题数。
       它多出来的那列是<b>欠账</b> —— 摸过但没到 L2 的题。格子把 L3 算进 S1，所以矩阵上看着有进度的题，
       离「写得对」其实还差一档，欠账就是那批。数字涨 = 在囤题，掉 = 在消化；不设阈值，开不开新题自己判断。
@@ -2274,56 +2371,49 @@ function buildGrid() {
   $('#count').textContent =
     `S2 ${all.filter((p) => p.depth >= 2).length}/${all.length} · 阶段 ${live.n}`;
 
-  // --- 概览条: 首屏第一眼只需要回答两件事 —— 我在哪个阶段, 这阶段要把哪几格推到底。
-  // 下面的矩阵/时间线/题目都是它的展开, 所以这里只放数字和差额, 不重复解释。
-  const goals = PLAN.targets.filter((x) => x.phase === live.n).map((x) => {
-    const { N, n, pct, label } = goalOf(all, x);
-    return `<div class="gr-hg">
-      <div class="gr-hg-t">${esc(label)}<span
-        class="gr-hg-ar">→</span>${esc(stageName(x.stage))}</div>
-      <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
-      <div class="gr-hg-n"><b>${n}</b><small>/${N}</small><span class="gr-hg-gap${n >= N ? ' met' : ''}">${
-        n >= N ? '已达标 ✓' : '还差 ' + (N - n) + ' 题'}</span></div></div>`;
-  }).join('');
-  // 底下这排是**跨层**的总计 —— 上面的矩阵只按层拆, 全局这三个数在那儿看不到。
-  const stat = (label, n, cls) => {
-    const pct = Math.round((n / all.length) * 100);
-    return `<div class="gr-st4">
-      <div class="gr-st4-t">${esc(label)}</div>
-      <div class="gr-st4-n"><b>${n}</b><small>/${all.length}</small></div>
-      <div class="gr-st4-bar"><i class="${cls}" style="width:${pct}%"></i></div></div>`;
-  };
-  const stats = PLAN.stages.map((st) => stat(`S${st.s} 及以上`, all.filter((x) => x.depth >= st.s).length, `s${st.s}`)).join('');
+  // --- 里程碑: 原来的概览条 + 时间线 + 里程碑三块并成一条轴。
+  // 阶段是底色色段, 里程碑是轴上的点, 今天是一根竖线; 下面一排卡片是每个点的 n/N。
+  // 阶段目标格(PLAN.targets)不再单列 —— 它们和最后一个里程碑说的是同一个数。
   const dl = daysLeft(live);
-  // 里程碑: 两周一次的对表点。过了日期没到数的标红 —— 规则是砍下一段的尾巴, 不压缩这一段
   const todayS = todayStr();
-  const ms = (PLAN.milestones || []).map((x) => {
+  const MS = PLAN.milestones || [];
+  const cur = curMilestone();
+  const ms = MS.map((x) => {
     const { N, n, pct, label } = goalOf(all, x);
     const days = Math.round((parseDay(x.date) - today) / 864e5);
     const st = n >= N ? 'met' : x.date < todayS ? 'missed' : 'open';
-    return `<div class="gr-ms ${st}">
+    return `<div class="gr-ms ${st}${x === cur ? ' cur' : ''}">
       <div class="gr-ms-d">${esc(mmdd(x.date))}<small>${
         st === 'met' ? '✓' : days >= 0 ? `还有 ${days} 天` : `过了 ${-days} 天`}</small></div>
       <div class="gr-ms-b"><div class="gr-ms-t">${esc(x.focus || label)}</div>
         <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
         <div class="gr-ms-n"><b>${n}</b>/${N} · ${esc(label)} → S${x.stage}${x.mock ? ' · ' + esc(x.mock) : ''}</div></div></div>`;
   }).join('');
-  const hero = `<section class="gr-hero">
-    <div class="gr-hero-l">
-      <div class="gr-hero-k">现在</div>
-      <h2 class="gr-hero-ph"><span class="gr-hero-n">阶段 ${live.n}</span>${esc(live.name)}</h2>
-      <div class="gr-hero-when">${spanOf(live)}　·　${esc(live.hrs)}${
-        dl !== null ? `<b class="gr-hero-left">剩 ${dl} 天</b>` : ''}</div>
-      <div class="gr-hero-goal">${esc(live.adds)}</div>
-      <div class="gr-hero-serves">${esc(live.serves)}</div>
-    </div>
-    <div class="gr-hero-r">
-      <div class="gr-hero-k">这阶段要推到底的格子</div>
-      <div class="gr-hero-goals">${goals || '<span class="gr-hg-gap">这阶段没设目标格</span>'}</div>
-      <div class="gr-hero-cov">${stats}</div>
-    </div>
-    ${ms ? `<div class="gr-hero-ms"><div class="gr-hero-k">里程碑 · 每两周对一次表，落后就砍下一段的尾巴</div>
-      <div class="gr-ms-row">${ms}</div></div>` : ''}
+  // 轴的两端: 第一段开始 → 最后一个有日期的点(阶段结束日 / 里程碑)再多 10 天, 给没有结束日的那段留个尾巴
+  const ends = PLAN.phases.map((p) => p.to).concat(MS.map((x) => x.date)).filter(Boolean).sort();
+  const ax0 = parseDay(PLAN.phases[0].from);
+  const ax1 = parseDay(dAdd(ends[ends.length - 1] || PLAN.phases[0].from, 10));
+  const pos = (d) => Math.min(100, Math.max(0, ((d - ax0) / (ax1 - ax0)) * 100)).toFixed(2);
+  const segs = PLAN.phases.map((ph) => {
+    const a = pos(parseDay(ph.from)), b = ph.to ? pos(parseDay(ph.to)) : 100;
+    return `<div class="ms-ph ${ph.state}" style="left:${a}%;width:${(b - a).toFixed(2)}%"
+        title="阶段 ${ph.n} · ${esc(ph.name)} · ${spanOf(ph)}\n${esc(ph.goal)}\n${esc(ph.adds)}">
+      <span>${ph.n} · ${esc(ph.name)}</span></div>`;
+  }).join('');
+  const ticks = MS.map((x) => {
+    const { N, n } = goalOf(all, x);
+    const st = n >= N ? 'met' : x.date < todayS ? 'missed' : 'open';
+    return `<div class="ms-tick ${st}${x === cur ? ' cur' : ''}" style="left:${pos(parseDay(x.date))}%"
+        title="${esc(x.date)} · ${esc(x.focus || '')} · ${n}/${N}"><i></i><span>${esc(mmdd(x.date))}</span></div>`;
+  }).join('');
+  const msSec = `<section class="gr-sec">
+    <div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>里程碑</h2>
+      <p><b>阶段 ${live.n} · ${esc(live.name)}</b>　${spanOf(live)} · ${esc(live.hrs)}${
+        dl !== null ? ` · <b class="ms-left">剩 ${dl} 天</b>` : ''}　${esc(live.adds)}</p></div>
+    <div class="ms-axis">${segs}${ticks}
+      <div class="ms-today" style="left:${pos(today)}%"><span>今天</span></div></div>
+    ${ms ? `<div class="gr-ms-row">${ms}</div>` : ''}
+    <p class="gr-note">每两周对一次表，过了日期没到数的标红 —— 落后就砍下一段的尾巴，不压缩这一段。</p>
   </section>`;
 
   // --- the grid itself: tiers down, stages across ---
@@ -2366,22 +2456,6 @@ function buildGrid() {
     }
   }
   m += '</div>';
-
-  // --- timeline: the four phases are a real sequence, so they're numbered ---
-  let t = '<div class="gr-tl">';
-  for (const ph of PLAN.phases) {
-    const range = spanOf(ph);
-    const left = daysLeft(ph);
-    t += `<div class="gr-ph ${ph.state}">
-      <div class="gr-ph-n"><span>阶段 ${ph.n}</span>${
-        ph.state === 'active' ? `<span class="gr-live">进行中${left !== null ? ' · 剩 ' + left + ' 天' : ''}</span>` : ''}</div>
-      <h3>${esc(ph.name)}</h3>
-      <div class="gr-ph-when">${range}　·　${esc(ph.hrs)}</div>
-      <div class="gr-goal">${esc(ph.goal)}</div>
-      <div class="gr-adds">${esc(ph.adds)}</div>
-      <div class="gr-serves">${esc(ph.serves)}</div></div>`;
-  }
-  t += '</div>';
 
   // --- the problems, by pattern group; click a chip to cycle its stage ---
   const recs = byId();
@@ -2460,14 +2534,26 @@ function buildGrid() {
         <span class="gr-sub">题单分类对不上上面任何一组的题 · 归组规则在 plan.json 的 extras</span></div>
       <div class="gr-xboxes">${xBoxes(OTHER_GROUP)}</div></div>`;
 
+  // 首屏只有两块: 里程碑 + 进度。其余(题目 / 攻坚 · Mock / 专题 / 格子 / 账本)折起来,
+  // 展开状态记在 localStorage, 下次还是那样。
+  const fold = (k, label, body) => `<details class="gr-more" data-fold="${k}"${
+    gridFolds().has(k) ? ' open' : ''}><summary>${label}</summary>${body}</details>`;
   $('#grid-view').innerHTML = `
-    ${hero}
-    <section class="gr-sec gr-sec-today" id="gr-today"><p class="empty-hint">读取打卡记录…</p></section>
+    ${msSec}
+    <section class="gr-sec">
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>进度</h2>
+        <p>上面是<b>覆盖</b>：选中那条里程碑的计划线 vs 实际（只有升档才动）；下面是<b>本周额度</b>：只看做没做，不看做没做好。两个一起看才对得上。</p></div>
+      <div id="gr-pace"><p class="empty-hint">读取历史…</p></div>
+      <div id="gr-today" class="tk-week"><p class="empty-hint">读取打卡记录…</p></div>
+    </section>
+    ${fold('problems', `题目 · 按 pattern 分组（点方块翻熟练度，点题名开详情，<span class="mono">+</span> = 还没建文件夹）`, `
+      ${g}
+      ${gl ? `<details class="gr-lowbox"><summary>低优先 / 已砍的组 · 其他题单补充</summary>${gl}</details>` : ''}`)}
+    ${fold('more', '其他：攻坚 · Mock · 专题 · 格子 · 账本', `
     <section class="gr-sec" id="gr-drill"><p class="empty-hint">读取弱题 / mock…</p></section>
     ${topicsHTML()}
-    <details class="gr-more"><summary>更多：格子 · 账本 · 配速 · 时间线</summary>
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进见过、S1、S2 四列。首列「见过」只数文件夹，不看熟练度。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
+      <div class="gr-sec-h"><h2><span class="gr-sec-n">▦</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进见过、S1、S2 四列。首列「见过」只数文件夹，不看熟练度。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
       ${m}
       <div class="gr-legend">
         <span class="gr-key"><i class="sseen"></i>建了文件夹 · 见过</span>
@@ -2479,18 +2565,13 @@ function buildGrid() {
       <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
       否则会攒下一整个月「做得出但讲不清」的题。</p>
     </section>
-    ${ledgerSection(all)}
-    <section class="gr-sec" id="gr-pace"><p class="empty-hint">读取历史…</p></section>
-    <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">5</span>时间线</h2><p>四段是真序列：每段的目标格建立在前一段已达标的基础上。</p></div>
-      ${t}
-    </section>
-    </details>
-    <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>题目</h2><p>点方块翻熟练度，点题名开详情，<span class="mono">+</span> = 还没建文件夹。</p></div>
-      ${g}
-      ${gl ? `<details class="gr-lowbox"><summary>低优先 / 已砍的组 · 其他题单补充</summary>${gl}</details>` : ''}
-    </section>`;
+    ${ledgerSection(all)}`)}`;
+  $('#grid-view').querySelectorAll('details[data-fold]').forEach((el) =>
+    el.addEventListener('toggle', () => {
+      const s = gridFolds();
+      el.open ? s.add(el.dataset.fold) : s.delete(el.dataset.fold);
+      try { localStorage.setItem('lc-grid-folds', JSON.stringify([...s])); } catch (e) { /* private mode */ }
+    }));
   renderToday();         // 异步: 要等 attempts.jsonl
   renderDrill();         // 异步: 要等 /api/weak + /api/mock
   renderPace();          // 异步: 要等 edits.jsonl
@@ -2637,20 +2718,6 @@ function weeklyQuota() {
   return { redo: +w.redo || 0, new: +w.new || 0, attack: +w.attack || 0 };
 }
 
-// 额度手改 plan.json 的 phases[].daily, 跟着当前阶段走 —— 冻结期 new 是 0,
-// 那一段的 adds 本来就写着"一题新的都不加"。
-// 日均只给「每天做了几道」那张图画参考线用: 周额度按 5 个工作日摊。旧写法 daily 照样认。
-function dailyQuota() {
-  if (!PLAN || !PLAN.phases || !PLAN.phases.length) return { redo: 0, new: 0, attack: 0 };
-  const live = datePhases().live;
-  if (live.weekly) {
-    const w = weeklyQuota(), r1 = (n) => Math.round((n / 5) * 10) / 10;
-    return { redo: r1(w.redo), new: r1(w.new), attack: r1(w.attack) };
-  }
-  const d = live.daily || {};
-  return { redo: +d.redo || 0, new: +d.new || 0, attack: 0 };
-}
-
 function todayHTML() {
   const today = todayStr();
   const q = weeklyQuota();
@@ -2708,8 +2775,8 @@ function todayHTML() {
       <span class="td-min-k">最低日</span>
       <b>${minMet ? '今天已达标 ✓' : `闪卡还剩 ${left} 张`}</b>
       <span class="hint">今天评过 ${done_} 张 · 每个牌组上限 ${cap} 张/天 · ${esc(PLAN.min_day || '')}</span></div>`;
-  return `<div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>本周</h2>
-      <p>${esc(mmdd(wk0))} 周一起 · 还剩 ${wkLeft} 天 · 错过的不补。只看做没做；做成什么样在详情页打卡后补，喂弱题列表。</p></div>
+  return `<div class="pc-sub-h"><b>本周额度</b>
+      <span class="hint">${esc(mmdd(wk0))} 周一起 · 还剩 ${wkLeft} 天 · 错过的不补 · 做成什么样在详情页打卡后补，喂弱题列表</span></div>
     ${minDay}
     <div class="td-lanes">${AT_LANES.map(lane).join('')}
       <div class="td-side">
@@ -2914,180 +2981,142 @@ async function renderToday() {
   if (box) box.innerHTML = todayHTML();
 }
 
-// 每天的两半, 和上面那条覆盖曲线并排看 —— 那条只有升档才动, 这条只要动手就动。
-function redoHTML() {
-  const today = todayStr();
-  const q = dailyQuota();
-  const { live } = datePhases();
-  const from = (live && live.from && live.from > dAdd(today, -60)) ? live.from : dAdd(today, -29);
-  const days = [];
-  for (let d = from; d <= today; d = dAdd(d, 1)) days.push(d);
-  if (!days.length) return '';
-
-  const counts = days.map(attemptCounts);
-  const sum = (k) => counts.reduce((s, c) => s + c[k], 0);
-  const metDays = counts.filter((c, i) => days[i] <= today && q.redo && c.redo >= q.redo).length;
-  const cols = days.map((d, i) => {
-    const cc = counts[i];
-    const hit = AT_ALL.filter((k) => cc[k]);
-    return {
-      label: d === today ? '今天' : (i % 5 === 0 ? mmdd(d) : ''),
-      on: d === today,
-      tip: `${d}${d === today ? ' (今天)' : ''} · ` + (hit.length
-        ? hit.map((k) => `${AT_META[k].label} ${cc[k]}`).join(' · ') : '没打卡'),
-      parts: AT_ALL.map((k) => ({ cls: AT_META[k].cls, n: cc[k] })),
-    };
-  });
-  const avg = (k) => (days.length ? sum(k) / days.length : 0);
-  return `<div class="pc-sub-h"><b>每天做了几道（不看效果）</b>
-      <span class="hint">${esc(days[0])} 起 · 每列一天 · 目标 复习重做 ${q.redo} · 新题 ${q.new} 题/天
-        · 复习达标 ${metDays}/${days.length} 天</span></div>
-    <div class="pc-tiles">
-      ${['redo', 'new'].map((k) => `<div class="pc-t">
-        <b>${pcFmt(avg(k))}</b><span>${esc(AT_META[k].label)} 日均</span>
-        <em>目标 ${q[k]} · 期内共 ${sum(k)} 次</em></div>`).join('')}
-      <div class="pc-t"><b>${sum('warm')}</b><span>巩固（不占额度）</span>
-        <em>以前做过 · 打卡时已 L0–L2</em></div>
-    </div>
-    ${chartHTML(cols, 84)}
-    ${slegend(AT_ALL.map((k) => [AT_META[k].cls, AT_META[k].label, sum(k)]))}
-    <p class="gr-note">这两块回答的不是同一个问题：上面那条是<b>覆盖爬到哪</b>（只有升档才动，
-    所以它天生只认结果）；下面这条是<b>今天有没有真的坐下来做</b>（只要打卡就动，不认结果）。
-    只看上面会奖励挑软柿子，只看下面会奖励瞎忙 —— 两条一起看才对得上。</p>`;
-}
-
-// ---- 配速: 把这一格剩下的题均摊到阶段的每一天, 看实际爬得比计划快还是慢 ------
+// ---- 进度: 选中那条里程碑链, 计划折线 vs 实际 --------------------------------
 // 数据和「掌握度时间轴」同一条路: edits.jsonl 逐日回放, 不落第二份统计。
 //
-// **计划线从阶段开始那天的实际值起步, 不是从 0 起步。** 阶段一开始时第一层已经有一批
-// 题到了 S1(9/1 那次批量评级), 从 0 画会显示"领先十几题", 其实一天都没多做。
-// 均摊的是**剩下的**: (总数 − 起点) / 阶段天数。
-let PACE_SEL = null;                 // "tier:stage"; null = 还没选过, 取第一项
-
-function paceOptions() {
-  const { live } = datePhases();
-  const out = [];
-  for (const t of PLAN.targets.filter((x) => x.phase === live.n))
-    for (let s = 1; s <= t.stage; s++) out.push({ tier: t.tier, stage: s, phase: live });
-  return out;
-}
+// **计划线从链起点那天的实际值起步, 不是从 0 起步**, 再折到每个里程碑的 (日期, 目标数)。
+// 从 0 画会显示"领先十几题", 其实一天都没多做。均摊的是每一段**剩下的**。
+let PACE_SEL = null;                 // msKey; null = 跟着当前里程碑走
 
 const pcFmt = (n) => n.toFixed(1).replace(/\.0$/, '');
 
 function paceHTML() {
-  const head = (body) => `<div class="gr-sec-h"><h2><span class="gr-sec-n">4</span>配速</h2>
-    <p>两张图：上面是<b>覆盖配速</b>——把目标格<b>剩下</b>的题均摊到阶段的每一天，和实际爬到的高度比
-    （计划线起点是<b>阶段开始那天的实际值</b>，不是 0，否则开局就凭空"领先"一大截）；
-    下面是<b>每天的做题量</b>，复习重做和新题分开，只看做没做、不看做没做好。</p></div>${body}
-    <div class="pc-split">${redoHTML()}</div>`;
-  if (!PLAN || PLAN.error) return head('');
-  const opts = paceOptions();
-  const kOf = (o) => `${o.tier}:${o.stage}`;
-  const sel = opts.find((o) => kOf(o) === PACE_SEL) || opts[0];
-  if (!sel) return head('<p class="empty-hint">当前阶段没有设目标格，没有可对的计划。</p>');
-  PACE_SEL = kOf(sel);
-  const ph = sel.phase;
-  const tabs = `<div class="groupby pc-tabs">${opts.map((o) =>
-    `<button class="gb-btn${kOf(o) === PACE_SEL ? ' on' : ''}" data-pace="${kOf(o)}"
-       >${esc(tierName(o.tier))} S${o.stage}</button>`).join('')}</div>`;
-  if (!ph.to) return head(`${tabs}<p class="empty-hint">阶段 ${ph.n} 没有结束日，均摊无从谈起。</p>`);
+  if (!PLAN || PLAN.error) return '';
+  const chains = msChains();
+  if (!chains.length) return '<p class="empty-hint">plan.json 里没有 milestones，没有可对的计划。</p>';
+  const cm = curMilestone();
+  const sel = chains.find((c) => c.k === PACE_SEL) || chains.find((c) => cm && c.k === msKey(cm)) || chains[0];
+  const all = planProblems();
+  const x0 = sel.pts[0];
+  const label = goalOf(all, x0).label;
+  const tabs = chains.length > 1 ? `<div class="groupby pc-tabs">${chains.map((c) =>
+    `<button class="gb-btn${c.k === sel.k ? ' on' : ''}" data-pace="${esc(c.k)}"
+       >${esc(goalOf(all, c.pts[0]).label)} → S${c.pts[0].stage}</button>`).join('')}</div>` : '';
 
-  const ids = new Set();
-  for (const g of PLAN.groups) if (g.tier === sel.tier) for (const p of g.problems) ids.add(p[0]);
+  const rows = all.filter((p) => p.tier === x0.tier && (!x0.groups || x0.groups.includes(p.grp)));
+  const ids = new Set(rows.map((p) => p.id));
+  const stage = x0.stage;
+  const nowN = goalOf(all, x0).n;                        // 今天的真实值, 直接来自 /api/problems
   const tl = buildTimeline({ ids, keyOf: depthKey });
   if (!tl) {
-    return head(`${tabs}<p class="empty-hint">dashboard/edits.jsonl 还没有可用的历史，画不出实际线。<br>
-      <span class="hint">跑 <code>python dashboard/backfill_edits.py --write</code> 从 git 里把历史补回来。</span></p>`);
+    return `${tabs}<p class="empty-hint">dashboard/edits.jsonl 还没有可用的历史，画不出实际线。<br>
+      <span class="hint">跑 <code>python dashboard/backfill_edits.py --write</code> 从 git 里把历史补回来。</span></p>`;
   }
-
-  // 达到 sel.stage 及以上 = 深度桶 sel.stage..3 之和(和格子里那个"及以上"同一个口径)
-  const reached = (c) => [1, 2, 3].reduce((n, s) => n + (s >= sel.stage ? (c[String(s)] || 0) : 0), 0);
+  // 达到 stage 及以上 = 深度桶 stage..3 之和(和格子里那个"及以上"同一个口径)
+  const reached = (c) => [1, 2, 3].reduce((n, s) => n + (s >= stage ? (c[String(s)] || 0) : 0), 0);
   const hist = new Map(tl.days.map((d) => [d.date, reached(d.c)]));
-  const firstDay = tl.days[0].date, lastDay = tl.days[tl.days.length - 1].date;
-  const at = (date) => (hist.has(date) ? hist.get(date)
-    : date < firstDay ? reached(tl.days[0].c) : reached(tl.days[tl.days.length - 1].c));
+  const firstDay = tl.days[0].date;
+  const at = (date) => (hist.has(date) ? hist.get(date) : date < firstDay ? reached(tl.days[0].c) : nowN);
 
-  const ix = (date) => Math.round((dParse(date) - dParse(ph.from)) / 864e5);
-  const span = ix(ph.to);
-  if (span <= 0) return head(`${tabs}<p class="empty-hint">阶段 ${ph.n} 的起止日期不合法。</p>`);
-  const cur = Math.min(Math.max(ix(todayStr()), 0), span);
-  const total = ids.size;
-  const base = at(ph.from);
-  const per = (total - base) / span;                   // 计划每天几题
-  const planAt = (i) => base + per * i;
+  const today = todayStr();
+  const from = sel.from, end = sel.pts[sel.pts.length - 1].date;
+  const ix = (d) => Math.round((dParse(d) - dParse(from)) / 864e5);
+  const span = ix(end);
+  if (span <= 0) return `${tabs}<p class="empty-hint">里程碑日期早于起点 ${esc(from)}，检查 plan.json。</p>`;
+  const cur = ix(today);                                 // < 0 = 还没起跑, > span = 链已经走完
+  const started = cur >= 0;
+  const base = started ? at(from) : nowN;
+  const plan = [[0, base], ...sel.pts.map((x) => [ix(x.date), goalOf(all, x).N])];
+  const segOf = (i) => {                                 // i 落在哪一段: [a, va, b, vb]
+    for (let k = 1; k < plan.length; k++) if (i <= plan[k][0]) return [...plan[k - 1], ...plan[k]];
+    return [...plan[plan.length - 1], ...plan[plan.length - 1]];
+  };
+  const planAt = (i) => {
+    if (i <= 0) return base;
+    const [a, va, b, vb] = segOf(i);
+    return b === a ? vb : va + ((vb - va) * (i - a)) / (b - a);
+  };
+  const slopeAt = (i) => { const [a, va, b, vb] = segOf(Math.max(i, 1)); return b === a ? 0 : (vb - va) / (b - a); };
+
+  const ci = Math.min(Math.max(cur, 0), span);
   const act = [];
-  for (let i = 0; i <= cur; i++) act.push(at(dAdd(ph.from, i)));
-  const now = act[cur];
-  const delta = now - planAt(cur);
-  const leftDays = Math.max(1, span - cur);
-  const needPer = Math.max(0, (total - now) / leftDays);
-  const aheadDays = per > 0 ? delta / per : 0;
+  if (started) for (let i = 0; i <= ci; i++) act.push(i === cur ? nowN : at(dAdd(from, i)));
+  const nx = sel.pts.find((x) => x.date >= today) || sel.pts[sel.pts.length - 1];
+  const nxN = goalOf(all, nx).N;
+  const nxLeft = Math.max(1, ix(nx.date) - ci);
+  const need = Math.max(0, (nxN - nowN) / nxLeft);
+  const delta = nowN - planAt(ci);
+  const per = slopeAt(ci);
   const ahead = delta >= 0;
 
-  // --- SVG: 计划线(虚) vs 实际线(实), 今天那一列画出两者的差 ---
-  const W = 760, H = 190, L = 42, R = 14, T = 12, B = 26;
+  // --- SVG: 计划折线(虚) vs 实际(实), 里程碑是折线上的点, 今天那一列画出两者的差 ---
+  // y 轴不从 0 起: 链上的题大半早就到了, 从 0 画的话整条线挤在顶上一条缝里
+  const total = Math.max(rows.length, ...plan.map((p) => p[1]));
+  const lo = Math.max(0, Math.floor((Math.min(base, ...act) - 4) / 5) * 5);
+  const W = 760, H = 200, L = 42, R = 16, T = 22, B = 26;
   const x = (i) => L + (W - L - R) * (i / span);
-  const y = (v) => T + (H - T - B) * (1 - v / (total || 1));
+  const y = (v) => T + (H - T - B) * (1 - (v - lo) / ((total - lo) || 1));
   const n2 = (v) => v.toFixed(1);
   const grid = [0, .25, .5, .75, 1].map((f) => {
-    const v = total * f, yy = y(v);
+    const v = lo + (total - lo) * f, yy = y(v);
     return `<line class="pc-grid" x1="${n2(L)}" y1="${n2(yy)}" x2="${n2(W - R)}" y2="${n2(yy)}"/>`
       + `<text class="pc-ylbl" x="${n2(L - 7)}" y="${n2(yy + 3.5)}">${Math.round(v)}</text>`;
   }).join('');
-  const step = Math.max(1, Math.ceil(span / 7));
-  const marks = [];
-  for (let i = 0; i < span - step / 2; i += step) marks.push(i);
-  marks.push(span);
-  const xlbl = marks.map((i, k) => `<text class="pc-xlbl" x="${n2(x(i))}" y="${H - 8}"
-    text-anchor="${i === 0 ? 'start' : i === span ? 'end' : 'middle'}"
-    >${esc(mmdd(dAdd(ph.from, i)))}${i === span ? ' 截止' : ''}</text>`).join('');
+  const xlbl = [0, ...sel.pts.map((p) => ix(p.date))].map((i) => `<text class="pc-xlbl" x="${n2(x(i))}" y="${H - 8}"
+    text-anchor="${i === 0 ? 'start' : i === span ? 'end' : 'middle'}">${esc(mmdd(dAdd(from, i)))}</text>`).join('');
+  const msDots = sel.pts.map((p) => {
+    const i = ix(p.date), g = goalOf(all, p);
+    const st = g.n >= g.N ? 'met' : p.date < today ? 'missed' : 'open';
+    return `<circle class="pc-ms ${st}" cx="${n2(x(i))}" cy="${n2(y(g.N))}" r="4.5"/>
+      <text class="pc-mslbl" x="${n2(x(i) - (i === span ? 6 : 0))}" y="${n2(y(g.N) - 9)}"
+        text-anchor="${i === span ? 'end' : 'middle'}">${g.N}</text>`;
+  }).join('');
   const pts = act.map((v, i) => `${n2(x(i))},${n2(y(v))}`).join(' ');
-  const svg = `<svg class="pc-svg" viewBox="0 0 ${W} ${H}" role="img"
-      aria-label="计划 vs 实际配速">
+  const svg = `<svg class="pc-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="里程碑计划 vs 实际">
     ${grid}
-    <line class="pc-base" x1="${n2(L)}" y1="${n2(y(base))}" x2="${n2(W - R)}" y2="${n2(y(base))}"/>
-    <text class="pc-blbl" x="${n2(W - R - 5)}" y="${n2(y(base) - 5)}" text-anchor="end">起点 ${base}</text>
-    <polygon class="pc-fill" points="${n2(x(0))},${n2(y(0))} ${pts} ${n2(x(cur))},${n2(y(0))}"/>
-    <line class="pc-plan" x1="${n2(x(0))}" y1="${n2(y(base))}" x2="${n2(x(span))}" y2="${n2(y(total))}"/>
-    <polyline class="pc-act" points="${pts}"/>
-    <line class="pc-today" x1="${n2(x(cur))}" y1="${T}" x2="${n2(x(cur))}" y2="${H - B}"/>
-    <line class="pc-gap ${ahead ? 'ahead' : 'behind'}" x1="${n2(x(cur))}" y1="${n2(y(planAt(cur)))}"
-          x2="${n2(x(cur))}" y2="${n2(y(now))}"/>
-    <circle class="pc-goal" cx="${n2(x(span))}" cy="${n2(y(total))}" r="3.5"/>
-    <circle class="pc-dot ${ahead ? 'ahead' : 'behind'}" cx="${n2(x(cur))}" cy="${n2(y(now))}" r="4"/>
+    ${started ? `<polygon class="pc-fill" points="${n2(x(0))},${n2(y(lo))} ${pts} ${n2(x(ci))},${n2(y(lo))}"/>` : ''}
+    <polyline class="pc-plan" fill="none" points="${plan.map(([i, v]) => `${n2(x(i))},${n2(y(v))}`).join(' ')}"/>
+    ${started ? `<polyline class="pc-act" points="${pts}"/>` : ''}
+    ${started && cur <= span ? `<line class="pc-today" x1="${n2(x(ci))}" y1="${T}" x2="${n2(x(ci))}" y2="${H - B}"/>
+      <line class="pc-gap ${ahead ? 'ahead' : 'behind'}" x1="${n2(x(ci))}" y1="${n2(y(planAt(ci)))}"
+            x2="${n2(x(ci))}" y2="${n2(y(nowN))}"/>
+      <circle class="pc-dot ${ahead ? 'ahead' : 'behind'}" cx="${n2(x(ci))}" cy="${n2(y(nowN))}" r="4"/>` : ''}
+    ${msDots}
     ${xlbl}
   </svg>`;
 
-  const tile = (v, label, sub, cls) => `<div class="pc-t${cls ? ' ' + cls : ''}">
-    <b>${esc(v)}</b><span>${esc(label)}</span><em>${esc(sub)}</em></div>`;
+  const tile = (v, lab, sub, cls) => `<div class="pc-t${cls ? ' ' + cls : ''}">
+    <b>${esc(v)}</b><span>${esc(lab)}</span><em>${esc(sub)}</em></div>`;
+  const gap = Math.max(0, nxN - nowN);
   const tiles = `<div class="pc-tiles">
-    ${tile(`${now}/${total}`, `实际已到 S${sel.stage}`, `阶段开始时 ${base} 题`)}
-    ${tile(pcFmt(planAt(cur)), '今天应达', `计划 ${pcFmt(per)} 题/天`)}
-    ${tile(`${ahead ? '+' : '−'}${pcFmt(Math.abs(delta))}`, ahead ? '超前' : '落后',
-           `约 ${pcFmt(Math.abs(aheadDays))} 天`, ahead ? 'ahead' : 'behind')}
-    ${tile(pcFmt(needPer), '剩下要的节奏 题/天', `还剩 ${leftDays} 天 · 还差 ${total - now} 题`)}
+    ${tile(`${nowN}/${nxN}`, `已到 S${stage} · 对 ${mmdd(nx.date)}`, started ? `起点 ${base}（${mmdd(from)}）` : `${mmdd(from)} 起跑`)}
+    ${started
+      ? tile(pcFmt(planAt(ci)), '今天应达', `这一段计划 ${pcFmt(per)} 题/天`)
+      : tile(`${-cur} 天`, '还没起跑', `这条链从 ${mmdd(from)} 开始`)}
+    ${started
+      ? tile(`${ahead ? '+' : '−'}${pcFmt(Math.abs(delta))}`, ahead ? '超前' : '落后',
+          per > 0 ? `约 ${pcFmt(Math.abs(delta / per))} 天` : '—', ahead ? 'ahead' : 'behind')
+      : tile(`${gap}`, '还差', `到 ${mmdd(nx.date)} 的目标 ${nxN}`)}
+    ${tile(pcFmt(need), `到 ${mmdd(nx.date)} 要的节奏 题/天`, `还剩 ${nxLeft} 天 · 还差 ${gap} 题`)}
   </div>`;
 
-  return head(`<div class="pc-sub-h"><b>覆盖配速（爬到 S${sel.stage} 的题数）</b>
-      <span class="hint">只有熟练度升档才会动 —— 重做没升上去在这张图上看不见，那是下面那张的事</span></div>
-    <div class="pc-head">${tabs}
-      <span class="hint">阶段 ${ph.n}「${esc(ph.name)}」${esc(ph.from.slice(5))} – ${esc(ph.to.slice(5))}
-        · 共 ${span} 天 · 历史自 ${esc(firstDay)}${lastDay < todayStr() ? '(日志最后一天 ' + esc(lastDay) + ')' : ''}</span></div>
+  return `<div class="pc-head">${tabs}
+      <span class="hint">${esc(label)} → S${stage} · ${esc(mmdd(from))} – ${esc(mmdd(end))} · 历史自 ${esc(firstDay)} · 只有熟练度升档才会动</span></div>
     ${tiles}${svg}
     <div class="pc-legend">
-      <span class="pc-key"><i class="k-plan"></i>计划（剩下的均摊到每天）</span>
+      <span class="pc-key"><i class="k-plan"></i>计划（起点 → 每个里程碑，折线均摊）</span>
       <span class="pc-key"><i class="k-act"></i>实际（edits.jsonl 逐日回放）</span>
+      <span class="pc-key"><i class="k-ms"></i>里程碑</span>
       <span class="pc-key"><i class="k-gap ${ahead ? 'ahead' : 'behind'}"></i>今天的差额</span>
-    </div>`);
+    </div>`;
 }
 
-// EDITS 是懒加载的(📈 进度那边也用它)。首屏先出格子, 历史拉回来再补这一段。
+// EDITS 是懒加载的(📈 进度那边也用它)。首屏先出里程碑, 历史拉回来再补这一段。
 async function renderPace() {
   if (!$('#gr-pace')) return;
   if (EDITS === null) {
     try { EDITS = (await api('/api/edits')).edits || []; } catch { EDITS = []; }
   }
-  await loadAttempts();               // 下半张"每天做了几道"读的是打卡日志
   const box = $('#gr-pace');            // 等待期间可能已经重画/切走了, 重新拿一次
   if (!box) return;
   box.innerHTML = paceHTML();
@@ -3125,6 +3154,7 @@ async function reload() {
   buildPanel();
   if (VIEW === 'grid') buildGrid();   // buildPanel 占了 #count / #sub，还回来
   loadTodo();                          // 刷新 📋 TODO 上的角标
+  renderPaused();                      // ⏸ 暂停上的角标
   updateReviewBadge();                 // 🧠 复习上的到期数
 }
 
@@ -3147,6 +3177,8 @@ on('#grid-view', 'click', (e) => {
   const jump = e.target.closest('[data-jump]');
   if (jump) {
     const el = document.getElementById(`gr-tier-${jump.dataset.jump}`);
+    const box = el && el.closest('details[data-fold]');
+    if (box && !box.open) box.open = true;           // 题目区是折着的, 先展开再跳
     if (el) el.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block: 'start' });
     return;
   }
@@ -3242,6 +3274,13 @@ on('#todo-in', 'keydown', (e) => {
 });
 document.addEventListener('click', closeTodoPop);      // 点别处收起
 
+on('#open-paused', 'click', (e) => { e.stopPropagation(); togglePausedPop(); });
+on('#paused-pop', 'click', (e) => e.stopPropagation());
+on('#paused-in', 'keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addPaused(); }
+});
+document.addEventListener('click', closePausedPop);
+
 // notes overlay controls
 on('#open-review', 'click', () => RV.start());   // 面板内部的交互全在 Vue 模板里
 on('#open-stats', 'click', openStats);
@@ -3284,6 +3323,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     if (!$('#todo-pop').classList.contains('hidden')) { closeTodoPop(); return; }
+    if (!$('#paused-pop').classList.contains('hidden')) { closePausedPop(); return; }
     if (document.querySelector('.fam-menu')) { closeFamMenu(); return; }
     if (RV.open) { RV.onEsc(); return; }
     if (statsOpen()) { closeStats(); return; }

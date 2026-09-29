@@ -10,21 +10,32 @@
     "space": "O(h)"
   },
   "quiz": {
-    "idea": "后序返回深度，更新左深+右深",
+    "idea": "dfs 返回 depth，顺手 update maxdia = 左 depth + 右 depth",
     "wrong": [
-      "根的左深度 + 右深度即直径",
-      "左右子树直径取较大者 + 1",
-      "最大深度减一后再乘以二"
+      "dfs 返回 depth，只在根上算一次 左 depth + 右 depth",
+      "dfs 返回子树直径，取左右直径较大者 + 1",
+      "dfs 返回 depth，最后 maxdia = (最大 depth - 1) × 2"
+    ],
+    "then": [
+      {
+        "q": "maxdia 定义在外层，dfs 里要改它怎么写？",
+        "idea": "在 dfs 函数体里写 nonlocal maxdia",
+        "wrong": [
+          "在外层函数体里写 nonlocal maxdia",
+          "在外层函数体里写 global maxdia",
+          "不用声明，dfs 里直接赋值 maxdia"
+        ]
+      }
     ]
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-15",
-    "last_review": "2026-09-14",
-    "stability": 1.2931,
-    "difficulty": 5.112170705601056,
-    "reps": 1,
+    "due": "2026-10-26",
+    "last_review": "2026-09-29",
+    "stability": 27.202066083486216,
+    "difficulty": 3.4641142975548855,
+    "reps": 2,
     "lapses": 0,
-    "last_rating": 2
+    "last_rating": 4
   }
 }

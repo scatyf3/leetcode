@@ -15,13 +15,13 @@
   "familiarity": 3.5,
   "fsrs": {
     "state": "review",
-    "due": "2026-09-16",
-    "last_review": "2026-09-14",
-    "stability": 2.3065,
-    "difficulty": 2.118103970459016,
-    "reps": 1,
+    "due": "2026-11-21",
+    "last_review": "2026-09-29",
+    "stability": 53.318445761672265,
+    "difficulty": 1.0,
+    "reps": 2,
     "lapses": 0,
-    "last_rating": 3
+    "last_rating": 4
   },
   "complexity": {
     "time": "O(n)",

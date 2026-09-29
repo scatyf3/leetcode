@@ -293,43 +293,9 @@ main{padding:18px 20px;overflow:auto}
   border:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}
 .gr-sec-h p{margin:0;color:var(--dim);font-size:12.5px;line-height:1.7;max-width:94ch}
 
-/* --- 概览条: 阶段 + 这阶段要推到底的格子。下面三段都是它的展开 --- */
-.gr-hero{display:grid;grid-template-columns:minmax(260px,1fr) minmax(300px,1.1fr);gap:1px;
-  background:var(--line);border:1px solid var(--line);border-radius:14px;
-  overflow:hidden;margin-bottom:32px}
-.gr-hero-l,.gr-hero-r{background:var(--panel);padding:16px 18px 15px;
-  display:flex;flex-direction:column;gap:9px}
-.gr-hero-l{background:linear-gradient(180deg,color-mix(in srgb,var(--medium) 10%,var(--panel)),var(--panel) 62%)}
-.gr-hero-k{font:600 10.5px/1 Consolas,monospace;letter-spacing:.09em;color:var(--dim)}
-.gr-hero-ph{margin:0;font-size:19px;font-weight:650;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.gr-hero-n{font:600 11px/1.7 Consolas,monospace;padding:1px 8px;border-radius:6px;
-  background:var(--medium);color:#1b1f27}
-.gr-hero-when{font:12.5px/1.5 Consolas,monospace;color:var(--dim);
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.gr-hero-left{color:var(--medium);font-weight:600}
-.gr-hero-goal{font-size:12.5px;line-height:1.7}
-.gr-hero-serves{margin-top:auto;padding-top:9px;border-top:1px dashed var(--line);
-  font-size:11.5px;color:var(--dim)}
-.gr-hero-goals{display:flex;flex-direction:column;gap:11px}
-.gr-hg{display:flex;flex-direction:column;gap:5px}
-.gr-hg-t{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.gr-hg-ar{color:var(--dim);font-weight:400}
+/* 里程碑卡片的进度条 */
 .gr-hg-bar{height:8px;border-radius:4px;background:var(--chip);overflow:hidden}
 .gr-hg-bar i{display:block;height:100%;border-radius:4px;transition:width .3s ease}
-.gr-hg-n{display:flex;align-items:baseline;gap:5px;font:12px/1 Consolas,monospace;color:var(--dim)}
-.gr-hg-n b{font-size:15px;color:var(--fg);font-variant-numeric:tabular-nums}
-.gr-hg-gap{margin-left:auto;color:var(--medium)}
-.gr-hg-gap.met{color:var(--accent2)}
-.gr-hero-cov{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line);
-  display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.gr-st4{display:flex;flex-direction:column;gap:4px;min-width:0}
-.gr-st4-t{font:10.5px/1.3 Consolas,monospace;color:var(--dim);white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.gr-st4-n{font:600 15px/1 Consolas,monospace;font-variant-numeric:tabular-nums}
-.gr-st4-n small{font-size:11px;font-weight:400;color:var(--dim)}
-.gr-st4-bar{height:4px;border-radius:2px;background:var(--chip);overflow:hidden}
-.gr-st4-bar i{display:block;height:100%;border-radius:2px}
-.gr-st4-bar i.built{background:var(--accent2)}
 .gr-note{color:var(--dim);font-size:12.5px;line-height:1.7;max-width:80ch;
   border-left:2px solid var(--line);padding-left:12px;margin:14px 0 0}
 
@@ -439,28 +405,6 @@ main{padding:18px 20px;overflow:auto}
 .pc-key i.k-gap.behind{border-top-color:var(--hard)}
 @media (max-width:900px){.pc-tiles{grid-template-columns:repeat(2,1fr)}}
 
-/* --- timeline: four numbered phases, past / active / future --- */
-.gr-tl{display:grid;grid-template-columns:repeat(4,1fr);
-  border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.gr-ph{position:relative;padding:14px 16px 16px;border-right:1px solid var(--line);
-  display:flex;flex-direction:column;gap:8px}
-.gr-ph:last-child{border-right:0}
-.gr-ph::before{content:"";position:absolute;top:0;left:0;width:100%;height:3px;background:var(--line)}
-.gr-ph.past::before{background:var(--accent)}
-.gr-ph.active::before{background:var(--medium)}
-.gr-ph.active{background:linear-gradient(180deg,color-mix(in srgb,var(--medium) 9%,var(--panel)),var(--panel) 58%)}
-.gr-ph.future h3{color:var(--dim)}
-.gr-ph h3{margin:0;font-size:14.5px;font-weight:650}
-.gr-ph-n{display:flex;align-items:center;gap:8px;font:600 11px/1 Consolas,monospace;color:var(--dim)}
-.gr-live{background:var(--medium);color:#1b1f27;padding:2px 7px;border-radius:5px;font-weight:600}
-.gr-ph-when{font:12px/1.4 Consolas,monospace;color:var(--dim)}
-.gr-goal{align-self:flex-start;font:600 12px/1.4 Consolas,monospace;
-  background:var(--panel2);border-radius:6px;padding:5px 8px}
-.gr-ph.active .gr-goal{background:var(--medium);color:#1b1f27}
-.gr-adds{font-size:12.5px;color:var(--dim);line-height:1.6}
-.gr-serves{margin-top:auto;padding-top:8px;border-top:1px dashed var(--line);
-  font-size:11.5px;color:var(--dim)}
-
 /* --- problems by pattern group; a chip cycles its stage --- */
 .gr-grp{margin-top:22px}
 .gr-grp.low{opacity:.55}
@@ -535,13 +479,9 @@ main{padding:18px 20px;overflow:auto}
 .gr-st:hover{outline:2px solid var(--accent2);outline-offset:1px}
 
 @media (max-width:900px){
-  .gr-hero{grid-template-columns:1fr}
   .gr-matrix{grid-template-columns:1fr 1fr}
   .gr-matrix>div:first-child,.gr-colh{display:none}
   .gr-rowh{grid-column:1/-1;border-right:0;border-top:1px solid var(--line);padding:14px 0 4px}
-  .gr-tl{grid-template-columns:1fr}
-  .gr-ph{border-right:0;border-bottom:1px solid var(--line)}
-  .gr-serves{margin-top:0}
 }
 @media (prefers-reduced-motion:reduce){.gr-bar i,.gr-hg-bar i{transition:none}}
 /* ---- 📋 TODO 浮层: 数据源是 notes/todo.md ---- */
@@ -572,6 +512,11 @@ main{padding:18px 20px;overflow:auto}
 .todo-x{flex:none;color:var(--dim);cursor:pointer;opacity:0;font-size:12px;padding:0 2px}
 .todo-item:hover .todo-x{opacity:1}
 .todo-x:hover{color:var(--hard)}
+/* ⏸ 暂停浮层: 复用 TODO 浮层的壳 */
+.paused-since{flex:none;color:var(--dim);font-size:11.5px}
+.paused-resume{flex:none;font-size:11.5px;padding:1px 8px;border-radius:6px;cursor:pointer;
+  background:var(--panel2);border:1px solid var(--line);color:inherit}
+.paused-resume:hover{border-color:var(--accent);color:var(--accent)}
 .todo-undo{cursor:pointer;text-decoration:underline;margin-left:4px}
 .todo-undo:hover{color:var(--accent)}
 
@@ -867,7 +812,6 @@ main{padding:18px 20px;overflow:auto}
 .chart i.b-warm,.skey i.b-warm,.td-bar i.b-warm{background:var(--line)}
 .chart i.b-attack,.skey i.b-attack,.td-bar i.b-attack{background:var(--fam35)}
 
-.gr-sec-today{margin-bottom:34px}
 .td-lanes{display:grid;grid-template-columns:1fr 1fr 1fr minmax(130px,.6fr);gap:10px}
 .td-lane{background:var(--panel);border:1px solid var(--line);border-radius:11px;
   padding:12px 14px 13px;display:flex;flex-direction:column;gap:7px}
@@ -900,7 +844,6 @@ main{padding:18px 20px;overflow:auto}
 .pc-sub-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .pc-sub-h b{font-size:13.5px;font-weight:600}
 .pc-sub-h .hint{font-size:11.5px;color:var(--dim)}
-.pc-split{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
 
 /* 详情页右上角的打卡按钮 */
 .d-head-r{display:flex;align-items:center;gap:9px}
@@ -942,12 +885,40 @@ main{padding:18px 20px;overflow:auto}
 .td-min b{font-size:14px}
 .td-min.met b{color:var(--accent2)}
 
-/* ---- hero: 里程碑 ---- */
-.gr-hero-ms{grid-column:1/-1;padding:16px 20px;background:var(--panel)}
+/* ---- 里程碑: 阶段色段 + 里程碑点 + 今天竖线, 一条轴 ---- */
+.ms-left{color:var(--medium)}
+.ms-axis{position:relative;height:62px;margin:4px 0 14px;border-radius:10px;
+  background:var(--panel);border:1px solid var(--line);overflow:hidden}
+.ms-ph{position:absolute;top:0;height:30px;border-right:1px solid var(--line);
+  background:var(--panel2);display:flex;align-items:center;padding:0 8px;min-width:0}
+.ms-ph span{font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ms-ph.past{opacity:.55}
+.ms-ph.active{background:color-mix(in srgb,var(--medium) 16%,var(--panel))}
+.ms-ph.active span{color:var(--fg);font-weight:600}
+.ms-tick{position:absolute;top:30px;bottom:0;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding-top:6px}
+.ms-tick i{width:10px;height:10px;transform:rotate(45deg);background:var(--dim);border-radius:2px}
+.ms-tick.met i{background:var(--accent2)}
+.ms-tick.missed i{background:var(--hard)}
+.ms-tick.cur i{background:var(--medium);box-shadow:0 0 0 3px color-mix(in srgb,var(--medium) 30%,transparent)}
+.ms-tick span{font:10.5px/1 Consolas,monospace;color:var(--dim)}
+.ms-tick.cur span{color:var(--fg);font-weight:600}
+.ms-today{position:absolute;top:30px;bottom:0;border-left:2px solid var(--accent);pointer-events:none}
+.ms-today span{position:absolute;top:5px;left:4px;font:600 10.5px/1 Consolas,monospace;color:var(--accent);white-space:nowrap}
 .gr-ms-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px}
-.gr-ms{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.gr-ms{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel)}
 .gr-ms.met{border-color:var(--accent2)}
 .gr-ms.missed{border-color:var(--hard)}
+.gr-ms.cur{border-color:var(--medium);box-shadow:0 0 0 1px var(--medium) inset}
+/* 进度: 里程碑点 + 本周额度 */
+.pc-ms{fill:var(--panel);stroke:var(--dim);stroke-width:2}
+.pc-ms.open{stroke:var(--medium)}
+.pc-ms.met{stroke:var(--accent2);fill:var(--accent2)}
+.pc-ms.missed{stroke:var(--hard)}
+.pc-mslbl{fill:var(--dim);font:10px Consolas,monospace}
+.pc-key i.k-ms{width:10px;height:10px;border:2px solid var(--medium);border-radius:50%}
+.tk-week{margin-top:26px;padding-top:20px;border-top:1px solid var(--line)}
 .gr-ms-d{font-weight:650;font-size:16px;min-width:52px;display:flex;flex-direction:column}
 .gr-ms-d small{font-weight:400;font-size:11px;color:var(--dim)}
 .gr-ms.missed .gr-ms-d small{color:var(--hard)}

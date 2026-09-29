@@ -14,11 +14,11 @@
   "familiarity": 2,
   "fsrs": {
     "state": "review",
-    "due": "2026-09-15",
-    "last_review": "2026-09-14",
-    "stability": 1.2931,
-    "difficulty": 5.112170705601056,
-    "reps": 1,
+    "due": "2026-10-09",
+    "last_review": "2026-09-29",
+    "stability": 9.612632384328375,
+    "difficulty": 6.7404595108297,
+    "reps": 2,
     "lapses": 0,
     "last_rating": 2
   },
@@ -31,7 +31,7 @@
     "wrong": [
       "DFS 取子树返回的最大值往上比，val ≥ 它就计数",
       "层序遍历，val ≥ 本层已见过的最大值就计数",
-      "DFS 把路径最大值往下传，val 严格大于它才计数"
+      "DFS 只和父节点比，val ≥ 父节点的值就计数"
     ]
   }
 }
