@@ -66,3 +66,8 @@
 {"ts": 1789924675, "date": "2026-09-20", "id": 198, "kind": "new", "fam": null, "born": "2026-09-20", "seen": false}
 {"ts": 1790538365, "date": "2026-09-27", "id": 98, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": true}
 {"ts": 1790538628, "date": "2026-09-27", "id": 230, "kind": "warm", "fam": 1, "born": "2026-09-12", "seen": true}
+{"ts": 1790711708, "date": "2026-09-29", "id": 994, "kind": "redo", "fam": 3, "born": null, "seen": true, "result": "bug", "pit": "graph bfs啥时候mark visit"}
+{"ts": 1790713381, "date": "2026-09-29", "id": 130, "kind": "warm", "fam": 2, "born": "2026-09-15", "seen": true}
+{"ts": 1790716006, "date": "2026-09-29", "id": 417, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": false}
+{"ts": 1790716986, "date": "2026-09-29", "id": 133, "kind": "warm", "fam": 2, "born": "2026-08-26", "seen": false}
+{"ts": 1790718224, "date": "2026-09-29", "id": 207, "kind": "redo", "fam": 3, "born": null, "seen": false, "result": "wrong-idea", "attack": true, "pit": "更复杂的bfs"}

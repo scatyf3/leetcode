@@ -1,5 +1,18 @@
 # 417 Pacific Atlantic Water Flow
 
+## pass2
+
+我感觉core concept我知道，但是写的太屎山了，核心的方法是
+1. collect左上边和右下边
+2. bfs搜所有可达
+3. 求交集
+
+但这里有一些实现上的问题
+1. 我的想法是，继承前几道题的做法，各自在grid里操作
+2. 然而这里visit和seen都是用set
+
+如果前者，则非常难写和屎山，后者很好。有任何observation吗，何时用grid存，何时用set？
+
 ## 我最初的想法(错的)
 
 ```
