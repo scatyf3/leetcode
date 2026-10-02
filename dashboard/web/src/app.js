@@ -676,8 +676,10 @@ const tlKey = (s) => (!s.exists ? TL_GONE
 
 // opts.ids   = 只**统计**这些题(其余照样跟着回放状态, 只是不计数) —— 配速图要的是某一层
 // opts.keyOf = 怎么把一道题的状态归档; 默认跟着 L/S 那个开关走
+// 统计的题(ids)也铺进初始状态: 题单里有、NeetCode 150 和仓库里都没有的题得算作「未做」占一格
 const buildTimeline = (opts = {}) => buildTimelineFor({
-  planGroups: PLAN?.groups, problems: PROBLEMS, edits: EDITS,
+  planGroups: [...(PLAN?.groups || []), ...(opts.ids ? [{ problems: [...opts.ids].map((id) => [id]) }] : [])],
+  problems: PROBLEMS, edits: EDITS,
   keyOf: opts.keyOf || tlKey, ids: opts.ids || null,
 });
 
@@ -1251,26 +1253,41 @@ function planProblems() {
   return out;
 }
 
-// 目标/里程碑的口径: 某层(可再限定几组) 达到某深度的题数, 对一个目标数 n(缺省 = 全数)
-function goalOf(all, x) {
-  const rows = all.filter((p) => p.tier === x.tier && (!x.groups || x.groups.includes(p.grp)));
-  const N = x.n || rows.length;
-  const n = rows.filter((p) => p.depth >= x.stage).length;
-  const label = x.groups ? x.groups.join(' + ') : tierName(x.tier);
-  return { N, n, label, pct: N ? Math.min(100, Math.round((n / N) * 100)) : 0 };
+// 按题单算的里程碑({list: "Hot 100"}): 题单里每道题一行, 没建文件夹的 rec 为空(= 还没到 S1)
+function listRows(name) {
+  const def = LISTS?.lists?.[name];
+  if (!def) return [];
+  const rec = byId();
+  const ids = [...new Set(Object.values(def.categories).flat().map((p) => p[0]))];
+  return ids.map((id) => ({ id, rec: rec.get(id), depth: depthOf(rec.get(id)) }));
 }
 
-// 「现在对的是哪个里程碑」: 日期还没过、也还没达标的第一个; 全过了就最后一个
+// 一个里程碑数的是哪些题: 按题单({list}) 或 按层(可再限定几组)
+const goalRows = (all, x) => (x.list ? listRows(x.list)
+  : all.filter((p) => p.tier === x.tier && (!x.groups || x.groups.includes(p.grp))));
+
+// 目标/里程碑的口径: 这批题里达到某深度的题数, 对一个目标数 n(缺省 = 全数)
+function goalOf(all, x) {
+  const rows = goalRows(all, x);
+  const N = x.n || rows.length;
+  const n = rows.filter((p) => p.depth >= x.stage).length;
+  const label = x.list || (x.groups ? x.groups.join(' + ') : tierName(x.tier));
+  return { N, n, label, short: x.short || label, pct: N ? Math.min(100, Math.round((n / N) * 100)) : 0 };
+}
+
+// 「现在对的是哪个里程碑」: 按日期排, 日期还没过、也还没达标的第一个; 全过了就最后一个。
+// 有好几条链(主线 + Hot 100 冲刺)时, 它就是离今天最近的那一个。
 function curMilestone() {
-  const MS = PLAN.milestones || [];
+  const MS = [...(PLAN.milestones || [])].sort((a, b) => a.date.localeCompare(b.date));
   const all = planProblems(), t = todayStr();
   return MS.find((x) => x.date >= t && goalOf(all, x).n < goalOf(all, x).N)
     || MS.find((x) => x.date >= t) || MS[MS.length - 1] || null;
 }
 
-// 口径相同(同层 · 同组 · 同深度)的里程碑串成一条链 —— 进度图画的是一整条链的折线计划,
-// 例如第一层 → S2 的 10/11 56 题、10/25 72 题。链的起点 = 第一个点所在阶段的开始日。
-const msKey = (x) => `${x.tier}|${x.stage}|${(x.groups || []).join('+')}`;
+// 口径相同(同题单 / 同层 · 同组 · 同深度)的里程碑串成一条链 —— 进度图画的是一整条链的折线计划,
+// 例如第一层 → S2 的 10/1 56 题、10/15 72 题。链的起点 = 第一个点上写的 from,
+// 没写就是第一个点所在阶段的开始日(冲刺这种跨阶段的短链要自己写 from)。
+const msKey = (x) => `${x.list || x.tier}|${x.stage}|${(x.groups || []).join('+')}`;
 function msChains() {
   const by = new Map();
   for (const x of [...(PLAN.milestones || [])].sort((a, b) => a.date.localeCompare(b.date))) {
@@ -1280,7 +1297,7 @@ function msChains() {
   return [...by.entries()].map(([k, pts]) => {
     const d0 = pts[0].date;
     const ph = PLAN.phases.find((p) => p.from < d0 && (!p.to || d0 <= p.to));
-    return { k, pts, from: ph ? ph.from : dAdd(d0, -14) };
+    return { k, pts, from: pts[0].from || (ph ? ph.from : dAdd(d0, -14)) };
   });
 }
 
@@ -1389,13 +1406,13 @@ function buildGrid() {
   const todayS = todayStr();
   const MS = PLAN.milestones || [];
   const cur = curMilestone();
-  const ms = MS.map((x) => {
-    const { N, n, pct, label } = goalOf(all, x);
+  const ms = [...MS].sort((a, b) => a.date.localeCompare(b.date)).map((x) => {
+    const { N, n, pct, label, short } = goalOf(all, x);
     const days = Math.round((parseDay(x.date) - today) / 864e5);
     const st = n >= N ? 'met' : x.date < todayS ? 'missed' : 'open';
     return `<div class="gr-ms ${st}${x === cur ? ' cur' : ''}"
         title="${esc(x.focus || label)} · ${esc(label)} → S${x.stage}${x.mock ? ' · ' + esc(x.mock) : ''}">
-      <span class="gr-ms-d">${esc(mmdd(x.date))}</span>
+      <span class="gr-ms-d">${esc(mmdd(x.date))}<em>${esc(short)}</em></span>
       <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
       <span class="gr-ms-n"><b>${n}</b>/${N}</span>
       <small>${st === 'met' ? '✓' : days >= 0 ? `${days} 天` : `过 ${-days} 天`}</small></div>`;
@@ -1727,25 +1744,35 @@ function kpiHTML() {
   const tile = (k, v, sub, cls = '', attrs = '') => `<div class="kpi${cls ? ' ' + cls : ''}"${attrs}>
       <span class="kpi-k">${k}</span><b class="kpi-v">${v}</b><span class="kpi-s">${sub}</span></div>`;
 
-  const cm = curMilestone();
-  let t1 = tile('下个里程碑', '—', '');
-  if (cm) {
-    const g = goalOf(all, cm);
-    const days = Math.round((dParse(cm.date) - dParse(today)) / 864e5);
-    const met = g.n >= g.N;
-    t1 = tile(`下个里程碑 · ${esc(mmdd(cm.date))}`, `${g.n}<small>/${g.N}</small>`,
-      met ? '已达标 ✓' : days >= 0 ? `剩 ${days} 天 · 差 ${g.N - g.n} 题` : `过了 ${-days} 天 · 差 ${g.N - g.n} 题`,
-      met ? 'met' : days < 0 ? 'behind' : '',
-      ` title="${esc(cm.focus || g.label)} · ${esc(g.label)} → S${cm.stage}"`);
-  }
+  // 每条链(主线 / Hot 100 冲刺 …)各报它的下一个里程碑: 日期没过、还没达标的第一个点。
+  // 整条链都过去了的不报。按日期排, 最多三条 —— 和「本周」那格同一个样子。
+  const nexts = msChains()
+    .map((c) => c.pts.find((x) => x.date >= today && goalOf(all, x).n < goalOf(all, x).N))
+    .filter(Boolean)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 3);
+  const msLane = (x) => {
+    const g = goalOf(all, x);
+    const days = Math.round((dParse(x.date) - dParse(today)) / 864e5);
+    return `<div class="kpi-lane" title="${esc(x.focus || g.label)} · ${esc(g.label)} → S${x.stage} · ${esc(x.date)} 前 ${g.N} 题">
+      <span>${esc(g.short)}</span><i><u style="width:${g.pct}%"></u></i>
+      <em>${g.n}/${g.N} · ${days} 天</em></div>`;
+  };
+  const t1 = `<div class="kpi kpi-week">
+      <span class="kpi-k">下个里程碑</span>
+      ${nexts.length ? `<div class="kpi-lanes">${nexts.map(msLane).join('')}</div>` : '<b class="kpi-v">✓</b>'}</div>`;
 
   let t2;
   const pm = EDITS === null ? null : paceModel();
   if (EDITS === null) t2 = tile('进度', '…', '');
   else if (!pm || pm.error) t2 = tile('进度', '—', pm && pm.error === 'nohist' ? '还没有历史' : '');
-  else if (!pm.started) t2 = tile('进度', `${pm.gap}`, `还差 · ${esc(mmdd(pm.from))} 起跑`);
-  else {
-    t2 = tile(pm.ahead ? '超前' : '落后', `${pm.ahead ? '+' : '−'}${pcFmt(Math.abs(pm.delta))}`,
+  else if (!pm.started) t2 = tile(`${esc(pm.short)} · 进度`, `${pm.gap}`, `还差 · ${esc(mmdd(pm.from))} 起跑`);
+  else if (Math.abs(pm.delta) < 0.05) {
+    // 起跑当天(或正好压线): 「超前 +0 ≈ 0 天」是噪音, 直接说今天要几题
+    t2 = tile(`${esc(pm.short)} · 进度`, '±0', `${pm.cur === 0 ? '今天起跑' : '正好压线'} · 要 ${pcFmt(pm.need)} 题/天`, '',
+      ` title="${esc(pm.label)} → S${pm.stage} · 到 ${esc(mmdd(pm.nx.date))} 要 ${pm.nxN} 题"`);
+  } else {
+    t2 = tile(`${esc(pm.short)} · ${pm.ahead ? '超前' : '落后'}`, `${pm.ahead ? '+' : '−'}${pcFmt(Math.abs(pm.delta))}`,
       [pm.per > 0 ? `≈ ${pcFmt(Math.abs(pm.delta / pm.per))} 天` : '',
         pm.need > 0 ? `要 ${pcFmt(pm.need)} 题/天` : '按计划走'].filter(Boolean).join(' · '),
       pm.ahead ? 'ahead' : 'behind',
@@ -2010,9 +2037,9 @@ function paceModel() {
   const all = planProblems();
   const x0 = sel.pts[0];
   const stage = x0.stage;
-  const rows = all.filter((p) => p.tier === x0.tier && (!x0.groups || x0.groups.includes(p.grp)));
+  const rows = goalRows(all, x0);
   const nowN = goalOf(all, x0).n;                        // 今天的真实值, 直接来自 /api/problems
-  const m = { chains, sel, all, rows, stage, nowN, label: goalOf(all, x0).label };
+  const m = { chains, sel, all, rows, stage, nowN, label: goalOf(all, x0).label, short: goalOf(all, x0).short };
   const tl = buildTimeline({ ids: new Set(rows.map((p) => p.id)), keyOf: depthKey });
   if (!tl) return { ...m, error: 'nohist' };
   // 达到 stage 及以上 = 深度桶 stage..3 之和(和格子里那个"及以上"同一个口径)

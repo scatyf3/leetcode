@@ -820,7 +820,8 @@ main{padding:28px 32px 72px;overflow:auto}
 .pc-ms.missed{stroke:var(--hard)}
 .pc-mslbl{fill:var(--dim);font:10px var(--font-mono)}
 
-.gr-ms-d{font:600 13.5px/1 var(--font-mono)}
+.gr-ms-d{font:600 13.5px/1 var(--font-mono);display:flex;flex-direction:column;gap:3px}
+.gr-ms-d em{font:400 10.5px/1 var(--font-sans);font-style:normal;color:var(--dim);white-space:nowrap}
 .gr-ms-n{font:12px/1 var(--font-mono);color:var(--dim);font-variant-numeric:tabular-nums}
 .gr-ms-n b{color:var(--fg)}
 
@@ -924,7 +925,7 @@ main{padding:28px 32px 72px;overflow:auto}
 /* 本周那格: 三条迷你额度条代替一个大数 */
 .kpi-lanes{display:flex;flex-direction:column;gap:7px;margin-top:4px}
 .kpi-lane{display:grid;grid-template-columns:4.6em 1fr auto;align-items:center;gap:8px;font-size:12px}
-.kpi-lane span{color:var(--dim)}
+.kpi-lane span{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kpi-lane i{height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
 .kpi-lane u{display:block;height:100%;border-radius:3px;background:var(--accent);transition:width .25s}
 .kpi-lane u.b-redo{background:var(--accent2)}

@@ -81,3 +81,5 @@
 {"ts": 1790889418, "date": "2026-10-01", "id": 79, "kind": "redo", "fam": 3, "born": "2026-09-06", "seen": false, "result": "bug", "pit": "nonlocal，set的操作，记得return"}
 {"ts": 1790891188, "date": "2026-10-01", "id": 131, "kind": "redo", "fam": 3.5, "born": "2026-09-09", "seen": false, "attack": true, "pit": "怎么建模问题"}
 {"ts": 1790892252, "date": "2026-10-01", "id": 17, "kind": "warm", "fam": 1, "born": "2026-09-09", "seen": false, "result": "clean"}
+{"ts": 1790958868, "date": "2026-10-02", "id": 146, "kind": "warm", "fam": 2, "born": "2026-09-12", "seen": true, "result": "bug", "pit": "怎么删除hashmap里的东西"}
+{"ts": 1790960128, "date": "2026-10-02", "id": 142, "kind": "new", "fam": 3, "born": "2026-10-02", "seen": false, "result": "wrong-idea", "pit": "推出来数值关系，但没反应过来咋用"}

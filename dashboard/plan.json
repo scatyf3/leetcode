@@ -67,7 +67,11 @@
   "milestones": [
     { "date": "2026-10-01", "tier": 1, "stage": 2, "n": 56, "focus": "Trees + Heap + 网格", "mock": "第 1 次 mock" },
     { "date": "2026-10-15", "tier": 1, "stage": 2, "n": 72, "focus": "第一层剩下的零碎", "mock": "mock 过半" },
-    { "date": "2026-10-29", "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"], "focus": "Graphs 其余 + Backtracking", "mock": "mock 基本稳定 → 冻结" }
+    { "date": "2026-10-29", "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"], "short": "图 + 回溯", "focus": "Graphs 其余 + Backtracking", "mock": "mock 基本稳定 → 冻结" },
+
+    { "date": "2026-10-05", "list": "Hot 100", "stage": 2, "n": 70, "from": "2026-10-02", "focus": "冲刺 Day 1–3：二叉树 / 链表 / 矩阵 + 技巧" },
+    { "date": "2026-10-07", "list": "Hot 100", "stage": 2, "n": 87, "from": "2026-10-02", "focus": "冲刺 Day 4–5：数组 · 子串 · 窗口 · 二分 / 回溯 · 栈 · 贪心 · Trie" },
+    { "date": "2026-10-09", "list": "Hot 100", "stage": 2, "from": "2026-10-02", "focus": "冲刺 Day 6–7：DP / 多维 DP + 三道 hard 收尾 → Hot 100 全部 S2" }
   ],
 
   "mock": {
@@ -77,6 +81,26 @@
   },
 
   "topics": [
+    { "name": "TikTok · Hot 100 冲刺 · 10/2–10/8", "short": "H100",
+      "note": "TikTok 以 Hot 100 为主，LeetCode 公司标签也有参考价值。",
+      "sections": [
+        { "name": "Day 1 · 10/2 · 第一批 · 链表 + 二叉树", "key": 146,
+          "problems": [[146, "LRU Cache"], [25, "Reverse Nodes in k-Group"], [142, "Linked List Cycle II"], [148, "Sort List"], [138, "Copy List with Random Pointer"], [236, "Lowest Common Ancestor of a Binary Tree"], [102, "Binary Tree Level Order Traversal"], [105, "Construct Binary Tree from Preorder and Inorder Traversal"]] },
+        { "name": "Day 2 · 10/3 · 第一批 · 数组 / 子串 / 二分 / 矩阵", "key": 560,
+          "problems": [[56, "Merge Intervals"], [560, "Subarray Sum Equals K"], [53, "Maximum Subarray"], [239, "Sliding Window Maximum"], [76, "Minimum Window Substring"], [33, "Search in Rotated Sorted Array"], [54, "Spiral Matrix"], [48, "Rotate Image"]] },
+        { "name": "Day 3 · 10/4 · 第一批 · DP / 回溯 / 栈", "key": 322,
+          "problems": [[322, "Coin Change"], [139, "Word Break"], [1143, "Longest Common Subsequence"], [72, "Edit Distance"], [31, "Next Permutation"], [78, "Subsets"], [79, "Word Search"], [394, "Decode String"]] },
+        { "name": "Day 4 · 10/5 · 第二批 · 简单题", "key": 234,
+          "problems": [[94, "Binary Tree Inorder Traversal"], [101, "Symmetric Tree"], [108, "Convert Sorted Array to Binary Search Tree"], [160, "Intersection of Two Linked Lists"], [234, "Palindrome Linked List"], [24, "Swap Nodes in Pairs"], [136, "Single Number"], [169, "Majority Element"], [75, "Sort Colors"]] },
+        { "name": "Day 5 · 10/6 · 第二批收尾 + 124 / 152", "key": 124,
+          "problems": [[118, "Pascal's Triangle"], [62, "Unique Paths"], [64, "Minimum Path Sum"], [240, "Search a 2D Matrix II"], [73, "Set Matrix Zeroes"], [438, "Find All Anagrams in a String"], [124, "Binary Tree Maximum Path Sum"], [152, "Maximum Product Subarray"]] },
+        { "name": "Day 6 · 10/7 · 第三批 · 能做多少做多少", "key": 84,
+          "problems": [[84, "Largest Rectangle in Histogram"], [41, "First Missing Positive"], [437, "Path Sum III"], [114, "Flatten Binary Tree to Linked List"], [279, "Perfect Squares"], [416, "Partition Equal Subset Sum"], [45, "Jump Game II"]] },
+        { "name": "Day 7 · 10/8 · 第三批 · 时间不够就放", "key": 763,
+          "problems": [[763, "Partition Labels"], [131, "Palindrome Partitioning"], [208, "Implement Trie (Prefix Tree)"], [51, "N-Queens"], [32, "Longest Valid Parentheses"], [4, "Median of Two Sorted Arrays"]] },
+        { "name": "面试前过一遍 · 已到 S2 的高频", "key": 23,
+          "problems": [[3, "Longest Substring Without Repeating Characters"], [15, "3Sum"], [42, "Trapping Rain Water"], [206, "Reverse Linked List"], [23, "Merge k Sorted Lists"], [200, "Number of Islands"], [207, "Course Schedule"], [215, "Kth Largest Element in an Array"], [295, "Find Median from Data Stream"], [300, "Longest Increasing Subsequence"], [5, "Longest Palindromic Substring"], [543, "Diameter of Binary Tree"]] }
+      ] },
     { "name": "Roblox OA · 实现模拟", "short": "RBX",
       "note": "CodeSignal 风格：40–80 行一次写对，隐藏测试卡边界。每题写完先过三件事再提交：最大输入、窗口/边界开闭、样例没覆盖的隐含假设。会员题(💰)做不了就跳过。时间不够只做每节加粗那道。",
       "sections": [
