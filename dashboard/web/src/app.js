@@ -1,6 +1,18 @@
-'use strict';
+// 看板的手写 DOM 部分(坐标系 / 矩阵 / 各个 overlay)。纯计算在 ./lib/*.ts(有单测),
+// 复习面板是 ./components/ReviewPanel.vue —— 这个文件只剩"拿数据 -> 拼 DOM -> 绑事件"。
+import { createApp } from 'vue';
+import ReviewPanel from './components/ReviewPanel.vue';
+import { api, isReadOnly } from './api';
+import { esc } from './lib/esc';
+import { FAM, FAM_LEVELS, L_NEXT, depthOf, famCls, famInfo, famKey, famOf, ledgerOf } from './lib/fam';
+import { dAdd, dParse, daysSince, fmtDays, mmdd, todayStr, weekStart } from './lib/dates';
+import { highlightPython } from './lib/highlight';
+import { renderMd } from './lib/markdown';
+import * as Q from './lib/queue';
+import { buildQuiz as buildQuizFor } from './lib/quiz';
+import { TL_GONE, buildTimeline as buildTimelineFor, depthKey } from './lib/timeline';
+
 const $ = (s) => document.querySelector(s);
-const api = (u, opt) => fetch(u, opt).then((r) => r.json());
 // 空安全绑定。底下有 40 多条顶层 addEventListener, 最后一行才是 reload() ——
 // 只要有一个元素不存在(典型场景: 浏览器拿了缓存的旧 index.html 配新 app.js),
 // 一个 TypeError 就会掐断整个顶层脚本, 连 reload() 都跑不到, 表现是**整页卡死**。
@@ -14,197 +26,6 @@ const on = (sel, ev, fn, opt) => {
 let PROBLEMS = [];
 let SYNTAX = [];           // 语法牌组的全部卡片(/api/syntax), 见 dashboard/syntax.py
 let CURRENT = null; // detail object
-
-// ---- familiarity (熟练度): 0 最熟(英语讲得清) → 4 完全不会; null = 还没评 ----
-// 未评**不是** 0 —— 0 是阶梯顶端。缺键在 meta.json 里就是缺键, 一路 null 到底,
-// 千万别写成 `Number(x) || 0`: 那会把没评过的题静默变成最熟的一档。
-// 半档 1.5 是故意的: 阶梯的语义是"排序", 不是"计数"。在 L1 和 L2 中间塞一档
-// 如果靠重新编号(2 让给新档, 老 2/3/4 各 +1), 就得迁移每个 meta.json,
-// 而且从此 `familiarity: 3` 读起来不等于 L3 —— 这文件是手写手读的, 不值当。
-// 直接存 1.5, 磁盘上写什么就是什么, 排序照样用数值比较。
-const FAM = {
-  0: { short: 'L0', label: '英语讲得清' },
-  1: { short: 'L1', label: '已经熟悉' },
-  1.5: { short: 'L1.5', label: '写得对 · 但不是最优解' },
-  2: { short: 'L2', label: '思路会 · 细节易写错' },
-  3: { short: 'L3', label: '思路大概知道 · 不熟' },
-  3.5: { short: 'L3.5', label: '方向对 · 但只是直觉' },
-  4: { short: 'L4', label: '思路都不知道' },
-};
-const FAM_NONE = { short: '—', label: '未评' };
-const FAM_LEVELS = [0, 1, 1.5, 2, 3, 3.5, 4, null];   // 最熟 -> 最生 -> 未评
-let FAM_FILTER = new Set();          // empty = 不过滤
-const famOf = (p) => {
-  const v = p.familiarity;
-  return v === null || v === undefined || v === '' ? null : Number(v);
-};
-const famInfo = (f) => (f === null || f === undefined ? FAM_NONE : FAM[f]);
-const famKey = (f) => (f === null || f === undefined ? 'none' : String(f));
-// CSS 类名里不能直接放小数点(`.f1.5` 会被当成两个类), 所以类名用下划线: f1_5。
-// 只有类名走这个, 对象键 / data 属性一律还是 famKey。
-const famCls = (f) => 'f' + famKey(f).replace('.', '_');
-
-// ---- board: cluster by 结构 or 范式, cards carry the other dimension + tricks ----
-const NO_STRUCT = '未分类';
-let GROUP_BY = 'structures';                       // 'structures' | 'paradigms'
-const otherDim = () => (GROUP_BY === 'structures' ? 'paradigms' : 'structures');
-
-function buildPanel() {
-  buildFamFilter();
-  const shown = FAM_FILTER.size
-    ? PROBLEMS.filter((p) => FAM_FILTER.has(famOf(p)))
-    : PROBLEMS;
-  const groups = new Map();            // structure -> [problems]
-  for (const p of shown) {
-    const keys = p[GROUP_BY].length ? p[GROUP_BY] : [NO_STRUCT];
-    for (const k of keys) (groups.get(k) || groups.set(k, []).get(k)).push(p);
-  }
-  const nStruct = [...groups.keys()].filter((k) => k !== NO_STRUCT).length;
-  $('#sub').textContent = GROUP_BY === 'structures' ? '按数据结构分组' : '按算法范式分组';
-  $('#count').textContent = FAM_FILTER.size
-    ? `${shown.length}/${PROBLEMS.length} 题 · ${nStruct} 类`
-    : `${PROBLEMS.length} 题 · ${nStruct} 类`;
-
-  // sort columns alphabetically, 未分类 always last
-  const order = [...groups.keys()].sort((a, b) =>
-    a === NO_STRUCT ? 1 : b === NO_STRUCT ? -1 : a.localeCompare(b));
-
-  if (!PROBLEMS.length) {
-    $('#panel').innerHTML = `<p class="empty-hint">还没有题目。建一个「编号. 标题」文件夹后点 ↻ Sync。</p>`;
-    return;
-  }
-  if (!shown.length) {
-    $('#panel').innerHTML = `<p class="empty-hint">这几档熟练度下没有题 — 再点一下上面的按钮取消过滤。</p>`;
-    return;
-  }
-
-  let h = `<div class="fam-legend">${[0, 1, 1.5, 2, 3, 3.5, 4]
-    .map((f) => `<span class="fam ${famCls(f)}">${FAM[f].short}</span>${esc(FAM[f].label)}`)
-    .join('<span class="sep">·</span>')}</div>`;
-  h += '<div class="groups">';
-  for (const g of order) {
-    const items = groups.get(g).slice().sort((a, b) => a.id - b.id);
-    const openable = g !== NO_STRUCT;
-    h += `<div class="group">
-      <div class="group-label${openable ? ' openable' : ''}"${openable ? ` data-struct="${esc(g)}" title="打开 ${esc(g)} 通用 trick 文档"` : ''}>
-        <span class="group-name">${esc(g)}</span>
-        <span class="group-count">${items.length} 题</span>
-        <span class="group-bar">${famBar(items)}</span>
-        ${openable ? '<span class="group-open">通用 trick →</span>' : ''}</div>
-      <div class="group-rows">${items.map(rowHTML).join('')}</div>
-    </div>`;
-  }
-  h += '</div>';
-  $('#panel').innerHTML = h;
-  wireCards();
-}
-
-function buildFamFilter() {
-  const counts = new Map(FAM_LEVELS.map((f) => [f, 0]));
-  for (const p of PROBLEMS) counts.set(famOf(p), (counts.get(famOf(p)) || 0) + 1);
-  $('#fam-filter').innerHTML = FAM_LEVELS
-    .filter((f) => counts.get(f))                   // hide buckets nobody is in
-    .map((f) => `<button class="fam-btn ${famCls(f)}${FAM_FILTER.has(f) ? ' on' : ''}"
-        data-fam="${famKey(f)}" title="${esc(famInfo(f).label)}">${famInfo(f).short}
-        <span class="fam-n">${counts.get(f)}</span></button>`)
-    .join('');
-  document.querySelectorAll('.fam-btn').forEach((b) =>
-    b.addEventListener('click', () => {
-      const f = b.dataset.fam === 'none' ? null : +b.dataset.fam;
-      FAM_FILTER.has(f) ? FAM_FILTER.delete(f) : FAM_FILTER.add(f);
-      buildPanel();
-    })
-  );
-}
-
-// 组标签上的熟练度分布: 一条按 L0→L4 排的堆叠条。分母是这一组, 不是全库 ——
-// 想知道的是"这个结构我握得怎么样", 不是"它占全库多少"。
-function famBar(items) {
-  return FAM_LEVELS
-    .map((f) => [f, items.filter((p) => famOf(p) === f).length])
-    .filter(([, n]) => n)
-    .map(([f, n]) => `<i class="${famCls(f)}" style="flex:${n}"
-      title="${esc(famInfo(f).short)} ${esc(famInfo(f).label)} — ${n} 题"></i>`)
-    .join('');
-}
-
-function rowHTML(p) {
-  const diff = p.difficulty || 'none';
-  const todo = p.status === 'todo' ? ' todo' : '';
-  const paused = p.paused ? ' paused' : '';
-  // 另一个维度(按结构分组时是范式, 反之是结构)单独占一列 —— 这一列是"× 范式"里的
-  // 那个乘号, 竖着能扫才有意义, 所以别和 trick 混在同一个右对齐的口袋里。
-  const paras = p[otherDim()].map((x) => `<span class="tag para">${esc(x)}</span>`).join('');
-  // trick 是这道题的注脚, 不是维度: 压到最后一格, 颜色也调轻
-  const tricks = p.techniques.map((x) => `<span class="tag trick">${esc(x)}</span>`).join('');
-  const f = famOf(p);
-  return `<div class="row${todo}${paused}" data-id="${p.id}">
-    <span class="dot ${diff}" title="${diff}"></span>
-    <span class="fam ${famCls(f)}" data-id="${p.id}" title="点击改熟练度 (当前: ${esc(famInfo(f).label)})">${famInfo(f).short}</span>
-    <span class="row-id">#${p.id}</span>
-    <span class="row-title">${p.paused ? `<i class="paused-mark" title="暂停复习中(自 ${esc(p.paused)})">⏸</i>` : ''}${esc(p.title)}</span>
-    <span class="row-para">${paras || '<span class="tag-none" title="还没标范式">—</span>'}</span>
-    <span class="row-trick">${tricks}</span>
-  </div>`;
-}
-
-function wireCards() {
-  document.querySelectorAll('.row').forEach((el) =>
-    el.addEventListener('click', () => openDetail(+el.dataset.id))
-  );
-  document.querySelectorAll('.row .fam').forEach((el) =>
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();          // 别让点击冒泡去开详情页
-      openFamMenu(el);
-    })
-  );
-  document.querySelectorAll('.group-label.openable').forEach((el) =>
-    el.addEventListener('click', () => openDoc(GROUP_BY, el.dataset.struct))
-  );
-}
-
-// ---- 总览里就地改熟练度 ----
-function closeFamMenu() {
-  const m = document.querySelector('.fam-menu');
-  if (m) m.remove();
-}
-
-function openFamMenu(badge) {
-  const open = document.querySelector('.fam-menu');
-  closeFamMenu();
-  if (open && +open.dataset.id === +badge.dataset.id) return;   // 再点一次 = 关掉
-
-  const id = +badge.dataset.id;
-  const cur = famOf(PROBLEMS.find((x) => x.id === id) || {});
-  const menu = document.createElement('div');
-  menu.className = 'fam-menu';
-  menu.dataset.id = id;
-  menu.innerHTML = FAM_LEVELS
-    .map((f) => `<button class="fam-opt${f === cur ? ' on' : ''}" data-f="${famKey(f)}">
-        <span class="fam ${famCls(f)}">${famInfo(f).short}</span>${esc(famInfo(f).label)}</button>`)
-    .join('');
-  document.body.appendChild(menu);
-
-  const r = badge.getBoundingClientRect();
-  menu.style.left = `${Math.min(r.left, innerWidth - menu.offsetWidth - 10)}px`;
-  menu.style.top = `${r.bottom + 4 + menu.offsetHeight > innerHeight
-    ? r.top - menu.offsetHeight - 4 : r.bottom + 4}px`;   // 贴着窗口下沿时朝上开
-
-  menu.querySelectorAll('.fam-opt').forEach((b) =>
-    b.addEventListener('click', (e) => {
-      e.stopPropagation();
-      setFam(id, b.dataset.f === 'none' ? null : +b.dataset.f);
-    })
-  );
-}
-
-async function setFam(id, f) {
-  closeFamMenu();
-  await putMeta(id, { familiarity: f });           // 只发这一个字段, 其它标签原样保留
-  const p = PROBLEMS.find((x) => x.id === id);
-  if (p) p.familiarity = f;
-  buildPanel();                                    // 正在按熟练度过滤时, 改完会自动移出/移入
-}
 
 // ---- detail ----
 async function openDetail(id) {
@@ -228,7 +49,7 @@ async function openDetail(id) {
   $('#note-file').textContent = d.note_file;
   $('#note-edit').value = d.note;
   $('#note-msg').textContent = '';
-  $('#meta-msg').textContent = '改动自动保存';
+  $('#meta-msg').textContent = '';
   exitEdit();                 // always open in rendered (preview) mode
   buildSolTabs(d);
   $('#overlay').classList.remove('hidden');
@@ -297,7 +118,7 @@ async function setResult(patch) {
   await loadAttempts();
   renderAttemptBtn();
   if (msg) { msg.textContent = '记下了'; setTimeout(() => { msg.textContent = ''; }, 1500); }
-  if (VIEW === 'grid') { renderToday(); renderPace(); renderDrill(); }
+  renderToday(); renderPace(); renderDrill();
 }
 
 async function punchAttempt() {
@@ -314,7 +135,7 @@ async function punchAttempt() {
   renderAttemptBtn();
   $('#attempt-msg').textContent = had ? '已撤销' : '记下了';
   setTimeout(() => { if ($('#attempt-msg')) $('#attempt-msg').textContent = ''; }, 1800);
-  if (VIEW === 'grid') { renderToday(); renderPace(); renderDrill(); }   // 后面那张周课条跟着变
+  renderToday(); renderPace(); renderDrill();   // 首屏的本周额度跟着变
 }
 
 // ---- editable tag chips (structures / paradigms / techniques) ----
@@ -397,14 +218,14 @@ async function autoSaveMeta() {
   };
   await putMeta(CURRENT.id, body);
   $('#meta-msg').textContent = '已保存 ✓';
+  setTimeout(() => { if ($('#meta-msg')) $('#meta-msg').textContent = ''; }, 1500);
   await reloadKeepOpen();
 }
 
 // reload the board data without disturbing the open detail modal
 async function reloadKeepOpen() {
   PROBLEMS = await api('/api/problems');
-  buildPanel();
-  if (VIEW === 'grid') buildGrid();   // 从坐标系点进来的, 格子和 #count/#sub 都要还回去
+  buildGrid();
   renderPaused();                     // 详情页勾 / 取消「暂停复习」, ⏸ 上的角标跟着变
 }
 
@@ -416,7 +237,7 @@ function enterEdit() {
   $('#note-preview').classList.add('hidden');
   $('#note-edit').classList.remove('hidden');
   $('#save-note').classList.remove('hidden');
-  $('#note-mode').textContent = '源码编辑中';
+  $('#note-mode').textContent = '编辑中 · Ctrl+S 保存';
   $('#note-edit').focus();
 }
 
@@ -429,7 +250,7 @@ function exitEdit(save) {
   $('#note-edit').classList.add('hidden');
   $('#save-note').classList.add('hidden');
   $('#note-preview').classList.remove('hidden');
-  $('#note-mode').textContent = '双击渲染区编辑';
+  $('#note-mode').textContent = '';
 }
 
 // ---- solutions: tab 列表 + 双击编辑 + 新建 .py (和 note 同一套交互) ----
@@ -482,7 +303,7 @@ function showItem(item) {
     desc.scrollTop = 0;
     desc.classList.remove('hidden');
     code.classList.add('hidden');
-    $('#sol-mode').textContent = '题面只读';
+    $('#sol-mode').textContent = '';
     return;
   }
   code.firstChild.innerHTML = item.name.endsWith('.py')
@@ -491,7 +312,7 @@ function showItem(item) {
   code.scrollTop = 0;
   code.classList.remove('hidden');
   desc.classList.add('hidden');
-  $('#sol-mode').textContent = item.readonly ? '' : '双击代码区编辑';
+  $('#sol-mode').textContent = '';
 }
 
 function enterSolEdit() {
@@ -503,7 +324,7 @@ function enterSolEdit() {
   $('#sol-desc').classList.add('hidden');
   $('#sol-edit').classList.remove('hidden');
   $('#sol-save').classList.remove('hidden');
-  $('#sol-mode').textContent = '源码编辑中';
+  $('#sol-mode').textContent = '编辑中 · Ctrl+S 保存';
   $('#sol-edit').focus();
 }
 
@@ -596,7 +417,7 @@ async function openDoc(kind, name) {
   $('#doc-title').textContent = DOC.name || name;
   $('#doc-file').textContent = DOC.file || `${kind}/${name}.md`;
   $('#doc-edit').value = DOC.content || '';
-  $('#doc-msg').textContent = '改动自动保存';
+  $('#doc-msg').textContent = '';
   exitDocEdit();
   $('#doc-overlay').classList.remove('hidden');
 }
@@ -606,7 +427,7 @@ function enterDocEdit() {
   $('#doc-preview').classList.add('hidden');
   $('#doc-edit').classList.remove('hidden');
   $('#doc-save').classList.remove('hidden');
-  $('#doc-mode').textContent = '源码编辑中';
+  $('#doc-mode').textContent = '编辑中 · Ctrl+S 保存';
   $('#doc-edit').focus();
 }
 
@@ -620,7 +441,7 @@ function exitDocEdit(save) {
   $('#doc-edit').classList.add('hidden');
   $('#doc-save').classList.add('hidden');
   $('#doc-preview').classList.remove('hidden');
-  $('#doc-mode').textContent = '双击渲染区编辑';
+  $('#doc-mode').textContent = '';
 }
 
 async function saveDoc() {
@@ -631,7 +452,7 @@ async function saveDoc() {
   });
   DOC.content = content;
   $('#doc-msg').textContent = '已保存 ✓';
-  setTimeout(() => { if ($('#doc-msg')) $('#doc-msg').textContent = '改动自动保存'; }, 1500);
+  setTimeout(() => { if ($('#doc-msg')) $('#doc-msg').textContent = ''; }, 1500);
 }
 
 function closeDoc() { $('#doc-overlay').classList.add('hidden'); DOC = null; }
@@ -681,7 +502,7 @@ function enterNoteEdit() {
   $('#nt-preview').classList.add('hidden');
   $('#nt-edit').classList.remove('hidden');
   $('#nt-save').classList.remove('hidden');
-  $('#nt-mode').textContent = '源码编辑中';
+  $('#nt-mode').textContent = '编辑中 · Ctrl+S 保存';
   $('#nt-edit').focus();
 }
 
@@ -695,7 +516,7 @@ function exitNoteEdit(save) {
   $('#nt-edit').classList.add('hidden');
   $('#nt-save').classList.add('hidden');
   $('#nt-preview').classList.remove('hidden');
-  $('#nt-mode').textContent = '双击渲染区编辑';
+  $('#nt-mode').textContent = '';
 }
 
 async function saveNoteFile() {
@@ -740,187 +561,19 @@ async function addScratch() {
 
 function closeNotes() { $('#notes-overlay').classList.add('hidden'); NOTE = null; }
 
-// ---- python syntax highlighter (tokenizer, no external deps) ----
-const PY_KW = new Set(['False','None','True','and','as','assert','async','await','break',
-  'class','continue','def','del','elif','else','except','finally','for','from','global',
-  'if','import','in','is','lambda','nonlocal','not','or','pass','raise','return','try',
-  'while','with','yield','match','case']);
-const PY_BUILTIN = new Set(['print','len','range','int','str','float','list','dict','set',
-  'tuple','bool','sorted','sum','min','max','abs','enumerate','zip','map','filter','open',
-  'input','type','isinstance','super','object','Exception','self','cls','None','True','False']);
+// markdown: marked + 题号链接(lib/markdown.ts)。题号索引每次现建, 和看板永远对得上
+const md = (src) => renderMd(src, byId());
 
-function highlightPython(src) {
-  let i = 0, n = src.length, out = '', prevWord = '';
-  const push = (cls, txt) => (out += cls ? `<span class="t-${cls}">${esc(txt)}</span>` : esc(txt));
-  while (i < n) {
-    const c = src[i];
-    if (c === '#') {                                   // comment
-      let j = i; while (j < n && src[j] !== '\n') j++;
-      push('com', src.slice(i, j)); i = j; continue;
-    }
-    if ((c === '"' || c === "'") && src.substr(i, 3) === c + c + c) {  // triple string
-      const q = c + c + c; let j = i + 3;
-      while (j < n && src.substr(j, 3) !== q) j++;
-      j = Math.min(n, j + 3); push('str', src.slice(i, j)); i = j; continue;
-    }
-    if (c === '"' || c === "'") {                      // single/double string
-      let j = i + 1; while (j < n && src[j] !== c) { if (src[j] === '\\') j++; j++; }
-      j = Math.min(n, j + 1); push('str', src.slice(i, j)); i = j; continue;
-    }
-    if (/[0-9]/.test(c) || (c === '.' && /[0-9]/.test(src[i + 1] || ''))) {  // number
-      let j = i; while (j < n && /[0-9a-fA-FxXoObB._]/.test(src[j])) j++;
-      push('num', src.slice(i, j)); i = j; continue;
-    }
-    if (c === '@') {                                   // decorator
-      let j = i + 1; while (j < n && /[A-Za-z0-9_.]/.test(src[j])) j++;
-      push('dec', src.slice(i, j)); i = j; continue;
-    }
-    if (/[A-Za-z_]/.test(c)) {                         // identifier / keyword
-      let j = i; while (j < n && /[A-Za-z0-9_]/.test(src[j])) j++;
-      const w = src.slice(i, j);
-      const cls = PY_KW.has(w) ? 'kw'
-        : (prevWord === 'def' || prevWord === 'class') ? 'fn'
-        : PY_BUILTIN.has(w) ? 'bi' : null;
-      push(cls, w); prevWord = w; i = j; continue;
-    }
-    if (!/\s/.test(c)) prevWord = '';                  // reset on real punctuation
-    push(null, c); i++;
-  }
-  return out;
-}
-
-// ---- 题号 -> 可点链接 ------------------------------------------------------
-// 只认**显式标记**: "LC 42"、"LC42"、"#42"。一串连号共用一个标记 ——
-// "LC 26, 27"、"LC 5/647"、"LC 3、76、209、424" 里每个数字都会各自去查,
-// 库里没有的(76/209 这种还没做的)保持纯文本, 不生成死链。
-//
-// 为什么不猜裸数字: 试过一版启发式(值域/量词/左右边界一堆规则), 全库能跑对,
-// 但规则不可预测 —— 写文档的时候没法一眼知道 "各 1 个标量" 的 1 会不会变成链接。
-// 显式标记的代价只是多打三个字符, 换来的是渲染结果完全可预期。存量文档(structures/
-// paradigms/notes 共 16 篇)的 182 处引用已经一次性迁移过, 迁移前后链接集合逐条对过。
-//
-// 只碰纯文本: <code> 里的 2i+1、<a href="../paradigms/1d-dp.md"> 里的路径、
-// 标签属性里的数字都不能动, 所以先按「标签/代码/已有链接」切段, 只改偶数段。
-const PID_SEG = /(<code[\s\S]*?<\/code>|<a\b[\s\S]*?<\/a>|<[^>]*>)/;
-// 标记 + 一串用 / , 、 和 与 连起来的题号
-// 末尾的否定环视: "每天 LC 1-1.5 小时" 里 LC 是网站名, 1 是时长不是题号
-const PID_RUN = /(?:LC\s*|#)\d{1,4}(?:\s*(?:[\/,、]|和|与)\s*\d{1,4})*(?![\w.%\-–—])/gi;
-const PID_ONE = /\d{1,4}/g;
-
-function linkifyPids(html) {
-  const rec = byId();
-  if (!rec.size) return html;
-  return html.split(PID_SEG).map((seg, k) => {
-    if (k % 2) return seg;                       // 捕获组 = 标签/代码/已有链接, 原样放回
-    return seg.replace(PID_RUN, (run) =>
-      run.replace(PID_ONE, (num) => {
-        const p = rec.get(+num);
-        return p
-          ? `<a class="pid" data-pid="${p.id}" title="${esc(p.id + '. ' + p.title)}">${num}</a>`
-          : num;                                 // 还没做的题: 留字, 不留链
-      }));
-  }).join('');
-}
-
-// ---- markdown 渲染: marked(存在仓库里) + 两层后处理 ------------------------
-// 这里以前是 60 行手写渲染器, 换掉的直接原因是**嵌套列表渲染不出来**: 它按行匹配
-// `^\s*[-*+]\s+` 就把所有层级拍平进同一个 <ul>, structures/array.md 的 feature
-// 那种三层缩进全塌成一层。顺带修掉的还有:
-//   - 行内 `|OPT'| = |OPT|` 长得像表头但下一行不是分隔行, 老渲染器要靠一句
-//     "第一行无条件吃掉" 的兜底才不死循环(见 git history, 435 的 note.md 触发过);
-//   - 引用块套列表、列表里的代码块、任务列表 `- [ ]` 这些一概不认。
-//
-// marked 是 vendored 的(vendor/marked.min.js, MIT), 不走 CDN、不需要构建步骤 ——
-// 和 vue.global.prod.js 同一条规矩, 见 README「没有构建步骤」。
-const MD_OPT = { gfm: true, breaks: false };
-
-function md(src) {
-  if (typeof marked === 'undefined') {          // vendor 文件掉了也别让整页炸
-    console.warn('[md] marked 没加载 —— 退化成纯文本。检查 vendor/marked.min.js');
-    return `<pre>${esc(String(src))}</pre>`;
-  }
-  const html = marked.parse(String(src), MD_OPT);
-  // 1) 文档里的链接指向仓库文件, 一律新标签打开(和老渲染器行为一致)
-  // 2) 题号 -> 可点链接。放在最后, 因为它的跳过依据正是上面生成的 <code>/<a>
-  return linkifyPids(html.replace(/<a href=/g, '<a target="_blank" href='));
-}
-
-// ---- 🧠 FSRS 复习: 看题面 -> 心里过思路 -> 揭晓 -> 1-4 自评 --------------------
-// 调度状态在各题 meta.json 的 fsrs 字段里, 算法在 dashboard/fsrs.py。
-// 和 familiarity(L1-L4) 是**两套独立的东西**: 这里只管"什么时候再问一次",
-// familiarity 仍然是手工维护的掌握档位, 复习不会去改它。
-//
-// 这一节的 UI 是**唯一用 Vue 的地方**(模板在 index.html 的 #review-app 里),
-// 其余看板还是手写 DOM。下面这些排队/调度的纯函数不属于 UI, 📈 进度那节也在用。
-const isReadOnly = () => document.documentElement.classList.contains('ro');
-
-const todayStr = () => new Date().toLocaleDateString('sv');   // 本地 YYYY-MM-DD
-const isCard = (p) => !!p.due;
-const isDue = (p) => isCard(p) && p.due <= todayStr();
-const rvEligible = (p) => p.status === 'solved' || p.status === 'review';
-const FAM_ORDER = { 4: 0, 3.5: 1, 3: 2, 2: 3, none: 4, 1.5: 5, 1: 6, 0: 7 };   // 越生的越先进队列
-
-// 队列**范围**三种模式都一样(到期的卡 + 还没进过复习的题), 模式只决定**顺序**:
-//   fsrs   到期优先 + 生的优先(默认)
-//   order  题号升序
-//   random 随机
-const RV_MODES = ['fsrs', 'order', 'random'];
-
-function savedMode() {
-  try {
-    const m = localStorage.getItem('rv-mode');
-    if (RV_MODES.includes(m)) return m;
-  } catch { /* 隐私模式 */ }
-  return 'fsrs';
-}
-
-// ---- 两个牌组 ---------------------------------------------------------------
-// problems 题目(真相在各题 meta.json) / syntax 语法卡(真相在 syntax/*.md)。
-// 两边**只共用调度器和历史**, 排队规则各写各的 —— 语法卡没有 status 也没有 familiarity,
-// 硬套题目那套会得到一个"全 undefined 参与排序"的随机顺序。
-const DECKS = ['problems', 'syntax'];
-const DECK_LABEL = { problems: '题目', syntax: '语法' };
+// ---- 🧠 FSRS 复习 -----------------------------------------------------------
+// 排队规则在 lib/queue.ts, 面板在 components/ReviewPanel.vue。这里只把两个牌组的行接上去,
+// 📈 进度那节和日课那节也用这几个数。
+const isCard = Q.isCard;
+const isDue = (p) => Q.isDue(p);
+const rvEligible = Q.rvEligible;
 const deckRows = (deck) => (deck === 'syntax' ? SYNTAX : PROBLEMS);
-
-function savedDeck() {
-  try {
-    const d = localStorage.getItem('rv-deck');
-    if (DECKS.includes(d)) return d;
-  } catch { /* 隐私模式 */ }
-  return 'problems';
-}
-
-// 队列范围: 到期的卡 + 还没进过复习的。题目那边"还没进过"要先够格(status 是 solved/review,
-// 没想出来过的思路谈不上复习); 语法卡只要写在 syntax/*.md 里就算数, 没有这一层。
-function queuePool(deck = 'problems') {
-  // 暂停的题整个不进队列(徽章也就不数它)。调度数据原样留着 —— 恢复时服务端把 due / last_review
-  // 一起往后推停掉的天数, 所以回来时不会是一大片逾期(见 server.set_paused)。
-  const rows = deckRows(deck).filter((p) => !p.paused);
-  const fresh = deck === 'syntax' ? rows : rows.filter(rvEligible);
-  return [...rows.filter(isDue), ...fresh.filter((p) => !isCard(p))];
-}
-
-function orderQueue(pool, mode = 'fsrs', deck = 'problems') {
-  // 组内的稳定兜底顺序。题目按题号; 语法卡按 ord(= /api/syntax 的下标, 也就是
-  // 文件名 -> 文件内的书写顺序)。**别拿 a.id - b.id 排语法卡** —— id 是字符串,
-  // 相减得 NaN, 比较器全返回 NaN 等于没排序, 表现是顺序每次都不一样。
-  const tie = deck === 'syntax'
-    ? (a, b) => (a.ord || 0) - (b.ord || 0)
-    : (a, b) => a.id - b.id;
-  if (mode === 'random') return shuffle(pool.map((p) => p.id));
-  if (mode === 'order') return [...pool].sort(tie).map((p) => p.id);
-  const due = pool.filter(isDue).sort((a, b) =>
-    (a.status === 'review' ? 0 : 1) - (b.status === 'review' ? 0 : 1) ||
-    a.due.localeCompare(b.due) || tie(a, b));
-  // 还没成为卡片的题, 按熟练度从生到熟排 —— 只是**读** familiarity 定顺序, 不写它。
-  // 语法卡没有这个字段, 就按书写顺序来(同一个文件里相关的卡挨着问, 正好对照)。
-  const fresh = pool.filter((p) => !isCard(p)).sort(deck === 'syntax' ? tie
-    : (a, b) => FAM_ORDER[famKey(famOf(a))] - FAM_ORDER[famKey(famOf(b))] || tie(a, b));
-  return [...due, ...fresh].map((p) => p.id);
-}
-
+const queuePool = (deck = 'problems') => Q.queuePool(deckRows(deck), deck);
 // 三种模式的**范围完全一样**, 所以徽章和 📈 里的数字跟模式无关
-const buildQueue = (mode = 'fsrs', deck = 'problems') => orderQueue(queuePool(deck), mode, deck);
+const buildQueue = (mode = 'fsrs', deck = 'problems') => Q.orderQueue(queuePool(deck), mode, deck);
 // 每天复习上限(两个牌组各算各的)。PLAN 在坐标系视图才会拉, 没拉到就按 10。
 const rvCap = () => (PLAN && +PLAN.review_cap) || 10;
 const reviewedToday = (deck) => deckRows(deck).filter((p) => p.last_review === todayStr()).length;
@@ -938,570 +591,19 @@ function updateReviewBadge() {
   return n;
 }
 
-function fmtInterval(days) {
-  if (days <= 0) return '今天';
-  if (days === 1) return '明天';
-  if (days < 30) return `${days} 天`;
-  if (days < 365) return `${(days / 30).toFixed(1)} 个月`;
-  return `${(days / 365).toFixed(1)} 年`;
-}
-
-const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) {
-  const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
-const cxText = (c) => (c && c.time ? `${c.time} / ${c.space || '?'}` : '');
-
-// 复杂度的干扰项从全库出现过的复杂度里抽, 并且**优先抽常见的** ——
-// 抽到 O(n^(T/min)) 那种独一份的等于送分, 抽到 O(n)/O(n) 才是真的容易混。
-function cxPool(correct) {
-  const freq = new Map();
-  for (const p of PROBLEMS) {
-    const t = cxText(p.complexity);
-    if (t && t !== correct) freq.set(t, (freq.get(t) || 0) + 1);
-  }
-  return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map((x) => x[0]);
-}
-
-// 复杂度那道先关掉: 思路还没稳的时候先问思路, 复杂度等思路熟了再开。
-// 改成 true 就能把「时间/空间复杂度？」那道题恢复出来, 其余逻辑都还在。
-const QUIZ_CX = false;
-
-// quiz 可以拆成几步问: 顶层 {q?, idea, wrong} 是第一问, then: [{q, idea, wrong}, ...] 接着问。
-// 比如 133 先问「DFS 还是 BFS」, 再问「哈希表怎么用」—— 一句话塞两个考点, 选对了也分不清是哪个会了。
-// 第一问的块总是在(没写选项时模板显示提示), then 里没写 idea 的直接跳过。
-// idea 写成数组就是**多选**: 几个都对、要全选中才算对。用在「两种说法其实是一回事」的题上
-// (139: 图的可达性 = 一维 DP) —— 单选里放一个「两者都行」, 做多了会发现"都行"那项总是对的。
-function buildQuiz(d) {
-  const q = d.quiz || {};
-  const cx = cxText(d.complexity);
-  const mk = (correct, wrongs) => {
-    const rights = [].concat(correct || []).filter(Boolean);
-    if (!rights.length || wrongs.length < 1) return null;
-    const opts = shuffle([...rights, ...wrongs.slice(0, 4 - rights.length)]);   // 总共至多 4 项(ABCD)
-    return { opts, correct: rights.map((t) => opts.indexOf(t)), multi: rights.length > 1, pick: [] };
-  };
-  const steps = [q, ...(Array.isArray(q.then) ? q.then : [])];
-  return {
-    ideas: steps
-      .map((s, i) => {
-        const state = s.idea ? mk(s.idea, s.wrong || []) : null;
-        const label = s.q || (i ? '然后呢？' : '思路是哪个？');
-        return { key: `idea${i}`, label: state && state.multi ? `${label}（多选）` : label, state };
-      })
-      .filter((b, i) => i === 0 || b.state),
-    cx: QUIZ_CX && cx ? mk(cx, shuffle(cxPool(cx)).slice(0, 3)) : null,
-  };
-}
-
-// ---- 复习面板(Vue)。模板是 index.html 里的 #review-app -----------------------
-// 迁移到 Vue 的理由: 这一屏状态最多(队列 / 揭晓与否 / 选择题 / 就地编辑 / tab),
-// 以前全靠手工 classList.toggle + innerHTML 对齐, 加一个元素就容易漏一处。
-// 现在 DOM 一律从下面这些 data/computed 推导出来, app.js 里不再有 $('#rv-*')。
-const RV = Vue.createApp({
-  data() {
-    return {
-      open: false,
-      queue: [], done: 0, total: 0,
-      d: null,                       // 当前这道的详情; null = 队列空了(显示收尾屏)
-      loading: false,                // 拉详情中。不加这个会先闪一下"没有到期的题"
-      revealed: false,
-      quiz: { ideas: [], cx: null },
-      items: [], active: 0,          // 揭晓后的 note / 各解法 tab
-      editing: false, draft: '', amsg: '',
-      attempt: '',                   // 揭晓前自己默写的那一遍。**只活在这一张卡的这一次**:
-                                     // 不发给后端、不写 syntax/*.md、换一张就清空
-      note: '',                      // 顶部那行临时提示(写失败 / 已经是队尾)
-      comments: [],                  // card-comments.jsonl 全部行(两个牌组), 开面板时拉一次
-      cbox: false, cdraft: '',       // 批注框开没开 / 草稿。Esc 收起不清草稿, 换卡才清
-      busy: false,                   // 评分->取下一题这一整段在飞。见 rate() 上面那段注释
-      failMsg: '',                   // 拉下一题失败时的收尾屏文案(替掉"复习完了")
-      deferred: [],                  // 今天(当前牌组)按过「押到队尾」的题, 按发生顺序, 可重复
-      startGen: 0,                   // start() 的代号: 异步拉 carry 期间被新的 start() 顶掉就作废
-      mode: savedMode(),
-      deck: savedDeck(),             // 'problems' | 'syntax'
-      counts: { problems: 0, syntax: 0 },   // 标在牌组按钮上的到期数
-      readOnly: isReadOnly(),
-      MODES: [{ k: 'fsrs', label: '到期优先' }, { k: 'order', label: '顺序' }, { k: 'random', label: '随机' }],
-      DECKS: [{ k: 'problems', label: '题目' }, { k: 'syntax', label: '语法' }],
-      KEYS: 'ABCD',
-      RATE: { 1: ['忘了', '想不起来'], 2: ['勉强', '想了很久'], 3: ['想起来了', '正常'], 4: ['很熟', '秒答'] },
-      CMT_ST: { open: '待改', done: '已改', skip: '没改' },
-    };
-  },
-
-  computed: {
-    isSyntax() { return this.deck === 'syntax'; },
-    // 左上角那个胶囊: 题目是题号, 语法卡是主题(= 文件名), 都是"这是哪一类"的定位信息
-    pillText() { return this.d ? (this.isSyntax ? this.d.topic : this.d.id) : ''; },
-    metaLine() {
-      if (!this.d) return '';
-      const reps = this.d.fsrs && this.d.fsrs.reps ? `第 ${this.d.fsrs.reps + 1} 次复习` : '第一次进复习';
-      return `${this.isSyntax ? this.d.file : (this.d.difficulty || '?')} · ${reps}`;
-    },
-    // v-html: 两句提示里都有加粗。内容是写死的常量, 没有外部输入
-    askText() {
-      return this.isSyntax
-        ? '先<b>在心里把答案说出来</b>, 再揭晓 —— 说不出口就是不会, 别停在"感觉知道"。'
-        : '先在心里说清三件事 —— <b>用什么结构 · 什么范式 · 触发条件是什么</b>。不写代码。';
-    },
-    // 只渲染题面 / 卡片正面。绝不碰 d.note / d.solutions / d.back —— 剧透了这个功能就没意义了
-    descHtml() {
-      if (!this.d) return '';
-      if (this.isSyntax) {
-        // 正面可以是空的: 那种卡的问题**就是标题**(「想判断字符是字母或数字, 用哪个方法」),
-        // 标题已经在上面大字显示了, 这里不用再补一句废话
-        return this.d.front ? md(this.d.front) : '';
-      }
-      return this.d.description
-        || '<p class="hint">这题没有抓到题面(problem.html 是空的)。只能靠标题回忆 —— 或者跑 dashboard/fetch_desc.py 补抓。</p>';
-    },
-    // 拉详情的空档不能显示收尾屏 —— 会闪一下"今天没有到期的题"
-    showEmpty() { return !this.d && !this.loading; },
-    // 默写框只有语法卡有。题目牌组揭晓前的规矩是"不写代码"(见 askText), 它测的是
-    // 辨别力, 那边对应的是选择题 —— 两个牌组各有各的"揭晓前动一下手"。
-    canWrite() { return this.isSyntax; },
-    // 空白/只有空格的不算写过: 揭晓后就不必贴一个空框上去
-    mine() { return this.attempt.trim(); },
-    // 这张卡上的批注。题号在 jsonl 里是整数、语法卡 id 是字符串, 统一按字符串比
-    cardComments() {
-      if (!this.d) return [];
-      const id = String(this.d.id);
-      return this.comments.filter((c) => c.deck === this.deck && String(c.id) === id);
-    },
-    openComments() { return this.cardComments.filter((c) => c.status === 'open').length; },
-    showCmt() { return !this.readOnly && (this.cbox || this.cardComments.length > 0); },
-    // 选择题只有题目牌组有 —— 它测的是"该用哪个模板"的辨别力, 语法卡没有这个维度
-    hasQuiz() { return !this.isSyntax && (this.quiz.ideas.some((b) => b.state) || !!this.quiz.cx); },
-    quizBlocks() {
-      const b = [...this.quiz.ideas];
-      if (this.quiz.cx) b.push({ key: 'cx', label: '时间 / 空间复杂度？', state: this.quiz.cx });
-      return b;                                    // cx 关掉时整块不占位
-    },
-    verdict() {
-      if (!this.revealed) return { cls: '', text: '' };
-      // 多选要**恰好**选中全部正确项才算对: 漏一个、多一个都是错
-      const v = (st) => (!st || !st.pick.length ? ''
-        : st.pick.length === st.correct.length && st.pick.every((i) => st.correct.includes(i)) ? 'ok' : 'no');
-      const vs = [...this.quiz.ideas.map((b) => v(b.state)), v(this.quiz.cx)].filter(Boolean);
-      if (!vs.length) return { cls: '', text: '' };
-      const allOk = vs.every((x) => x === 'ok');
-      return {
-        cls: allOk ? 'ok' : 'no',
-        text: allOk ? '选择题全对' : `选择题错了 ${vs.filter((x) => x === 'no').length} 项`,
-      };
-    },
-    // 标签就是答案的一部分 —— 「用什么结构 / 什么范式」正是揭晓时该对照的东西
-    tagline() {
-      const tag = (label, arr) => (arr && arr.length ? `${label} <b>${esc(arr.join(' · '))}</b>` : '');
-      return [tag('结构', this.d.structures), tag('范式', this.d.paradigms)].filter(Boolean).join('　　')
-        || '<span class="rv-none">(还没打标签)</span>';
-    },
-    cxLine() {
-      const cx = (this.d && this.d.complexity) || {};
-      return [cx.time, cx.space].filter(Boolean).join('  /  ');
-    },
-    ideaHtml() {
-      if (this.isSyntax) {
-        return this.d.back
-          ? md(this.d.back)
-          : '<span class="rv-none">这张卡还没写背面 —— 点右边「改一下」补上</span>';
-      }
-      return this.d.answer
-        ? md(this.d.answer)
-        : '<span class="rv-none">还没写答案卡 —— 点右边「改一下」把刚才想的那套写进去</span>';
-    },
-    bodyHtml() {
-      const item = this.items[this.active];
-      if (!item) return '';
-      return item.code !== undefined ? `<pre><code>${highlightPython(item.code)}</code></pre>` : md(item.md);
-    },
-    preview() { return (this.d && this.d.fsrs_preview) || {}; },
-    emptyMsg() {
-      if (this.failMsg) return this.failMsg;
-      const unit = this.isSyntax ? '张' : '道';
-      const other = this.isSyntax ? 'problems' : 'syntax';
-      const rest = this.counts[other]
-        ? `<br><span class="hint">另一组「${DECK_LABEL[other]}」还有 ${this.counts[other]} ${other === 'syntax' ? '张' : '道'}到期 —— 点上面切过去</span>`
-        : '';
-      if (this.done) {
-        return `这一轮复习完了 —— 共 ${this.done} ${unit} 🎉`
-          + `<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>${rest}`;
-      }
-      return (this.isSyntax
-        ? '今天没有到期的语法卡 🎉<br><span class="hint">卡片写在 syntax/*.md 里, 一个 ## 一张 —— 加一张就会进队列</span>'
-        : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>') + rest;
-    },
-  },
-
-  methods: {
-    fmtInterval,                                   // 模板里要用
-
-    // 把当前队列快照发给后端存成 dashboard/session.json。队列仍然是每次开面板现算的,
-    // 快照里只有 deferred(今天押过队尾的)会被 start() 经 /api/review/carry 读回来。
-    // 失败了不影响复习, 顶多是关掉重开后押过的题回到原位。
-    syncSession() {
-      if (this.readOnly) return;                   // 只读站没有写接口
-      api('/api/review/session', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          open: this.open, deck: this.deck, mode: this.mode, done: this.done, total: this.total,
-          current: this.d ? this.d.id : null, queue: this.queue, deferred: this.deferred,
-        }),
-      }).catch(() => { /* 存不上就算了, 这不是数据源 */ });
-    },
-
-    // 队列每次现算, 但今天这一轮里有两类题不能因为关掉重开就走样(见 server.review_carry):
-    //   押过队尾的 -> 还在现算队列里, 挪回队尾;
-    //   今天最后一次评 1 的 -> due 已是明天, 现算里没有, 追加到队尾。
-    // 只动**现算队列里本来就有**或**牌组里还在**的 id —— 改了语法卡标题留下的旧 id 会被
-    // 自然滤掉, "关掉重开就好"那条恢复路径照旧有效。
-    async start() {
-      const deck = this.deck;
-      const gen = ++this.startGen;
-      this.counts = updateReviewBadge();
-      this.open = true;
-      this.d = null;
-      this.loading = true;                 // 拉 carry 期间别闪"没有到期的题"
-      this.loadComments();                 // 不等它: 批注是旁支, 慢了顶多晚一点显示
-      let carry = { deferred: [], again: [] };
-      if (!this.readOnly) {
-        try {
-          carry = await api(`/api/review/carry?deck=${deck}`);
-        } catch (e) {
-          console.error('[review] 拉今天的押队尾/评 1 记录失败, 按现算队列来', e);
-        }
-      }
-      // 等的时候又开了一次 / 切了牌组(都会再进 start(), 由新的那次接手), 或者已经关掉了
-      if (gen !== this.startGen || !this.open) return;
-      this.loading = false;
-      // 每天上限 review_cap 张(plan.json, 默认 10): 今天已经评过的先扣掉。
-      // 逾期堆得再多也不一次清 —— 多出来的留在明天的队列里, 不欠账也不补课。
-      const queue = buildQueue(this.mode, deck).slice(0, rvCapLeft(deck));
-      const inDeck = new Set(deckRows(deck).map((p) => p.id));
-      const deferred = (carry.deferred || []).filter((id) => inDeck.has(id));
-      // 押了好几次的按最后一次的先后排, 和会话内 push 到队尾的效果一致
-      const tail = [...new Set([...deferred].reverse())].reverse().filter((id) => queue.includes(id));
-      const again = (carry.again || []).filter((id) => inDeck.has(id) && !queue.includes(id));
-      this.queue = [...queue.filter((id) => !tail.includes(id)), ...tail, ...again];
-      this.done = 0;
-      this.total = this.queue.length;
-      this.deferred = deferred;             // 接着记, 不从零开始 —— 否则下次同步就把今天押过的冲掉了
-      this.next();
-    },
-
-    // 换牌组 = **重开一轮**, 不是重排队列: 两组的 id 空间都不一样(整数 vs 字符串),
-    // 混在一个 queue 里 next() 会拿着题号去语法卡里找。所以 done/total 一起清零。
-    setDeck(k) {
-      if (!DECKS.includes(k) || k === this.deck) return;
-      this.deck = k;
-      try { localStorage.setItem('rv-deck', k); } catch { /* 隐私模式 */ }
-      this.start();
-    },
-    close() {
-      this.open = false;
-      this.d = null;
-      this.editing = false;
-      this.syncSession();
-    },
-    toStats() { this.close(); openStats(); },
-
-    // 拉详情要是失败, 绝不能让 this.d / revealed 停在**上一道**题上 —— 那样卡面纹丝不动,
-    // 看着像前端卡死, 而 1-4 还照样响应, 于是每按一次就给上一道重复记一次复习。
-    // (真发生过: reviews.jsonl 里 #1 在 4 秒内被记了 6 次, #206 记了 4 次, stability
-    //  一路 8→60 天。) 所以: 先落下 revealed, 失败就把题号放回队头 + 走收尾屏说明白。
-    async next() {
-      this.note = '';
-      this.failMsg = '';
-      this.editing = false;
-      this.amsg = '';
-      this.attempt = '';                                 // 上一张写的别串到这张来
-      this.cbox = false; this.cdraft = '';               // 批注草稿同理
-      this.revealed = false;                             // 先落下答案, 再去拉
-      const id = this.queue.shift();
-      if (id === undefined) { this.d = null; return; }   // 队列空了 -> 收尾屏
-      // 语法卡整组在 /api/syntax 里一次拉完(几十张而已), 不需要逐张再请求一次 ——
-      // 所以这条路没有"拉详情失败"这种状态, 直接从内存里取。
-      let d = null;
-      if (this.isSyntax) {
-        d = SYNTAX.find((c) => c.id === id) || null;
-      } else {
-        this.loading = true;
-        try {
-          d = await api(`/api/problems/${id}`);
-        } catch (e) {
-          console.error('[review] 拉题详情失败', id, e);
-        } finally {
-          this.loading = false;
-        }
-      }
-      if (!d || d.id === undefined) {                    // 没拿到: id 放回队头, 不丢
-        this.queue.unshift(id);
-        this.d = null;
-        this.failMsg = this.isSyntax
-          ? `⚠ 队列里的「${esc(String(id))}」在 syntax/*.md 里找不到了<br>`
-            + `<span class="hint">多半是刚改了卡标题(改标题 = 换 id)。关掉重开就好</span>`
-          : `⚠ 拉 #${id} 的详情失败(服务没起? 看 console)<br>`
-            + `<span class="hint">这道题还在队列里 —— 关掉重开就接着问它</span>`;
-        this.syncSession();
-        return;
-      }
-      this.d = d;
-      this.quiz = buildQuiz(this.isSyntax ? {} : this.d);
-      this.active = 0;
-      this.$nextTick(() => { if (this.$refs.card) this.$refs.card.scrollTop = 0; });
-      this.syncSession();
-    },
-    // 只读站用: 没有评分按钮, 空格 = 下一题。busy 同 rate() —— 连按两下空格
-    // 会在上一道还没拉回来的时候再 shift 一个题号, 那道就被静默跳过了。
-    async skip() {
-      if (this.busy) return;
-      this.busy = true;
-      this.done++;
-      try { await this.next(); } finally { this.busy = false; }
-    },
-
-    // 换模式: 只重排**剩下**的题, 当前这道不动, done/total 也不重来
-    setMode(m) {
-      if (!RV_MODES.includes(m)) return;
-      this.mode = m;
-      try { localStorage.setItem('rv-mode', m); } catch { /* 隐私模式 */ }
-      const byId = new Map(deckRows(this.deck).map((p) => [p.id, p]));
-      this.queue = orderQueue(this.queue.map((id) => byId.get(id)).filter(Boolean), m, this.deck);
-      this.syncSession();
-    },
-
-    pick(state, i) {
-      if (this.revealed) return;                       // 揭晓后不能再改答案
-      const has = state.pick.includes(i);              // 再点一下取消
-      if (state.multi) state.pick = has ? state.pick.filter((x) => x !== i) : [...state.pick, i];
-      else state.pick = has ? [] : [i];                // 单选: 点别的就换过去
-    },
-    optClass(state, i) {
-      const picked = state.pick.includes(i), right = state.correct.includes(i);
-      if (!this.revealed) return { picked };
-      // missed 只在多选里标: 单选没选的那项本来就是"没作答", 不算漏
-      return { done: true, right, wrong: picked && !right, missed: state.multi && right && !picked };
-    },
-
-    reveal() {
-      if (!this.d || this.revealed || this.busy) return;
-      // 焦点还留在默写框里的话, 接下来的 1-4 会被 onKey 的 TEXTAREA 那道闸放行 ——
-      // 表现是"揭晓了但评不了分, 键盘像死了"。趁 DOM 还没重渲染(框是 v-if)先抬走焦点。
-      if (this.$refs.write && document.activeElement === this.$refs.write) this.$refs.write.blur();
-      if (this.$refs.cbox && document.activeElement === this.$refs.cbox) this.$refs.cbox.blur();
-      this.revealed = true;
-      // 语法卡的背面就是全部, 没有次要 tab —— items 留空, 模板里那一块整个不占位
-      this.items = this.isSyntax ? []
-        : [{ name: '📝 笔记', md: this.d.note || '_(还没写笔记)_' },
-           ...this.d.solutions.map((x) => ({ name: x.name, code: x.content }))];
-      this.active = 0;
-    },
-
-    // w = 跳进默写框。不自动 focus 是故意的 —— 一进卡就把焦点塞进 textarea 的话,
-    // 空格就成了打空格, 原来"空格揭晓"的手感整个没了。
-    focusWrite() {
-      if (this.$refs.write) this.$refs.write.focus();
-    },
-
-    // 就地改答案卡: 复习时脑子正热, 这时候压缩成一句话最准
-    startEdit() {
-      if (!this.revealed || this.readOnly) return;
-      this.draft = (this.isSyntax ? this.d.back : this.d.answer) || '';
-      this.editing = true;
-      this.$nextTick(() => this.$refs.aedit && this.$refs.aedit.focus());
-    },
-    cancelEdit() { this.editing = false; },
-
-    // 给 agent 的批注: 复习时只记「哪儿不对」, 不当场改 —— 攒进 dashboard/card-comments.jsonl,
-    // 之后跟 agent 说一句「处理卡片批注」统一改(见 .claude/skills/card-comments)。
-    // 和「改一下」的分工: 那个是自己一句话就能改完的; 这个是要查 note / 对全库口径 / 重写干扰项的。
-    async loadComments() {
-      if (this.readOnly) return;                   // 只读站不导出批注
-      try {
-        this.comments = (await api('/api/card-comments')).comments || [];
-      } catch (e) { console.error('[review] 拉卡片批注失败', e); }
-    },
-    openComment() {
-      if (!this.d || this.readOnly) return;
-      this.cbox = true;
-      this.$nextTick(() => {
-        if (this.$refs.cmt) this.$refs.cmt.scrollIntoView({ block: 'nearest' });
-        if (this.$refs.cbox) this.$refs.cbox.focus();
-      });
-    },
-    closeComment() {
-      if (this.$refs.cbox) this.$refs.cbox.blur();
-      this.cbox = false;
-    },
-    async sendComment() {
-      const text = this.cdraft.trim();
-      if (!text || !this.d) return;
-      let r;
-      try {
-        r = await api('/api/card-comments', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ deck: this.deck, id: this.d.id, title: this.d.title, text }),
-        });
-      } catch { r = null; }
-      if (!r || !r.ok) { this.note = `⚠ 批注没存上${r && r.error ? ': ' + r.error : '(服务没起?)'}`; return; }
-      this.comments.push(r.comment);
-      this.cdraft = '';
-      this.closeComment();
-    },
-    async dropComment(c) {
-      let r;
-      try {
-        r = await api('/api/card-comments', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ op: 'delete', cid: c.cid }),
-        });
-      } catch { r = null; }
-      if (!r || !r.ok) { this.note = `⚠ 没撤回${r && r.error ? ': ' + r.error : ''}`; return; }
-      this.comments = this.comments.filter((x) => x.cid !== c.cid);
-    },
-    async saveAnswer() {
-      if (!this.editing) return;
-      const content = this.draft;
-      // 语法卡的背面存回 syntax/<主题>.md 的对应行区间(见 syntax.save_back), 题目的存 answer.md
-      const req = this.isSyntax
-        ? ['/api/syntax/card', { id: this.d.id, content }]
-        : [`/api/problems/${this.d.id}/answer`, { content }];
-      let r;
-      try {
-        r = await api(req[0], {
-          method: 'PUT', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(req[1]),
-        });
-      } catch { r = null; }
-      if (!r || !r.ok) { this.amsg = '没存上(只读站?)'; return; }
-      if (this.isSyntax) this.d.back = content; else this.d.answer = content;
-      this.editing = false;
-      this.amsg = '已存 ✓';
-      setTimeout(() => { this.amsg = ''; }, 1500);
-    },
-
-    // 押到队尾: 不评分 / 不写 FSRS / 不算进度, 只把这道题挪到本次会话的最后再问一遍。
-    // 和评 1 的区别 —— 评 1 是**真的记一次复习**(写 reviews.jsonl, due 会变);
-    // 这里表达的是"现在没空细看", 不该污染调度数据。
-    defer() {
-      if (!this.d || this.busy) return;
-      if (!this.queue.length) {                        // 后面没题了, 挪了还是它
-        this.note = '⚠ 已经是本轮最后一道了 —— 队尾就在这儿';
-        return;
-      }
-      this.queue.push(this.d.id);                      // done/total 都不动: 这道题还欠着
-      this.deferred.push(this.d.id);
-      this.next();                                     // next() 里会同步给后端
-    },
-
-    // 暂停当前这道: 不评分, 从本轮队列里整个拿掉(押过队尾 / 评 1 追加的也一起), 以后也不再进队列,
-    // 直到在详情页取消勾选。和押队尾的区别 —— 押队尾是"等会儿再问", 这个是"这阵子都别问"。
-    async pause() {
-      if (!this.d || this.busy || this.isSyntax || this.readOnly) return;
-      const id = this.d.id;
-      this.busy = true;
-      let ok = false;
-      try { ok = (await putMeta(id, { paused: true })).ok; } catch { ok = false; }
-      if (!ok) {
-        this.busy = false;
-        this.note = '⚠ 没暂停成功(服务没起?) —— 这道还在';
-        return;
-      }
-      const p = PROBLEMS.find((x) => x.id === id);
-      if (p) p.paused = todayStr();
-      this.queue = this.queue.filter((x) => x !== id);
-      this.deferred = this.deferred.filter((x) => x !== id);
-      this.total = this.done + this.queue.length;   // 这道不再算进本轮
-      try {
-        buildPanel();
-        this.counts = updateReviewBadge();
-      } catch (e) { console.error('[review] 刷新看板失败', e); }
-      try { await this.next(); } finally { this.busy = false; }
-    },
-
-    // busy 是**去重闸**, 不是转圈动画: 一次评分要走 POST -> 刷看板 -> 再 GET 下一题,
-    // 这中间卡面还停在当前这道且 revealed=true, 手快按第二下就会给同一道题再记一次复习。
-    // 服务端每条都照单全收(reviews.jsonl 里 #1 连记 6 次那次就是这么来的), 只能前端拦。
-    async rate(r) {
-      if (!this.revealed || this.busy) return;
-      const id = this.d.id;
-      this.busy = true;
-      // 语法卡的 id 是 "主题/标题"(带中文和空格), 塞不进 URL 路径, 所以走 body
-      const req = this.isSyntax
-        ? ['/api/syntax/review', { id, rating: r }]
-        : [`/api/review/${id}`, { rating: r }];
-      let res;
-      try {
-        res = await api(req[0], {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(req[1]),
-        });
-      } catch { res = null; }
-      if (!res || !res.ok) {
-        this.busy = false;
-        // 只读站的 403 也走这里(static-shim 是 resolve 不是 reject)。写失败就**不推进**——
-        // 假装评过了会让这道题的调度悄悄丢一次, 比停下来更糟。
-        this.note = '⚠ 没记录下来(只读站或服务没起) —— 按「下一题」继续自测';
-        return;
-      }
-      // 就地更新内存里那一行, 免得为了一个 due 重拉整组。两个牌组的行是同形状的
-      // (语法卡的调度字段在 /api/syntax 里就摊平到顶层了), 所以这段不用分叉。
-      const p = deckRows(this.deck).find((x) => x.id === id);
-      if (p) {
-        p.due = res.card.due; p.reps = res.card.reps; p.stability = res.card.stability;
-        p.last_review = res.card.last_review; p.fsrs_state = res.card.state;
-        p.fsrs = res.card; p.fsrs_preview = res.preview;
-      }
-      if (r === 1) { this.queue.push(id); this.total++; }   // 忘了 -> 本次会话末尾再问一遍
-      REVIEWS = null;        // 历史多了一行, 让 📈 进度下次打开重新拉
-      this.done++;
-      // 看板重绘是**旁支**: 它抛了顶多是背后那屏没刷新, 不能连累复习推进 ——
-      // 以前这两行在 this.next() 前面裸调, 一抛就停在当前这道题上, 表现同上。
-      try {
-        buildPanel();
-        this.counts = updateReviewBadge();
-      } catch (e) { console.error('[review] 刷新看板失败', e); }
-      try { await this.next(); } finally { this.busy = false; }
-    },
-
-    // 键盘由 app.js 末尾那个全局 handler 转进来 —— 保持和其它 overlay 同一套分发顺序
-    onKey(e) {
-      // 批注框里: 只认 Ctrl+Enter 存, 其余键都是打字 —— 必须在默写框那条 Ctrl+Enter 揭晓**之前**
-      if (this.$refs.cbox && document.activeElement === this.$refs.cbox) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { this.sendComment(); return true; }
-        return false;
-      }
-      if (this.editing && (e.ctrlKey || e.metaKey) && e.key === 's') { this.saveAnswer(); return true; }
-      // 默写框里空格是空格, 所以另给一个揭晓键。这条必须在下面那道修饰键闸**之前**
-      if (!this.revealed && this.canWrite && (e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        this.reveal(); return true;
-      }
-      if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.keyCode === 229) return false;
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return false;
-      if (e.key === 'w' && !this.revealed && this.canWrite) { this.focusWrite(); return true; }
-      if (e.key === 'c' && !this.readOnly) { this.openComment(); return true; }
-      if (e.key === ' ') {
-        if (!this.revealed) this.reveal();
-        else if (this.readOnly) this.skip();     // 只读站没有评分按钮, 空格 = 下一题
-        // 本地站揭晓后不响应空格: 必须按 1-4, 防止手滑跳过一道没评分
-        return true;
-      }
-      if (e.key === '0') { this.defer(); return true; }
-      if (this.revealed && !this.readOnly && '1234'.includes(e.key)) { this.rate(+e.key); return true; }
-      return false;
-    },
-    onEsc() {
-      // 批注框里 Esc = 收起框, 草稿留在 cdraft 里(再按 c 还在)
-      if (this.$refs.cbox && document.activeElement === this.$refs.cbox) {
-        this.closeComment(); return;
-      }
-      // 在默写框里按 Esc 只退出输入框。直接关面板会把刚写的一起吞掉(attempt 不存盘),
-      // 而 Esc 恰恰是打字时最容易顺手按的那个键
-      if (this.$refs.write && document.activeElement === this.$refs.write) {
-        this.$refs.write.blur(); return;
-      }
-      if (this.editing) this.cancelEdit();
-      else this.close();
-    },
+// 复习面板和看板之间只走这一个口子(见 ReviewPanel.vue 的 ReviewHost)。
+// 全写成箭头函数: putMeta / PLAN 这些在文件更下面才声明, 现在就取值会撞上 TDZ。
+const RV = createApp(ReviewPanel, {
+  host: {
+    rows: (deck) => deckRows(deck),
+    queue: (mode, deck) => buildQueue(mode, deck).slice(0, rvCapLeft(deck)),
+    quiz: (d) => buildQuizFor(d, PROBLEMS),
+    md: (src) => md(src),
+    refresh: () => { buildGrid(); return updateReviewBadge(); },
+    badge: () => updateReviewBadge(),
+    putMeta: (id, body) => putMeta(id, body),
+    openStats: () => openStats(),
+    reviewsChanged: () => { REVIEWS = null; },
   },
 }).mount('#review-app');
 
@@ -1516,24 +618,10 @@ const RATE_LABEL = { 1: '忘了', 2: '勉强', 3: '想起来了', 4: '很熟' };
 const FORECAST_DAYS = 30;           // 到期预测往前看多远
 const HISTORY_DAYS = 30;            // 复习历史往回看多久
 
-// 全部按**本地日期**算, 和 todayStr() / server.py 的 today_str() 是同一套口径
-const dParse = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
-const dAdd = (s, n) => { const t = dParse(s); t.setDate(t.getDate() + n); return t.toLocaleDateString('sv'); };
-const mmdd = (s) => s.slice(5).replace('-', '/');
-
 // stability(天)的分桶: [上界(不含), 标签]。最后一档兜底。
 const SBUCKETS = [[1, '<1天'], [3, '1-3天'], [7, '3-7天'], [14, '1-2周'],
                   [30, '2-4周'], [90, '1-3月'], [180, '3-6月'], [Infinity, '>6月']];
 const sBucket = (d) => SBUCKETS.findIndex(([hi]) => d < hi);
-
-// 记忆强度和间隔都用它 —— fmtInterval 是给"下次什么时候"用的, 0 会说成"今天", 这里不合适
-function fmtDays(d) {
-  if (!d || d <= 0) return '—';
-  if (d < 1) return '<1 天';
-  if (d < 30) return `${d.toFixed(d < 10 ? 1 : 0)} 天`;
-  if (d < 365) return `${(d / 30).toFixed(1)} 个月`;
-  return `${(d / 365).toFixed(1)} 年`;
-}
 
 // 柱状图。cols: [{label, tip, on, n, parts:[{cls,n}]}]; 高度按全图最大值归一, 堆叠从下往上。
 // 柱子顶上默认写这一列的合计; 给了 c.n 就写它 —— 时间轴那张图每列合计都是全库题数,
@@ -1572,8 +660,6 @@ const slegend = (items) => `<div class="slegend">${items
 //
 // 分母是**题单 ∪ 仓库**: 没建文件夹的题也得占一格, 否则"未做"这一层就画不出来,
 // 曲线会变成"总量凭空长大", 而不是"未做在被吃掉"。
-const TL_MAX_DAYS = 120;      // 一列一天, 再长就挤不下了, 只画最近这些天
-const TL_GONE = 'gone';       // 还没建文件夹 = 未做
 let TL_MODE = 'L';            // 'L' 按熟练度档(原始的 L) | 'S' 按深度级(算出来的 S)
 
 // 每档 [key, cls, label]。数组顺序 = 堆叠顺序, 第一项在**最底下**(见 .col-bars 的 column-reverse)。
@@ -1590,49 +676,10 @@ const tlKey = (s) => (!s.exists ? TL_GONE
 
 // opts.ids   = 只**统计**这些题(其余照样跟着回放状态, 只是不计数) —— 配速图要的是某一层
 // opts.keyOf = 怎么把一道题的状态归档; 默认跟着 L/S 那个开关走
-function buildTimeline(opts = {}) {
-  const keyOf = opts.keyOf || tlKey;
-  const only = opts.ids || null;
-  const st = new Map();                       // id -> {fam, exists}, 先铺现状
-  for (const g of (PLAN?.groups || [])) for (const p of g.problems) st.set(p[0], { fam: null, exists: false });
-  for (const p of PROBLEMS) st.set(p.id, { fam: famOf(p), exists: true });
-
-  const evs = (EDITS || [])
-    .filter((e) => e.date && st.has(e.id) && (e.field === 'familiarity' || e.field === 'exists'))
-    .sort((a, b) => (a.ts || 0) - (b.ts || 0));
-  if (!evs.length) return null;
-
-  const set = (e, v) => {
-    const s = st.get(e.id);
-    if (e.field === 'exists') s.exists = !!v;
-    else s.fam = (v === null || v === undefined || v === '') ? null : Number(v);
-  };
-  for (let i = evs.length - 1; i >= 0; i--) set(evs[i], evs[i].from);   // 倒推到第一条事件之前
-
-  const today = todayStr();
-  const floor = dAdd(today, -(TL_MAX_DAYS - 1));
-  let start = dAdd(evs[0].date, -1);          // 多留一列: 什么都还没发生的样子
-  let i = 0;
-  if (start < floor) {                        // 太久远的那段直接快进掉, 只留最近的窗口
-    start = floor;
-    while (i < evs.length && evs[i].date < start) { set(evs[i], evs[i].to); i++; }
-  }
-  const days = [];
-  for (let d = start; d <= today; d = dAdd(d, 1)) {
-    while (i < evs.length && evs[i].date <= d) { set(evs[i], evs[i].to); i++; }
-    const c = {};
-    for (const [id, s] of st) {
-      if (only && !only.has(id)) continue;
-      const k = keyOf(s); c[k] = (c[k] || 0) + 1;
-    }
-    days.push({ date: d, c });
-  }
-  // 日志里全是未来日期(手改过时间戳之类)的话一天都取不到, 别让下面拿 days[-1]
-  return days.length ? { days, total: only ? only.size : st.size } : null;
-}
-
-// 按算出来的深度归档(不受 TL_MODE 那个开关影响) —— 配速图固定按 S 读
-const depthKey = (s) => (!s.exists ? TL_GONE : String(depthOf({ familiarity: s.fam })));
+const buildTimeline = (opts = {}) => buildTimelineFor({
+  planGroups: PLAN?.groups, problems: PROBLEMS, edits: EDITS,
+  keyOf: opts.keyOf || tlKey, ids: opts.ids || null,
+});
 
 function timelineHTML() {
   const tl = buildTimeline();
@@ -1899,7 +946,7 @@ async function addFromList(el, id) {
     return;
   }
   PROBLEMS = await api('/api/problems');
-  buildPanel();
+  buildGrid();
   renderLists();                      // 重画, 那一格会变成"已建待做"
 }
 
@@ -2045,7 +1092,7 @@ async function scaffoldForTodo(query, line, canon) {
   }
   if (!r || !r.ok) return flashTodo(r?.error || '拉题失败');
   PROBLEMS = await api('/api/problems');
-  buildPanel();
+  buildGrid();
   await loadTodo(false);                           // 重读, 别覆盖我在别处的改动
   const i = TODO_LINES.indexOf(line);              // 题名/裸题号那条补成 "编号 标题"
   if (canon && i >= 0 && TODO_LINES[i] !== `- [ ] ${r.id} ${r.title}`) {
@@ -2106,8 +1153,6 @@ function flashPaused(msg, ms = 2500) {
   PAUSED_MSG_T = setTimeout(() => ($('#paused-msg').textContent = ''), ms);
 }
 
-const daysSince = (d) => Math.round((new Date(todayStr()) - new Date(d)) / 864e5);
-
 function renderPaused() {
   const rows = PROBLEMS.filter((p) => p.paused)
     .sort((a, b) => a.paused.localeCompare(b.paused) || a.id - b.id);   // 停得最久的在上
@@ -2136,7 +1181,7 @@ async function setPaused(id, on) {
   try { ok = (await putMeta(id, { paused: on })).ok; } catch { ok = false; }
   if (!ok) return flashPaused('没存上(服务没起?)');
   PROBLEMS = await api('/api/problems');           // 恢复会改 due, 得重拉
-  buildPanel();
+  buildGrid();
   updateReviewBadge();                             // 里面顺带 renderPaused
   flashPaused(on ? `#${id} 已暂停` : `#${id} 已恢复 ✓`);
 }
@@ -2162,17 +1207,12 @@ function togglePausedPop() {
   $('#paused-in').focus();
 }
 
-function esc(s) {
-  return String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-}
-
 // ---- 坐标系 view: coverage (tier) × depth (stage) ----
 // tier  = how far the题单 is spread (75 / 110 / 135)
 // stage = how well each problem is held (S1 思路 / S2 写得对 / S3 讲得清)
 // a cell counts problems at that stage *or deeper*, so S3 also feeds S1 and S2.
 let PLAN = null;   // dashboard/plan.json — the curriculum, hand-edited
 const tierName = (t) => (PLAN.tiers.find((x) => x.t === t) || {}).name || `第 ${t} 层`;
-let VIEW = 'board';
 
 // 深度不另存: 由每题 meta.json 的 familiarity 算出来。一个字段, 一条阶梯:
 //   L0 英语讲得清                      -> S3 讲得清 (面试门槛)
@@ -2182,15 +1222,6 @@ let VIEW = 'board';
 // 阶梯是有序的, 所以 S3 ⊂ S2 ⊂ S1 由构造保证 —— 讲得清的题必然也写得对,
 // 不会出现"讲得出但写不对"的题混进 S2 那一列(而 S2 正是判断能不能做 OA 的那列)。
 const byId = () => new Map(PROBLEMS.map((p) => [p.id, p]));
-function depthOf(rec) {
-  if (!rec) return 0;
-  const L = famOf(rec);
-  if (L === null) return 0;       // 未评 —— 不能落进下面任何区间
-  if (L <= 0) return 3;           // L0 讲得清
-  if (L <= 2) return 2;           // L1 / L1.5 / L2 —— 都是"跑得过", 够 OA 门槛
-  if (L <= 3) return 1;           // L3 思路大概知道 —— S1 的下界就划在这儿
-  return 0;                       // L3.5 / L4 —— 方向感不算"思路清楚", 够不着 S1
-}
 
 
 const parseDay = (s) => { const a = s.split('-').map(Number); return new Date(a[0], a[1] - 1, a[2]); };
@@ -2270,19 +1301,6 @@ function gridFolds() {
 // 开不开新题当场自己判断。
 // 会员题单独摘出来, 不算进"该做还没做": 它们做不掉, 混在缺口里每次看都像背着一笔还不了的债。
 // 口径跟 dashboard/progress.py 一字不差 —— 那边是同一张表的命令行版。
-function ledgerOf(rows, premium) {
-  const t = { n: rows.length, seen: 0, touched: 0, s2: 0, debt: 0, absent: 0, prem: 0 };
-  for (const p of rows) {
-    if (!p.rec) { premium.has(p.id) ? t.prem++ : t.absent++; continue; }
-    t.seen++;                       // 见过 = 建了文件夹, 含已经摸过的
-    const L = famOf(p.rec);
-    if (L === null) continue;       // 建了但没评 —— 停在地板上
-    t.touched++;
-    if (L <= 2) t.s2++; else t.debt++;
-  }
-  return t;
-}
-
 function ledgerSection(all) {
   // 会员名单在 lists.json 里。拉不到的时候**说出来** —— 那 6 道会静默混进「没建」,
   // 数字错了却一切正常的样子, 比少画一列糟得多。
@@ -2302,21 +1320,15 @@ function ledgerSection(all) {
   const body = PLAN.tiers.map((tr) =>
     line(tierName(tr.t), all.filter((p) => p.tier === tr.t))).join('');
   return `<section class="gr-sec">
-    <div class="gr-sec-h"><h2><span class="gr-sec-n">≡</span>账本</h2>
-      <p>上面那张格子是<b>累计</b>的，一道题同时计进好几列；这张四档<b>互斥</b>，横着加起来就是题数。
-      它多出来的那列是<b>欠账</b> —— 摸过但没到 L2 的题。格子把 L3 算进 S1，所以矩阵上看着有进度的题，
-      离「写得对」其实还差一档，欠账就是那批。数字涨 = 在囤题，掉 = 在消化；不设阈值，开不开新题自己判断。
-      会员题做不掉，单独一列，不算缺口。</p></div>
+    <div class="gr-sec-h"><h2 title="互斥: 每题只落一格, 横着加起来 = 共。口径同 python dashboard/progress.py">账本</h2></div>
     <table class="gr-led">
-      <thead><tr><th></th><th>共</th><th>见过</th><th>摸过</th><th>S2</th>
-        <th class="gr-led-debt">欠账</th><th>没建</th><th class="gr-led-prem">会员</th></tr></thead>
+      <thead><tr><th></th><th>共</th><th title="建了文件夹">见过</th><th title="评过熟练度">摸过</th><th title="L0–L2">S2</th>
+        <th class="gr-led-debt" title="摸过但还没到 L2">欠账</th><th>没建</th>
+        <th class="gr-led-prem" title="LeetCode 会员题, 做不掉, 不算缺口">会员</th></tr></thead>
       <tbody>${body}</tbody>
       <tfoot>${line('合计', all, 'gr-led-sum')}</tfoot>
     </table>
-    <p class="gr-note">${noPrem ? '<b class="gr-led-warn">lists.json 没拉到</b>，会员题这列空着，'
-      + '那几道暂时混在「没建」里 —— Sync 一下再看。<br>' : ''}同一张表的命令行版:
-      <span class="mono">python dashboard/progress.py</span>
-      （加 <span class="mono">--debt</span> 列出每一道欠账题，<span class="mono">--todo</span> 列出没建的）。</p>
+    ${noPrem ? '<p class="gr-led-warn">lists.json 没拉到: 会员题暂时混在「没建」里 —— Sync 一下再看</p>' : ''}
   </section>`;
 }
 
@@ -2367,14 +1379,13 @@ function buildGrid() {
   const spanOf = (ph) => md_(parseDay(ph.from)) + (ph.to ? ' – ' + md_(parseDay(ph.to)) : ' 起');
   const daysLeft = (ph) => (ph.to ? Math.max(0, Math.round((parseDay(ph.to) - today) / 864e5)) : null);
 
-  $('#sub').textContent = '覆盖 × 深度 · NeetCode 150';
-  $('#count').textContent =
-    `S2 ${all.filter((p) => p.depth >= 2).length}/${all.length} · 阶段 ${live.n}`;
+  $('#sub').textContent = `阶段 ${live.n} · ${live.name}${daysLeft(live) !== null ? ` · 剩 ${daysLeft(live)} 天` : ''}`;
+  $('#sub').title = [spanOf(live), live.hrs, live.goal, live.adds].filter(Boolean).join('\n');
+  $('#count').textContent = `S2 ${all.filter((p) => p.depth >= 2).length}/${all.length}`;
 
   // --- 里程碑: 原来的概览条 + 时间线 + 里程碑三块并成一条轴。
   // 阶段是底色色段, 里程碑是轴上的点, 今天是一根竖线; 下面一排卡片是每个点的 n/N。
   // 阶段目标格(PLAN.targets)不再单列 —— 它们和最后一个里程碑说的是同一个数。
-  const dl = daysLeft(live);
   const todayS = todayStr();
   const MS = PLAN.milestones || [];
   const cur = curMilestone();
@@ -2382,12 +1393,12 @@ function buildGrid() {
     const { N, n, pct, label } = goalOf(all, x);
     const days = Math.round((parseDay(x.date) - today) / 864e5);
     const st = n >= N ? 'met' : x.date < todayS ? 'missed' : 'open';
-    return `<div class="gr-ms ${st}${x === cur ? ' cur' : ''}">
-      <div class="gr-ms-d">${esc(mmdd(x.date))}<small>${
-        st === 'met' ? '✓' : days >= 0 ? `还有 ${days} 天` : `过了 ${-days} 天`}</small></div>
-      <div class="gr-ms-b"><div class="gr-ms-t">${esc(x.focus || label)}</div>
-        <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
-        <div class="gr-ms-n"><b>${n}</b>/${N} · ${esc(label)} → S${x.stage}${x.mock ? ' · ' + esc(x.mock) : ''}</div></div></div>`;
+    return `<div class="gr-ms ${st}${x === cur ? ' cur' : ''}"
+        title="${esc(x.focus || label)} · ${esc(label)} → S${x.stage}${x.mock ? ' · ' + esc(x.mock) : ''}">
+      <span class="gr-ms-d">${esc(mmdd(x.date))}</span>
+      <div class="gr-hg-bar"><i class="s${x.stage}" style="width:${pct}%"></i></div>
+      <span class="gr-ms-n"><b>${n}</b>/${N}</span>
+      <small>${st === 'met' ? '✓' : days >= 0 ? `${days} 天` : `过 ${-days} 天`}</small></div>`;
   }).join('');
   // 轴的两端: 第一段开始 → 最后一个有日期的点(阶段结束日 / 里程碑)再多 10 天, 给没有结束日的那段留个尾巴
   const ends = PLAN.phases.map((p) => p.to).concat(MS.map((x) => x.date)).filter(Boolean).sort();
@@ -2407,13 +1418,10 @@ function buildGrid() {
         title="${esc(x.date)} · ${esc(x.focus || '')} · ${n}/${N}"><i></i><span>${esc(mmdd(x.date))}</span></div>`;
   }).join('');
   const msSec = `<section class="gr-sec">
-    <div class="gr-sec-h"><h2><span class="gr-sec-n">1</span>里程碑</h2>
-      <p><b>阶段 ${live.n} · ${esc(live.name)}</b>　${spanOf(live)} · ${esc(live.hrs)}${
-        dl !== null ? ` · <b class="ms-left">剩 ${dl} 天</b>` : ''}　${esc(live.adds)}</p></div>
+    <div class="gr-sec-h"><h2>里程碑</h2></div>
     <div class="ms-axis">${segs}${ticks}
       <div class="ms-today" style="left:${pos(today)}%"><span>今天</span></div></div>
     ${ms ? `<div class="gr-ms-row">${ms}</div>` : ''}
-    <p class="gr-note">每两周对一次表，过了日期没到数的标红 —— 落后就砍下一段的尾巴，不压缩这一段。</p>
   </section>`;
 
   // --- the grid itself: tiers down, stages across ---
@@ -2424,17 +1432,17 @@ function buildGrid() {
   const SEEN = PLAN.seen || { t: '见过', d: '建了文件夹：题面已经抓到本地' };
   const seen = (t) => all.filter((p) => p.tier === t && p.rec).length;
   let m = '<div class="gr-matrix"><div></div>';
-  m += `<div class="gr-colh" data-s="seen"><span class="gr-colh-t">${esc(SEEN.t)}</span><span class="gr-colh-d">${esc(SEEN.d)}</span></div>`;
+  m += `<div class="gr-colh" data-s="seen" title="${esc(SEEN.d)}"><span class="gr-colh-t">${esc(SEEN.t)}</span></div>`;
   for (const st of PLAN.stages)
-    m += `<div class="gr-colh" data-s="${st.s}"><span class="gr-colh-t">${esc(st.t)}</span><span class="gr-colh-d">${esc(st.d)}</span></div>`;
+    m += `<div class="gr-colh" data-s="${st.s}" title="${esc(st.d)}"><span class="gr-colh-t">${esc(st.t)}</span></div>`;
   for (const tr of PLAN.tiers) {
     const N = size(tr.t);
     m += `<div class="gr-rowh">
-      <button class="gr-rowh-t" data-jump="${tr.t}" title="跳到下面「题目」里这一层的第一组">
+      <button class="gr-rowh-t" data-jump="${tr.t}"
+          title="${esc(tr.desc)}\n做完题单累计 ${esc(tr.cum)} · 点击跳到这一层的题">
         <b class="gr-tno">${tr.t}</b>
         <span class="gr-rowh-nm">${esc(tr.name)}<span class="gr-jump-x">▾</span></span>
-        <span class="gr-rowh-n">本层 ${N} 题 · 做完题单累计 ${esc(tr.cum)}</span></button>
-      <span class="gr-rowh-d">${esc(tr.desc)}</span></div>`;
+        <span class="gr-rowh-n">${N} 题</span></button></div>`;
     const sn = seen(tr.t), spct = N ? Math.round((sn / N) * 100) : 0;
     m += `<div class="gr-cell seen${sn ? '' : ' zero'}">
       <div class="gr-cell-top"><span class="gr-frac">${sn}<small>/${N}</small></span><span class="gr-pct">${spct}%</span></div>
@@ -2530,40 +1538,37 @@ function buildGrid() {
     if (grp.low) gl += add; else g += add;
   }
   if (X.byGroup.has(OTHER_GROUP)) gl += `<div class="gr-grp">
-      <div class="gr-grp-h"><h3>${OTHER_GROUP}</h3>
-        <span class="gr-sub">题单分类对不上上面任何一组的题 · 归组规则在 plan.json 的 extras</span></div>
+      <div class="gr-grp-h"><h3 title="题单分类对不上上面任何一组的题 · 归组规则在 plan.json 的 extras">${OTHER_GROUP}</h3></div>
       <div class="gr-xboxes">${xBoxes(OTHER_GROUP)}</div></div>`;
 
-  // 首屏只有两块: 里程碑 + 进度。其余(题目 / 攻坚 · Mock / 专题 / 格子 / 账本)折起来,
-  // 展开状态记在 localStorage, 下次还是那样。
+  // 首屏: KPI 一排 + 里程碑 + 计划 vs 实际。其余折起来, 展开状态记在 localStorage。
   const fold = (k, label, body) => `<details class="gr-more" data-fold="${k}"${
     gridFolds().has(k) ? ' open' : ''}><summary>${label}</summary>${body}</details>`;
+  const topics = topicsHTML();
   $('#grid-view').innerHTML = `
+    <section class="kpis" id="gr-kpi">${kpiHTML()}</section>
     ${msSec}
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">2</span>进度</h2>
-        <p>上面是<b>覆盖</b>：选中那条里程碑的计划线 vs 实际（只有升档才动）；下面是<b>本周额度</b>：只看做没做，不看做没做好。两个一起看才对得上。</p></div>
+      <div class="gr-sec-h"><h2>计划 vs 实际</h2></div>
       <div id="gr-pace"><p class="empty-hint">读取历史…</p></div>
-      <div id="gr-today" class="tk-week"><p class="empty-hint">读取打卡记录…</p></div>
+      <div id="gr-today"></div>
     </section>
-    ${fold('problems', `题目 · 按 pattern 分组（点方块翻熟练度，点题名开详情，<span class="mono">+</span> = 还没建文件夹）`, `
+    ${fold('problems', '题目', `
       ${g}
-      ${gl ? `<details class="gr-lowbox"><summary>低优先 / 已砍的组 · 其他题单补充</summary>${gl}</details>` : ''}`)}
-    ${fold('more', '其他：攻坚 · Mock · 专题 · 格子 · 账本', `
-    <section class="gr-sec" id="gr-drill"><p class="empty-hint">读取弱题 / mock…</p></section>
-    ${topicsHTML()}
+      ${gl ? `<details class="gr-lowbox"><summary>低优先 · 其他题单</summary>${gl}</details>` : ''}`)}
+    ${fold('drill', '攻坚 · Mock', '<section class="gr-sec" id="gr-drill"><p class="empty-hint">读取中…</p></section>')}
+    ${topics ? fold('topics', '专题', topics) : ''}
+    ${fold('cover', '覆盖', `
     <section class="gr-sec">
-      <div class="gr-sec-h"><h2><span class="gr-sec-n">▦</span>格子</h2><p>每格 = 该层里达到<b>该深度及以上</b>的题数 —— 一道 S3 的题同时计进见过、S1、S2 四列。首列「见过」只数文件夹，不看熟练度。层之间<b>不</b>累计：每题只属于一层。琥珀格 = 当前阶段该站的位置。</p></div>
+      <div class="gr-sec-h"><h2 title="累计: 每格 = 该层达到该深度及以上的题数, 一道 S3 的题同时计进见过/S1/S2/S3">格子</h2></div>
       ${m}
       <div class="gr-legend">
-        <span class="gr-key"><i class="sseen"></i>建了文件夹 · 见过</span>
-        <span class="gr-key"><i class="s0"></i>L4 / 未评 · 还没到 S1</span>
-        <span class="gr-key"><i class="s1"></i>L3 → S1 思路清楚</span>
-        <span class="gr-key"><i class="s2"></i>L1–L2 → S2 能写对</span>
-        <span class="gr-key"><i class="s3"></i>L0 → S3 讲得清</span>
+        <span class="gr-key"><i class="sseen"></i>见过</span>
+        <span class="gr-key"><i class="s0"></i>L4 / 未评</span>
+        <span class="gr-key"><i class="s1"></i>S1 · L3</span>
+        <span class="gr-key"><i class="s2"></i>S2 · L1–L2</span>
+        <span class="gr-key"><i class="s3"></i>S3 · L0</span>
       </div>
-      <p class="gr-note">S1→S2 是 OA 门槛，S2→S3 是面试门槛。S3 不是第三阶段才开始练 —— 阶段一就挑 15 题顺手讲，
-      否则会攒下一整个月「做得出但讲不清」的题。</p>
     </section>
     ${ledgerSection(all)}`)}`;
   $('#grid-view').querySelectorAll('details[data-fold]').forEach((el) =>
@@ -2576,9 +1581,6 @@ function buildGrid() {
   renderDrill();         // 异步: 要等 /api/weak + /api/mock
   renderPace();          // 异步: 要等 edits.jsonl
 }
-
-// 顺着"越来越熟"的方向走, 走到顶再回到未评
-const L_NEXT = { none: 4, 4: 3.5, 3.5: 3, 3: 2, 2: 1.5, 1.5: 1, 1: 0, 0: null };
 
 // 改标签的**唯一**出口(看板的熟练度菜单 / 详情页 / 坐标系上点方块都走这儿) ——
 // 服务器每次都会往 edits.jsonl 追一行, 所以顺手把时间轴的缓存作废。
@@ -2679,8 +1681,6 @@ const AT_META = {
   attack: { label: '攻坚',   cls: 'b-attack', tip: '弱题的变体簇 · 打卡后在详情页点「攻坚」' },
 };
 const AT_LANES = ['redo', 'new', 'attack'];   // 有额度的三份, 顺序 = 展示顺序
-const AT_ALL = ['redo', 'new', 'attack', 'warm'];
-const TD_STRIP_DAYS = 14;                 // 日课条下面那排小柱子往回看多久
 
 async function loadAttempts() {
   if (ATTEMPTS === null) {
@@ -2703,7 +1703,6 @@ function attemptCounts(date) {
 }
 
 // 一周从周一算。周课额度在 plan.json 的 phases[].weekly
-const weekStart = (d) => { const t = dParse(d); const k = (t.getDay() + 6) % 7; return dAdd(d, -k); };
 function weekCounts(date = todayStr()) {
   const c = { redo: 0, new: 0, warm: 0, attack: 0 };
   for (let d = weekStart(date); d <= date; d = dAdd(d, 1)) {
@@ -2718,74 +1717,91 @@ function weeklyQuota() {
   return { redo: +w.redo || 0, new: +w.new || 0, attack: +w.attack || 0 };
 }
 
+// ---- 首屏 KPI: 下个里程碑 / 超前落后 / 本周额度 / 今日复习 -----------------------
+// 数都是现算的, 和下面的里程碑卡 / 进度图同一套口径(goalOf / paceModel / weekCounts)。
+// EDITS / ATTEMPTS 懒加载, 没回来之前那两格先显示「…」, renderPace / renderToday 拉完会重画。
+function kpiHTML() {
+  if (!PLAN || PLAN.error) return '';
+  const all = planProblems();
+  const today = todayStr();
+  const tile = (k, v, sub, cls = '', attrs = '') => `<div class="kpi${cls ? ' ' + cls : ''}"${attrs}>
+      <span class="kpi-k">${k}</span><b class="kpi-v">${v}</b><span class="kpi-s">${sub}</span></div>`;
+
+  const cm = curMilestone();
+  let t1 = tile('下个里程碑', '—', '');
+  if (cm) {
+    const g = goalOf(all, cm);
+    const days = Math.round((dParse(cm.date) - dParse(today)) / 864e5);
+    const met = g.n >= g.N;
+    t1 = tile(`下个里程碑 · ${esc(mmdd(cm.date))}`, `${g.n}<small>/${g.N}</small>`,
+      met ? '已达标 ✓' : days >= 0 ? `剩 ${days} 天 · 差 ${g.N - g.n} 题` : `过了 ${-days} 天 · 差 ${g.N - g.n} 题`,
+      met ? 'met' : days < 0 ? 'behind' : '',
+      ` title="${esc(cm.focus || g.label)} · ${esc(g.label)} → S${cm.stage}"`);
+  }
+
+  let t2;
+  const pm = EDITS === null ? null : paceModel();
+  if (EDITS === null) t2 = tile('进度', '…', '');
+  else if (!pm || pm.error) t2 = tile('进度', '—', pm && pm.error === 'nohist' ? '还没有历史' : '');
+  else if (!pm.started) t2 = tile('进度', `${pm.gap}`, `还差 · ${esc(mmdd(pm.from))} 起跑`);
+  else {
+    t2 = tile(pm.ahead ? '超前' : '落后', `${pm.ahead ? '+' : '−'}${pcFmt(Math.abs(pm.delta))}`,
+      [pm.per > 0 ? `≈ ${pcFmt(Math.abs(pm.delta / pm.per))} 天` : '',
+        pm.need > 0 ? `要 ${pcFmt(pm.need)} 题/天` : '按计划走'].filter(Boolean).join(' · '),
+      pm.ahead ? 'ahead' : 'behind',
+      ` title="${esc(pm.label)} → S${pm.stage} · 今天应达 ${pcFmt(pm.planNow)} · 实际 ${pm.nowN}"`);
+  }
+
+  let t3;
+  if (ATTEMPTS === null) t3 = tile('本周', '…', '');
+  else {
+    const q = weeklyQuota(), c = weekCounts(today);
+    const wkLeft = 7 - Math.round((dParse(today) - dParse(weekStart(today))) / 864e5);   // 含今天
+    const lane = (k) => {
+      const n = c[k], N = q[k];
+      const pct = N ? Math.min(100, Math.round((100 * n) / N)) : (n ? 100 : 0);
+      return `<div class="kpi-lane${N && n >= N ? ' met' : ''}" title="${esc(AT_META[k].tip)}">
+        <span>${esc(AT_META[k].label)}</span><i><u class="${AT_META[k].cls}" style="width:${pct}%"></u></i>
+        <em>${n}/${N}</em></div>`;
+    };
+    t3 = `<div class="kpi kpi-week" title="巩固 ${c.warm} 道(以前做过、打卡时已 L0–L2, 不占额度)">
+      <span class="kpi-k">本周 · 剩 ${wkLeft} 天</span>
+      <div class="kpi-lanes">${AT_LANES.map(lane).join('')}</div></div>`;
+  }
+
+  // 「最低日」并进这一格: 两个牌组都刷到上限(或刷空)就算今天没断
+  const left = Math.min(deckDue('problems'), rvCapLeft('problems')) + Math.min(deckDue('syntax'), rvCapLeft('syntax'));
+  const rated = reviewedToday('problems') + reviewedToday('syntax');
+  const t4 = tile('今日复习', left ? `${left}<small> 张</small>` : '✓',
+    left ? `已评 ${rated} · 点这里开始 →` : `已评 ${rated} 张`,
+    left ? 'go' : 'met', ` data-review="1" role="button" tabindex="0" title="每个牌组每天上限 ${rvCap()} 张"`);
+
+  return t1 + t2 + t3 + t4;
+}
+
+function renderKpi() {
+  const box = $('#gr-kpi');
+  if (box) box.innerHTML = kpiHTML();
+}
+
+// 今天打过卡的题。用 .gr-chip 的壳, 点一下开详情这件事就白捡了(#grid-view 那个委托监听)
 function todayHTML() {
   const today = todayStr();
-  const q = weeklyQuota();
-  const c = weekCounts(today);
   const recs = byId();
-  const wk0 = weekStart(today);
-  const wkLeft = 7 - Math.round((dParse(today) - dParse(wk0)) / 864e5);   // 含今天
-
-  const lane = (k) => {
-    const n = c[k], N = q[k];
-    const pct = N ? Math.min(100, Math.round((100 * n) / N)) : (n ? 100 : 0);
-    const met = N ? n >= N : true;
-    return `<div class="td-lane${met ? ' met' : ''}">
-      <div class="td-lane-h"><b>${esc(AT_META[k].label)}</b><span class="hint">${esc(AT_META[k].tip)}</span></div>
-      <div class="td-lane-n"><b>${n}</b><small>/${N}</small><span class="td-gap${met ? ' met' : ''}">${
-        N === 0 ? '这阶段不排' : n >= N ? '本周达标 ✓' : '本周还差 ' + (N - n) + ' 题'}</span></div>
-      <div class="td-bar"><i class="${AT_META[k].cls}" style="width:${pct}%"></i></div></div>`;
-  };
-
-  // 今天打过卡的题。用 .gr-chip 的壳, 点一下开详情这件事就白捡了(#grid-view 那个委托监听)
   const done = (ATTEMPTS || []).filter((a) => a.date === today).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+  if (!done.length) return '';
   const chips = done.map((a) => {
     const rec = recs.get(a.id);
     const L = rec ? famOf(rec) : null;
     const famTxt = (a.fam === null || a.fam === undefined) ? '未评' : 'L' + a.fam;
     return `<button class="gr-chip td-chip ${esc(a.kind)}" data-id="${a.id}"
-        title="${esc(AT_META[a.kind] ? AT_META[a.kind].label : a.kind)} · 打卡时 ${esc(famTxt)} — 点击打开题目">
+        title="${esc(AT_META[a.kind] ? AT_META[a.kind].label : a.kind)} · 打卡时 ${esc(famTxt)}">
         <span class="gr-st s${depthOf(rec)}">${esc(famInfo(L).short)}</span>
         <span class="gr-id">${a.id}</span>
         <span class="gr-nm">${esc(rec ? rec.title : '')}</span></button>`;
   }).join('');
-
-  const cols = [];
-  const win = { redo: 0, new: 0, warm: 0, attack: 0 };   // 图例只数这排柱子看得见的那几天
-  for (let i = TD_STRIP_DAYS - 1; i >= 0; i--) {
-    const d = dAdd(today, -i);
-    const cc = attemptCounts(d);
-    for (const k of AT_ALL) win[k] += cc[k];
-    const hit = AT_ALL.filter((k) => cc[k]);
-    cols.push({
-      label: i === 0 ? '今天' : (i % 5 === 0 ? mmdd(d) : ''),
-      on: i === 0,
-      tip: `${d}${i === 0 ? ' (今天)' : ''} · ` + (hit.length
-        ? hit.map((k) => `${AT_META[k].label} ${cc[k]}`).join(' · ') : '没打卡'),
-      parts: AT_ALL.map((k) => ({ cls: AT_META[k].cls, n: cc[k] })),
-    });
-  }
-
-  // 最低日: 只要把今天的闪卡刷到上限(或刷空), 这一天就算没断
-  const cap = rvCap();
-  const done_ = reviewedToday('problems') + reviewedToday('syntax');
-  const left = Math.min(deckDue('problems'), rvCapLeft('problems')) + Math.min(deckDue('syntax'), rvCapLeft('syntax'));
-  const minMet = left === 0;            // 刷到上限, 或者今天本来就没有到期的
-  const minDay = `<div class="td-min${minMet ? ' met' : ''}">
-      <span class="td-min-k">最低日</span>
-      <b>${minMet ? '今天已达标 ✓' : `闪卡还剩 ${left} 张`}</b>
-      <span class="hint">今天评过 ${done_} 张 · 每个牌组上限 ${cap} 张/天 · ${esc(PLAN.min_day || '')}</span></div>`;
-  return `<div class="pc-sub-h"><b>本周额度</b>
-      <span class="hint">${esc(mmdd(wk0))} 周一起 · 还剩 ${wkLeft} 天 · 错过的不补 · 做成什么样在详情页打卡后补，喂弱题列表</span></div>
-    ${minDay}
-    <div class="td-lanes">${AT_LANES.map(lane).join('')}
-      <div class="td-side">
-        <div class="td-side-k">巩固</div>
-        <div class="td-side-n">${c.warm}</div>
-        <div class="td-side-d">以前做过、打卡时已 L0–L2，<br>记下来但不占额度</div></div></div>
-    ${done.length ? `<div class="td-done"><span class="td-done-k">今天打过卡</span>
-      <div class="gr-chips td-chips">${chips}</div></div>` : ''}
-`;
+  return `<div class="td-done"><span class="td-done-k">今天打过卡</span>
+      <div class="gr-chips td-chips">${chips}</div></div>`;
 }
 
 // ---- 攻坚 + mock ---------------------------------------------------------------
@@ -2831,14 +1847,13 @@ function drillHTML() {
   const wrow = (r) => `<div class="dr-w">
       ${chip(r.id, r.title)}
       <span class="dr-why">${esc(r.why)}</span>
-      ${r.pit ? `<span class="dr-pit"><b>坑</b>${esc(r.pit)}</span>` : '<span class="dr-pit none">还没写坑 —— 打开题目在「坑」里写一行</span>'}
+      ${r.pit ? `<span class="dr-pit"><b>坑</b>${esc(r.pit)}</span>` : '<span class="dr-pit none" title="打开题目在「坑」里写一行">没写坑</span>'}
       ${r.cluster ? `<span class="dr-cl" title="同簇另外两道不同的题 clean 就关掉">${esc(r.cluster)} ${r.cluster_clean.length}/2</span>`
         : '<span class="dr-cl none" title="挂了簇才能靠变体关掉">没挂簇</span>'}</div>`;
   const weak = `<div class="dr-col">
-      <div class="pc-sub-h"><b>弱题 · 还开着 ${W.open.length} 道</b>
-        <span class="hint">已关 ${W.closed.length} 道 · 进度看这个数在不在缩短，不看 L 值</span></div>
-      ${W.open.length ? W.open.map(wrow).join('') : '<p class="empty-hint">没有开着的弱题 —— 攻坚额度这周还给新题。</p>'}
-      <p class="gr-note">关掉：同簇另外两道 clean，或之后重做 clean。同一题连 3 次不 clean 就换变体。</p></div>`;
+      <div class="pc-sub-h" title="关掉: 同簇另外两道 clean, 或之后重做 clean。同一题连 3 次不 clean 就换变体">
+        <b>弱题 · 开着 ${W.open.length}</b><span class="hint">已关 ${W.closed.length}</span></div>
+      ${W.open.length ? W.open.map(wrow).join('') : '<p class="empty-hint">没有开着的弱题</p>'}</div>`;
 
   // mock
   const cur = (MOCKS || []).slice().reverse().find(mockOpen);
@@ -2852,17 +1867,17 @@ function drillHTML() {
     };
     mock = `<div class="dr-mock-cur">
         <div class="dr-mock-h"><b>这一轮 · ${esc(cur.date.slice(5))}</b>
-          <span id="mock-timer" class="dr-timer" data-ts="${cur.ts}" data-min="${cur.minutes}"></span>
+          <span id="mock-timer" class="dr-timer" data-ts="${cur.ts}" data-min="${cur.minutes}"
+            title="每题 ${cur.minutes} 分钟, 这是整轮的总时长 · 不看笔记题解, 先写下判断的范式再开写"></span>
           <button class="dr-drop" data-drop="${esc(cur.mid)}" title="抽错了/没开始做: 撤掉这一轮, 题放回池子">作废</button></div>
         ${cur.problems.map((p) => `<div class="dr-mp">
           <a href="${lcUrl(p)}" target="_blank" rel="noopener"><b>${p.id}</b> ${esc(p.title)}</a>
           <span class="hint">${esc(p.src || '')}</span>
           <span class="dr-yns">AC ${yn(p, 'ac', true, '✓')}${yn(p, 'ac', false, '✗')}
-            　范式 ${yn(p, 'pattern', true, '✓')}${yn(p, 'pattern', false, '✗')}</span></div>`).join('')}
-        <p class="gr-note">每题 ${cur.minutes} 分钟（计时器是这一轮的总时长），不看笔记、不看题解。先写下你判断的范式再开写。计时只是显示，到点自己停。</p></div>`;
+            　范式 ${yn(p, 'pattern', true, '✓')}${yn(p, 'pattern', false, '✗')}</span></div>`).join('')}</div>`;
   } else {
-    mock = `<div class="dr-mock-cur"><button id="mock-draw" class="dr-draw">抽 ${esc(String((PLAN.mock || {}).count || 2))} 道没见过的题</button>
-      <p class="gr-note">${esc((PLAN.mock || {}).note || '')}</p></div>`;
+    mock = `<div class="dr-mock-cur"><button id="mock-draw" class="dr-draw" title="${esc((PLAN.mock || {}).note || '')}"
+      >抽 ${esc(String((PLAN.mock || {}).count || 2))} 道没见过的题</button></div>`;
   }
   const weeks = mockWeeks();
   const pct = (a, b) => (b ? Math.round((100 * a) / b) + '%' : '—');
@@ -2871,11 +1886,8 @@ function drillHTML() {
       <td>${w.ac}/${w.n} <small>${pct(w.ac, w.n)}</small></td><td>${w.pat}/${w.patN} <small>${pct(w.pat, w.patN)}</small></td></tr>`).join('')
   }</tbody></table>` : '<p class="empty-hint">还没做过 mock。</p>';
 
-  return `<div class="gr-sec-h"><h2><span class="gr-sec-n">↯</span>攻坚 · Mock</h2>
-      <p>覆盖之外的两个数：弱题还开着几道 · 没见过的题能不能做对。mock 挂在哪类，下周补哪类。</p></div>
-    <div class="dr-grid">${weak}
-      <div class="dr-col"><div class="pc-sub-h"><b>Mock · 随机两题</b>
-        <span class="hint">每周 1 次 · 只记 AC 和范式判断</span></div>${mock}${hist}</div></div>`;
+  return `<div class="dr-grid">${weak}
+      <div class="dr-col"><div class="pc-sub-h" title="每周 1 次 · 只记 AC 和范式判断"><b>Mock</b></div>${mock}${hist}</div></div>`;
 }
 
 // ---- 专题(plan.topics): 按小节排的一组题, 不计进 NC150 进度、mock 不抽 ---------------
@@ -2904,9 +1916,7 @@ function topicsHTML() {
         <div class="gr-chips">${ordered(x).map(([id, tt]) => chip(id, tt, id === x.key)).join('')}</div></div>`).join('')}
     </details>`;
   };
-  return `<section class="gr-sec"><div class="gr-sec-h"><h2><span class="gr-sec-n">◆</span>专题</h2>
-      <p>针对具体公司 / 岗位的题组，写在 plan.json 的 topics。不计进 NeetCode 150 进度，mock 也不抽。</p></div>
-    ${T.map(one).join('')}</section>`;
+  return `<section class="gr-sec">${T.map(one).join('')}</section>`;
 }
 
 function tickMock() {
@@ -2979,6 +1989,7 @@ async function renderToday() {
   await loadAttempts();
   const box = $('#gr-today');        // 等这一下的功夫可能已经切走/重画了
   if (box) box.innerHTML = todayHTML();
+  renderKpi();
 }
 
 // ---- 进度: 选中那条里程碑链, 计划折线 vs 实际 --------------------------------
@@ -2990,28 +2001,20 @@ let PACE_SEL = null;                 // msKey; null = 跟着当前里程碑走
 
 const pcFmt = (n) => n.toFixed(1).replace(/\.0$/, '');
 
-function paceHTML() {
-  if (!PLAN || PLAN.error) return '';
+function paceModel() {
+  if (!PLAN || PLAN.error) return null;
   const chains = msChains();
-  if (!chains.length) return '<p class="empty-hint">plan.json 里没有 milestones，没有可对的计划。</p>';
+  if (!chains.length) return { error: 'nochain', chains };
   const cm = curMilestone();
   const sel = chains.find((c) => c.k === PACE_SEL) || chains.find((c) => cm && c.k === msKey(cm)) || chains[0];
   const all = planProblems();
   const x0 = sel.pts[0];
-  const label = goalOf(all, x0).label;
-  const tabs = chains.length > 1 ? `<div class="groupby pc-tabs">${chains.map((c) =>
-    `<button class="gb-btn${c.k === sel.k ? ' on' : ''}" data-pace="${esc(c.k)}"
-       >${esc(goalOf(all, c.pts[0]).label)} → S${c.pts[0].stage}</button>`).join('')}</div>` : '';
-
-  const rows = all.filter((p) => p.tier === x0.tier && (!x0.groups || x0.groups.includes(p.grp)));
-  const ids = new Set(rows.map((p) => p.id));
   const stage = x0.stage;
+  const rows = all.filter((p) => p.tier === x0.tier && (!x0.groups || x0.groups.includes(p.grp)));
   const nowN = goalOf(all, x0).n;                        // 今天的真实值, 直接来自 /api/problems
-  const tl = buildTimeline({ ids, keyOf: depthKey });
-  if (!tl) {
-    return `${tabs}<p class="empty-hint">dashboard/edits.jsonl 还没有可用的历史，画不出实际线。<br>
-      <span class="hint">跑 <code>python dashboard/backfill_edits.py --write</code> 从 git 里把历史补回来。</span></p>`;
-  }
+  const m = { chains, sel, all, rows, stage, nowN, label: goalOf(all, x0).label };
+  const tl = buildTimeline({ ids: new Set(rows.map((p) => p.id)), keyOf: depthKey });
+  if (!tl) return { ...m, error: 'nohist' };
   // 达到 stage 及以上 = 深度桶 stage..3 之和(和格子里那个"及以上"同一个口径)
   const reached = (c) => [1, 2, 3].reduce((n, s) => n + (s >= stage ? (c[String(s)] || 0) : 0), 0);
   const hist = new Map(tl.days.map((d) => [d.date, reached(d.c)]));
@@ -3022,7 +2025,7 @@ function paceHTML() {
   const from = sel.from, end = sel.pts[sel.pts.length - 1].date;
   const ix = (d) => Math.round((dParse(d) - dParse(from)) / 864e5);
   const span = ix(end);
-  if (span <= 0) return `${tabs}<p class="empty-hint">里程碑日期早于起点 ${esc(from)}，检查 plan.json。</p>`;
+  if (span <= 0) return { ...m, error: 'span', from };
   const cur = ix(today);                                 // < 0 = 还没起跑, > span = 链已经走完
   const started = cur >= 0;
   const base = started ? at(from) : nowN;
@@ -3044,11 +2047,31 @@ function paceHTML() {
   const nx = sel.pts.find((x) => x.date >= today) || sel.pts[sel.pts.length - 1];
   const nxN = goalOf(all, nx).N;
   const nxLeft = Math.max(1, ix(nx.date) - ci);
-  const need = Math.max(0, (nxN - nowN) / nxLeft);
   const delta = nowN - planAt(ci);
-  const per = slopeAt(ci);
-  const ahead = delta >= 0;
+  return Object.assign(m, {
+    today, from, end, ix, span, cur, started, base, plan, planAt, ci, act, nx, nxN, nxLeft,
+    need: Math.max(0, (nxN - nowN) / nxLeft), delta, per: slopeAt(ci), ahead: delta >= 0,
+    gap: Math.max(0, nxN - nowN), planNow: planAt(ci),
+  });
+}
 
+function paceHTML() {
+  const pm = paceModel();
+  if (!pm) return '';
+  if (pm.error === 'nochain') return '<p class="empty-hint">plan.json 里没有 milestones</p>';
+  const { chains, sel, all, stage } = pm;
+  const head = chains.length > 1
+    ? `<div class="groupby pc-tabs">${chains.map((c) =>
+      `<button class="gb-btn${c.k === sel.k ? ' on' : ''}" data-pace="${esc(c.k)}"
+         >${esc(goalOf(all, c.pts[0]).label)} → S${c.pts[0].stage}</button>`).join('')}</div>`
+    : `<span class="hint">${esc(pm.label)} → S${stage}</span>`;
+  if (pm.error === 'nohist') {
+    return `<div class="pc-head">${head}</div><p class="empty-hint">edits.jsonl 还没有历史 ——
+      <code>python dashboard/backfill_edits.py --write</code></p>`;
+  }
+  if (pm.error === 'span') return `<div class="pc-head">${head}</div><p class="empty-hint">里程碑日期早于起点 ${esc(pm.from)}</p>`;
+
+  const { today, from, ix, span, cur, started, base, plan, planAt, ci, act, nowN, ahead, rows } = pm;
   // --- SVG: 计划折线(虚) vs 实际(实), 里程碑是折线上的点, 今天那一列画出两者的差 ---
   // y 轴不从 0 起: 链上的题大半早就到了, 从 0 画的话整条线挤在顶上一条缝里
   const total = Math.max(rows.length, ...plan.map((p) => p[1]));
@@ -3073,6 +2096,7 @@ function paceHTML() {
   }).join('');
   const pts = act.map((v, i) => `${n2(x(i))},${n2(y(v))}`).join(' ');
   const svg = `<svg class="pc-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="里程碑计划 vs 实际">
+    <title>虚线 = 计划(起点 → 每个里程碑均摊) · 实线 = 实际(edits.jsonl 逐日回放) · 竖线 = 今天的差额</title>
     ${grid}
     ${started ? `<polygon class="pc-fill" points="${n2(x(0))},${n2(y(lo))} ${pts} ${n2(x(ci))},${n2(y(lo))}"/>` : ''}
     <polyline class="pc-plan" fill="none" points="${plan.map(([i, v]) => `${n2(x(i))},${n2(y(v))}`).join(' ')}"/>
@@ -3084,31 +2108,7 @@ function paceHTML() {
     ${msDots}
     ${xlbl}
   </svg>`;
-
-  const tile = (v, lab, sub, cls) => `<div class="pc-t${cls ? ' ' + cls : ''}">
-    <b>${esc(v)}</b><span>${esc(lab)}</span><em>${esc(sub)}</em></div>`;
-  const gap = Math.max(0, nxN - nowN);
-  const tiles = `<div class="pc-tiles">
-    ${tile(`${nowN}/${nxN}`, `已到 S${stage} · 对 ${mmdd(nx.date)}`, started ? `起点 ${base}（${mmdd(from)}）` : `${mmdd(from)} 起跑`)}
-    ${started
-      ? tile(pcFmt(planAt(ci)), '今天应达', `这一段计划 ${pcFmt(per)} 题/天`)
-      : tile(`${-cur} 天`, '还没起跑', `这条链从 ${mmdd(from)} 开始`)}
-    ${started
-      ? tile(`${ahead ? '+' : '−'}${pcFmt(Math.abs(delta))}`, ahead ? '超前' : '落后',
-          per > 0 ? `约 ${pcFmt(Math.abs(delta / per))} 天` : '—', ahead ? 'ahead' : 'behind')
-      : tile(`${gap}`, '还差', `到 ${mmdd(nx.date)} 的目标 ${nxN}`)}
-    ${tile(pcFmt(need), `到 ${mmdd(nx.date)} 要的节奏 题/天`, `还剩 ${nxLeft} 天 · 还差 ${gap} 题`)}
-  </div>`;
-
-  return `<div class="pc-head">${tabs}
-      <span class="hint">${esc(label)} → S${stage} · ${esc(mmdd(from))} – ${esc(mmdd(end))} · 历史自 ${esc(firstDay)} · 只有熟练度升档才会动</span></div>
-    ${tiles}${svg}
-    <div class="pc-legend">
-      <span class="pc-key"><i class="k-plan"></i>计划（起点 → 每个里程碑，折线均摊）</span>
-      <span class="pc-key"><i class="k-act"></i>实际（edits.jsonl 逐日回放）</span>
-      <span class="pc-key"><i class="k-ms"></i>里程碑</span>
-      <span class="pc-key"><i class="k-gap ${ahead ? 'ahead' : 'behind'}"></i>今天的差额</span>
-    </div>`;
+  return `<div class="pc-head">${head}</div>${svg}`;
 }
 
 // EDITS 是懒加载的(📈 进度那边也用它)。首屏先出里程碑, 历史拉回来再补这一段。
@@ -3122,28 +2122,17 @@ async function renderPace() {
   box.innerHTML = paceHTML();
   box.querySelectorAll('[data-pace]').forEach((b) =>
     b.addEventListener('click', () => { PACE_SEL = b.dataset.pace; renderPace(); }));
+  renderKpi();                          // 超前/落后那格跟着选中的链走
 }
 
-async function switchView(v) {
-  VIEW = v;
-  document.querySelectorAll('.view-tab').forEach((b) => b.classList.toggle('active', b.dataset.view === v));
-  $('#panel').classList.toggle('hidden', v !== 'board');
-  $('#grid-view').classList.toggle('hidden', v !== 'grid');
-  // 按结构/按范式、熟练度筛选只对矩阵视图有意义
-  $('#groupby').classList.toggle('hidden', v !== 'board');
-  $('#fam-filter').classList.toggle('hidden', v !== 'board');
-  try { localStorage.setItem('lc-view2', v); } catch (e) { /* private mode */ }
-  if (v === 'grid') {
-    if (!PLAN) PLAN = await api('/api/plan');
-    // 每组下面那几个题单框要用; 拉不到就只画 NeetCode 150, 不拦着坐标系
-    if (!LISTS) { try { LISTS = await api('/api/lists'); } catch { LISTS = null; } }
-    buildGrid();
-  } else {
-    buildPanel();
-  }
+// 坐标系要 plan.json; 每组下面那几个题单框要 lists.json —— 拉不到就只画 NeetCode 150
+async function loadPlan() {
+  if (!PLAN) PLAN = await api('/api/plan');
+  if (!LISTS) { try { LISTS = await api('/api/lists'); } catch { LISTS = null; } }
 }
 
 async function reload() {
+  await loadPlan();
   PROBLEMS = await api('/api/problems');
   // 语法牌组拉失败不能连累看板(只读站没导出这个文件时就会走到这) —— 空数组即可,
   // 队列自然是 0, 徽章上只剩题目那边的数字。
@@ -3151,8 +2140,7 @@ async function reload() {
     SYNTAX = (await api('/api/syntax')).cards || [];
   } catch { SYNTAX = []; }
   SYNTAX.forEach((c, i) => { c.ord = i; });   // 书写顺序, 给「题号」那档排序用
-  buildPanel();
-  if (VIEW === 'grid') buildGrid();   // buildPanel 占了 #count / #sub，还回来
+  buildGrid();
   loadTodo();                          // 刷新 📋 TODO 上的角标
   renderPaused();                      // ⏸ 暂停上的角标
   updateReviewBadge();                 // 🧠 复习上的到期数
@@ -3169,9 +2157,12 @@ document.addEventListener('click', (e) => {
 
 // ---- wire global controls ----
 on('#sync', 'click', async () => { await fetch('/api/sync', { method: 'POST' }); reload(); });
-document.querySelectorAll('.view-tab').forEach((b) =>
-  b.addEventListener('click', () => switchView(b.dataset.view)));
+// 首屏「今日复习」那格 = 开复习。先把焦点从格子上拿走: 不然面板里按空格揭晓时,
+// 事件先冒泡到这格的 keydown, 等于又点了一次「开复习」, 队列被重开。
+const startReview = (tile) => { tile.blur(); RV.start(); };
 on('#grid-view', 'click', (e) => {
+  const rv = e.target.closest('[data-review]');
+  if (rv) return void startReview(rv);
   const doc = e.target.closest('.gr-doc');
   if (doc) return void openDoc(doc.dataset.kind, doc.dataset.tag);
   const jump = e.target.closest('[data-jump]');
@@ -3189,6 +2180,10 @@ on('#grid-view', 'click', (e) => {
   if (!byId().get(id)) return void startProblem(id, chip);
   if (e.target.closest('.gr-st')) return void cycleL(id);
   openDetail(id);
+});
+on('#grid-view', 'keydown', (e) => {
+  const rv = e.target.closest('[data-review]');
+  if (rv && !RV.open && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); startReview(rv); }
 });
 on('#d-attempt', 'click', punchAttempt);
 on('#close', 'click', closeDetail);
@@ -3251,20 +2246,7 @@ document.addEventListener('input', (e) => {
   addTag(inp.dataset.field, v);
 });
 
-document.addEventListener('click', closeFamMenu);
-addEventListener('resize', closeFamMenu);
-addEventListener('scroll', closeFamMenu, true);
-
 on('#overlay', 'click', (e) => { if (e.target.id === 'overlay') closeDetail(); });
-
-// 分组维度切换: 结构 <-> 范式
-document.querySelectorAll('.gb-btn').forEach((b) =>
-  b.addEventListener('click', () => {
-    GROUP_BY = b.dataset.by;
-    document.querySelectorAll('.gb-btn').forEach((x) => x.classList.toggle('on', x === b));
-    buildPanel();
-  })
-);
 
 // todo popover controls
 on('#open-todo', 'click', (e) => { e.stopPropagation(); toggleTodoPop(); });
@@ -3324,7 +2306,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!$('#todo-pop').classList.contains('hidden')) { closeTodoPop(); return; }
     if (!$('#paused-pop').classList.contains('hidden')) { closePausedPop(); return; }
-    if (document.querySelector('.fam-menu')) { closeFamMenu(); return; }
     if (RV.open) { RV.onEsc(); return; }
     if (statsOpen()) { closeStats(); return; }
     if (!$('#lists-overlay').classList.contains('hidden')) { closeLists(); return; }
@@ -3340,9 +2321,4 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// 默认落在坐标系: 首页要先回答"我现在在哪、下一步练什么", 矩阵是查题的第二跳。
-// 键从 lc-view 换成 lc-view2 是一次性迁移 —— 老浏览器里存着的 'board' 不该把
-// 新默认值顶掉, 换个键等于所有人重新按新默认开一次, 之后再记各自的选择。
-let startView = 'grid';
-try { startView = localStorage.getItem('lc-view2') || 'grid'; } catch (e) { /* private mode */ }
-reload().then(() => switchView(startView));
+reload();

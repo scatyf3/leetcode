@@ -1,22 +1,34 @@
 # LeetCode 看板
 
-本地看板，两个视图：
+本地看板，单页，只管**追进度**。首屏一排四个数：下个里程碑 n/N · 超前/落后 · 本周额度 · 今日复习（点它开始复习），
+下面是里程碑轴和「计划 vs 实际」折线；其余（题目 / 攻坚 · Mock / 专题 / 覆盖）折起来。
+点题卡打开详情：左边 `*.py` 解法，右边可编辑的笔记（保存回磁盘）。
 
-- **坐标系**（默认首屏）— 覆盖 × 深度。备考进度盘：题单铺到哪一层 × 每题掌握到哪一级，叠上时间线。
-- **矩阵** — 数据结构 × 算法范式。点进每道题：左边 `*.py` 解法，右边可编辑的笔记（保存回磁盘）。
+页面上不放说明文字 —— 口径 / 定义都在悬停提示（`title`）和下面这份 README 里。
 
-首屏落在坐标系，因为一开页要先答「我在哪个阶段、这阶段还差几题」；矩阵是按题型翻库的第二跳。
-切过一次就记住（`localStorage` 的 `lc-view2`）。
-
-纯 Python 标准库，**零依赖、无需 pip 安装**。
+后端是纯 Python 标准库，**零依赖、无需 pip 安装**；前端是 Vite + Vue 3 + TypeScript 工程
+（`dashboard/web/`，结构照着 [ai-infra-inferview](https://github.com/scatyf3/ai-infra-inferview)），
+需要 Node 22+ 构建一次。
 
 ## 运行
 
 ```bash
+npm install          # 仓库根目录, 第一次 / package.json 变了之后
+npm run build        # -> dashboard/web/dist/ (gitignore)
 python dashboard/server.py
 ```
 
-然后打开 http://localhost:8765 （Ctrl+C 停止）。
+然后打开 http://localhost:8765 （Ctrl+C 停止）。server.py 伺候的是 `dashboard/web/dist/` 里的产物，
+**改了前端要重新 `npm run build`**（或者用下面的热更新）。没构建过的话首页会提示你先构建，API 照常可用。
+
+改前端时：
+
+```bash
+python dashboard/server.py   # 一个终端: API
+npm run dev                  # 另一个终端: http://localhost:5173, 热更新, /api 自动代理到 8765
+npm test                     # lib/ 下纯函数的单测 (vitest)
+npm run typecheck            # vue-tsc
+```
 
 ## 架构
 
@@ -28,8 +40,8 @@ python dashboard/server.py
   *.py           ← 解法（面板里按文件名分 tab 展示）
   note.md 等     ← 笔记（面板右侧可编辑，Ctrl+S 保存）
 
-structures/<结构>.md   ← 该数据结构的通用 trick(点板子左侧的组标签打开)
-paradigms/<范式>.md    ← 该算法范式的通用 trick(切到「按范式」后同样点组标签)
+structures/<结构>.md   ← 该数据结构的通用 trick(点「题目」里的组标题打开)
+paradigms/<范式>.md    ← 该算法范式的通用 trick(同上, 看 plan.json 里组挂的是哪份)
 notes/*.md             ← 跨题笔记 + scratch.md 随想收件箱(右上角 📓 笔记)
 
 syntax/<主题>.md       ← **语法牌组**的卡片(一个 ## 一张卡, `---` 上下分正反面)
@@ -39,7 +51,14 @@ dashboard/
   server.py      ← 标准库 http + sqlite 索引 + API
   scaffold.py    ← 题号/题名 → 抓题面 + 建空题目文件夹（TODO 加条目时自动调）
   fetch_desc.py  ← 批量补抓已有文件夹的 problem.html
-  index.html / app.js / styles.css   ← 无构建前端
+  web/           ← 前端 (Vite 工程, 配置在仓库根目录 vite.config.ts / package.json)
+    index.html               ← 页面骨架 + 首帧前落定深浅色的那段内联脚本
+    src/main.ts              ← 入口: 字体 + 样式 + 主题开关 + app.js
+    src/app.js               ← 看板的手写 DOM 部分(首页 / 各个 overlay)
+    src/components/ReviewPanel.vue ← 🧠 复习面板
+    src/lib/*.ts             ← 纯计算(熟练度阶梯 / 排队 / 选择题 / 时间轴 / markdown / 高亮), 有单测
+    src/styles.css           ← 全部样式; 最上面一块是设计 token(VitePress 配色), 换主题只改那里
+    public/static-shim.js + ro.css ← 只读静态站专用, 只有 export_static.py 会把它们挂进 index.html
   fsrs.py        ← FSRS-6 调度算法（移植自 py-fsrs，纯标准库；`--selftest` 可自查）
   backfill_edits.py ← 从 git 历史回填 edits.jsonl（时间轴开写之前那一截）
   syntax.py      ← 语法牌组: 解析 syntax/*.md + 调度 + 就地改背面
@@ -80,9 +99,8 @@ dashboard/
 > 因为 L1 的定义是「盲写一次过」，而复习模式只想思路不写代码，成功回忆不足以证明能盲写。
 > 觉得某道题该升降档，还是自己去改。
 
-面板左上角有 `L0 L1 L1.5 L2 L3 L3.5 L4` 过滤按钮（可多选，再点一下取消）；
-每行标题前的方块是熟练度，圆点是难度 —— **两个不是一回事**，简单题也可以不熟。
-详情页「熟练度」下拉改完即存回 `meta.json`。
+题卡左边的方块是熟练度，右边的圆点是难度 —— **两个不是一回事**，简单题也可以不熟。
+点方块循环改熟练度；详情页「熟练度」下拉改完也即存回 `meta.json`。
 
 ## 🧠 复习（FSRS）
 
@@ -294,18 +312,25 @@ python dashboard/backfill_edits.py --write  # 真写
 补成带 `"src": "git"` 的日志行。**可以反复跑** —— 每次都把已有的 `src=git` 行整段丢掉重算，
 只保留服务器实时写的那些。代价是粒度只到 commit（时间戳是 commit 时间，一个 commit 一堆题）。
 
-## 视图一：坐标系（默认）
+## 首页
 
-回答的问题是：**现在该站哪一格。** 和矩阵视图正交 —— 那个管题型覆盖面，这个管备考进度。
+回答的问题是：**离下个里程碑还差几题、这周该做的做了没、今天还剩几张复习。**
 
-首屏只有两块，其余全折起来（展开状态记在 localStorage 的 `lc-grid-folds`）：
+顶栏副标题是当前阶段（`阶段 2 · 补第一层 · 剩 23 天`，悬停看这段的投入 / 目标 / 说明），右边是全库 S2 数。
 
-1. **里程碑** —— 一条时间轴：阶段是底色色段（悬停看这段的目标和说明），`plan.milestones` 是轴上的菱形，
-   今天是一根竖线；轴下面每个里程碑一张卡（n/N + 进度条）。琥珀色的是「现在对的那个」：
-   日期没过、还没达标的第一个。过了日期没到数的标红。
-2. **进度** —— 上半是[里程碑配速](#配速计划-vs-实际)，下半是[本周额度](#今天日课)。
+首屏（其余全折起来，展开状态记在 localStorage 的 `lc-grid-folds`）：
 
-折叠区：**题目**（按 pattern 分组的题卡，见下）· **其他**（攻坚 · Mock / 专题 / 格子 / 账本）。
+1. **KPI 一排四格**
+   - **下个里程碑**：日期没过、还没达标的第一个里程碑的 n/N + 剩几天 / 差几题。
+   - **超前 / 落后**：[配速](#配速计划-vs-实际)那条链今天的差额，按这一段斜率折成天；落后时还写出到下个里程碑要几题/天。
+   - **本周**：[本周额度](#本周额度)三条迷你进度条（复习重做 / 新题 / 攻坚），悬停看巩固数。
+   - **今日复习**：两个牌组今天还能刷几张（到期数和每日上限取小）；**点它直接开复习面板**。刷完变 ✓ —— 就是原来的「最低日」。
+2. **里程碑** —— 一条时间轴：阶段是底色色段（悬停看这段的目标和说明），`plan.milestones` 是轴上的菱形，
+   今天是一根竖线；轴下面每个里程碑一行（日期 · 进度条 · n/N · 剩几天，悬停看焦点和口径）。
+   琥珀色的是「现在对的那个」，过了日期没到数的标红。
+3. **计划 vs 实际** —— [配速](#配速计划-vs-实际)折线；下面列今天打过卡的题。
+
+折叠区：**题目**（按 pattern 分组的题卡，见下）· **攻坚 · Mock** · **专题** · **覆盖**（格子 + 账本）。
 格子里点层标签会自动展开题目区再跳。
 
 两个轴：
@@ -331,8 +356,8 @@ python dashboard/backfill_edits.py --write  # 真写
   文件夹建好了但**题面没抓到**（会员题）会弹一条提示 —— 否则详情页一片空白，没人知道为什么。
   新建的题**不带** `familiarity` 键，也就是「未评」；早先这里写死 `0`，而 `0` 是阶梯顶端，
   于是每道新建的题一出生就是 L0，还直接计进 S3。
-- **组标题可点** → 打开这个 pattern 的通用 trick 文档（`paradigms/*.md` 或 `structures/*.md`），
-  和矩阵视图点组标签是同一个 overlay。哪些 pattern 还没写 trick，扫一眼标题就知道。
+- **组标题可点** → 打开这个 pattern 的通用 trick 文档（`paradigms/*.md` 或 `structures/*.md`）。
+  哪些 pattern 还没写 trick，扫一眼标题就知道。
 - **层标签可点** → 跳到下面「题目」区这一层的第一组。
 - **灰掉的组**（Math & Geometry / Bit Manipulation）在第三层里低优先：迁移性最低、OA 命中率最低，时间不够先砍它们。
   第三层内部的取舍顺序是 2-D DP > Advanced Graphs > Greedy > 这两组，从后往前砍。
@@ -344,9 +369,9 @@ python dashboard/backfill_edits.py --write  # 真写
   归组靠 `plan.json` 的 `extras` 那张「题单分类 → 组名」表；对不上任何组的分类进页面最底下的「其他」组。
   表里写错组名不会报错，只会把那个分类挪进「其他」并在 console 里 warn 一行。
 
-### 今天（日课）
+### 本周额度
 
-「进度」的下半。回答的是：**这周该做的几件事做了没有。**
+首屏 KPI 第三格。回答的是：**这周该做的几件事做了没有。**
 
 日课**故意不看效果**，分成互不相通的两半。分档**先问「以前碰过没有」，再看档位** ——
 顺序不能反：
@@ -384,16 +409,15 @@ python dashboard/backfill_edits.py --write  # 真写
 - 每行还记下当时的 `born` / `seen`，日后想复盘「这一笔当初凭什么算成新题」不用再猜。
 - 额度手改 `plan.json` 里 `phases[].weekly`（`{"redo": 4, "new": 6, "attack": 2}`），**按周算**（周一起），
   跟着当前阶段走。错过的不补，下周从 0 开始。（旧的 `daily` 写法已经不读了。）
-- **最低日**：到期闪卡刷到上限（`review_cap`，每个牌组每天默认 10 张）就算这天没断。复习面板开队列时也按这个上限截断，
-  逾期堆得再多也不一次清。
+- **最低日**（首屏「今日复习」那格变 ✓）：到期闪卡刷到上限（`review_cap`，每个牌组每天默认 10 张）就算这天没断。
+  复习面板开队列时也按这个上限截断，逾期堆得再多也不一次清。所以顶栏 🧠 徽章（全部到期数）可能比那格大。
 - **打卡后补结果**：详情页打卡后多出一行 —— `一次过 / 小 bug / 思路错` + `攻坚` 开关 + 这次踩的坑。
   结果写回 attempts.jsonl 那一行的 `result` / `attack` / `pit`，**不影响额度**，只喂弱题列表。
   标了攻坚的那一笔只算攻坚额度，不再同时算新题/重做。
-- 底下那排小柱子是最近 14 天，图例只数看得见的那几天。
 
 ### 攻坚 · Mock
 
-坐标系「本周」下面那段，格子之外的两个数：
+折叠区「攻坚 · Mock」，覆盖之外的两个数：
 
 - **弱题**（`/api/weak`，`server.weak_list`）：复习忘过 ≥ 2 次，或最近一次打卡不是 `clean`。
   关掉靠：之后又做一遍 clean，或挂了变体簇（meta.json 的 `cluster`）且同簇**另外两道**题 clean。
@@ -402,12 +426,12 @@ python dashboard/backfill_edits.py --write  # 真写
   （NeetCode 150 未做 + 其他题单未做，砍掉的组、会员题、`plan.topics` 里的专题题、抽过的都不抽）。
   只记 AC 和范式判断对没对，按周汇总。抽错了点「作废」，题放回池子。
 - **专题**：`plan.topics`（如 Roblox OA · 实现模拟、Infra 实操），按小节列题，不计进度、mock 不抽，自己排。加新专题直接往这个数组里写。小节可带 `note`（显示在小节标题下），写这一类题的要点。
-- **里程碑**：`plan.milestones`，`{date, tier, stage, n?, groups?, focus, mock}`，首屏第一块。每两周对一次表，落后就砍下一段的尾巴。
+- **里程碑**：`plan.milestones`，`{date, tier, stage, n?, groups?, focus, mock}`，首屏 KPI 第一格 + 里程碑轴。每两周对一次表，落后就砍下一段的尾巴。
 
 ### 配速（计划 vs 实际）
 
-「进度」的上半：**对着下一个里程碑，我比计划快还是慢。** 只有升档才动 —— 它天生只认结果；
-认不认真做在下半那几条本周额度里看，两个一起看才对得上。
+首屏「计划 vs 实际」：**对着下一个里程碑，我比计划快还是慢。** 只有升档才动 —— 它天生只认结果；
+认不认真做看本周额度，两个一起看才对得上。
 
 - **口径相同的里程碑串成一条链**（同层 · 同组 · 同深度），比如「第一层 → S2」的 10/11 56 题、10/25 72 题。
   多条链时上面有 tab，默认选「现在对的那个里程碑」所在的链。
@@ -416,8 +440,9 @@ python dashboard/backfill_edits.py --write  # 真写
 - y 轴也不从 0 起 —— 链上大半的题早就到了，从 0 画整条线挤在顶上一条缝里。
 - 实际线由 `edits.jsonl` **逐日回放**得到，和「掌握度时间轴」同一条路 —— 没有第二份统计。
   今天那一列直接来自 `/api/problems`，往左靠每条改动的 `from` 一步步倒推。
-- 四个数：实际 / 今天应达 / 差额（超前绿、落后红，按这一段的斜率折算成天）/ 到下一个里程碑要的节奏（题/天）。
-  链还没起跑（起点在未来）时换成「还没起跑 · 还差几题」。
+- 差额进首屏 KPI 第二格（超前绿、落后红，按这一段的斜率折算成天；落后时写出到下一个里程碑要的节奏）。
+  KPI 跟着图上选中的链走；链还没起跑（起点在未来）时换成「还差几题 · 几号起跑」。
+  图上没有图例：虚线 = 计划，实线 = 实际，今天那根竖线 = 差额（悬停图看说明）。
 - 历史是懒加载的：首屏先出里程碑，`/api/edits` 回来了再补这一段。
 
 ### S1 / S2 / S3 是怎么算出来的
@@ -470,21 +495,6 @@ L4 思路都不知道           ├─→ 还没到 S1
 - `groups[].tag` — 这一组挂到哪份 trick 文档（`{kind: "paradigms"|"structures", name}`），
   组标题就是链到它。指向一份还不存在的文档也没关系 —— 点开是空的，写完保存就建出来了。
 
-
-## 视图二：矩阵
-
-- **结构（行）× 范式（列）**，一题可同时出现在多个格子（多标签）。
-- 默认按 **结构** 分组；右上角可切「按范式」，范式那一列自动换成另一个维度。
-- 每行是对齐的列（`.group-rows` 建网格，行用 `subgrid` 挂上去）：难度点 · 熟练度 · 题号 · 题名 ·
-  **另一个维度** · trick。另一个维度单独占一列 —— 它就是「× 范式」里的那个乘号，竖着能扫才有意义，
-  所以没和 trick 混在同一个右对齐的口袋里。trick 是这道题的注脚而不是维度，压到最后一格，颜色也调轻了。
-- 组标签可点开该结构 / 该范式的通用 trick 文档；标签下那条**堆叠条**是这一组的熟练度分布
-  （分母是这一组，不是全库 —— 想知道的是「这个结构握得怎么样」）。
-- `dp` 拆成了 `1d-dp` / `2d-dp` —— 两者的难点完全不同（找递推 vs 找扫描顺序）。
-- **空格子**一眼可见 → 就是你还没覆盖的题型组合，该补哪类题很直观。
-- 灰色虚线 chip = `status: todo`；圆点颜色 = 难度（绿易 / 黄中 / 红难）。
-
-回答的问题是：**哪类题型组合我还没碰过。**
 
 ## API（供扩展）
 
@@ -551,23 +561,28 @@ python -m http.server -d dist 8000
 
 只读站没有写接口，`syncSession()` 和拉 carry 都直接跳过，队列就是现算的。
 
-## 为什么复习面板是 Vue, 其余是手写 DOM
+## 前端
 
-`dashboard/index.html` 里 `#review-app` 那一段是 **Vue 3 的 in-DOM 模板**，组件在
-`app.js` 的 `const RV = Vue.createApp({...}).mount('#review-app')`。其余看板和 overlay
-仍然是手写 DOM，**没动**。
+照着 [ai-infra-inferview](https://github.com/scatyf3/ai-infra-inferview) 的做法：Vite + Vue 3 SFC + TS，
+纯计算抽成不依赖 DOM 的 `src/lib/*.ts` 并配 vitest 单测，外观用 VitePress 的设计语言
+（品牌蓝 `#2563eb`、毛玻璃顶栏、浅/深色两套 token、右上角拨片切换）。
 
-- **只有这一屏迁了**，因为它状态最多（队列 / 揭晓与否 / 选择题 / 就地编辑 / tab），
-  以前全靠手工 `classList.toggle` + `innerHTML` 对齐，加个元素就容易漏一处。迁完
-  `app.js` 里的 `$('#rv-*')` 从 20 多处降到 **0**。
-- **没有构建步骤**：`dashboard/vendor/` 下的 `vue.global.prod.js` 和 `marked.min.js`(v15.0.7, MIT)
-  都是**存在仓库里的**，不走 CDN。
-  本地看板要能离线用，CI 里也没有 node（`pages.yml` 只装 Python）。想调试就把它换成
-  同版本的 `vue.global.js`（dev 版有模板报错信息），文件名改一下 `index.html` 的 script 标签。
-- **只读站的退化**不再靠 CSS 藏了：组件里有个 `readOnly` 标志位（读 `<html class="ro">`），
-  评分按钮 / 「改一下」/「下一题」直接用 `v-if` 决定渲染哪一套。`ro.css` 里那三条已删。
-- **模板里别写 `&&`** —— 属性值里的 `&` 会让 Vue 的字符串解析器走 HTML 实体解码，
-  浏览器里没事，但离线跑 `Vue.compile()` 做检查时会炸。多条件拆成 computed（如 `showEmpty`）。
+- **复习面板是 SFC**（`src/components/ReviewPanel.vue`），其余看板和 overlay 仍然是 `app.js` 里的手写 DOM。
+  这一屏状态最多（队列 / 揭晓与否 / 选择题 / 就地编辑 / tab），最早迁到 Vue；现在模板从 index.html
+  搬进了 SFC，编译期就能查出模板错误。
+- **面板和看板之间只走 `host` 一个口子**（见 `ReviewPanel.vue` 的 `ReviewHost`）：读两组行、
+  算今天的队列、重画看板、改 meta、开 📈。以前是直接摸全局变量；拆成模块后依赖得写明白。
+  `app.js` 里构造 host 时全用箭头函数 —— `putMeta` / `PLAN` 在文件更下面才声明，直接取值会撞 TDZ。
+- **`src/lib/` 是纯函数**：熟练度阶梯与 S 深度、账本、复习队列的范围与顺序、选择题、时间轴回放、
+  markdown + 题号链接、Python 高亮。改这些先跑 `npm test`。marked 锁在 15.0.7（和原来 vendor 的同版本），
+  渲染结果不变。
+- **深浅色**：`<html data-theme>` 是唯一开关，`index.html` 里一段内联脚本在首帧前落定（不闪白）。
+  手动切过记在 `localStorage` 的 `lc-theme`，没切过就一直跟系统。
+- **离线**：Inter 字体用 `@fontsource-variable/inter` 打进产物，不走 Google Fonts；构建产物不依赖网络。
+- **只读站的退化**靠组件里的 `readOnly` 标志位（读 `<html class="ro">`），评分按钮 / 「改一下」/
+  「下一题」直接用 `v-if` 决定渲染哪一套；其余写入口由 `ro.css` 藏掉。
+- **CI**（`.github/workflows/pages.yml`）：`npm ci` → `npm test` → `npm run build` → `export_static.py`。
+  单测挂了就不发布。
 
 ## 端口
 

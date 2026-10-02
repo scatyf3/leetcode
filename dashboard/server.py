@@ -2,7 +2,8 @@
 """
 LeetCode dashboard — 数据结构 x 算法范式 看板.
 
-纯标准库(http.server + sqlite3),零 pip 安装.
+后端纯标准库(http.server + sqlite3),零 pip 安装. 前端是 dashboard/web/ 下的 Vite 工程,
+这里只伺候它的构建产物 dashboard/web/dist/ (先在仓库根目录 npm install && npm run build).
 
 真相源 : 每个题目文件夹里的 meta.json (git 可追踪)
 索引层 : data.db  (SQLite, 由 /api/sync 从 meta.json 重建, gitignore)
@@ -17,6 +18,7 @@ run:
 then open http://localhost:8765
 """
 import json
+import mimetypes
 import os
 import re
 import sqlite3
@@ -48,7 +50,26 @@ ATTEMPT_LOG = HERE / "attempts.jsonl"  # 每次「做了一遍」打卡追加一
 MOCK_LOG = HERE / "mock.jsonl"         # 随机抽题模拟面试, 一轮一行(抽题时追加, 记结果时整份重写), git 追踪
 SESSION_FILE = HERE / "session.json"  # 当前这轮复习的队列快照, **易失状态**, 不进 git
 _REVIEW_LOCK = threading.Lock()       # ThreadingHTTPServer + meta.json 读改写 + 日志追加, 必须串行
-VENDOR_FILES = ("/vendor/vue.global.prod.js", "/vendor/marked.min.js")
+# 前端是 Vite 构建的(源码 dashboard/web/, 见 README「前端」), 这里只伺候产物。
+# 产物 gitignore 了: 新 clone 下来要先在仓库根目录 `npm install && npm run build` 一次。
+WEB_DIST = HERE / "web" / "dist"
+STATIC_TYPES = {
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8",
+    ".json": "application/json",
+    ".svg": "image/svg+xml",
+    ".woff2": "font/woff2",
+    ".woff": "font/woff",
+}
+NO_BUILD_PAGE = """<!doctype html><meta charset="utf-8"><title>LeetCode 看板 · 还没构建</title>
+<body style="font:15px/1.7 system-ui,sans-serif;max-width:620px;margin:12vh auto;padding:0 20px">
+<h2>前端还没构建</h2>
+<p>API 已经起来了, 但 <code>dashboard/web/dist/</code> 不存在。在仓库根目录跑一次:</p>
+<pre style="background:#f6f6f7;padding:12px 14px;border-radius:8px">npm install
+npm run build</pre>
+<p>然后刷新这页。改前端时用 <code>npm run dev</code>(热更新, http://localhost:5173, /api 自动代理到这里)。</p>
+</body>"""
 
 FOLDER_RE = re.compile(r"^(\d+)\.\s*(.+)$")
 # .md files that count as "the note" (first match wins), in priority order
@@ -1035,21 +1056,22 @@ class Handler(BaseHTTPRequestHandler):
         n = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(n) or b"{}")
 
+    def _static(self, path):
+        """前端产物: dashboard/web/dist/ (仓库根目录 `npm run build` 生成)。只认 dist 里面的文件。"""
+        if not (WEB_DIST / "index.html").is_file():
+            return self._send(503, NO_BUILD_PAGE, "text/html; charset=utf-8")
+        rel = "index.html" if path in ("/", "/index.html") else unquote(path).lstrip("/")
+        f = (WEB_DIST / rel).resolve()
+        if not f.is_relative_to(WEB_DIST.resolve()) or not f.is_file():
+            return self._send(404, {"error": "not found"})
+        # 不信 mimetypes: Windows 注册表常把 .js 登记成 text/plain, 浏览器会拒绝执行 module script
+        ctype = STATIC_TYPES.get(f.suffix) or mimetypes.guess_type(f.name)[0] or "application/octet-stream"
+        return self._send(200, f.read_bytes(), ctype)
+
     def do_GET(self):
         path = urlparse(self.path).path
-        if path in ("/", "/index.html"):
-            return self._send(200, (HERE / "index.html").read_text(encoding="utf-8"), "text/html; charset=utf-8")
-        if path == "/app.js":
-            return self._send(200, (HERE / "app.js").read_text(encoding="utf-8"), "text/javascript; charset=utf-8")
-        if path == "/styles.css":
-            return self._send(200, (HERE / "styles.css").read_text(encoding="utf-8"), "text/css; charset=utf-8")
-        # 复习面板用的 Vue + 文档渲染用的 marked, 都存在仓库里不走 CDN(见 README「为什么不用构建」)。
-        # 白名单, 不做目录遍历 —— 这个 server 只在本地跑, 但也没必要开个读文件的口子。
-        # 往 vendor/ 里加文件时**这里也要加一行**, 否则浏览器拿到 404:
-        # app.js 的 md() 会退化成纯文本(整篇 markdown 原样显示), 看起来像"渲染坏了"。
-        if path in VENDOR_FILES:
-            return self._send(200, (HERE / "vendor" / path.split("/")[-1]).read_text(encoding="utf-8"),
-                              "text/javascript; charset=utf-8")
+        if not path.startswith("/api/"):
+            return self._static(path)
         if path == "/api/problems":
             return self._send(200, list_problems())
         if path == "/api/plan":
@@ -1218,6 +1240,8 @@ def main():
     n = sync()
     print(f"indexed {n} problems -> {DB.name}")
     print(f"serving  http://localhost:{PORT}   (Ctrl+C to stop)")
+    if not (WEB_DIST / "index.html").is_file():
+        print("⚠ 前端还没构建 —— 在仓库根目录跑 `npm install && npm run build`, 或者 `npm run dev` 走热更新")
     try:
         ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
     except KeyboardInterrupt:

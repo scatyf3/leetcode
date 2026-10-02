@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LeetCode 看板</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="color-scheme" content="light dark">
+  <!-- 主题: 先于样式落定, 免得深色模式下先闪一屏白。手动选过就用选过的, 否则跟系统(见 src/theme.ts) -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('lc-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <h1><span class="brand">LeetCode</span> 看板 <span class="sub" id="sub"></span></h1>
+    <div class="actions">
+      <span id="count" class="count"></span>
+      <div class="todo-wrap">
+        <button id="open-todo" class="ghost">📋 TODO<span id="todo-n" class="todo-n hidden"></span></button>
+        <div id="todo-pop" class="todo-pop hidden">
+          <div class="todo-head">
+            <span class="mono">notes/todo.md</span>
+            <span id="todo-msg" class="msg"></span>
+          </div>
+          <input id="todo-in" placeholder="题号或题名… 如 34 / word break,Enter 添加并建文件夹" spellcheck="false">
+          <div id="todo-list" class="todo-list"></div>
+        </div>
+      </div>
+      <div class="todo-wrap pause-wrap">
+        <button id="open-paused" class="ghost" title="暂停复习中的题: 恢复 / 再加">⏸ 暂停<span id="paused-n" class="todo-n hidden"></span></button>
+        <div id="paused-pop" class="todo-pop hidden">
+          <div class="todo-head">
+            <span class="mono">暂停复习中</span>
+            <span id="paused-msg" class="msg"></span>
+          </div>
+          <input id="paused-in" placeholder="题号,Enter 暂停这道" spellcheck="false">
+          <div id="paused-list" class="todo-list"></div>
+        </div>
+      </div>
+      <button id="open-review" class="ghost">🧠 复习<span id="review-n" class="todo-n hidden"></span></button>
+      <button id="open-stats" class="ghost" title="复习进度: 到期预测 / 记忆强度 / 历史">📈 进度</button>
+      <button id="open-lists" class="ghost">📊 题单</button>
+      <button id="open-notes" class="ghost">📓 笔记</button>
+      <button id="sync">↻ Sync</button>
+      <button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-label="切换深色模式" title="切换深色 / 浅色">
+        <span class="theme-knob"><i class="sun">☀</i><i class="moon">☾</i></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div id="grid-view"></div>
+  </main>
+
+  <!-- detail overlay -->
+  <div id="overlay" class="overlay hidden">
+    <div class="detail">
+      <div class="detail-head">
+        <div>
+          <span id="d-id" class="pill"></span>
+          <span id="d-title" class="d-title"></span>
+        </div>
+        <div class="d-head-r">
+          <span id="attempt-msg" class="msg"></span>
+          <button id="d-attempt" class="attempt-btn"></button>
+          <button id="close" class="icon-btn">✕</button>
+        </div>
+      </div>
+
+      <div class="tags-editor">
+        <div class="tf"><span class="tf-label">结构</span>
+          <div class="chipfield" data-field="structures"></div></div>
+        <div class="tf"><span class="tf-label">范式</span>
+          <div class="chipfield" data-field="paradigms"></div></div>
+        <div class="tf"><span class="tf-label">技巧 trick</span>
+          <div class="chipfield" data-field="techniques"></div></div>
+        <label class="tf sel">难度
+          <select id="e-difficulty">
+            <option value="">-</option><option>easy</option><option>medium</option><option>hard</option>
+          </select>
+        </label>
+        <label class="tf sel">状态
+          <select id="e-status">
+            <option>solved</option><option>review</option><option>todo</option>
+          </select>
+        </label>
+        <label class="tf sel paused-toggle">暂停复习
+          <input type="checkbox" id="e-paused">
+        </label>
+        <label class="tf sel">熟练度
+          <select id="e-familiarity">
+            <option value="">— 未评</option>
+            <option value="0">L0 英语讲得清</option>
+            <option value="1">L1 已经熟悉</option>
+            <option value="1.5">L1.5 写得对 · 但不是最优解</option>
+            <option value="2">L2 思路会 · 细节易写错</option>
+            <option value="3">L3 思路大概知道 · 不熟</option>
+            <option value="3.5">L3.5 方向对 · 但只是直觉</option>
+            <option value="4">L4 思路都不知道</option>
+          </select>
+        </label>
+        <label class="tf sel pit-field" title="这题真栽过的实现细节, 一两行。复习揭晓时和思路一起翻出来">坑
+          <input type="text" id="e-pit" placeholder="例: 跳重复的几个分支必须互斥" spellcheck="false">
+        </label>
+        <label class="tf sel" title="这题属于哪个坑的变体簇。弱题可以靠同簇另外两道 clean 关掉">变体簇
+          <input type="text" id="e-cluster" placeholder="例: sorted-dedup" spellcheck="false" list="cluster-list">
+          <datalist id="cluster-list"></datalist>
+        </label>
+        <span id="meta-msg" class="msg"></span>
+      </div>
+
+      <!-- 打卡之后补一句做成什么样: 额度只看做没做, 这一行只喂弱题列表 -->
+      <div id="d-result" class="d-result hidden">
+        <span class="d-result-k">这一遍</span>
+        <button class="d-res" data-res="clean" title="一次过, 没 debug">一次过</button>
+        <button class="d-res" data-res="bug" title="思路对, 细节错了一两次">小 bug</button>
+        <button class="d-res" data-res="wrong-idea" title="思路本身不对 / 看了题解">思路错</button>
+        <button class="d-res d-attack" data-attack="1" title="这一笔算攻坚额度(弱题的变体簇)">攻坚</button>
+        <input type="text" id="d-res-pit" placeholder="这次踩的坑(一句话, 回车存)" spellcheck="false">
+        <span id="d-res-msg" class="msg"></span>
+      </div>
+
+      <div class="split">
+        <section class="pane code-pane">
+          <div class="sol-head">
+            <div id="sol-tabs" class="tabs"></div>
+            <div class="sol-tools">
+              <span id="sol-mode" class="hint"></span>
+              <button id="sol-save" class="hidden">保存 (Ctrl+S)</button>
+              <span id="sol-msg" class="msg"></span>
+            </div>
+          </div>
+          <textarea id="sol-edit" class="hidden" spellcheck="false"
+            placeholder="写解法… Ctrl+S 保存，Esc / 点开返回高亮视图"></textarea>
+          <pre id="sol-code"><code></code></pre>
+          <div id="sol-desc" class="lc-desc hidden"></div>
+        </section>
+        <section class="pane note-pane">
+          <div class="note-head">
+            <span id="note-file" class="mono"></span>
+            <div>
+              <span id="note-mode" class="hint"></span>
+              <button id="save-note" class="hidden">保存 (Ctrl+S)</button>
+              <span id="note-msg" class="msg"></span>
+            </div>
+          </div>
+          <textarea id="note-edit" class="hidden" spellcheck="false" placeholder="源码编辑中… Ctrl+S 保存，Esc / 点开返回渲染"></textarea>
+          <div id="note-preview" class="note-preview" title="双击进入源码编辑"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- FSRS 复习面板: components/ReviewPanel.vue 挂在这里 -->
+  <div id="review-app"></div>
+
+  <!-- list coverage overlay: dashboard/lists.json 是题单定义, 进度现算 -->
+  <div id="lists-overlay" class="overlay hidden">
+    <div class="detail lists-detail">
+      <div class="detail-head">
+        <div>
+          <span class="pill">题单</span>
+          <span id="lists-title" class="d-title">覆盖进度</span>
+        </div>
+        <button id="lists-close" class="icon-btn">✕</button>
+      </div>
+      <div id="lists-tabs" class="tabs lists-tabs"></div>
+      <div id="lists-body" class="lists-body"></div>
+    </div>
+  </div>
+
+  <!-- 📈 复习进度: 全部由 /api/problems 的 fsrs 列 + /api/reviews 现算, 没有第二份状态 -->
+  <div id="stats-overlay" class="overlay hidden">
+    <div class="detail stats-detail">
+      <div class="detail-head">
+        <div>
+          <span class="pill">进度</span>
+          <span class="d-title">FSRS 复习</span>
+        </div>
+        <button id="stats-close" class="icon-btn">✕</button>
+      </div>
+      <div id="stats-body" class="stats-body"></div>
+    </div>
+  </div>
+
+  <!-- cross-cutting notes overlay: notes/*.md + 随想速记 -->
+  <div id="notes-overlay" class="overlay hidden">
+    <div class="detail notes-detail">
+      <div class="detail-head">
+        <div>
+          <span class="pill">笔记</span>
+          <span class="d-title">notes/</span>
+        </div>
+        <button id="notes-close" class="icon-btn">✕</button>
+      </div>
+      <div class="notes-body">
+        <aside class="notes-side">
+          <div class="scratch-box">
+            <input id="scratch-in" placeholder="随想… (Enter 存进 scratch.md)" spellcheck="false">
+            <span id="scratch-msg" class="msg"></span>
+          </div>
+          <div id="notes-list" class="notes-list"></div>
+          <button id="note-new" class="ghost note-new">+ 新建笔记</button>
+        </aside>
+        <section class="pane note-pane">
+          <div class="note-head">
+            <span id="nt-file" class="mono"></span>
+            <div>
+              <span id="nt-mode" class="hint"></span>
+              <button id="nt-save" class="hidden">保存 (Ctrl+S)</button>
+              <span id="nt-msg" class="msg"></span>
+            </div>
+          </div>
+          <textarea id="nt-edit" class="hidden" spellcheck="false"></textarea>
+          <div id="nt-preview" class="note-preview" title="双击进入源码编辑"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- data-structure trick doc overlay -->
+  <div id="doc-overlay" class="overlay hidden">
+    <div class="detail doc">
+      <div class="detail-head">
+        <div>
+          <span class="pill" id="doc-kind">结构</span>
+          <span id="doc-title" class="d-title"></span>
+        </div>
+        <button id="doc-close" class="icon-btn">✕</button>
+      </div>
+      <div class="note-pane doc-pane">
+        <div class="note-head">
+          <span id="doc-file" class="mono"></span>
+          <div>
+            <span id="doc-mode" class="hint"></span>
+            <button id="doc-save" class="hidden">保存 (Ctrl+S)</button>
+            <span id="doc-msg" class="msg"></span>
+          </div>
+        </div>
+        <textarea id="doc-edit" class="hidden" spellcheck="false" placeholder="写这个数据结构的通用套路 / trick…"></textarea>
+        <div id="doc-preview" class="note-preview" title="双击进入源码编辑"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

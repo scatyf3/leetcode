@@ -13,8 +13,6 @@
   display: none !important;
 }
 
-/* 熟练度徽章原本点开是改熟练度的菜单; 让点击穿透到整行 = 打开详情 */
-.ro .row .fam { pointer-events: none; }
 
 .ro-badge {
   font-size: 12px;

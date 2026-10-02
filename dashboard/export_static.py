@@ -16,7 +16,8 @@
     /api/notes/x.md      -> api/notes/x.md.json
     /api/structures/array-> api/structures/array.json
 
-前端一行没改: static-shim.js 把 fetch 改道到这些文件, 写请求一律拒绝(见那个文件)。
+前端用的是同一份 Vite 产物(dashboard/web/dist/, 先 `npm run build`), 只在 index.html 里
+多挂一个 static-shim.js: 它把 fetch 改道到这些文件, 写请求一律拒绝(见那个文件)。
 所以本地 `python dashboard/server.py` 的可写体验完全不受影响。
 """
 import json
@@ -40,10 +41,10 @@ PRIVATE_NOTES = {"scratch.md", "todo.md"}
 # public 的。只读站上它退化成纯自测(空格揭晓 -> 下一张, 不记录), 和题目牌组一个待遇。
 EXPORT_SYNTAX = True
 
-# vendor/vue.global.prod.js 是**存在仓库里的**, 不走 CDN —— 本地看板断网也要能用,
-# 而且 CI 里没有 node, 不能有构建步骤。见 dashboard/README.md 的「为什么不用构建」。
-SITE_FILES = ["app.js", "styles.css", "static-shim.js", "ro.css",
-              "vendor/vue.global.prod.js", "vendor/marked.min.js"]
+# 前端是 Vite 的构建产物(源码 dashboard/web/), 先在仓库根目录 `npm run build`。
+# 产物里 ro.css / static-shim.js 来自 web/public/, 原样拷过来, 只在这里被 index.html 引用 ——
+# 本地 server.py 伺候的同一份 dist 不挂它们, 所以本地照样可写。
+WEB_DIST = HERE / "web" / "dist"
 
 
 def write_json(path: Path, obj):
@@ -59,6 +60,8 @@ def safe_name(name: str) -> str | None:
 
 
 def export(out: Path) -> dict:
+    if not (WEB_DIST / "index.html").is_file():
+        sys.exit("dashboard/web/dist/ 不存在 —— 先在仓库根目录跑 `npm ci && npm run build`")
     n = server.sync()                       # 从各文件夹的 meta.json 重建索引
     if out.exists():
         shutil.rmtree(out)
@@ -106,10 +109,7 @@ def export(out: Path) -> dict:
             continue
         write_json(api / "notes" / f"{fn}.json", server.get_note(x["file"]))
 
-    for f in SITE_FILES:
-        dst = out / f
-        dst.parent.mkdir(parents=True, exist_ok=True)   # vendor/ 这种带目录的
-        shutil.copy(HERE / f, dst)
+    shutil.copytree(WEB_DIST, out, dirs_exist_ok=True)   # assets/ + ro.css + static-shim.js
     out.joinpath("index.html").write_text(build_index(), encoding="utf-8")
     (out / ".nojekyll").touch()             # Pages 别拿 Jekyll 处理这堆文件
 
@@ -118,16 +118,16 @@ def export(out: Path) -> dict:
 
 
 def build_index() -> str:
-    """把 index.html 改成只读版: 挂上 ro.css + shim, 去掉"双击编辑"的提示。"""
-    html = (HERE / "index.html").read_text(encoding="utf-8")
+    """把构建出的 index.html 改成只读版: 挂上 ro.css + shim, 去掉"双击编辑"的提示。"""
+    html = (WEB_DIST / "index.html").read_text(encoding="utf-8")
+    # 都塞在 </head> 前面:
+    #   ro.css 排在 Vite 注入的样式表之后, 同优先级时后来者赢;
+    #   shim 是普通同步脚本, 解析到就跑 —— 而 Vite 的入口是 type=module(天然 defer),
+    #   所以 shim 一定先把 fetch 改道、先挂上 .ro, app.js 顶层的 reload() 才发请求。
+    assert html.count("</head>") == 1, "构建出的 index.html 里找不到 </head>"
     html = html.replace(
-        '<link rel="stylesheet" href="styles.css">',
-        '<link rel="stylesheet" href="styles.css">\n  <link rel="stylesheet" href="ro.css">',
-    )
-    # shim 必须在 app.js 之前跑 —— app.js 末尾就直接 reload() 发请求了
-    html = html.replace(
-        '<script src="app.js"></script>',
-        '<script src="static-shim.js"></script>\n  <script src="app.js"></script>',
+        "</head>",
+        '  <link rel="stylesheet" href="ro.css">\n  <script src="static-shim.js"></script>\n</head>',
     )
     html = html.replace(' title="双击进入源码编辑"', "")
     return html
