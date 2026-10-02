@@ -1,7 +1,36 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo"
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(m·n·3^L)",
+    "space": "O(L)"
+  },
+  "quiz": {
+    "idea": "每格当起点 DFS，visited 进去加、回来删，匹配完就 return",
+    "wrong": [
+      "每格当起点 DFS，visited 只加不删，匹配完就 return",
+      "每格当起点 BFS，按层匹配 word 的第 k 个字母",
+      "每格当起点 DFS，一个方向走不通就 return False"
+    ],
+    "then": [
+      {
+        "q": "嵌套的 dfs 里写 find = True，外层 find 还是 False，为什么？",
+        "idea": "给名字赋值会新建局部变量，要 nonlocal",
+        "wrong": [
+          "嵌套函数看不到外层定义的变量",
+          "find 要定义在 dfs 之后才能改到",
+          "外层的 find 被最后的 return 覆盖了"
+        ]
+      }
+    ]
+  }
 }

@@ -27,12 +27,12 @@
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-17",
-    "last_review": "2026-09-14",
-    "stability": 2.8577544813764573,
-    "difficulty": 8.906732149244661,
-    "reps": 4,
+    "due": "2026-10-16",
+    "last_review": "2026-09-30",
+    "stability": 16.354797748632485,
+    "difficulty": 8.52664134910091,
+    "reps": 5,
     "lapses": 1,
-    "last_rating": 2
+    "last_rating": 4
   }
 }

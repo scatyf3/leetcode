@@ -1,8 +1,39 @@
 {
-  "structures": [],
-  "paradigms": [],
-  "techniques": [],
+  "structures": [
+    "graph"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
+  "techniques": [
+    "Kahn: 入度计数 + 队列",
+    "入度 = 入边列表压缩成长度",
+    "出队数 < n ⇔ 有环"
+  ],
   "difficulty": "medium",
-  "status": "todo",
-  "familiarity": 3
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(V+E)",
+    "space": "O(V+E)"
+  },
+  "quiz": {
+    "idea": "入度计数 + 队列，最后出队数 < n 就有环",
+    "wrong": [
+      "从任一点 BFS，碰到来过的点就说明有环",
+      "并查集合并每条边，已连通就说明有环",
+      "任一前置出队，就把它的后继也入队"
+    ],
+    "then": [
+      {
+        "q": "indeg[v] 回答的是什么问题？",
+        "idea": "v 还差几个前置没修完",
+        "wrong": [
+          "v 有没有被访问过",
+          "v 是不是整张图的起点",
+          "v 之后还有几门课要修"
+        ]
+      }
+    ]
+  }
 }

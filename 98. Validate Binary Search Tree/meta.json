@@ -18,21 +18,23 @@
     "space": "O(h)"
   },
   "quiz": {
-    "idea": "递归传 (low, high) 上下界",
+    "idea": [
+      "递归往下传 (low, high) 区间，逐层收紧",
+      "中序遍历，检查序列是否严格递增",
+      "后序往上返回 (ok, 子树 min, 子树 max)"
+    ],
     "wrong": [
-      "只比较父子三者的大小",
-      "层序遍历检查每层递增",
-      "看节点数是否为 2^h-1"
+      "只比较每个节点和它的左右两个孩子"
     ]
   },
   "fsrs": {
     "state": "review",
-    "due": "2026-09-30",
-    "last_review": "2026-09-06",
-    "stability": 23.88306407915667,
-    "difficulty": 1.0,
-    "reps": 2,
+    "due": "2026-12-09",
+    "last_review": "2026-09-30",
+    "stability": 69.65271901781779,
+    "difficulty": 4.010608969296839,
+    "reps": 3,
     "lapses": 0,
-    "last_rating": 4
+    "last_rating": 2
   }
 }

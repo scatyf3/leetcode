@@ -1,8 +1,36 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo",
-  "familiarity": 0
+  "status": "solved",
+  "familiarity": 0,
+  "complexity": {
+    "time": "O(4^n/√n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "每步放一个：left 还有就放 (，right > left 才放 )",
+    "wrong": [
+      "每步放一个：left 还有就放 (，right 还有就放 )",
+      "每步放一个：left 还有就放 (，right ≥ left 才放 )",
+      "每步放一个：left > right 才放 (，right 还有就放 )"
+    ],
+    "then": [
+      {
+        "q": "为什么是 right_remain > left_remain 才能放 )？",
+        "idea": "已放的 ( 比 ) 多，才有 ( 在等着被配对",
+        "wrong": [
+          "保证最后左右括号的数量相等",
+          "防止 ( 放得比 ) 多，串变不合法",
+          "保证右括号不会比左括号先用完"
+        ]
+      }
+    ]
+  }
 }

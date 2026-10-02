@@ -1,0 +1,36 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n·2^n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "sort 后同层去重：i > start 且和前一个相同就跳",
+    "wrong": [
+      "sort 后同层去重：i > 0 且和前一个相同就跳",
+      "不 sort，str(cur) 放进 set，见过的就不收",
+      "sort 后去重：和 cur[-1] 相同就跳过不选"
+    ],
+    "then": [
+      {
+        "q": "i > start 说明什么？",
+        "idea": "本层已试过兄弟分支，当前不是本层第一个选择",
+        "wrong": [
+          "当前这个元素已经被放进 cur 里了",
+          "当前不是整个数组里的第一个元素",
+          "下一层的递归还没有开始执行"
+        ]
+      }
+    ]
+  }
+}

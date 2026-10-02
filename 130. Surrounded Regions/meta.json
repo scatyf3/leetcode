@@ -1,8 +1,35 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo",
-  "familiarity": 2
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(m·n)",
+    "space": "O(m·n)"
+  },
+  "quiz": {
+    "idea": "从边界的 O 反向 BFS 标记安全，剩下的 O 全改 X",
+    "wrong": [
+      "从边界的 O 反向 BFS，标记到的 O 全改成 X",
+      "四周都是 X 的单个 O 改 X，反复扫直到不变",
+      "从四个角的 O 出发 BFS 标记安全，剩下改 X"
+    ],
+    "then": [
+      {
+        "q": "怎么判断 (i, j) 在边界上？",
+        "idea": "i in (0, m-1) or j in (0, n-1)",
+        "wrong": [
+          "i == 0 or j == 0",
+          "i in (0, m) or j in (0, n)",
+          "i in (0, n-1) or j in (0, m-1)"
+        ]
+      }
+    ]
+  }
 }

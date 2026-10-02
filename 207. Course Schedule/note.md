@@ -1,5 +1,14 @@
 # 207. Course Schedule
 
+
+## pass2
+
+given一堆src,dst，我们需要建
+1. graph src ->dstlst
+2. indeg, dst -> num in
+
+这两个mapping感觉有一些本质啊，道理在哪里，感觉像双向链表的弱化版
+
 ## framework
 
 这类事更复杂的graph，需要自己建grpah自己找起点，后面的非简单grid graph都这样吗？

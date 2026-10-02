@@ -4,5 +4,32 @@
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4
+  "familiarity": 4,
+  "quiz": {
+    "idea": "比 mid 和 mid+1：上坡 l = mid+1，否则 r = mid-1，返回 l",
+    "wrong": [
+      "比 mid 和 mid+1：上坡 r = mid-1，否则 l = mid+1，返回 l",
+      "比 mid 和 nums[-1]：mid 更大 l = mid+1，否则 r = mid-1",
+      "比 mid 和 mid-1：比左边大 l = mid+1，否则 r = mid-1"
+    ],
+    "then": [
+      {
+        "q": "往上坡那一半走，凭什么那一半里一定有峰？",
+        "idea": "沿上坡一直走，走到头那格就是峰（越界当 -∞）",
+        "wrong": [
+          "因为全局最大值一定在上坡的那一半里",
+          "因为数组在上坡那一半里是整体有序的",
+          "因为上坡那一半剩下的元素个数更多"
+        ]
+      },
+      {
+        "q": "出了 while l <= r，返回什么？",
+        "idea": "l",
+        "wrong": [
+          "r",
+          "mid"
+        ]
+      }
+    ]
+  }
 }

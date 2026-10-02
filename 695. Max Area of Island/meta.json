@@ -4,5 +4,34 @@
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 2
+  "familiarity": 2,
+  "quiz": {
+    "idea": "扫到 1 就 BFS 把整座岛沉成 0，边沉边数面积",
+    "wrong": [
+      "扫到 1 就计数 +1，BFS 沉岛，最后返回计数",
+      "扫到 1 只看四个邻居，邻居 1 最多的最大",
+      "沉完所有岛后，数 grid 里 0 的个数取最大"
+    ],
+    "then": [
+      {
+        "q": "面积在哪一步 +1？",
+        "idea": "格子被沉成 0 的那一刻 +1",
+        "wrong": [
+          "每次 append 进队列就 +1，不管沉没沉过",
+          "起点 +1，之后 BFS 每扩展一层再 +1",
+          "只在起点 +1，邻居入队时不计数"
+        ]
+      }
+    ]
+  },
+  "fsrs": {
+    "state": "review",
+    "due": "2026-10-02",
+    "last_review": "2026-10-01",
+    "stability": 1.2931,
+    "difficulty": 5.112170705601056,
+    "reps": 1,
+    "lapses": 0,
+    "last_rating": 2
+  }
 }

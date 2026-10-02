@@ -1,7 +1,36 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo"
+  "status": "solved",
+  "familiarity": 3.5,
+  "complexity": {
+    "time": "O(n·2^n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "每层决定下一刀切在哪：s[start:i+1] 是回文才切，start==n 收",
+    "wrong": [
+      "每层决定下一刀切在哪：切下的块和剩余部分都是回文才切",
+      "每层决定下一刀切在哪：s[start:i] 是回文才切，start==n 收",
+      "每层决定下一刀切在哪：s[start:i+1] 是回文才切，每层都收"
+    ],
+    "then": [
+      {
+        "q": "为什么不用检查剩余部分是不是回文？",
+        "idea": "单字符一定是回文，剩下的总能切完",
+        "wrong": [
+          "剩余部分会在结算时统一检查一次",
+          "剩余部分一定比切下来的块更短",
+          "回文去掉回文前缀后还是回文"
+        ]
+      }
+    ]
+  }
 }

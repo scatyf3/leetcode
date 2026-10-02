@@ -1,19 +1,31 @@
-from typing import List
-
-
 class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
-        '''
-        naive: 不断两两比较合并直到没有 overlap, O(n^2) 起
+        # merge all overlapping intervals
 
-        按 start 排序后, 新区间只可能和「最后一个已合并区间」重叠 -> 内层循环消掉, O(n)
-        证明和排序键的推法见 paradigms/intervals.md §1
-        '''
-        intervals.sort(key=lambda x: x[0])        # 按 start 排
-        res = []
-        for s, e in intervals:
-            if res and s <= res[-1][1]:           # 重叠 (= 因为本题端点相碰算重叠)
-                res[-1][1] = max(res[-1][1], e)   # 往外推; max 是为了 [[1,10],[2,3]] 这种包含关系
+        # sort intervals
+        # 排序是为了让「这一块合并完了」能当场下结论
+        # eg: [[2,3], [4,5], [1,10]]
+        # left: [1,10], [2,3], [4,5]
+        # right: [[2,3], [4,5], [1,10]]，后面打乱部署
+        intervals.sort()
+        # print(intervals)
+
+        # sliding windows merging
+        l=0
+        r=1
+        merged=[]
+        if len(intervals)==1:
+            return intervals
+        while r<len(intervals):
+            if intervals[l][1]>=intervals[r][0]: # 等于也算可以merge
+                # merged.append([intervals[l][0],intervals[r][1]])
+                intervals[r]=[intervals[l][0],max(intervals[l][1],intervals[r][1])]
             else:
-                res.append([s, e])                # 不重叠, 开新的 (必须 append 新 list)
-        return res
+                # 相当于一直带着merge的结果往前跑，当不能merge的时候，l就是我们想要的一个最终区间
+                merged.append(intervals[l])
+                # r还没检查，不能merge
+                # merged.append(intervals[r])
+            l+=1
+            r+=1
+        merged.append(intervals[-1])  # 然而在最后我们需要把最后一个加进去
+        return merged

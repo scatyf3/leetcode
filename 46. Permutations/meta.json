@@ -1,8 +1,36 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo",
-  "familiarity": 2
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n·n!)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "每层从没用过的元素里挑一个，候选用完才收",
+    "wrong": [
+      "每层从 start 往后挑，递归传 i+1，够 n 个才收",
+      "每层从全部元素里挑，允许重复，够 n 个才收",
+      "每层从 start 往后挑，递归传 i+1，每层都收"
+    ],
+    "then": [
+      {
+        "q": "为什么排列不用 start？",
+        "idea": "顺序本身是答案的一部分，[1,2] 和 [2,1] 都要",
+        "wrong": [
+          "输入元素互不相同，本来就不会重复",
+          "排列的递归深度固定是 n，不用 start",
+          "候选放在 set 里，顺序已经被打乱了"
+        ]
+      }
+    ]
+  }
 }

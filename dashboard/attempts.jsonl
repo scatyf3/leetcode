@@ -71,3 +71,13 @@
 {"ts": 1790716006, "date": "2026-09-29", "id": 417, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": false}
 {"ts": 1790716986, "date": "2026-09-29", "id": 133, "kind": "warm", "fam": 2, "born": "2026-08-26", "seen": false}
 {"ts": 1790718224, "date": "2026-09-29", "id": 207, "kind": "redo", "fam": 3, "born": null, "seen": false, "result": "wrong-idea", "attack": true, "pit": "更复杂的bfs"}
+{"ts": 1790794391, "date": "2026-09-30", "id": 207, "kind": "warm", "fam": 2, "born": null, "seen": true, "result": "clean"}
+{"ts": 1790796291, "date": "2026-09-30", "id": 239, "kind": "redo", "fam": 3, "born": "2026-09-08", "seen": true, "attack": true, "pit": "单调队列模版题"}
+{"ts": 1790797398, "date": "2026-09-30", "id": 56, "kind": "redo", "fam": 4, "born": "2026-09-04", "seen": false}
+{"ts": 1790882028, "date": "2026-10-01", "id": 78, "kind": "warm", "fam": 2, "born": "2026-09-09", "seen": false, "result": "wrong-idea"}
+{"ts": 1790882906, "date": "2026-10-01", "id": 39, "kind": "warm", "fam": 1, "born": "2026-09-01", "seen": false, "result": "clean"}
+{"ts": 1790883524, "date": "2026-10-01", "id": 90, "kind": "new", "fam": 2, "born": "2026-10-01", "seen": false, "result": "bug"}
+{"ts": 1790886851, "date": "2026-10-01", "id": 40, "kind": "new", "fam": 3, "born": "2026-10-01", "seen": false, "result": "wrong-idea", "pit": "更好的去重"}
+{"ts": 1790889418, "date": "2026-10-01", "id": 79, "kind": "redo", "fam": 3, "born": "2026-09-06", "seen": false, "result": "bug", "pit": "nonlocal，set的操作，记得return"}
+{"ts": 1790891188, "date": "2026-10-01", "id": 131, "kind": "redo", "fam": 3.5, "born": "2026-09-09", "seen": false, "attack": true, "pit": "怎么建模问题"}
+{"ts": 1790892252, "date": "2026-10-01", "id": 17, "kind": "warm", "fam": 1, "born": "2026-09-09", "seen": false, "result": "clean"}

@@ -1,8 +1,43 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo",
-  "familiarity": 2
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(m·n)",
+    "space": "O(m·n)"
+  },
+  "quiz": {
+    "idea": "多源 BFS：所有 2 一起入队，按层扩散，层数 = 分钟",
+    "wrong": [
+      "从每个 2 单独 BFS，取各自最远距离里的最大值",
+      "单源 BFS：从第一个 2 出发按层扩散，层数 = 分钟",
+      "DFS 从每个 2 出发，记下递归最深的层数当分钟"
+    ],
+    "then": [
+      {
+        "q": "什么时候把新鲜橘子标成 2？",
+        "idea": "入队的同时就标成 2",
+        "wrong": [
+          "出队的时候再标成 2",
+          "一整层处理完再统一标 2",
+          "只在开头把起点标成 2"
+        ]
+      },
+      {
+        "q": "while 条件为什么要加 fresh > 0？",
+        "idea": "最后一层不再腐烂谁，不加会多算 1 分钟",
+        "wrong": [
+          "不加会死循环，队列永远不会空",
+          "不加的话孤立的新鲜橘子会被漏掉"
+        ]
+      }
+    ]
+  }
 }

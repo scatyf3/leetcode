@@ -1,0 +1,36 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n·2^n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "sort，递归传 i+1，同层 i > start 且重复就跳，remain==0 收",
+    "wrong": [
+      "sort，递归传 i，同层 i > start 且重复就跳，remain==0 收",
+      "sort，递归传 i+1，不做去重，remain==0 收",
+      "sort，递归传 i+1，和 cur[-1] 相同就跳，remain==0 收"
+    ],
+    "then": [
+      {
+        "q": "去掉 i > start，只留「和前一个值相同就跳」，会怎样？",
+        "idea": "多去重：[1,1,6] 这种含相同值的组合全丢了",
+        "wrong": [
+          "少去重：[1,2,5] 还是会出现两次",
+          "没影响：sort 之后两种写法等价",
+          "报错：i = 0 时 nums[-1] 越界"
+        ]
+      }
+    ]
+  }
+}

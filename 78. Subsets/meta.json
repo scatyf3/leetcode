@@ -1,7 +1,36 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo"
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n·2^n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "for 从 start 往后挑，递归传 i+1，每个节点都收",
+    "wrong": [
+      "for 从 start 往后挑，递归传 i，每个节点都收",
+      "for 从 start 往后挑，递归传 i+1，到底才收",
+      "for 从 0 开始挑，递归传 i+1，每个节点都收"
+    ],
+    "then": [
+      {
+        "q": "res.append(cur) 不写成 cur[:] 会怎样？",
+        "idea": "res 里全是同一个列表，回溯完全是空的",
+        "wrong": [
+          "结果一样，只是多占了一点内存",
+          "只有最后一个子集对，其余是空的",
+          "报错：list 里不能再放 list"
+        ]
+      }
+    ]
+  }
 }

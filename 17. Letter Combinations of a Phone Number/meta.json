@@ -1,7 +1,45 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "backtracking",
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo"
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n·4^n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "每层对应一位数字，枚举它的字母，填满才收",
+    "wrong": [
+      "每层从 start 往后挑一位数字，每个节点都收",
+      "每层枚举所有数字的所有字母，填满才收",
+      "每层对应一位数字，枚举它的字母，每层都收"
+    ],
+    "then": [
+      {
+        "q": "结算时把 cur（字符列表）变成字符串？",
+        "idea": "\"\".join(cur)",
+        "wrong": [
+          "str(cur)",
+          "cur[:]",
+          "\"\".join(str(cur))"
+        ]
+      },
+      {
+        "q": "digits = \"\" 时应该返回？",
+        "idea": "[]，要单独特判",
+        "wrong": [
+          "[\"\"]，dfs 自然就会返回",
+          "None，没有数字就没有答案"
+        ]
+      }
+    ]
+  }
 }

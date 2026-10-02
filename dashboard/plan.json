@@ -41,17 +41,17 @@
       "goal": "第一层 → S2",
       "adds": "原计划 9/25 第一层 77 题全部 S2；实际收尾 36/77，落后约 3.5 周。计划本身按「一半时间做科研」做不到，9/27 重排。",
       "serves": "已结束 · 复盘：日额度 5 题从没达到过" },
-    { "n": 2, "name": "补第一层", "from": "2026-09-27", "to": "2026-10-25", "hrs": "≈45–60 min/天",
+    { "n": 2, "name": "补第一层", "from": "2026-09-27", "to": "2026-10-15", "hrs": "≈45–60 min/天",
       "weekly": { "redo": 4, "new": 6, "attack": 2 },
       "goal": "第一层 ≥ 72/77 → S2",
-      "adds": "顺序：Trees → Heap → 网格 → Stack / Binary Search / Linked List / Sliding Window / DP 四题。L3/L4 的老题重做比开新题快，先清它们。10/11 起每周 1 次 mock。",
+      "adds": "顺序：Trees → Heap → 网格 → Stack / Binary Search / Linked List / Sliding Window / DP 四题。L3/L4 的老题重做比开新题快，先清它们。10/1 起每周 1 次 mock（10/11 的里程碑 10/1 提前达标，后面整体前移 10 天）。",
       "serves": "服务 10 月 OA / 电面" },
-    { "n": 3, "name": "图 + 回溯", "from": "2026-10-25", "to": "2026-11-08", "hrs": "≈45–60 min/天",
+    { "n": 3, "name": "图 + 回溯", "from": "2026-10-15", "to": "2026-10-29", "hrs": "≈45–60 min/天",
       "weekly": { "redo": 3, "new": 7, "attack": 2 },
       "goal": "Graphs 其余 + Backtracking（17 题）→ S2",
       "adds": "只做这两组。Intervals / 1-D DP 其余 / Tries 其余 / 第三层全部砍掉，有空再说。第一层 → S3 不单练，交给 mock。",
-      "serves": "服务 11 月面试 · 11/8 是硬线（PhD 申请季）" },
-    { "n": 4, "name": "冻结", "from": "2026-11-08", "to": null, "hrs": "≈5 hr/周",
+      "serves": "服务 11 月面试 · 10/29 收尾，留 10 天缓冲到 11/8 硬线（PhD 申请季）" },
+    { "n": 4, "name": "冻结", "from": "2026-10-29", "to": null, "hrs": "≈5 hr/周",
       "weekly": { "redo": 5, "new": 0, "attack": 0 },
       "goal": "位置不动",
       "adds": "一题新的都不加。闪卡 + 每周 1 次 mock；mock 挂在哪类就补哪类。",
@@ -65,9 +65,9 @@
   ],
 
   "milestones": [
-    { "date": "2026-10-11", "tier": 1, "stage": 2, "n": 56, "focus": "Trees + Heap + 网格", "mock": "第 1 次 mock" },
-    { "date": "2026-10-25", "tier": 1, "stage": 2, "n": 72, "focus": "第一层剩下的零碎", "mock": "mock 过半" },
-    { "date": "2026-11-08", "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"], "focus": "Graphs 其余 + Backtracking", "mock": "mock 基本稳定 → 冻结" }
+    { "date": "2026-10-01", "tier": 1, "stage": 2, "n": 56, "focus": "Trees + Heap + 网格", "mock": "第 1 次 mock" },
+    { "date": "2026-10-15", "tier": 1, "stage": 2, "n": 72, "focus": "第一层剩下的零碎", "mock": "mock 过半" },
+    { "date": "2026-10-29", "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"], "focus": "Graphs 其余 + Backtracking", "mock": "mock 基本稳定 → 冻结" }
   ],
 
   "mock": {
@@ -289,7 +289,7 @@
       [17, "Letter Combinations of a Phone Number", "medium"],
       [51, "N-Queens", "hard"]
     ]},
-    { "name": "1-D DP · 其余", "tier": 2, "low": true, "sub": "11/8 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
+    { "name": "1-D DP · 其余", "tier": 2, "low": true, "sub": "10/29 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
       [746, "Min Cost Climbing Stairs", "easy"],
       [5, "Longest Palindromic Substring", "medium"],
       [647, "Palindromic Substrings", "medium"],
@@ -299,7 +299,7 @@
       [300, "Longest Increasing Subsequence", "medium"],
       [416, "Partition Equal Subset Sum", "medium"]
     ]},
-    { "name": "Intervals", "tier": 2, "low": true, "sub": "11/8 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "intervals" }, "problems": [
+    { "name": "Intervals", "tier": 2, "low": true, "sub": "10/29 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "intervals" }, "problems": [
       [57, "Insert Interval", "medium"],
       [56, "Merge Intervals", "medium"],
       [435, "Non-overlapping Intervals", "medium"],
@@ -317,7 +317,7 @@
       [684, "Redundant Connection", "medium"],
       [127, "Word Ladder", "hard"]
     ]},
-    { "name": "Tries · 其余", "tier": 2, "low": true, "sub": "11/8 前不做 · 212 是 Trie × Backtracking，排在回溯之后", "tag": { "kind": "structures", "name": "trie" }, "problems": [
+    { "name": "Tries · 其余", "tier": 2, "low": true, "sub": "10/29 前不做 · 212 是 Trie × Backtracking，排在回溯之后", "tag": { "kind": "structures", "name": "trie" }, "problems": [
       [211, "Design Add and Search Words", "medium"],
       [212, "Word Search II", "hard"]
     ]},
