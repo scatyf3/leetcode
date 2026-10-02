@@ -96,8 +96,8 @@ export default defineComponent({
     // v-html: 两句提示里都有加粗。内容是写死的常量, 没有外部输入
     askText(): string {
       return this.isSyntax
-        ? '先<b>在心里把答案说出来</b>, 再揭晓 —— 说不出口就是不会, 别停在"感觉知道"。'
-        : '先在心里说清三件事 —— <b>用什么结构 · 什么范式 · 触发条件是什么</b>。不写代码。'
+        ? '先<b>说出答案</b>再揭晓'
+        : '心里说清 <b>结构 · 范式 · 触发条件</b>, 不写代码'
     },
     // 只渲染题面 / 卡片正面。绝不碰 d.note / d.solutions / d.back —— 剧透了这个功能就没意义了
     descHtml(): string {
@@ -176,15 +176,15 @@ export default defineComponent({
       const unit = this.isSyntax ? '张' : '道'
       const other: Deck = this.isSyntax ? 'problems' : 'syntax'
       const rest = this.counts[other]
-        ? `<br><span class="hint">另一组「${DECK_LABEL[other]}」还有 ${this.counts[other]} ${other === 'syntax' ? '张' : '道'}到期 —— 点上面切过去</span>`
+        ? `<br><span class="hint">「${DECK_LABEL[other]}」还有 ${this.counts[other]} ${other === 'syntax' ? '张' : '道'}</span>`
         : ''
       if (this.done) {
         return `这一轮复习完了 —— 共 ${this.done} ${unit} 🎉`
-          + `<br><span class="hint">下次到期时间已经按 FSRS 排好, 徽章上的数字会自己变</span>${rest}`
+          + rest
       }
       return (this.isSyntax
-        ? '今天没有到期的语法卡 🎉<br><span class="hint">卡片写在 syntax/*.md 里, 一个 ## 一张 —— 加一张就会进队列</span>'
-        : '今天没有到期的题 🎉<br><span class="hint">status 是 solved / review 的题才会进复习队列</span>') + rest
+        ? '今天没有到期的语法卡 🎉'
+        : '今天没有到期的题 🎉') + rest
     },
   },
 
@@ -596,7 +596,6 @@ export default defineComponent({
                   </template>
                 </div>
               </div>
-              <div class="rv-q-hint">选不选都行 —— 直接按空格也能揭晓。选了的话揭晓时会标出对错。</div>
             </div>
             <!-- 默写框(只有语法卡有)。纯草稿纸: 不存盘、不判对错、不进 FSRS ——
                  揭晓后原样贴到答案上面自己比。之所以不自动判, 是因为「只保留符合条件的
@@ -604,8 +603,8 @@ export default defineComponent({
             <div v-if="canWrite && !revealed" class="rv-write">
               <div class="rv-q-label">默写一遍(可选)</div>
               <textarea id="rv-write-box" ref="write" v-model="attempt" spellcheck="false"
-                        placeholder="把答案写出来… 写不出来就是不会，别停在「感觉知道」"></textarea>
-              <div class="rv-q-hint">写不写都行 —— <b>w</b> 跳进来写，框里 <b>Ctrl+Enter</b> 揭晓（空格在框里就是空格）。不判对错。</div>
+                        placeholder="默写…"></textarea>
+              <div class="rv-q-hint"><b>w</b> 写 · <b>Ctrl+Enter</b> 揭晓</div>
             </div>
           </div>
 
@@ -627,9 +626,9 @@ export default defineComponent({
                  v-text="'这张卡有 ' + cardComments.length + ' 条批注 —— 揭晓后显示(防剧透)'"></div>
             <template v-if="cbox">
               <textarea id="rv-cmt-box" ref="cbox" v-model="cdraft" spellcheck="false"
-                        placeholder="这张卡哪儿不对… 例: 干扰项 B 其实也能 AC / 答案卡漏了触发条件"></textarea>
+                        placeholder="这张卡哪儿不对…"></textarea>
               <div class="rv-q-hint"><button class="ghost" :disabled="!cdraft.trim()" @click="sendComment">存</button>
-                或 <b>Ctrl+Enter</b> · <b>Esc</b> 收起(草稿留着)。存完不用管 —— 攒够了跟 agent 说「处理卡片批注」。</div>
+                <b>Ctrl+Enter</b> 存 · <b>Esc</b> 收起</div>
             </template>
           </div>
 

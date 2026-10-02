@@ -18,12 +18,8 @@
 </head>
 <body>
   <header>
-    <h1><span class="brand">LeetCode</span> 看板 <span class="sub" id="sub">数据结构 × 算法范式</span></h1>
+    <h1><span class="brand">LeetCode</span> 看板 <span class="sub" id="sub"></span></h1>
     <div class="actions">
-      <nav class="views">
-        <button class="view-tab active" data-view="grid">坐标系</button>
-        <button class="view-tab" data-view="board">矩阵</button>
-      </nav>
       <span id="count" class="count"></span>
       <div class="todo-wrap">
         <button id="open-todo" class="ghost">📋 TODO<span id="todo-n" class="todo-n hidden"></span></button>
@@ -56,17 +52,9 @@
         <span class="theme-knob"><i class="sun">☀</i><i class="moon">☾</i></span>
       </button>
     </div>
-    <!-- 第二行: 只有矩阵视图用得上的分组 / 熟练度筛选(VitePress 的 local nav 那个位置) -->
-    <div id="board-bar" class="subbar hidden">
-      <div class="groupby" id="groupby">
-        <button class="gb-btn on" data-by="structures">按结构</button><button class="gb-btn" data-by="paradigms">按范式</button>
-      </div>
-      <div id="fam-filter" class="fam-filter"></div>
-    </div>
   </header>
 
   <main>
-    <div id="panel" class="hidden"></div>
     <div id="grid-view"></div>
   </main>
 
@@ -124,7 +112,7 @@
           <input type="text" id="e-cluster" placeholder="例: sorted-dedup" spellcheck="false" list="cluster-list">
           <datalist id="cluster-list"></datalist>
         </label>
-        <span id="meta-msg" class="msg">改动自动保存</span>
+        <span id="meta-msg" class="msg"></span>
       </div>
 
       <!-- 打卡之后补一句做成什么样: 额度只看做没做, 这一行只喂弱题列表 -->
@@ -157,7 +145,7 @@
           <div class="note-head">
             <span id="note-file" class="mono"></span>
             <div>
-              <span id="note-mode" class="hint">双击渲染区编辑</span>
+              <span id="note-mode" class="hint"></span>
               <button id="save-note" class="hidden">保存 (Ctrl+S)</button>
               <span id="note-msg" class="msg"></span>
             </div>
@@ -179,7 +167,6 @@
         <div>
           <span class="pill">题单</span>
           <span id="lists-title" class="d-title">覆盖进度</span>
-          <span class="hint">按子主题看缺口 · 点条目打开题, 没建的可以一键建</span>
         </div>
         <button id="lists-close" class="icon-btn">✕</button>
       </div>
@@ -195,7 +182,6 @@
         <div>
           <span class="pill">进度</span>
           <span class="d-title">FSRS 复习</span>
-          <span class="hint">调度状态在各题 meta.json 的 fsrs 字段, 历史在 dashboard/reviews.jsonl</span>
         </div>
         <button id="stats-close" class="icon-btn">✕</button>
       </div>
@@ -210,7 +196,6 @@
         <div>
           <span class="pill">笔记</span>
           <span class="d-title">notes/</span>
-          <span class="hint">不属于任何单题的东西 —— 方法论、模板、随想</span>
         </div>
         <button id="notes-close" class="icon-btn">✕</button>
       </div>
@@ -227,7 +212,7 @@
           <div class="note-head">
             <span id="nt-file" class="mono"></span>
             <div>
-              <span id="nt-mode" class="hint">双击渲染区编辑</span>
+              <span id="nt-mode" class="hint"></span>
               <button id="nt-save" class="hidden">保存 (Ctrl+S)</button>
               <span id="nt-msg" class="msg"></span>
             </div>
@@ -246,7 +231,6 @@
         <div>
           <span class="pill" id="doc-kind">结构</span>
           <span id="doc-title" class="d-title"></span>
-          <span class="hint">通用 trick 速查</span>
         </div>
         <button id="doc-close" class="icon-btn">✕</button>
       </div>
@@ -254,7 +238,7 @@
         <div class="note-head">
           <span id="doc-file" class="mono"></span>
           <div>
-            <span id="doc-mode" class="hint">双击渲染区编辑</span>
+            <span id="doc-mode" class="hint"></span>
             <button id="doc-save" class="hidden">保存 (Ctrl+S)</button>
             <span id="doc-msg" class="msg"></span>
           </div>
