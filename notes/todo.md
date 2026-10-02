@@ -7,3 +7,5 @@ web 看板右上角 📋 TODO 可以按题号或题名快速加,勾掉 = 做完�
 
 
 - [ ] 56 . Merge Intervals
+- [ ] Lowest Common Ancestor of a Binary Search Tree
+- [ ] 235 . Lowest Common Ancestor of a Binary Search Tree

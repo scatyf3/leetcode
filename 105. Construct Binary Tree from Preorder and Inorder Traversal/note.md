@@ -1,5 +1,10 @@
 # 105. Construct Binary Tree from Preorder and Inorder Traversal
 
+## 复杂度trick
+
+
+## 思路
+
 given两个array
 1. 从preorder切分出root
 2. inorder根据root的value，找到其对应的root index，然后切分左右tree的list

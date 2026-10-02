@@ -83,3 +83,9 @@
 {"ts": 1790892252, "date": "2026-10-01", "id": 17, "kind": "warm", "fam": 1, "born": "2026-09-09", "seen": false, "result": "clean"}
 {"ts": 1790958868, "date": "2026-10-02", "id": 146, "kind": "warm", "fam": 2, "born": "2026-09-12", "seen": true, "result": "bug", "pit": "怎么删除hashmap里的东西"}
 {"ts": 1790960128, "date": "2026-10-02", "id": 142, "kind": "new", "fam": 3, "born": "2026-10-02", "seen": false, "result": "wrong-idea", "pit": "推出来数值关系，但没反应过来咋用"}
+{"ts": 1790969437, "date": "2026-10-02", "id": 148, "kind": "new", "fam": null, "born": "2026-10-02", "seen": false, "attack": true, "pit": "不熟悉"}
+{"ts": 1790970070, "date": "2026-10-02", "id": 138, "kind": "warm", "fam": 1, "born": "2026-09-11", "seen": true}
+{"ts": 1790971653, "date": "2026-10-02", "id": 236, "kind": "new", "fam": 3, "born": "2026-10-02", "seen": false, "attack": true, "pit": "很烦"}
+{"ts": 1790972234, "date": "2026-10-02", "id": 235, "kind": "warm", "fam": 2, "born": "2026-09-12", "seen": true}
+{"ts": 1790972839, "date": "2026-10-02", "id": 102, "kind": "warm", "fam": 1, "born": "2026-09-12", "seen": true, "result": "clean"}
+{"ts": 1790974050, "date": "2026-10-02", "id": 105, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": true, "result": "bug", "pit": "edge case和找rootval的循环"}

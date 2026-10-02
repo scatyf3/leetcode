@@ -1,5 +1,11 @@
 # 235. Lowest Common Ancestor of a Binary Search Tree
 
+## pass2
+
+之前的代码好傻，需要改改，就按照binary search tree的语义执行就行
+
+## pass1
+
 这里的key insight是利用binary tree的性质( assume p<q)
 1. 如果p<r<q，则当前就是要找的
 2. 如果p<q<r，往左找
