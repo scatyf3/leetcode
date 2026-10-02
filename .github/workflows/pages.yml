@@ -1,7 +1,7 @@
 # 把看板导出成只读静态站发到 GitHub Pages -> https://scatyf3.github.io/leetcode/
 #   /        LeetCode 看板
 #   /jobs/   求职看板(只有方法论, 没有投递数据)
-# 写入口在构建时就被剥掉了(见 dashboard/static-shim.js), 线上没有任何可写接口。
+# 写入口在构建时就被剥掉了(见 dashboard/web/public/static-shim.js), 线上没有任何可写接口。
 name: Deploy dashboard
 
 on:
@@ -23,10 +23,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # 前端: Vite 构建 -> dashboard/web/dist/。单测挂了就不发布
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python dashboard/export_static.py dist   # 纯标准库, 没有依赖要装
+      - run: python dashboard/export_static.py dist   # 后端纯标准库, 没有依赖要装
       # 求职看板挂在 /jobs/ 子路径。**必须在 dashboard 之后** —— 那个 export 会先
       # rmtree(dist) 重建, 反过来跑的话 dist/jobs 会被它整个删掉。
       # 线上只有方法论, 投递状态不导出(见 jobs/export_static.py 的 EXPORT_APPLICATIONS)。

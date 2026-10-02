@@ -8,15 +8,29 @@
 首屏落在坐标系，因为一开页要先答「我在哪个阶段、这阶段还差几题」；矩阵是按题型翻库的第二跳。
 切过一次就记住（`localStorage` 的 `lc-view2`）。
 
-纯 Python 标准库，**零依赖、无需 pip 安装**。
+后端是纯 Python 标准库，**零依赖、无需 pip 安装**；前端是 Vite + Vue 3 + TypeScript 工程
+（`dashboard/web/`，结构照着 [ai-infra-inferview](https://github.com/scatyf3/ai-infra-inferview)），
+需要 Node 22+ 构建一次。
 
 ## 运行
 
 ```bash
+npm install          # 仓库根目录, 第一次 / package.json 变了之后
+npm run build        # -> dashboard/web/dist/ (gitignore)
 python dashboard/server.py
 ```
 
-然后打开 http://localhost:8765 （Ctrl+C 停止）。
+然后打开 http://localhost:8765 （Ctrl+C 停止）。server.py 伺候的是 `dashboard/web/dist/` 里的产物，
+**改了前端要重新 `npm run build`**（或者用下面的热更新）。没构建过的话首页会提示你先构建，API 照常可用。
+
+改前端时：
+
+```bash
+python dashboard/server.py   # 一个终端: API
+npm run dev                  # 另一个终端: http://localhost:5173, 热更新, /api 自动代理到 8765
+npm test                     # lib/ 下纯函数的单测 (vitest)
+npm run typecheck            # vue-tsc
+```
 
 ## 架构
 
@@ -39,7 +53,14 @@ dashboard/
   server.py      ← 标准库 http + sqlite 索引 + API
   scaffold.py    ← 题号/题名 → 抓题面 + 建空题目文件夹（TODO 加条目时自动调）
   fetch_desc.py  ← 批量补抓已有文件夹的 problem.html
-  index.html / app.js / styles.css   ← 无构建前端
+  web/           ← 前端 (Vite 工程, 配置在仓库根目录 vite.config.ts / package.json)
+    index.html               ← 页面骨架 + 首帧前落定深浅色的那段内联脚本
+    src/main.ts              ← 入口: 字体 + 样式 + 主题开关 + app.js
+    src/app.js               ← 看板的手写 DOM 部分(坐标系 / 矩阵 / 各个 overlay)
+    src/components/ReviewPanel.vue ← 🧠 复习面板
+    src/lib/*.ts             ← 纯计算(熟练度阶梯 / 排队 / 选择题 / 时间轴 / markdown / 高亮), 有单测
+    src/styles.css           ← 全部样式; 最上面一块是设计 token(VitePress 配色), 换主题只改那里
+    public/static-shim.js + ro.css ← 只读静态站专用, 只有 export_static.py 会把它们挂进 index.html
   fsrs.py        ← FSRS-6 调度算法（移植自 py-fsrs，纯标准库；`--selftest` 可自查）
   backfill_edits.py ← 从 git 历史回填 edits.jsonl（时间轴开写之前那一截）
   syntax.py      ← 语法牌组: 解析 syntax/*.md + 调度 + 就地改背面
@@ -551,23 +572,28 @@ python -m http.server -d dist 8000
 
 只读站没有写接口，`syncSession()` 和拉 carry 都直接跳过，队列就是现算的。
 
-## 为什么复习面板是 Vue, 其余是手写 DOM
+## 前端
 
-`dashboard/index.html` 里 `#review-app` 那一段是 **Vue 3 的 in-DOM 模板**，组件在
-`app.js` 的 `const RV = Vue.createApp({...}).mount('#review-app')`。其余看板和 overlay
-仍然是手写 DOM，**没动**。
+照着 [ai-infra-inferview](https://github.com/scatyf3/ai-infra-inferview) 的做法：Vite + Vue 3 SFC + TS，
+纯计算抽成不依赖 DOM 的 `src/lib/*.ts` 并配 vitest 单测，外观用 VitePress 的设计语言
+（品牌蓝 `#2563eb`、毛玻璃顶栏、浅/深色两套 token、右上角拨片切换）。
 
-- **只有这一屏迁了**，因为它状态最多（队列 / 揭晓与否 / 选择题 / 就地编辑 / tab），
-  以前全靠手工 `classList.toggle` + `innerHTML` 对齐，加个元素就容易漏一处。迁完
-  `app.js` 里的 `$('#rv-*')` 从 20 多处降到 **0**。
-- **没有构建步骤**：`dashboard/vendor/` 下的 `vue.global.prod.js` 和 `marked.min.js`(v15.0.7, MIT)
-  都是**存在仓库里的**，不走 CDN。
-  本地看板要能离线用，CI 里也没有 node（`pages.yml` 只装 Python）。想调试就把它换成
-  同版本的 `vue.global.js`（dev 版有模板报错信息），文件名改一下 `index.html` 的 script 标签。
-- **只读站的退化**不再靠 CSS 藏了：组件里有个 `readOnly` 标志位（读 `<html class="ro">`），
-  评分按钮 / 「改一下」/「下一题」直接用 `v-if` 决定渲染哪一套。`ro.css` 里那三条已删。
-- **模板里别写 `&&`** —— 属性值里的 `&` 会让 Vue 的字符串解析器走 HTML 实体解码，
-  浏览器里没事，但离线跑 `Vue.compile()` 做检查时会炸。多条件拆成 computed（如 `showEmpty`）。
+- **复习面板是 SFC**（`src/components/ReviewPanel.vue`），其余看板和 overlay 仍然是 `app.js` 里的手写 DOM。
+  这一屏状态最多（队列 / 揭晓与否 / 选择题 / 就地编辑 / tab），最早迁到 Vue；现在模板从 index.html
+  搬进了 SFC，编译期就能查出模板错误。
+- **面板和看板之间只走 `host` 一个口子**（见 `ReviewPanel.vue` 的 `ReviewHost`）：读两组行、
+  算今天的队列、重画看板、改 meta、开 📈。以前是直接摸全局变量；拆成模块后依赖得写明白。
+  `app.js` 里构造 host 时全用箭头函数 —— `putMeta` / `PLAN` 在文件更下面才声明，直接取值会撞 TDZ。
+- **`src/lib/` 是纯函数**：熟练度阶梯与 S 深度、账本、复习队列的范围与顺序、选择题、时间轴回放、
+  markdown + 题号链接、Python 高亮。改这些先跑 `npm test`。marked 锁在 15.0.7（和原来 vendor 的同版本），
+  渲染结果不变。
+- **深浅色**：`<html data-theme>` 是唯一开关，`index.html` 里一段内联脚本在首帧前落定（不闪白）。
+  手动切过记在 `localStorage` 的 `lc-theme`，没切过就一直跟系统。
+- **离线**：Inter 字体用 `@fontsource-variable/inter` 打进产物，不走 Google Fonts；构建产物不依赖网络。
+- **只读站的退化**靠组件里的 `readOnly` 标志位（读 `<html class="ro">`），评分按钮 / 「改一下」/
+  「下一题」直接用 `v-if` 决定渲染哪一套；其余写入口由 `ro.css` 藏掉。
+- **CI**（`.github/workflows/pages.yml`）：`npm ci` → `npm test` → `npm run build` → `export_static.py`。
+  单测挂了就不发布。
 
 ## 端口
 

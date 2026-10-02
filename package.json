@@ -1,0 +1,28 @@
+{
+  "name": "leetcode-dashboard",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "LeetCode 看板前端：Vite + Vue 3 + TS，后端是 dashboard/server.py",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.1.1",
+    "marked": "15.0.7",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.7.2",
+    "vite": "^6.0.7",
+    "vitest": "^3.0.0",
+    "vue-tsc": "^2.2.0"
+  }
+}

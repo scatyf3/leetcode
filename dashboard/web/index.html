@@ -4,20 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LeetCode 看板</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="color-scheme" content="light dark">
+  <!-- 主题: 先于样式落定, 免得深色模式下先闪一屏白。手动选过就用选过的, 否则跟系统(见 src/theme.ts) -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('lc-theme'); } catch (e) {}
+      if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
 </head>
 <body>
   <header>
-    <h1>LeetCode 看板 <span class="sub" id="sub">数据结构 × 算法范式</span></h1>
+    <h1><span class="brand">LeetCode</span> 看板 <span class="sub" id="sub">数据结构 × 算法范式</span></h1>
     <div class="actions">
       <nav class="views">
         <button class="view-tab active" data-view="grid">坐标系</button>
         <button class="view-tab" data-view="board">矩阵</button>
       </nav>
-      <div class="groupby" id="groupby">
-        <button class="gb-btn on" data-by="structures">按结构</button><button class="gb-btn" data-by="paradigms">按范式</button>
-      </div>
-      <div id="fam-filter" class="fam-filter"></div>
       <span id="count" class="count"></span>
       <div class="todo-wrap">
         <button id="open-todo" class="ghost">📋 TODO<span id="todo-n" class="todo-n hidden"></span></button>
@@ -46,6 +52,16 @@
       <button id="open-lists" class="ghost">📊 题单</button>
       <button id="open-notes" class="ghost">📓 笔记</button>
       <button id="sync">↻ Sync</button>
+      <button id="theme-toggle" class="theme-toggle" type="button" role="switch" aria-label="切换深色模式" title="切换深色 / 浅色">
+        <span class="theme-knob"><i class="sun">☀</i><i class="moon">☾</i></span>
+      </button>
+    </div>
+    <!-- 第二行: 只有矩阵视图用得上的分组 / 熟练度筛选(VitePress 的 local nav 那个位置) -->
+    <div id="board-bar" class="subbar hidden">
+      <div class="groupby" id="groupby">
+        <button class="gb-btn on" data-by="structures">按结构</button><button class="gb-btn" data-by="paradigms">按范式</button>
+      </div>
+      <div id="fam-filter" class="fam-filter"></div>
     </div>
   </header>
 
@@ -65,7 +81,7 @@
         <div class="d-head-r">
           <span id="attempt-msg" class="msg"></span>
           <button id="d-attempt" class="attempt-btn"></button>
-          <button id="close">✕</button>
+          <button id="close" class="icon-btn">✕</button>
         </div>
       </div>
 
@@ -153,156 +169,9 @@
     </div>
   </div>
 
-  <!-- FSRS 复习: 看题面 -> 心里过一遍思路 -> 空格揭晓 -> 1-4 自评。
-       这一块由 Vue 接管(app.js 里的 ReviewApp) —— 下面是它的 in-DOM 模板,
-       别再往里塞 id 然后去 app.js 里 $() 抓, 状态一律走 data/computed。
-       其余 overlay 仍然是手写 DOM, 没动。 -->
-  <div id="review-app">
-    <div class="overlay" :class="{ hidden: !open }" @click.self="close">
-      <div class="detail review-detail">
-        <div class="detail-head">
-          <div>
-            <span class="pill" v-text="pillText"></span>
-            <span class="d-title" v-text="d ? d.title : ''"></span>
-            <span class="hint" v-text="note || metaLine"></span>
-          </div>
-          <div class="rv-head-right">
-            <!-- 两个牌组: 题目(meta.json) / 语法(syntax/*.md)。换组 = 重开一轮 -->
-            <div class="groupby rv-deck" title="换牌组会重开一轮 —— 两组的 id 空间不一样, 不能混在一个队列里">
-              <button v-for="k in DECKS" :key="k.k" class="gb-btn" :class="{ on: deck === k.k }"
-                      @click="setDeck(k.k)">
-                <span v-text="k.label"></span>
-                <em v-if="counts[k.k]" class="rv-deck-n" v-text="counts[k.k]"></em>
-              </button>
-            </div>
-            <div class="groupby rv-mode" title="只改队列顺序, 不改范围(到期的 + 还没进过复习的)">
-              <button v-for="m in MODES" :key="m.k" class="gb-btn" :class="{ on: mode === m.k }"
-                      @click="setMode(m.k)" v-text="m.label"></button>
-            </div>
-            <span class="rv-verdict" :class="verdict.cls" v-text="verdict.text"></span>
-            <span class="hint" v-text="d ? (done + 1) + ' / ' + total : ''"></span>
-            <button @click="close">✕</button>
-          </div>
-        </div>
+  <!-- FSRS 复习面板: components/ReviewPanel.vue 挂在这里 -->
+  <div id="review-app"></div>
 
-        <div v-if="showEmpty" class="rv-empty">
-          <span v-html="emptyMsg"></span>
-          <br><button class="ghost rv-stats" @click="toStats">📈 看看复习进度</button>
-        </div>
-
-        <template v-else-if="d">
-          <div class="rv-card" ref="card">
-            <div>
-              <div class="rv-ask" v-html="askText"></div>
-              <div class="lc-desc" v-html="descHtml"></div>
-              <div v-if="hasQuiz" class="rv-quiz">
-                <div class="rv-q" v-for="b in quizBlocks" :key="b.key">
-                  <div class="rv-q-label" v-text="b.label"></div>
-                  <div class="rv-opts">
-                    <span v-if="!b.state" class="rv-q-hint">(这题还没写选项)</span>
-                    <button v-else v-for="(t, i) in b.state.opts" :key="i"
-                            class="rv-opt" :class="optClass(b.state, i)" @click="pick(b.state, i)">
-                      <span class="k" v-text="KEYS[i]"></span><span v-text="t"></span>
-                    </button>
-                  </div>
-                </div>
-                <div class="rv-q-hint">选不选都行 —— 直接按空格也能揭晓。选了的话揭晓时会标出对错。</div>
-              </div>
-              <!-- 默写框(只有语法卡有)。纯草稿纸: 不存盘、不判对错、不进 FSRS ——
-                   揭晓后原样贴到答案上面自己比。之所以不自动判, 是因为「只保留符合条件的
-                   字符」这种卡写法自由度太高, 机器判错会比不判更烦人。 -->
-              <div v-if="canWrite && !revealed" class="rv-write">
-                <div class="rv-q-label">默写一遍(可选)</div>
-                <textarea id="rv-write-box" ref="write" v-model="attempt" spellcheck="false"
-                          placeholder="把答案写出来… 写不出来就是不会，别停在「感觉知道」"></textarea>
-                <div class="rv-q-hint">写不写都行 —— <b>w</b> 跳进来写，框里 <b>Ctrl+Enter</b> 揭晓（空格在框里就是空格）。不判对错。</div>
-              </div>
-            </div>
-
-            <!-- 给 agent 的批注(dashboard/card-comments.jsonl)。放在答案卡**上面**:
-                 揭晓后底下还有笔记 / 解法 tab, 放最底下一打开就在视口外。
-                 揭晓前只报条数不显示内容 —— 批注和 agent 的回复多半会提到正确答案 -->
-            <div v-if="showCmt" class="rv-cmt" ref="cmt">
-              <div class="rv-q-label">给 agent 的批注</div>
-              <template v-if="revealed">
-                <div v-for="c in cardComments" :key="c.cid" class="rv-cmt-item" :class="c.status">
-                  <span class="rv-cmt-st" v-text="CMT_ST[c.status] || c.status"></span>
-                  <span class="rv-cmt-text" v-text="c.text"></span>
-                  <span class="hint" v-text="c.date"></span>
-                  <span v-if="c.status === 'open'" class="rv-cmt-x" @click="dropComment(c)">撤回</span>
-                  <div v-if="c.reply" class="rv-cmt-reply" v-text="'↳ ' + c.reply"></div>
-                </div>
-              </template>
-              <div v-else-if="cardComments.length" class="rv-q-hint"
-                   v-text="'这张卡有 ' + cardComments.length + ' 条批注 —— 揭晓后显示(防剧透)'"></div>
-              <template v-if="cbox">
-                <textarea id="rv-cmt-box" ref="cbox" v-model="cdraft" spellcheck="false"
-                          placeholder="这张卡哪儿不对… 例: 干扰项 B 其实也能 AC / 答案卡漏了触发条件"></textarea>
-                <div class="rv-q-hint"><button class="ghost" :disabled="!cdraft.trim()" @click="sendComment">存</button>
-                  或 <b>Ctrl+Enter</b> · <b>Esc</b> 收起(草稿留着)。存完不用管 —— 攒够了跟 agent 说「处理卡片批注」。</div>
-              </template>
-            </div>
-
-            <!-- 答案卡: 标签 + 复杂度 + 一句话思路。note/解法退成次要 tab -->
-            <div v-if="revealed" id="rv-answer">
-              <!-- 你刚才写的, 原样贴在答案卡**上面** —— 要比的两半挨着才比得动 -->
-              <div v-if="mine" class="rv-mine">
-                <div class="rv-q-label">你写的</div>
-                <pre v-text="mine"></pre>
-              </div>
-              <div class="rv-acard">
-                <div class="rv-acard-head">
-                  <!-- 标签和复杂度是**题目**答案卡的一部分(正是揭晓时该对照的东西);
-                       语法卡没有这两样, 那一行换成它出自哪个文件 -->
-                  <template v-if="!isSyntax">
-                    <span class="rv-tagline" v-html="tagline"></span>
-                    <span v-if="cxLine" class="rv-cx" v-text="cxLine"></span>
-                  </template>
-                  <span v-else class="rv-tagline">来自 <b v-text="d.file"></b></span>
-                  <span v-if="!readOnly" class="rv-aedit" title="双击那段答案也能编辑"
-                        @click="editing ? cancelEdit() : startEdit()"
-                        v-text="editing ? 'Ctrl+S 保存 · Esc 取消' : '改一下'"></span>
-                  <span class="msg" v-text="amsg"></span>
-                </div>
-                <div v-show="!editing" class="rv-idea" title="双击编辑"
-                     @dblclick="startEdit" v-html="ideaHtml"></div>
-                <div v-if="!isSyntax && d.pit" class="rv-pit"><b>坑</b><span v-text="d.pit"></span></div>
-                <textarea v-show="editing" id="rv-aedit-box" ref="aedit" v-model="draft"
-                          spellcheck="false" placeholder="一句话思路… Ctrl+S 保存，Esc 取消"></textarea>
-              </div>
-              <!-- 语法卡的背面就是全部, items 是空的 -> 次要 tab 整块不出现 -->
-              <template v-if="items.length">
-                <div class="tabs">
-                  <button v-for="(x, k) in items" :key="k" class="tab" :class="{ on: active === k }"
-                          @click="active = k" v-text="x.name"></button>
-                </div>
-                <div class="rv-body" v-html="bodyHtml"></div>
-              </template>
-            </div>
-          </div>
-
-          <div class="rv-foot">
-            <button v-if="!revealed" class="rv-reveal" @click="reveal">显示答案 <em>空格</em></button>
-            <!-- 只读站没有写接口: 没有评分按钮, 只有单纯的「下一题」自测 -->
-            <div v-else-if="!readOnly" class="rv-rate">
-              <button v-for="r in [1, 2, 3, 4]" :key="r" class="rv-btn" :data-r="r" @click="rate(r)">
-                <b v-text="RATE[r][0]"></b>
-                <i v-text="fmtInterval(preview[r] || 0)"></i>
-                <u v-text="r + ' · ' + RATE[r][1]"></u>
-              </button>
-            </div>
-            <button v-else class="rv-next" @click="skip">下一题 <em>空格</em></button>
-            <button class="ghost rv-defer" :class="{ off: !queue.length }" @click="defer"
-                    title="不评分 · 不写 FSRS —— 只把当前这张挪到本次会话的最后再问一遍">↓ 押到队尾 <em>0</em></button>
-            <button v-if="!isSyntax && !readOnly" class="ghost rv-pause" @click="pause"
-                    title="这阵子都别问: 不评分, 以后不进复习队列, interval 一起冻住 —— 在详情页取消勾选恢复">⏸ 暂停</button>
-            <button v-if="!readOnly" class="ghost rv-cmt-btn" @click="openComment"
-                    title="给 agent 留一句这张卡哪儿不对 —— 攒着让 agent 统一改, 不评分、不影响调度">💬 批注 <em>c</em><b v-if="openComments" v-text="openComments"></b></button>
-          </div>
-        </template>
-      </div>
-    </div>
-  </div>
   <!-- list coverage overlay: dashboard/lists.json 是题单定义, 进度现算 -->
   <div id="lists-overlay" class="overlay hidden">
     <div class="detail lists-detail">
@@ -312,7 +181,7 @@
           <span id="lists-title" class="d-title">覆盖进度</span>
           <span class="hint">按子主题看缺口 · 点条目打开题, 没建的可以一键建</span>
         </div>
-        <button id="lists-close">✕</button>
+        <button id="lists-close" class="icon-btn">✕</button>
       </div>
       <div id="lists-tabs" class="tabs lists-tabs"></div>
       <div id="lists-body" class="lists-body"></div>
@@ -328,7 +197,7 @@
           <span class="d-title">FSRS 复习</span>
           <span class="hint">调度状态在各题 meta.json 的 fsrs 字段, 历史在 dashboard/reviews.jsonl</span>
         </div>
-        <button id="stats-close">✕</button>
+        <button id="stats-close" class="icon-btn">✕</button>
       </div>
       <div id="stats-body" class="stats-body"></div>
     </div>
@@ -343,7 +212,7 @@
           <span class="d-title">notes/</span>
           <span class="hint">不属于任何单题的东西 —— 方法论、模板、随想</span>
         </div>
-        <button id="notes-close">✕</button>
+        <button id="notes-close" class="icon-btn">✕</button>
       </div>
       <div class="notes-body">
         <aside class="notes-side">
@@ -379,7 +248,7 @@
           <span id="doc-title" class="d-title"></span>
           <span class="hint">通用 trick 速查</span>
         </div>
-        <button id="doc-close">✕</button>
+        <button id="doc-close" class="icon-btn">✕</button>
       </div>
       <div class="note-pane doc-pane">
         <div class="note-head">
@@ -396,8 +265,6 @@
     </div>
   </div>
 
-  <script src="vendor/vue.global.prod.js"></script>
-  <script src="vendor/marked.min.js"></script>
-  <script src="app.js"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

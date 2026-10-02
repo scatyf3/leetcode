@@ -1,11 +1,13 @@
 'use strict';
 // 只读静态构建(GitHub Pages)的适配层 —— 本地跑 server.py 时这个文件不会被加载。
+// 放在 web/public/ 里, Vite 原样拷进 dist/; 只有 export_static.py 会把它挂进 index.html,
+// 而且挂在 </head> 前、Vite 的 module 入口之前生效(module 天然 defer)。
 //
 // 干三件事:
-//   1. 把 app.js 的 fetch 改道到 export_static.py 导出的 .json 文件;
+//   1. 把前端的 fetch 改道到 export_static.py 导出的 .json 文件;
 //   2. 写请求(PUT/POST)一律就地拒绝, 不出网;
 //   3. 关掉所有编辑入口(双击进编辑 / Ctrl+S), 配合 ro.css 把按钮藏掉。
-// app.js 本身一行没改, 本地那份仍然是可写的完整看板。
+// 前端代码本身不知道自己在只读站上, 本地那份仍然是可写的完整看板。
 (function () {
   const BASE = new URL('.', document.baseURI);   // 支持挂在 /leetcode/ 这种子路径下
   const realFetch = window.fetch.bind(window);
