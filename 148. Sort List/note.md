@@ -1,5 +1,19 @@
 # 148. Sort List
 
+### pass2
+
+```python
+        while fast and fast.next: # 如果只用fast，无限循环
+            slow = slow.next
+            fast = fast.next.next
+```
+
+必须这样写 - 规律是：一次走几步，就要守住前面几个指针。走两步，就守 fast 和 fast.next。
+
+之前一个做法是外侧while fast，内部if fast.next再更新fast，这样会死循环...
+
+### pass1
+
 标准的归并排序，但感觉对咋写完全不熟悉，思路没问题，让agent给个template填空...
 
 而且这玩意算是linkedlist里重要的题，包括快慢指针，找中点，merge之类的

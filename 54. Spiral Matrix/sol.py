@@ -1,26 +1,34 @@
 class Solution:
     def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
         res = []
+        # 为啥这里闭区间（ => 好递推
         top, bottom = 0, len(matrix) - 1
         left, right = 0, len(matrix[0]) - 1
-
         while top <= bottom and left <= right:
-            for c in range(left, right + 1):          # → 沿 top 行
-                res.append(matrix[top][c])
-            top += 1
-
-            for r in range(top, bottom + 1):          # ↓ 沿 right 列
-                res.append(matrix[r][right])
-            right -= 1
-
-            if top <= bottom:                         # 守卫: 还剩至少一行
-                for c in range(right, left - 1, -1):  # ← 沿 bottom 行
-                    res.append(matrix[bottom][c])
-                bottom -= 1
-
-            if left <= right:                         # 守卫: 还剩至少一列
-                for r in range(bottom, top - 1, -1):  # ↑ 沿 left 列
-                    res.append(matrix[r][left])
-                left += 1
-
+            i = left
+            # ⬆️
+            while i<=right and top <= bottom and left <= right:
+                res.append(matrix[top][i])
+                i+=1
+            top+=1
+            # ➡️
+            j = top
+            while j<=bottom and top <= bottom and left <= right:
+                res.append(matrix[j][right])
+                j+=1
+            right-=1
+            # ⬇️
+            i = right
+            while i>=left and top <= bottom and left <= right:
+                res.append(matrix[bottom][i])
+                i-=1
+            bottom-=1
+            # ⬅️
+            j = bottom
+            while j>=top and top <= bottom and left <= right:
+                # print(left,j)
+                res.append(matrix[j][left])
+                j-=1
+            left+=1
         return res
+            

@@ -89,3 +89,18 @@
 {"ts": 1790972234, "date": "2026-10-02", "id": 235, "kind": "warm", "fam": 2, "born": "2026-09-12", "seen": true}
 {"ts": 1790972839, "date": "2026-10-02", "id": 102, "kind": "warm", "fam": 1, "born": "2026-09-12", "seen": true, "result": "clean"}
 {"ts": 1790974050, "date": "2026-10-02", "id": 105, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": true, "result": "bug", "pit": "edge case和找rootval的循环"}
+{"ts": 1791047420, "date": "2026-10-03", "id": 438, "kind": "warm", "fam": 2, "born": null, "seen": false}
+{"ts": 1791048716, "date": "2026-10-03", "id": 148, "kind": "warm", "fam": 2, "born": "2026-10-02", "seen": true}
+{"ts": 1791049126, "date": "2026-10-03", "id": 142, "kind": "warm", "fam": 2, "born": "2026-10-02", "seen": true}
+{"ts": 1791050659, "date": "2026-10-03", "id": 25, "kind": "redo", "fam": 3, "born": null, "seen": false, "result": "bug", "attack": true, "pit": "template不对"}
+{"ts": 1791052156, "date": "2026-10-03", "id": 236, "kind": "redo", "fam": 3, "born": "2026-10-02", "seen": true}
+{"ts": 1791053189, "date": "2026-10-03", "id": 105, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": true, "result": "bug"}
+{"ts": 1791054636, "date": "2026-10-03", "id": 560, "kind": "new", "fam": 4, "born": "2026-10-03", "seen": false, "attack": true}
+{"ts": 1791055822, "date": "2026-10-03", "id": 56, "kind": "redo", "fam": 3, "born": "2026-09-04", "seen": true}
+{"ts": 1791056516, "date": "2026-10-03", "id": 53, "kind": "warm", "fam": 1, "born": "2026-09-04", "seen": false, "result": "bug"}
+{"ts": 1791058042, "date": "2026-10-03", "id": 239, "kind": "redo", "fam": 3, "born": "2026-09-08", "seen": true}
+{"ts": 1791058919, "date": "2026-10-03", "id": 76, "kind": "redo", "fam": 3, "born": "2026-09-08", "seen": true}
+{"ts": 1791060600, "date": "2026-10-03", "id": 33, "kind": "redo", "fam": 3, "born": "2026-09-01", "seen": false, "attack": true, "pit": "搜rotate array"}
+{"ts": 1791062011, "date": "2026-10-03", "id": 54, "kind": "redo", "fam": 4, "born": "2026-09-04", "seen": false}
+{"ts": 1791062325, "date": "2026-10-03", "id": 48, "kind": "redo", "fam": 4, "born": "2026-09-01", "seen": false}
+{"ts": 1791063138, "date": "2026-10-03", "id": 322, "kind": "new", "fam": 3, "born": "2026-10-03", "seen": false}

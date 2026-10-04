@@ -1,5 +1,11 @@
 # 54. Spiral Matrix
 
+### pass2
+
+懒得思考，每次都判断`top <= bottom and left <= right`得了
+
+### pass1
+
 一个naive的设计是定义一个xy步进的step
 1. x++,y不动直到右边界
 2. x不动，y++

@@ -11,7 +11,7 @@
     "窗口满看 i >= k - 1, 答案取 nums[dq[0]]"
   ],
   "difficulty": "hard",
-  "status": "todo",
+  "status": "solved",
   "familiarity": 3,
   "complexity": {
     "time": "O(n)",

@@ -1,8 +1,10 @@
 {
-  "structures": [],
+  "structures": [
+    "linked-list"
+  ],
   "paradigms": [],
   "techniques": [],
   "difficulty": "medium",
   "status": "todo",
-  "familiarity": 3
+  "familiarity": 2
 }

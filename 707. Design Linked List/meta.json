@@ -1,5 +1,7 @@
 {
-  "structures": [],
+  "structures": [
+    "linked-list"
+  ],
   "paradigms": [],
   "techniques": [],
   "difficulty": "medium",

@@ -1,5 +1,17 @@
 # 76. Minimum Window Substring
 
+### pass2
+基本没问题，但是犯傻了
+
+```python
+        for r in range(len(s)):
+            if s[r] in cnt:
+                cnt[s[r]]-=1
+            # r+=1 # woc你在干嘛
+```
+
+### pass1
+
 很烦，是对LC 567的放缩
 1. 扫r，一旦valid收l
 2. 判断valid，LC 567 有个轮椅是py counter的高级特性，这里naive的做法是维护一个missing的int，无条件更新counter，只在当前str在target str的counter里边missing

@@ -1,5 +1,14 @@
 # 56. Merge Intervals
 
+## pass2
+
+我知道要按照start排序，但是这里怎么又很麻烦。这里可以迭代interval，edit res
+1. 对每个区间，对比res的尾部，如果可以merge则merge，不能merge则append
+2. 这里res的操作其实是个heap，但没有explicit的pop，则是inplace修改了
+3. 不要在intervals里操作，非常麻烦
+
+## pass1
+
 范式：区间题 §1 合并/扫描 —— [paradigms/intervals.md](../paradigms/intervals.md)
 
 ## 一开始的想法

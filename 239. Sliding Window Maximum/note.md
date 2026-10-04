@@ -1,5 +1,11 @@
 # 239. Sliding Window Maximum
 
+## pass3
+
+感觉还是很不熟练，这里swa还是闭区间，所以我们枚举r，则len=r-l+1(设想r=l的情况)，则invalid: k>len => k>r-index+1 => index>r-k+1
+
+这个index体操好烦...
+
 ## pass2
 
 我们用单调队列，队列里保存index，我们规定这个队列 头>尾

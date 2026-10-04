@@ -1,5 +1,24 @@
 # 53. Maximum Subarray
 
+### pass2
+
+确实啊，直接1d dp压缩成scalar，然后记得初始化到-inf
+```
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        max_sum = float("-inf")
+        mx = float("-inf")
+        for elem in nums:
+            # 决策就是要不要和自己的prefix切割
+            max_sum = max(elem,max_sum+elem)
+            if max_sum>mx:
+                mx=max_sum
+        return mx
+        
+```
+
+### pass1
+
 1. naive的想法是lr naive迭代，然后naive 迭代里缩边界不用重算
 2. 或者一个二维dp表维护i..j slice切片的值
 
