@@ -15,7 +15,7 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3,
+  "familiarity": 2,
   "complexity": {
     "time": "O(n²·L)",
     "space": "O(n)"

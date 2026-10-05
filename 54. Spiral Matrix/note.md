@@ -4,6 +4,8 @@
 
 懒得思考，每次都判断`top <= bottom and left <= right`得了
 
+然后记得左右是闭区间（
+
 ### pass1
 
 一个naive的设计是定义一个xy步进的step

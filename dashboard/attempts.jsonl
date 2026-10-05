@@ -104,3 +104,16 @@
 {"ts": 1791062011, "date": "2026-10-03", "id": 54, "kind": "redo", "fam": 4, "born": "2026-09-04", "seen": false}
 {"ts": 1791062325, "date": "2026-10-03", "id": 48, "kind": "redo", "fam": 4, "born": "2026-09-01", "seen": false}
 {"ts": 1791063138, "date": "2026-10-03", "id": 322, "kind": "new", "fam": 3, "born": "2026-10-03", "seen": false}
+{"ts": 1791224661, "date": "2026-10-05", "id": 560, "kind": "redo", "fam": 3, "born": "2026-10-03", "seen": true, "result": "bug"}
+{"ts": 1791225417, "date": "2026-10-05", "id": 56, "kind": "redo", "fam": 3, "born": "2026-09-04", "seen": true}
+{"ts": 1791226450, "date": "2026-10-05", "id": 239, "kind": "redo", "fam": 3, "born": "2026-09-08", "seen": true}
+{"ts": 1791227073, "date": "2026-10-05", "id": 33, "kind": "warm", "fam": 2, "born": "2026-09-01", "seen": true}
+{"ts": 1791228200, "date": "2026-10-05", "id": 54, "kind": "redo", "fam": 3, "born": "2026-09-04", "seen": true}
+{"ts": 1791228608, "date": "2026-10-05", "id": 322, "kind": "warm", "fam": 2, "born": "2026-10-03", "seen": true}
+{"ts": 1791230387, "date": "2026-10-05", "id": 139, "kind": "warm", "fam": 2, "born": "2026-09-01", "seen": false}
+{"ts": 1791231655, "date": "2026-10-05", "id": 1143, "kind": "new", "fam": 4, "born": "2026-10-05", "seen": false}
+{"ts": 1791232209, "date": "2026-10-05", "id": 72, "kind": "new", "fam": 3.5, "born": "2026-10-05", "seen": false}
+{"ts": 1791233338, "date": "2026-10-05", "id": 31, "kind": "new", "fam": 4, "born": "2026-10-05", "seen": false}
+{"ts": 1791233565, "date": "2026-10-05", "id": 78, "kind": "redo", "fam": 3, "born": "2026-09-09", "seen": true}
+{"ts": 1791235109, "date": "2026-10-05", "id": 79, "kind": "redo", "fam": 3, "born": "2026-09-06", "seen": true}
+{"ts": 1791236136, "date": "2026-10-05", "id": 394, "kind": "redo", "fam": 3.5, "born": "2026-09-14", "seen": false}

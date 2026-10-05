@@ -12,7 +12,7 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3,
+  "familiarity": 1,
   "complexity": {
     "time": "O(n log n)",
     "space": "O(n)"

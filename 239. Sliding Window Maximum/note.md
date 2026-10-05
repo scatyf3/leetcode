@@ -4,7 +4,7 @@
 
 感觉还是很不熟练，这里swa还是闭区间，所以我们枚举r，则len=r-l+1(设想r=l的情况)，则invalid: k>len => k>r-index+1 => index>r-k+1
 
-这个index体操好烦...
+这个index体操好烦...手推一下好
 
 ## pass2
 
