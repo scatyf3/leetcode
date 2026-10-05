@@ -1,0 +1,6821 @@
+[
+[
+{
+"rating": 4,
+"today": "2026-06-15",
+"card": {
+"state": "review",
+"due": "2026-06-23",
+"last_review": "2026-06-15",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-06-23",
+"card": {
+"state": "review",
+"due": "2026-06-24",
+"last_review": "2026-06-23",
+"stability": 1.3886324609821161,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-07-01",
+"card": {
+"state": "review",
+"due": "2026-07-10",
+"last_review": "2026-07-01",
+"stability": 8.976430865792228,
+"difficulty": 7.0151909490243805,
+"reps": 3,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-09-17",
+"card": {
+"state": "review",
+"due": "2026-09-18",
+"last_review": "2026-09-17",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-09-17",
+"card": {
+"state": "review",
+"due": "2026-09-18",
+"last_review": "2026-09-17",
+"stability": 0.42437996387663374,
+"difficulty": 5.200020369516838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-09-17",
+"card": {
+"state": "review",
+"due": "2026-09-18",
+"last_review": "2026-09-17",
+"stability": 0.1594139202311611,
+"difficulty": 8.40750770461851,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-09-18",
+"card": {
+"state": "review",
+"due": "2026-09-19",
+"last_review": "2026-09-18",
+"stability": 0.07944740278028298,
+"difficulty": 9.46178698075255,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-04-25",
+"card": {
+"state": "review",
+"due": "2026-04-26",
+"last_review": "2026-04-25",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-04-26",
+"card": {
+"state": "review",
+"due": "2026-04-29",
+"last_review": "2026-04-26",
+"stability": 3.348709732599786,
+"difficulty": 5.200020369516838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 2,
+"today": "2026-04-26",
+"card": {
+"state": "review",
+"due": "2026-04-29",
+"last_review": "2026-04-26",
+"stability": 3.348709732599786,
+"difficulty": 6.798778211531335,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 2,
+"today": "2026-04-26",
+"card": {
+"state": "review",
+"due": "2026-04-29",
+"last_review": "2026-04-26",
+"stability": 3.348709732599786,
+"difficulty": 7.860108169175996,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 2,
+"today": "2026-04-27",
+"card": {
+"state": "review",
+"due": "2026-05-01",
+"last_review": "2026-04-27",
+"stability": 4.403835787645675,
+"difficulty": 8.564668453036548,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 7
+}
+},
+{
+"rating": 3,
+"today": "2026-05-01",
+"card": {
+"state": "review",
+"due": "2026-05-10",
+"last_review": "2026-05-01",
+"stability": 8.614407391183185,
+"difficulty": 8.551332153880349,
+"reps": 6,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+},
+{
+"rating": 2,
+"today": "2026-05-10",
+"card": {
+"state": "review",
+"due": "2026-05-24",
+"last_review": "2026-05-10",
+"stability": 13.539696824972063,
+"difficulty": 9.023535145120984,
+"reps": 7,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 14,
+"preview": {
+"1": 4,
+"2": 14,
+"3": 14,
+"4": 21
+}
+},
+{
+"rating": 2,
+"today": "2026-05-10",
+"card": {
+"state": "review",
+"due": "2026-05-24",
+"last_review": "2026-05-10",
+"stability": 13.539696824972063,
+"difficulty": 9.33700549536591,
+"reps": 8,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 14,
+"preview": {
+"1": 4,
+"2": 14,
+"3": 14,
+"4": 21
+}
+},
+{
+"rating": 1,
+"today": "2026-05-17",
+"card": {
+"state": "review",
+"due": "2026-05-18",
+"last_review": "2026-05-17",
+"stability": 1.4612946703584575,
+"difficulty": 9.767306583986244,
+"reps": 9,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-05-18",
+"card": {
+"state": "review",
+"due": "2026-05-20",
+"last_review": "2026-05-18",
+"stability": 1.8742963469714595,
+"difficulty": 9.83075563623372,
+"reps": 10,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-09-30",
+"card": {
+"state": "review",
+"due": "2026-10-02",
+"last_review": "2026-09-30",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 4,
+"today": "2026-10-02",
+"card": {
+"state": "review",
+"due": "2026-10-21",
+"last_review": "2026-10-02",
+"stability": 18.52175418175859,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 19,
+"preview": {
+"1": 5,
+"2": 19,
+"3": 19,
+"4": 28
+}
+},
+{
+"rating": 2,
+"today": "2026-10-11",
+"card": {
+"state": "review",
+"due": "2026-11-20",
+"last_review": "2026-10-11",
+"stability": 39.67956671403861,
+"difficulty": 4.010608969296839,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 40,
+"preview": {
+"1": 11,
+"2": 40,
+"3": 40,
+"4": 56
+}
+},
+{
+"rating": 2,
+"today": "2027-01-04",
+"card": {
+"state": "review",
+"due": "2027-05-04",
+"last_review": "2027-01-04",
+"stability": 119.51364466119122,
+"difficulty": 6.00919149749405,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 120,
+"preview": {
+"1": 31,
+"2": 120,
+"3": 120,
+"4": 158
+}
+},
+{
+"rating": 3,
+"today": "2027-01-04",
+"card": {
+"state": "review",
+"due": "2027-05-04",
+"last_review": "2027-01-04",
+"stability": 119.51364466119122,
+"difficulty": 5.998410675293394,
+"reps": 5,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 120,
+"preview": {
+"1": 31,
+"2": 120,
+"3": 120,
+"4": 158
+}
+},
+{
+"rating": 3,
+"today": "2027-05-04",
+"card": {
+"state": "review",
+"due": "2028-01-24",
+"last_review": "2027-05-04",
+"stability": 265.08855507799024,
+"difficulty": 5.987640633914939,
+"reps": 6,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 265,
+"preview": {
+"1": 65,
+"2": 265,
+"3": 265,
+"4": 332
+}
+},
+{
+"rating": 3,
+"today": "2028-01-24",
+"card": {
+"state": "review",
+"due": "2029-07-25",
+"last_review": "2028-01-24",
+"stability": 547.5708915373416,
+"difficulty": 5.9768813625778625,
+"reps": 7,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 548,
+"preview": {
+"1": 128,
+"2": 548,
+"3": 548,
+"4": 654
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-02-07",
+"card": {
+"state": "review",
+"due": "2026-02-15",
+"last_review": "2026-02-07",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 3,
+"today": "2026-02-11",
+"card": {
+"state": "review",
+"due": "2026-03-09",
+"last_review": "2026-02-11",
+"stability": 26.194800905837976,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 26,
+"preview": {
+"1": 8,
+"2": 26,
+"3": 26,
+"4": 38
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-09-08",
+"card": {
+"state": "review",
+"due": "2026-09-09",
+"last_review": "2026-09-08",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-09-14",
+"card": {
+"state": "review",
+"due": "2026-09-17",
+"last_review": "2026-09-14",
+"stability": 3.319582579140426,
+"difficulty": 6.402115069296838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 3,
+"today": "2026-09-15",
+"card": {
+"state": "review",
+"due": "2026-09-21",
+"last_review": "2026-09-15",
+"stability": 5.8896940374586215,
+"difficulty": 6.3909413235243795,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 9
+}
+},
+{
+"rating": 4,
+"today": "2026-09-21",
+"card": {
+"state": "review",
+"due": "2026-10-18",
+"last_review": "2026-09-21",
+"stability": 26.54673337130347,
+"difficulty": 5.170190465277389,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 27,
+"preview": {
+"1": 8,
+"2": 27,
+"3": 27,
+"4": 39
+}
+},
+{
+"rating": 1,
+"today": "2026-09-21",
+"card": {
+"state": "review",
+"due": "2026-09-29",
+"last_review": "2026-09-21",
+"stability": 7.596067219060819,
+"difficulty": 8.39770281793835,
+"reps": 5,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 8,
+"preview": {
+"1": 2,
+"2": 8,
+"3": 8,
+"4": 12
+}
+},
+{
+"rating": 1,
+"today": "2026-10-30",
+"card": {
+"state": "review",
+"due": "2026-10-31",
+"last_review": "2026-10-30",
+"stability": 1.4753578186586374,
+"difficulty": 9.458564181174012,
+"reps": 6,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 3,
+"today": "2026-10-30",
+"card": {
+"state": "review",
+"due": "2026-11-01",
+"last_review": "2026-10-30",
+"stability": 1.511022982271545,
+"difficulty": 9.444333986289676,
+"reps": 7,
+"lapses": 2,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-08-17",
+"card": {
+"state": "review",
+"due": "2026-08-25",
+"last_review": "2026-08-17",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-09-17",
+"card": {
+"state": "review",
+"due": "2026-09-19",
+"last_review": "2026-09-17",
+"stability": 1.6751998555180483,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-10-12",
+"card": {
+"state": "review",
+"due": "2026-10-21",
+"last_review": "2026-10-12",
+"stability": 9.236503518137964,
+"difficulty": 8.011605503110008,
+"reps": 3,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+},
+{
+"rating": 4,
+"today": "2026-10-21",
+"card": {
+"state": "review",
+"due": "2026-11-18",
+"last_review": "2026-10-21",
+"stability": 28.113366296233455,
+"difficulty": 7.332405090729766,
+"reps": 4,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 28,
+"preview": {
+"1": 8,
+"2": 28,
+"3": 28,
+"4": 41
+}
+},
+{
+"rating": 3,
+"today": "2026-10-21",
+"card": {
+"state": "review",
+"due": "2026-11-18",
+"last_review": "2026-10-21",
+"stability": 28.113366296233455,
+"difficulty": 7.320301054935875,
+"reps": 5,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 28,
+"preview": {
+"1": 8,
+"2": 28,
+"3": 28,
+"4": 41
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-05-07",
+"card": {
+"state": "review",
+"due": "2026-05-15",
+"last_review": "2026-05-07",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-06-16",
+"card": {
+"state": "review",
+"due": "2026-06-18",
+"last_review": "2026-06-16",
+"stability": 1.7444998088862356,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 4,
+"today": "2026-06-17",
+"card": {
+"state": "review",
+"due": "2026-06-23",
+"last_review": "2026-06-17",
+"stability": 5.923741529499481,
+"difficulty": 6.018776394938751,
+"reps": 3,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 10
+}
+},
+{
+"rating": 2,
+"today": "2026-06-23",
+"card": {
+"state": "review",
+"due": "2026-07-06",
+"last_review": "2026-06-23",
+"stability": 13.09745971097236,
+"difficulty": 7.342306615237186,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 13,
+"preview": {
+"1": 4,
+"2": 13,
+"3": 13,
+"4": 20
+}
+},
+{
+"rating": 3,
+"today": "2026-08-31",
+"card": {
+"state": "review",
+"due": "2026-10-27",
+"last_review": "2026-08-31",
+"stability": 56.71152716946307,
+"difficulty": 7.330192677918787,
+"reps": 5,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 57,
+"preview": {
+"1": 15,
+"2": 57,
+"3": 57,
+"4": 79
+}
+},
+{
+"rating": 3,
+"today": "2026-10-27",
+"card": {
+"state": "review",
+"due": "2027-02-18",
+"last_review": "2026-10-27",
+"stability": 114.13979222368918,
+"difficulty": 7.318090854537707,
+"reps": 6,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 114,
+"preview": {
+"1": 30,
+"2": 114,
+"3": 114,
+"4": 151
+}
+},
+{
+"rating": 4,
+"today": "2027-02-18",
+"card": {
+"state": "review",
+"due": "2027-12-22",
+"last_review": "2027-02-18",
+"stability": 306.57035020476684,
+"difficulty": 6.407150164387225,
+"reps": 7,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 307,
+"preview": {
+"1": 75,
+"2": 307,
+"3": 307,
+"4": 380
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-02-12",
+"card": {
+"state": "review",
+"due": "2026-02-13",
+"last_review": "2026-02-12",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 2,
+"today": "2026-02-13",
+"card": {
+"state": "review",
+"due": "2026-02-16",
+"last_review": "2026-02-13",
+"stability": 3.2494117658571677,
+"difficulty": 6.7404595108297,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 2,
+"today": "2026-02-13",
+"card": {
+"state": "review",
+"due": "2026-02-16",
+"last_review": "2026-02-13",
+"stability": 3.2494117658571677,
+"difficulty": 7.821393497998797,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-01-03",
+"card": {
+"state": "review",
+"due": "2026-01-11",
+"last_review": "2026-01-03",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 3,
+"today": "2026-01-11",
+"card": {
+"state": "review",
+"due": "2026-02-19",
+"last_review": "2026-01-11",
+"stability": 38.90514998232684,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 39,
+"preview": {
+"1": 11,
+"2": 39,
+"3": 39,
+"4": 55
+}
+},
+{
+"rating": 1,
+"today": "2026-04-05",
+"card": {
+"state": "review",
+"due": "2026-04-08",
+"last_review": "2026-04-05",
+"stability": 3.1630967974526327,
+"difficulty": 7.0269895692968385,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-10-14",
+"card": {
+"state": "review",
+"due": "2026-10-22",
+"last_review": "2026-10-14",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-10-18",
+"card": {
+"state": "review",
+"due": "2026-10-19",
+"last_review": "2026-10-18",
+"stability": 1.3009257796275164,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 4,
+"today": "2026-10-19",
+"card": {
+"state": "review",
+"due": "2026-10-24",
+"last_review": "2026-10-19",
+"stability": 5.413894069559142,
+"difficulty": 6.018776394938751,
+"reps": 3,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 5,
+"preview": {
+"1": 2,
+"2": 5,
+"3": 5,
+"4": 9
+}
+},
+{
+"rating": 1,
+"today": "2026-10-19",
+"card": {
+"state": "review",
+"due": "2026-10-21",
+"last_review": "2026-10-19",
+"stability": 1.7199762618076189,
+"difficulty": 8.676627242633721,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-11-19",
+"card": {
+"state": "review",
+"due": "2026-11-26",
+"last_review": "2026-11-19",
+"stability": 6.506542609528516,
+"difficulty": 9.106711863786607,
+"reps": 5,
+"lapses": 2,
+"last_rating": 2
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 10
+}
+},
+{
+"rating": 1,
+"today": "2026-11-19",
+"card": {
+"state": "review",
+"due": "2026-11-21",
+"last_review": "2026-11-19",
+"stability": 2.042252662008134,
+"difficulty": 9.691610633282822,
+"reps": 6,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 2,
+"today": "2026-11-19",
+"card": {
+"state": "review",
+"due": "2026-11-21",
+"last_review": "2026-11-19",
+"stability": 2.042252662008134,
+"difficulty": 9.780505136725486,
+"reps": 7,
+"lapses": 3,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-07-06",
+"card": {
+"state": "review",
+"due": "2026-07-07",
+"last_review": "2026-07-06",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-07-06",
+"card": {
+"state": "review",
+"due": "2026-07-07",
+"last_review": "2026-07-06",
+"stability": 0.212,
+"difficulty": 7.604209769076838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-07-07",
+"card": {
+"state": "review",
+"due": "2026-07-08",
+"last_review": "2026-07-07",
+"stability": 0.9576992131064217,
+"difficulty": 8.39479117018528,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-07-08",
+"card": {
+"state": "review",
+"due": "2026-07-10",
+"last_review": "2026-07-08",
+"stability": 2.3538948966907336,
+"difficulty": 8.381624748311934,
+"reps": 4,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 4,
+"today": "2026-07-10",
+"card": {
+"state": "review",
+"due": "2026-07-17",
+"last_review": "2026-07-10",
+"stability": 7.14327020442771,
+"difficulty": 7.826067524781349,
+"reps": 5,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 11
+}
+},
+{
+"rating": 4,
+"today": "2026-07-10",
+"card": {
+"state": "review",
+"due": "2026-07-21",
+"last_review": "2026-07-10",
+"stability": 11.344949334777079,
+"difficulty": 7.08486896611346,
+"reps": 6,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 11,
+"preview": {
+"1": 3,
+"2": 11,
+"3": 11,
+"4": 17
+}
+},
+{
+"rating": 4,
+"today": "2026-08-20",
+"card": {
+"state": "review",
+"due": "2026-11-04",
+"last_review": "2026-08-20",
+"stability": 76.3879287593405,
+"difficulty": 6.095996388991595,
+"reps": 7,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 76,
+"preview": {
+"1": 20,
+"2": 76,
+"3": 76,
+"4": 104
+}
+},
+{
+"rating": 1,
+"today": "2026-11-04",
+"card": {
+"state": "review",
+"due": "2026-11-07",
+"last_review": "2026-11-04",
+"stability": 3.343881750093775,
+"difficulty": 8.702008929582929,
+"reps": 8,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 3,
+"today": "2026-11-04",
+"card": {
+"state": "review",
+"due": "2026-11-07",
+"last_review": "2026-11-04",
+"stability": 3.343881750093775,
+"difficulty": 8.688535289950183,
+"reps": 9,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 4,
+"today": "2026-11-07",
+"card": {
+"state": "review",
+"due": "2026-11-16",
+"last_review": "2026-11-07",
+"stability": 9.24055554992506,
+"difficulty": 8.23553326740386,
+"reps": 10,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-09-22",
+"card": {
+"state": "review",
+"due": "2026-09-23",
+"last_review": "2026-09-22",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-07-05",
+"card": {
+"state": "review",
+"due": "2026-07-06",
+"last_review": "2026-07-05",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-07-26",
+"card": {
+"state": "review",
+"due": "2026-07-27",
+"last_review": "2026-07-26",
+"stability": 0.15826004510256383,
+"difficulty": 8.806304468856837,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-07-27",
+"card": {
+"state": "review",
+"due": "2026-07-28",
+"last_review": "2026-07-27",
+"stability": 0.8710291365508084,
+"difficulty": 8.792726533684817,
+"reps": 3,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-03-27",
+"card": {
+"state": "review",
+"due": "2026-03-28",
+"last_review": "2026-03-27",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-03-28",
+"card": {
+"state": "review",
+"due": "2026-04-02",
+"last_review": "2026-03-28",
+"stability": 4.546029441066125,
+"difficulty": 5.102286904192293,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 5,
+"preview": {
+"1": 1,
+"2": 5,
+"3": 5,
+"4": 7
+}
+},
+{
+"rating": 2,
+"today": "2026-04-02",
+"card": {
+"state": "review",
+"due": "2026-04-14",
+"last_review": "2026-04-02",
+"stability": 11.765977848981025,
+"difficulty": 6.733898182869418,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 12,
+"preview": {
+"1": 4,
+"2": 12,
+"3": 12,
+"4": 18
+}
+},
+{
+"rating": 4,
+"today": "2026-06-06",
+"card": {
+"state": "review",
+"due": "2026-09-15",
+"last_review": "2026-06-06",
+"stability": 100.71660680527081,
+"difficulty": 5.627747525225894,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 101,
+"preview": {
+"1": 26,
+"2": 101,
+"3": 101,
+"4": 134
+}
+},
+{
+"rating": 2,
+"today": "2026-09-15",
+"card": {
+"state": "review",
+"due": "2027-03-16",
+"last_review": "2026-09-15",
+"stability": 182.1823325641044,
+"difficulty": 7.082723429576463,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 182,
+"preview": {
+"1": 46,
+"2": 182,
+"3": 182,
+"4": 234
+}
+},
+{
+"rating": 4,
+"today": "2026-12-15",
+"card": {
+"state": "review",
+"due": "2027-12-10",
+"last_review": "2026-12-15",
+"stability": 359.6225948084441,
+"difficulty": 6.093133914125937,
+"reps": 6,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 360,
+"preview": {
+"1": 87,
+"2": 360,
+"3": 360,
+"4": 441
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-01-15",
+"card": {
+"state": "review",
+"due": "2026-01-17",
+"last_review": "2026-01-15",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-04-10",
+"card": {
+"state": "review",
+"due": "2026-04-12",
+"last_review": "2026-04-10",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 3,
+"today": "2026-04-12",
+"card": {
+"state": "review",
+"due": "2026-04-23",
+"last_review": "2026-04-12",
+"stability": 10.964332335820698,
+"difficulty": 2.111214235785395,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 11,
+"preview": {
+"1": 3,
+"2": 11,
+"3": 11,
+"4": 17
+}
+},
+{
+"rating": 1,
+"today": "2026-05-17",
+"card": {
+"state": "review",
+"due": "2026-05-19",
+"last_review": "2026-05-17",
+"stability": 1.8026563590853684,
+"difficulty": 7.392238132342694,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-05-18",
+"card": {
+"state": "review",
+"due": "2026-05-21",
+"last_review": "2026-05-18",
+"stability": 3.0225038222540572,
+"difficulty": 8.254074519842886,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 3,
+"today": "2026-05-21",
+"card": {
+"state": "review",
+"due": "2026-05-28",
+"last_review": "2026-05-21",
+"stability": 6.721667549510971,
+"difficulty": 8.24104881461988,
+"reps": 5,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 11
+}
+},
+{
+"rating": 1,
+"today": "2026-05-24",
+"card": {
+"state": "review",
+"due": "2026-05-25",
+"last_review": "2026-05-24",
+"stability": 1.0143521172200234,
+"difficulty": 9.407073075530453,
+"reps": 6,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-05-25",
+"card": {
+"state": "review",
+"due": "2026-05-27",
+"last_review": "2026-05-25",
+"stability": 1.8740024154249815,
+"difficulty": 9.39289437175176,
+"reps": 7,
+"lapses": 2,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 1,
+"today": "2026-06-02",
+"card": {
+"state": "review",
+"due": "2026-06-03",
+"last_review": "2026-06-02",
+"stability": 0.5984114914025093,
+"difficulty": 9.785676877609912,
+"reps": 8,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-07-24",
+"card": {
+"state": "review",
+"due": "2026-07-26",
+"last_review": "2026-07-24",
+"stability": 2.1007139313268914,
+"difficulty": 9.842950693196794,
+"reps": 9,
+"lapses": 3,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 2,
+"today": "2026-07-26",
+"card": {
+"state": "review",
+"due": "2026-07-29",
+"last_review": "2026-07-26",
+"stability": 2.7725113581294973,
+"difficulty": 9.880971720943172,
+"reps": 10,
+"lapses": 3,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-06-20",
+"card": {
+"state": "review",
+"due": "2026-06-28",
+"last_review": "2026-06-20",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-06-28",
+"card": {
+"state": "review",
+"due": "2026-06-29",
+"last_review": "2026-06-28",
+"stability": 1.3886324609821161,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-03-29",
+"card": {
+"state": "review",
+"due": "2026-03-30",
+"last_review": "2026-03-29",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-03-30",
+"card": {
+"state": "review",
+"due": "2026-04-02",
+"last_review": "2026-03-30",
+"stability": 3.348709732599786,
+"difficulty": 5.200020369516838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 4,
+"today": "2026-04-12",
+"card": {
+"state": "review",
+"due": "2026-05-21",
+"last_review": "2026-04-12",
+"stability": 39.4477445958508,
+"difficulty": 3.5813192253569843,
+"reps": 3,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 39,
+"preview": {
+"1": 11,
+"2": 39,
+"3": 39,
+"4": 56
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-06-29",
+"card": {
+"state": "review",
+"due": "2026-06-30",
+"last_review": "2026-06-29",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 1,
+"today": "2026-06-29",
+"card": {
+"state": "review",
+"due": "2026-06-30",
+"last_review": "2026-06-29",
+"stability": 0.4514029154253082,
+"difficulty": 8.378632117467106,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-06-30",
+"card": {
+"state": "review",
+"due": "2026-07-01",
+"last_review": "2026-06-30",
+"stability": 1.1835785434340724,
+"difficulty": 8.908888813128176,
+"reps": 3,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-04-10",
+"card": {
+"state": "review",
+"due": "2026-04-11",
+"last_review": "2026-04-10",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-04-11",
+"card": {
+"state": "review",
+"due": "2026-04-13",
+"last_review": "2026-04-11",
+"stability": 1.8867876195204154,
+"difficulty": 6.402115069296838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 3,
+"today": "2026-04-13",
+"card": {
+"state": "review",
+"due": "2026-04-19",
+"last_review": "2026-04-13",
+"stability": 6.269161317502347,
+"difficulty": 6.3909413235243795,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 10
+}
+},
+{
+"rating": 4,
+"today": "2026-04-16",
+"card": {
+"state": "review",
+"due": "2026-05-04",
+"last_review": "2026-04-16",
+"stability": 18.427324702813628,
+"difficulty": 5.170190465277389,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-07-01",
+"card": {
+"state": "review",
+"due": "2026-07-09",
+"last_review": "2026-07-01",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 2,
+"today": "2026-09-04",
+"card": {
+"state": "review",
+"due": "2026-11-09",
+"last_review": "2026-09-04",
+"stability": 66.0066210229994,
+"difficulty": 4.010608969296839,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 66,
+"preview": {
+"1": 18,
+"2": 66,
+"3": 66,
+"4": 91
+}
+},
+{
+"rating": 1,
+"today": "2026-11-09",
+"card": {
+"state": "review",
+"due": "2026-11-12",
+"last_review": "2026-11-09",
+"stability": 3.245639960649247,
+"difficulty": 8.016556265363716,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 2,
+"today": "2027-01-01",
+"card": {
+"state": "review",
+"due": "2027-01-14",
+"last_review": "2027-01-01",
+"stability": 13.376115962533946,
+"difficulty": 8.66852598976724,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 13,
+"preview": {
+"1": 4,
+"2": 13,
+"3": 13,
+"4": 20
+}
+},
+{
+"rating": 2,
+"today": "2027-01-14",
+"card": {
+"state": "review",
+"due": "2027-02-03",
+"last_review": "2027-01-14",
+"stability": 19.80290521617227,
+"difficulty": 9.101333874615454,
+"reps": 5,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 20,
+"preview": {
+"1": 6,
+"2": 20,
+"3": 20,
+"4": 29
+}
+},
+{
+"rating": 4,
+"today": "2027-01-24",
+"card": {
+"state": "review",
+"due": "2027-02-26",
+"last_review": "2027-01-24",
+"stability": 33.454357461775984,
+"difficulty": 8.78626990265022,
+"reps": 6,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 33,
+"preview": {
+"1": 9,
+"2": 33,
+"3": 33,
+"4": 48
+}
+},
+{
+"rating": 1,
+"today": "2027-02-26",
+"card": {
+"state": "review",
+"due": "2027-02-28",
+"last_review": "2027-02-26",
+"stability": 2.347635021211068,
+"difficulty": 9.586283539662627,
+"reps": 7,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 3,
+"today": "2027-02-28",
+"card": {
+"state": "review",
+"due": "2027-03-04",
+"last_review": "2027-02-28",
+"stability": 3.727980572374929,
+"difficulty": 9.571925625419802,
+"reps": 8,
+"lapses": 2,
+"last_rating": 3
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 6
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-09-29",
+"card": {
+"state": "review",
+"due": "2026-10-07",
+"last_review": "2026-09-29",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-10-14",
+"card": {
+"state": "review",
+"due": "2026-10-16",
+"last_review": "2026-10-14",
+"stability": 1.5029274817265372,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 3,
+"today": "2026-10-15",
+"card": {
+"state": "review",
+"due": "2026-10-19",
+"last_review": "2026-10-15",
+"stability": 3.7198220481597173,
+"difficulty": 7.0151909490243805,
+"reps": 3,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 6
+}
+},
+{
+"rating": 1,
+"today": "2026-10-15",
+"card": {
+"state": "review",
+"due": "2026-10-16",
+"last_review": "2026-10-15",
+"stability": 1.2113215588231594,
+"difficulty": 9.004141930942698,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 1,
+"today": "2026-10-16",
+"card": {
+"state": "review",
+"due": "2026-10-17",
+"last_review": "2026-10-16",
+"stability": 0.3473062923776271,
+"difficulty": 9.657896593832572,
+"reps": 5,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-12-15",
+"card": {
+"state": "review",
+"due": "2026-12-16",
+"last_review": "2026-12-15",
+"stability": 0.2593036195394988,
+"difficulty": 9.872781305992767,
+"reps": 6,
+"lapses": 4,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-12-16",
+"card": {
+"state": "review",
+"due": "2026-12-17",
+"last_review": "2026-12-16",
+"stability": 0.5256000843711433,
+"difficulty": 9.900774671823694,
+"reps": 7,
+"lapses": 4,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-12-17",
+"card": {
+"state": "review",
+"due": "2026-12-19",
+"last_review": "2026-12-17",
+"stability": 1.5176705690659102,
+"difficulty": 9.852846560344304,
+"reps": 8,
+"lapses": 4,
+"last_rating": 4
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 4,
+"today": "2026-12-19",
+"card": {
+"state": "review",
+"due": "2026-12-23",
+"last_review": "2026-12-19",
+"stability": 3.5010691170883708,
+"difficulty": 9.788903107458495,
+"reps": 9,
+"lapses": 4,
+"last_rating": 4
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 6
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-05-07",
+"card": {
+"state": "review",
+"due": "2026-05-09",
+"last_review": "2026-05-07",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 2,
+"today": "2026-07-06",
+"card": {
+"state": "review",
+"due": "2026-08-03",
+"last_review": "2026-07-06",
+"stability": 28.188272925969734,
+"difficulty": 4.752858488532557,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 28,
+"preview": {
+"1": 8,
+"2": 28,
+"3": 28,
+"4": 41
+}
+},
+{
+"rating": 4,
+"today": "2026-08-12",
+"card": {
+"state": "review",
+"due": "2027-01-10",
+"last_review": "2026-08-12",
+"stability": 151.16260222140812,
+"difficulty": 2.984736681491411,
+"reps": 3,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 151,
+"preview": {
+"1": 39,
+"2": 151,
+"3": 151,
+"4": 196
+}
+},
+{
+"rating": 4,
+"today": "2026-08-12",
+"card": {
+"state": "review",
+"due": "2027-02-24",
+"last_review": "2026-08-12",
+"stability": 196.39427826077338,
+"difficulty": 1.0,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 196,
+"preview": {
+"1": 49,
+"2": 196,
+"3": 196,
+"4": 251
+}
+},
+{
+"rating": 2,
+"today": "2026-11-18",
+"card": {
+"state": "review",
+"due": "2027-11-04",
+"last_review": "2026-11-18",
+"stability": 351.11406338029155,
+"difficulty": 4.010608969296839,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 351,
+"preview": {
+"1": 85,
+"2": 351,
+"3": 351,
+"4": 432
+}
+},
+{
+"rating": 2,
+"today": "2027-11-04",
+"card": {
+"state": "review",
+"due": "2029-08-16",
+"last_review": "2027-11-04",
+"stability": 650.5315936050453,
+"difficulty": 6.00919149749405,
+"reps": 6,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 651,
+"preview": {
+"1": 151,
+"2": 651,
+"3": 651,
+"4": 768
+}
+},
+{
+"rating": 1,
+"today": "2029-08-16",
+"card": {
+"state": "review",
+"due": "2029-08-23",
+"last_review": "2029-08-16",
+"stability": 7.040331160164647,
+"difficulty": 8.673476752020948,
+"reps": 7,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 11
+}
+},
+{
+"rating": 3,
+"today": "2029-09-02",
+"card": {
+"state": "review",
+"due": "2029-09-20",
+"last_review": "2029-09-02",
+"stability": 18.241149425733397,
+"difficulty": 8.660031644565764,
+"reps": 8,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+},
+{
+"rating": 2,
+"today": "2029-09-02",
+"card": {
+"state": "review",
+"due": "2029-09-20",
+"last_review": "2029-09-02",
+"stability": 18.241149425733397,
+"difficulty": 9.095694932434228,
+"reps": 9,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-02-18",
+"card": {
+"state": "review",
+"due": "2026-02-26",
+"last_review": "2026-02-18",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 2,
+"today": "2026-02-22",
+"card": {
+"state": "review",
+"due": "2026-03-13",
+"last_review": "2026-02-22",
+"stability": 19.060179424770958,
+"difficulty": 4.010608969296839,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 19,
+"preview": {
+"1": 6,
+"2": 19,
+"3": 19,
+"4": 28
+}
+},
+{
+"rating": 4,
+"today": "2026-03-03",
+"card": {
+"state": "review",
+"due": "2026-05-07",
+"last_review": "2026-03-03",
+"stability": 65.1256342760369,
+"difficulty": 1.994461961754711,
+"reps": 3,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 65,
+"preview": {
+"1": 18,
+"2": 65,
+"3": 65,
+"4": 89
+}
+},
+{
+"rating": 3,
+"today": "2026-06-02",
+"card": {
+"state": "review",
+"due": "2027-02-20",
+"last_review": "2026-06-02",
+"stability": 263.38571756613675,
+"difficulty": 1.9876958690897946,
+"reps": 4,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 263,
+"preview": {
+"1": 65,
+"2": 263,
+"3": 263,
+"4": 330
+}
+},
+{
+"rating": 3,
+"today": "2027-02-20",
+"card": {
+"state": "review",
+"due": "2029-03-29",
+"last_review": "2027-02-20",
+"stability": 768.1646111964264,
+"difficulty": 1.980936542517543,
+"reps": 5,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 768,
+"preview": {
+"1": 176,
+"2": 768,
+"3": 768,
+"4": 897
+}
+},
+{
+"rating": 3,
+"today": "2028-03-10",
+"card": {
+"state": "review",
+"due": "2032-04-10",
+"last_review": "2028-03-10",
+"stability": 1492.31092335155,
+"difficulty": 1.9741839752718635,
+"reps": 6,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 1492,
+"preview": {
+"1": 328,
+"2": 1492,
+"3": 1492,
+"4": 1668
+}
+},
+{
+"rating": 4,
+"today": "2028-03-10",
+"card": {
+"state": "review",
+"due": "2032-10-03",
+"last_review": "2028-03-10",
+"stability": 1667.674488126639,
+"difficulty": 1.0,
+"reps": 7,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 1668,
+"preview": {
+"1": 363,
+"2": 1668,
+"3": 1668,
+"4": 1850
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-01-10",
+"card": {
+"state": "review",
+"due": "2026-01-12",
+"last_review": "2026-01-10",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 3,
+"today": "2026-01-12",
+"card": {
+"state": "review",
+"due": "2026-01-23",
+"last_review": "2026-01-12",
+"stability": 10.964332335820698,
+"difficulty": 2.111214235785395,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 11,
+"preview": {
+"1": 3,
+"2": 11,
+"3": 11,
+"4": 17
+}
+},
+{
+"rating": 1,
+"today": "2026-01-23",
+"card": {
+"state": "review",
+"due": "2026-01-25",
+"last_review": "2026-01-23",
+"stability": 1.5383372358832694,
+"difficulty": 7.392238132342694,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-01-23",
+"card": {
+"state": "review",
+"due": "2026-01-25",
+"last_review": "2026-01-23",
+"stability": 1.5383372358832694,
+"difficulty": 8.254074519842886,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 1,
+"today": "2026-02-01",
+"card": {
+"state": "review",
+"due": "2026-02-02",
+"last_review": "2026-02-01",
+"stability": 0.5503660147731465,
+"difficulty": 9.411354536262458,
+"reps": 5,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-02-02",
+"card": {
+"state": "review",
+"due": "2026-02-03",
+"last_review": "2026-02-02",
+"stability": 0.2009033045846065,
+"difficulty": 9.79174460815546,
+"reps": 6,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-02-15",
+"card": {
+"state": "review",
+"due": "2026-02-16",
+"last_review": "2026-02-15",
+"stability": 1.1460237026435542,
+"difficulty": 9.777181232844141,
+"reps": 7,
+"lapses": 3,
+"last_rating": 3
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-08-05",
+"card": {
+"state": "review",
+"due": "2026-08-13",
+"last_review": "2026-08-05",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 4,
+"today": "2026-08-05",
+"card": {
+"state": "review",
+"due": "2026-08-18",
+"last_review": "2026-08-05",
+"stability": 13.046064691177454,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 13,
+"preview": {
+"1": 4,
+"2": 13,
+"3": 13,
+"4": 20
+}
+},
+{
+"rating": 1,
+"today": "2026-08-18",
+"card": {
+"state": "review",
+"due": "2026-08-20",
+"last_review": "2026-08-18",
+"stability": 1.7539682518623347,
+"difficulty": 7.0269895692968385,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-08-19",
+"card": {
+"state": "review",
+"due": "2026-08-22",
+"last_review": "2026-08-19",
+"stability": 3.0961878813964034,
+"difficulty": 8.011605503110008,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 1,
+"today": "2026-08-22",
+"card": {
+"state": "review",
+"due": "2026-08-23",
+"last_review": "2026-08-22",
+"stability": 0.6884157045936147,
+"difficulty": 9.331656619251676,
+"reps": 5,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-01-09",
+"card": {
+"state": "review",
+"due": "2026-01-11",
+"last_review": "2026-01-09",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 2,
+"today": "2026-01-09",
+"card": {
+"state": "review",
+"due": "2026-01-11",
+"last_review": "2026-01-09",
+"stability": 2.3065,
+"difficulty": 4.752858488532557,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-03-04",
+"card": {
+"state": "review",
+"due": "2026-03-05",
+"last_review": "2026-03-04",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-03-05",
+"card": {
+"state": "review",
+"due": "2026-03-08",
+"last_review": "2026-03-05",
+"stability": 3.348709732599786,
+"difficulty": 5.200020369516838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 2,
+"today": "2026-03-26",
+"card": {
+"state": "review",
+"due": "2026-04-13",
+"last_review": "2026-03-26",
+"stability": 17.72603174544225,
+"difficulty": 6.798778211531335,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+},
+{
+"rating": 2,
+"today": "2026-03-26",
+"card": {
+"state": "review",
+"due": "2026-04-13",
+"last_review": "2026-03-26",
+"stability": 17.72603174544225,
+"difficulty": 7.860108169175996,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+},
+{
+"rating": 3,
+"today": "2026-04-24",
+"card": {
+"state": "review",
+"due": "2026-06-07",
+"last_review": "2026-04-24",
+"stability": 43.59508456956753,
+"difficulty": 7.847476430303659,
+"reps": 5,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 44,
+"preview": {
+"1": 12,
+"2": 44,
+"3": 44,
+"4": 61
+}
+},
+{
+"rating": 2,
+"today": "2026-04-24",
+"card": {
+"state": "review",
+"due": "2026-06-07",
+"last_review": "2026-04-24",
+"stability": 43.59508456956753,
+"difficulty": 8.556282916134059,
+"reps": 6,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 44,
+"preview": {
+"1": 12,
+"2": 44,
+"3": 44,
+"4": 61
+}
+},
+{
+"rating": 3,
+"today": "2026-07-18",
+"card": {
+"state": "review",
+"due": "2026-10-17",
+"last_review": "2026-07-18",
+"stability": 91.07497296569828,
+"difficulty": 8.542955002514763,
+"reps": 7,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 91,
+"preview": {
+"1": 24,
+"2": 91,
+"3": 91,
+"4": 122
+}
+},
+{
+"rating": 2,
+"today": "2026-10-17",
+"card": {
+"state": "review",
+"due": "2027-02-19",
+"last_review": "2026-10-17",
+"stability": 125.24795047189703,
+"difficulty": 9.017974001669254,
+"reps": 8,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 125,
+"preview": {
+"1": 32,
+"2": 125,
+"3": 125,
+"4": 165
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-09-14",
+"card": {
+"state": "review",
+"due": "2026-09-16",
+"last_review": "2026-09-14",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 1,
+"today": "2026-09-15",
+"card": {
+"state": "review",
+"due": "2026-09-16",
+"last_review": "2026-09-15",
+"stability": 0.5712991793450282,
+"difficulty": 7.394502741279718,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-09-19",
+"card": {
+"state": "review",
+"due": "2026-09-20",
+"last_review": "2026-09-19",
+"stability": 0.25931254777894025,
+"difficulty": 9.128819137736839,
+"reps": 3,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-09-16",
+"card": {
+"state": "review",
+"due": "2026-09-17",
+"last_review": "2026-09-16",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 2,
+"today": "2026-09-17",
+"card": {
+"state": "review",
+"due": "2026-09-20",
+"last_review": "2026-09-17",
+"stability": 3.2494117658571677,
+"difficulty": 6.7404595108297,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 4,
+"today": "2026-09-27",
+"card": {
+"state": "review",
+"due": "2026-10-23",
+"last_review": "2026-09-27",
+"stability": 26.249892646095894,
+"difficulty": 5.636501343232619,
+"reps": 3,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 26,
+"preview": {
+"1": 8,
+"2": 26,
+"3": 26,
+"4": 38
+}
+},
+{
+"rating": 4,
+"today": "2026-10-23",
+"card": {
+"state": "review",
+"due": "2027-02-08",
+"last_review": "2026-10-23",
+"stability": 108.11334558018761,
+"difficulty": 4.163651800475204,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 108,
+"preview": {
+"1": 28,
+"2": 108,
+"3": 108,
+"4": 144
+}
+},
+{
+"rating": 2,
+"today": "2027-02-28",
+"card": {
+"state": "review",
+"due": "2027-10-18",
+"last_review": "2027-02-28",
+"stability": 231.65052570902031,
+"difficulty": 6.110788460626181,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 232,
+"preview": {
+"1": 57,
+"2": 232,
+"3": 232,
+"4": 293
+}
+},
+{
+"rating": 2,
+"today": "2027-11-09",
+"card": {
+"state": "review",
+"due": "2028-12-03",
+"last_review": "2027-11-09",
+"stability": 389.75192327711494,
+"difficulty": 7.4033885122027625,
+"reps": 6,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 390,
+"preview": {
+"1": 93,
+"2": 390,
+"3": 390,
+"4": 476
+}
+},
+{
+"rating": 2,
+"today": "2029-01-18",
+"card": {
+"state": "review",
+"due": "2030-08-13",
+"last_review": "2029-01-18",
+"stability": 571.7092134522701,
+"difficulty": 8.261476661601701,
+"reps": 7,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 572,
+"preview": {
+"1": 134,
+"2": 572,
+"3": 572,
+"4": 681
+}
+},
+{
+"rating": 3,
+"today": "2030-08-13",
+"card": {
+"state": "review",
+"due": "2032-12-25",
+"last_review": "2030-08-13",
+"stability": 864.7329797558072,
+"difficulty": 8.248443554236937,
+"reps": 8,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 865,
+"preview": {
+"1": 197,
+"2": 865,
+"3": 865,
+"4": 1002
+}
+},
+{
+"rating": 2,
+"today": "2033-02-17",
+"card": {
+"state": "review",
+"due": "2036-03-19",
+"last_review": "2033-02-17",
+"stability": 1125.6467810664349,
+"difficulty": 8.822463578068943,
+"reps": 9,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1126,
+"preview": {
+"1": 252,
+"2": 1126,
+"3": 1126,
+"4": 1281
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-05-11",
+"card": {
+"state": "review",
+"due": "2026-05-12",
+"last_review": "2026-05-11",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 4,
+"today": "2026-05-11",
+"card": {
+"state": "review",
+"due": "2026-05-13",
+"last_review": "2026-05-11",
+"stability": 2.2981513617969918,
+"difficulty": 3.4641142975548855,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 3,
+"today": "2026-06-25",
+"card": {
+"state": "review",
+"due": "2026-07-31",
+"last_review": "2026-06-25",
+"stability": 35.967409221522914,
+"difficulty": 3.455878552554169,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 36,
+"preview": {
+"1": 10,
+"2": 36,
+"3": 36,
+"4": 51
+}
+},
+{
+"rating": 3,
+"today": "2026-07-31",
+"card": {
+"state": "review",
+"due": "2026-11-25",
+"last_review": "2026-07-31",
+"stability": 116.50214370869594,
+"difficulty": 3.4476510432984533,
+"reps": 4,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 117,
+"preview": {
+"1": 30,
+"2": 117,
+"3": 117,
+"4": 154
+}
+},
+{
+"rating": 2,
+"today": "2026-07-31",
+"card": {
+"state": "review",
+"due": "2026-11-25",
+"last_review": "2026-07-31",
+"stability": 116.50214370869594,
+"difficulty": 5.6354737923769695,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 117,
+"preview": {
+"1": 30,
+"2": 117,
+"3": 117,
+"4": 154
+}
+},
+{
+"rating": 4,
+"today": "2026-09-27",
+"card": {
+"state": "review",
+"due": "2027-07-07",
+"last_review": "2026-09-27",
+"stability": 283.45576404126643,
+"difficulty": 4.162280890007466,
+"reps": 6,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 283,
+"preview": {
+"1": 69,
+"2": 283,
+"3": 283,
+"4": 353
+}
+},
+{
+"rating": 3,
+"today": "2026-09-27",
+"card": {
+"state": "review",
+"due": "2027-07-07",
+"last_review": "2026-09-27",
+"stability": 283.45576404126643,
+"difficulty": 4.153346978414297,
+"reps": 7,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 283,
+"preview": {
+"1": 69,
+"2": 283,
+"3": 283,
+"4": 353
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-06-15",
+"card": {
+"state": "review",
+"due": "2026-06-16",
+"last_review": "2026-06-15",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-07-06",
+"card": {
+"state": "review",
+"due": "2026-07-09",
+"last_review": "2026-07-06",
+"stability": 2.659824844678432,
+"difficulty": 7.604209769076838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 1,
+"today": "2026-07-07",
+"card": {
+"state": "review",
+"due": "2026-07-08",
+"last_review": "2026-07-07",
+"stability": 0.5754944668935053,
+"difficulty": 9.197748411765964,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-07-08",
+"card": {
+"state": "review",
+"due": "2026-07-09",
+"last_review": "2026-07-08",
+"stability": 0.20772775002977523,
+"difficulty": 9.72153372755511,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-09-15",
+"card": {
+"state": "review",
+"due": "2026-09-16",
+"last_review": "2026-09-15",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 1,
+"today": "2026-09-16",
+"card": {
+"state": "review",
+"due": "2026-09-17",
+"last_review": "2026-09-16",
+"stability": 0.3753949287873252,
+"difficulty": 8.378632117467106,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-09-16",
+"card": {
+"state": "review",
+"due": "2026-09-17",
+"last_review": "2026-09-16",
+"stability": 0.1421558398714152,
+"difficulty": 9.452295771609876,
+"reps": 3,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-09-16",
+"card": {
+"state": "review",
+"due": "2026-09-17",
+"last_review": "2026-09-16",
+"stability": 0.05738394860273017,
+"difficulty": 9.805201713813757,
+"reps": 4,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-06-03",
+"card": {
+"state": "review",
+"due": "2026-06-04",
+"last_review": "2026-06-03",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 2,
+"today": "2026-06-03",
+"card": {
+"state": "review",
+"due": "2026-06-04",
+"last_review": "2026-06-03",
+"stability": 1.2931,
+"difficulty": 6.7404595108297,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 4,
+"today": "2026-06-04",
+"card": {
+"state": "review",
+"due": "2026-06-10",
+"last_review": "2026-06-04",
+"stability": 5.700645188060481,
+"difficulty": 5.636501343232619,
+"reps": 3,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 9
+}
+},
+{
+"rating": 4,
+"today": "2026-07-27",
+"card": {
+"state": "review",
+"due": "2026-10-16",
+"last_review": "2026-07-27",
+"stability": 80.88276045133871,
+"difficulty": 4.163651800475204,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 81,
+"preview": {
+"1": 22,
+"2": 81,
+"3": 81,
+"4": 109
+}
+},
+{
+"rating": 2,
+"today": "2026-07-27",
+"card": {
+"state": "review",
+"due": "2026-10-16",
+"last_review": "2026-07-27",
+"stability": 80.88276045133871,
+"difficulty": 6.110788460626181,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 81,
+"preview": {
+"1": 22,
+"2": 81,
+"3": 81,
+"4": 109
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-09-20",
+"card": {
+"state": "review",
+"due": "2026-09-21",
+"last_review": "2026-09-20",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 1,
+"today": "2026-11-09",
+"card": {
+"state": "review",
+"due": "2026-11-10",
+"last_review": "2026-11-09",
+"stability": 0.6662585836894037,
+"difficulty": 8.378632117467106,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-12-18",
+"card": {
+"state": "review",
+"due": "2026-12-22",
+"last_review": "2026-12-18",
+"stability": 3.9472518200086117,
+"difficulty": 8.908888813128176,
+"reps": 3,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 7
+}
+},
+{
+"rating": 1,
+"today": "2026-12-18",
+"card": {
+"state": "review",
+"due": "2026-12-19",
+"last_review": "2026-12-18",
+"stability": 1.2803723136182157,
+"difficulty": 9.62658754172814,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-12-18",
+"card": {
+"state": "review",
+"due": "2026-12-19",
+"last_review": "2026-12-18",
+"stability": 1.3236120170111438,
+"difficulty": 9.61218932348325,
+"reps": 5,
+"lapses": 2,
+"last_rating": 3
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 4,
+"today": "2027-01-13",
+"card": {
+"state": "review",
+"due": "2027-01-22",
+"last_review": "2027-01-13",
+"stability": 8.66270065531006,
+"difficulty": 9.467829436665715,
+"reps": 6,
+"lapses": 2,
+"last_rating": 4
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+},
+{
+"rating": 1,
+"today": "2027-01-22",
+"card": {
+"state": "review",
+"due": "2027-01-23",
+"last_review": "2027-01-22",
+"stability": 1.248008552161232,
+"difficulty": 9.810307523888689,
+"reps": 7,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-05-06",
+"card": {
+"state": "review",
+"due": "2026-05-08",
+"last_review": "2026-05-06",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 1,
+"today": "2026-05-06",
+"card": {
+"state": "review",
+"due": "2026-05-07",
+"last_review": "2026-05-06",
+"stability": 0.7750839828558984,
+"difficulty": 7.394502741279718,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-05-07",
+"card": {
+"state": "review",
+"due": "2026-05-08",
+"last_review": "2026-05-07",
+"stability": 0.2597035311538781,
+"difficulty": 9.128819137736839,
+"reps": 3,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-05-08",
+"card": {
+"state": "review",
+"due": "2026-05-09",
+"last_review": "2026-05-08",
+"stability": 0.11536654963767348,
+"difficulty": 9.698877143900798,
+"reps": 4,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-05-09",
+"card": {
+"state": "review",
+"due": "2026-05-10",
+"last_review": "2026-05-09",
+"stability": 0.804208918862422,
+"difficulty": 9.583484287014377,
+"reps": 5,
+"lapses": 3,
+"last_rating": 4
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 1,
+"today": "2026-05-10",
+"card": {
+"state": "review",
+"due": "2026-05-11",
+"last_review": "2026-05-10",
+"stability": 0.26222250318264795,
+"difficulty": 9.848322486745312,
+"reps": 6,
+"lapses": 4,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-05-27",
+"card": {
+"state": "review",
+"due": "2026-05-28",
+"last_review": "2026-05-27",
+"stability": 0.938927189781087,
+"difficulty": 9.88453776782626,
+"reps": 7,
+"lapses": 4,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 4,
+"today": "2026-05-28",
+"card": {
+"state": "review",
+"due": "2026-05-30",
+"last_review": "2026-05-28",
+"stability": 2.0557312006379336,
+"difficulty": 9.831184039670653,
+"reps": 8,
+"lapses": 4,
+"last_rating": 4
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-07-15",
+"card": {
+"state": "review",
+"due": "2026-07-23",
+"last_review": "2026-07-15",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-08-11",
+"card": {
+"state": "review",
+"due": "2026-08-13",
+"last_review": "2026-08-11",
+"stability": 1.6394020097922373,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-04-12",
+"card": {
+"state": "review",
+"due": "2026-04-13",
+"last_review": "2026-04-12",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-04-13",
+"card": {
+"state": "review",
+"due": "2026-04-18",
+"last_review": "2026-04-13",
+"stability": 4.546029441066125,
+"difficulty": 5.102286904192293,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 5,
+"preview": {
+"1": 1,
+"2": 5,
+"3": 5,
+"4": 7
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-03-10",
+"card": {
+"state": "review",
+"due": "2026-03-18",
+"last_review": "2026-03-10",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-05-18",
+"card": {
+"state": "review",
+"due": "2026-05-19",
+"last_review": "2026-05-18",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-05-19",
+"card": {
+"state": "review",
+"due": "2026-05-24",
+"last_review": "2026-05-19",
+"stability": 4.546029441066125,
+"difficulty": 5.102286904192293,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 5,
+"preview": {
+"1": 1,
+"2": 5,
+"3": 5,
+"4": 7
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-05-27",
+"card": {
+"state": "review",
+"due": "2026-06-04",
+"last_review": "2026-05-27",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-06-04",
+"card": {
+"state": "review",
+"due": "2026-06-05",
+"last_review": "2026-06-04",
+"stability": 1.3886324609821161,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 2,
+"today": "2026-07-11",
+"card": {
+"state": "review",
+"due": "2026-07-20",
+"last_review": "2026-07-11",
+"stability": 9.021472440321391,
+"difficulty": 8.011605503110008,
+"reps": 3,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+},
+{
+"rating": 1,
+"today": "2026-07-15",
+"card": {
+"state": "review",
+"due": "2026-07-16",
+"last_review": "2026-07-15",
+"stability": 1.1889363522604854,
+"difficulty": 9.331656619251676,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-07-18",
+"card": {
+"state": "review",
+"due": "2026-07-21",
+"last_review": "2026-07-18",
+"stability": 3.0586234024633603,
+"difficulty": 9.317553331929263,
+"reps": 5,
+"lapses": 2,
+"last_rating": 3
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 4,
+"today": "2026-07-21",
+"card": {
+"state": "review",
+"due": "2026-07-28",
+"last_review": "2026-07-21",
+"stability": 7.309432146518496,
+"difficulty": 9.074739826771593,
+"reps": 6,
+"lapses": 2,
+"last_rating": 4
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 12
+}
+},
+{
+"rating": 2,
+"today": "2026-08-22",
+"card": {
+"state": "review",
+"due": "2026-09-06",
+"last_review": "2026-08-22",
+"stability": 15.118000607407104,
+"difficulty": 9.370997549183748,
+"reps": 7,
+"lapses": 2,
+"last_rating": 2
+},
+"interval": 15,
+"preview": {
+"1": 4,
+"2": 15,
+"3": 15,
+"4": 23
+}
+},
+{
+"rating": 2,
+"today": "2026-11-05",
+"card": {
+"state": "review",
+"due": "2026-12-03",
+"last_review": "2026-11-05",
+"stability": 27.937120195159373,
+"difficulty": 9.567667230930802,
+"reps": 8,
+"lapses": 2,
+"last_rating": 2
+},
+"interval": 28,
+"preview": {
+"1": 8,
+"2": 28,
+"3": 28,
+"4": 41
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-02-16",
+"card": {
+"state": "review",
+"due": "2026-02-18",
+"last_review": "2026-02-16",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 3,
+"today": "2026-02-27",
+"card": {
+"state": "review",
+"due": "2026-03-25",
+"last_review": "2026-02-27",
+"stability": 26.13257900816894,
+"difficulty": 2.111214235785395,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 26,
+"preview": {
+"1": 7,
+"2": 26,
+"3": 26,
+"4": 38
+}
+},
+{
+"rating": 3,
+"today": "2026-05-10",
+"card": {
+"state": "review",
+"due": "2026-10-20",
+"last_review": "2026-05-10",
+"stability": 163.44292761861095,
+"difficulty": 2.1043313908464483,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 163,
+"preview": {
+"1": 41,
+"2": 163,
+"3": 163,
+"4": 211
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-09-06",
+"card": {
+"state": "review",
+"due": "2026-09-07",
+"last_review": "2026-09-06",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-09-07",
+"card": {
+"state": "review",
+"due": "2026-09-10",
+"last_review": "2026-09-07",
+"stability": 3.348709732599786,
+"difficulty": 5.200020369516838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 4,
+"today": "2026-09-10",
+"card": {
+"state": "review",
+"due": "2026-09-28",
+"last_review": "2026-09-10",
+"stability": 18.146929719947757,
+"difficulty": 3.5813192253569843,
+"reps": 3,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+},
+{
+"rating": 2,
+"today": "2026-09-19",
+"card": {
+"state": "review",
+"due": "2026-10-23",
+"last_review": "2026-09-19",
+"stability": 33.83927474689316,
+"difficulty": 5.724208960564706,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 34,
+"preview": {
+"1": 10,
+"2": 34,
+"3": 34,
+"4": 49
+}
+},
+{
+"rating": 4,
+"today": "2026-10-23",
+"card": {
+"state": "review",
+"due": "2027-03-06",
+"last_review": "2026-10-23",
+"stability": 134.36806047983845,
+"difficulty": 4.280667216344707,
+"reps": 5,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 134,
+"preview": {
+"1": 35,
+"2": 134,
+"3": 134,
+"4": 176
+}
+},
+{
+"rating": 3,
+"today": "2026-12-29",
+"card": {
+"state": "review",
+"due": "2027-09-15",
+"last_review": "2026-12-29",
+"stability": 260.2826648620567,
+"difficulty": 4.2716149184252,
+"reps": 6,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 260,
+"preview": {
+"1": 64,
+"2": 260,
+"3": 260,
+"4": 326
+}
+},
+{
+"rating": 3,
+"today": "2026-12-29",
+"card": {
+"state": "review",
+"due": "2027-09-15",
+"last_review": "2026-12-29",
+"stability": 260.2826648620567,
+"difficulty": 4.262571672803613,
+"reps": 7,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 260,
+"preview": {
+"1": 64,
+"2": 260,
+"3": 260,
+"4": 326
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-04-11",
+"card": {
+"state": "review",
+"due": "2026-04-13",
+"last_review": "2026-04-11",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-02-03",
+"card": {
+"state": "review",
+"due": "2026-02-11",
+"last_review": "2026-02-03",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-03-21",
+"card": {
+"state": "review",
+"due": "2026-03-23",
+"last_review": "2026-03-21",
+"stability": 1.7841332025987247,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 4,
+"today": "2026-03-22",
+"card": {
+"state": "review",
+"due": "2026-03-28",
+"last_review": "2026-03-22",
+"stability": 5.966350483008827,
+"difficulty": 6.018776394938751,
+"reps": 3,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 10
+}
+},
+{
+"rating": 1,
+"today": "2026-05-22",
+"card": {
+"state": "review",
+"due": "2026-05-23",
+"last_review": "2026-05-22",
+"stability": 1.4730026793280038,
+"difficulty": 8.676627242633721,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 1,
+"today": "2026-05-23",
+"card": {
+"state": "review",
+"due": "2026-05-24",
+"last_review": "2026-05-23",
+"stability": 0.3955381505635184,
+"difficulty": 9.550244742885292,
+"reps": 5,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-06-12",
+"card": {
+"state": "review",
+"due": "2026-06-14",
+"last_review": "2026-06-12",
+"stability": 1.534603311480336,
+"difficulty": 9.686659871029113,
+"reps": 6,
+"lapses": 3,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 3,
+"today": "2026-06-13",
+"card": {
+"state": "review",
+"due": "2026-06-15",
+"last_review": "2026-06-13",
+"stability": 2.2682442951703568,
+"difficulty": 9.67220158045492,
+"reps": 7,
+"lapses": 3,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 3,
+"today": "2026-06-11",
+"card": {
+"state": "review",
+"due": "2026-06-13",
+"last_review": "2026-06-11",
+"stability": 2.3065,
+"difficulty": 2.118103970459016,
+"reps": 1,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 1,
+"today": "2026-07-11",
+"card": {
+"state": "review",
+"due": "2026-07-12",
+"last_review": "2026-07-11",
+"stability": 0.9053468286574414,
+"difficulty": 7.394502741279718,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 4,
+"today": "2026-08-22",
+"card": {
+"state": "review",
+"due": "2026-09-09",
+"last_review": "2026-08-22",
+"stability": 18.16684236782484,
+"difficulty": 6.5090953428844935,
+"reps": 3,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+},
+{
+"rating": 2,
+"today": "2026-10-15",
+"card": {
+"state": "review",
+"due": "2026-12-04",
+"last_review": "2026-10-15",
+"stability": 50.25762446033054,
+"difficulty": 7.667803181746544,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 50,
+"preview": {
+"1": 14,
+"2": 50,
+"3": 50,
+"4": 70
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-01-26",
+"card": {
+"state": "review",
+"due": "2026-02-03",
+"last_review": "2026-01-26",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 2,
+"today": "2026-02-03",
+"card": {
+"state": "review",
+"due": "2026-03-02",
+"last_review": "2026-02-03",
+"stability": 26.704183359371363,
+"difficulty": 4.010608969296839,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 27,
+"preview": {
+"1": 8,
+"2": 27,
+"3": 27,
+"4": 39
+}
+},
+{
+"rating": 3,
+"today": "2026-03-02",
+"card": {
+"state": "review",
+"due": "2026-05-26",
+"last_review": "2026-03-02",
+"stability": 85.34020308236191,
+"difficulty": 4.00182672962438,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 85,
+"preview": {
+"1": 23,
+"2": 85,
+"3": 85,
+"4": 115
+}
+},
+{
+"rating": 2,
+"today": "2026-05-26",
+"card": {
+"state": "review",
+"due": "2026-11-19",
+"last_review": "2026-05-26",
+"stability": 177.32793760846587,
+"difficulty": 6.0033614375471025,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 177,
+"preview": {
+"1": 45,
+"2": 177,
+"3": 177,
+"4": 228
+}
+},
+{
+"rating": 4,
+"today": "2026-08-22",
+"card": {
+"state": "review",
+"due": "2027-09-23",
+"last_review": "2026-08-22",
+"stability": 397.4445227977592,
+"difficulty": 4.653099442629192,
+"reps": 5,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 397,
+"preview": {
+"1": 95,
+"2": 397,
+"3": 397,
+"4": 485
+}
+},
+{
+"rating": 3,
+"today": "2027-03-08",
+"card": {
+"state": "review",
+"due": "2029-01-27",
+"last_review": "2027-03-08",
+"stability": 690.8763815051818,
+"difficulty": 4.643674712483401,
+"reps": 6,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 691,
+"preview": {
+"1": 160,
+"2": 691,
+"3": 691,
+"4": 812
+}
+},
+{
+"rating": 3,
+"today": "2028-02-16",
+"card": {
+"state": "review",
+"due": "2031-04-19",
+"last_review": "2028-02-16",
+"stability": 1157.6588067658101,
+"difficulty": 4.634259407067756,
+"reps": 7,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 1158,
+"preview": {
+"1": 258,
+"2": 1158,
+"3": 1158,
+"4": 1315
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-05-03",
+"card": {
+"state": "review",
+"due": "2026-05-11",
+"last_review": "2026-05-03",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 4,
+"today": "2026-05-11",
+"card": {
+"state": "review",
+"due": "2026-07-16",
+"last_review": "2026-05-11",
+"stability": 65.62422616189994,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 66,
+"preview": {
+"1": 18,
+"2": 66,
+"3": 66,
+"4": 90
+}
+},
+{
+"rating": 2,
+"today": "2026-05-11",
+"card": {
+"state": "review",
+"due": "2026-07-16",
+"last_review": "2026-05-11",
+"stability": 65.62422616189994,
+"difficulty": 4.010608969296839,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 66,
+"preview": {
+"1": 18,
+"2": 66,
+"3": 66,
+"4": 90
+}
+},
+{
+"rating": 4,
+"today": "2026-05-11",
+"card": {
+"state": "review",
+"due": "2026-08-09",
+"last_review": "2026-05-11",
+"stability": 90.07272077641306,
+"difficulty": 1.994461961754711,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 90,
+"preview": {
+"1": 24,
+"2": 90,
+"3": 90,
+"4": 121
+}
+},
+{
+"rating": 4,
+"today": "2026-08-09",
+"card": {
+"state": "review",
+"due": "2027-11-29",
+"last_review": "2026-08-09",
+"stability": 476.555667821151,
+"difficulty": 1.0,
+"reps": 5,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 477,
+"preview": {
+"1": 113,
+"2": 477,
+"3": 477,
+"4": 574
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-08-19",
+"card": {
+"state": "review",
+"due": "2026-08-20",
+"last_review": "2026-08-19",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 2,
+"today": "2026-08-20",
+"card": {
+"state": "review",
+"due": "2026-08-23",
+"last_review": "2026-08-20",
+"stability": 3.2494117658571677,
+"difficulty": 6.7404595108297,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 3,
+"today": "2026-08-20",
+"card": {
+"state": "review",
+"due": "2026-08-23",
+"last_review": "2026-08-20",
+"stability": 3.2494117658571677,
+"difficulty": 6.728947420615708,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 3,
+"today": "2026-08-23",
+"card": {
+"state": "review",
+"due": "2026-09-01",
+"last_review": "2026-08-23",
+"stability": 9.049772443353582,
+"difficulty": 6.717446842491931,
+"reps": 4,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 9,
+"preview": {
+"1": 3,
+"2": 9,
+"3": 9,
+"4": 14
+}
+},
+{
+"rating": 3,
+"today": "2026-08-27",
+"card": {
+"state": "review",
+"due": "2026-09-13",
+"last_review": "2026-08-27",
+"stability": 16.718190265747626,
+"difficulty": 6.705957764946278,
+"reps": 5,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 17,
+"preview": {
+"1": 5,
+"2": 17,
+"3": 17,
+"4": 25
+}
+},
+{
+"rating": 1,
+"today": "2026-09-26",
+"card": {
+"state": "review",
+"due": "2026-09-28",
+"last_review": "2026-09-26",
+"stability": 1.8923703433365626,
+"difficulty": 8.902499086121876,
+"reps": 6,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 4,
+"today": "2026-09-28",
+"card": {
+"state": "review",
+"due": "2026-10-04",
+"last_review": "2026-09-28",
+"stability": 5.638065746745629,
+"difficulty": 8.520993793543232,
+"reps": 7,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 9
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-09-26",
+"card": {
+"state": "review",
+"due": "2026-10-04",
+"last_review": "2026-09-26",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 1,
+"today": "2026-09-30",
+"card": {
+"state": "review",
+"due": "2026-10-01",
+"last_review": "2026-09-30",
+"stability": 1.3009257796275164,
+"difficulty": 7.0269895692968385,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 3,
+"today": "2026-10-01",
+"card": {
+"state": "review",
+"due": "2026-10-04",
+"last_review": "2026-10-01",
+"stability": 3.4969684353654773,
+"difficulty": 7.0151909490243805,
+"reps": 3,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+},
+{
+"rating": 2,
+"today": "2026-10-01",
+"card": {
+"state": "review",
+"due": "2026-10-04",
+"last_review": "2026-10-01",
+"stability": 3.4969684353654773,
+"difficulty": 8.003773029157445,
+"reps": 4,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 6
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-05-08",
+"card": {
+"state": "review",
+"due": "2026-05-16",
+"last_review": "2026-05-08",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 4,
+"today": "2026-05-16",
+"card": {
+"state": "review",
+"due": "2026-07-21",
+"last_review": "2026-05-16",
+"stability": 65.62422616189994,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 66,
+"preview": {
+"1": 18,
+"2": 66,
+"3": 66,
+"4": 90
+}
+},
+{
+"rating": 1,
+"today": "2026-09-14",
+"card": {
+"state": "review",
+"due": "2026-09-18",
+"last_review": "2026-09-14",
+"stability": 3.8117598534693524,
+"difficulty": 7.0269895692968385,
+"reps": 3,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 6
+}
+},
+{
+"rating": 4,
+"today": "2026-09-14",
+"card": {
+"state": "review",
+"due": "2026-09-20",
+"last_review": "2026-09-14",
+"stability": 6.309273904902892,
+"difficulty": 6.018776394938751,
+"reps": 4,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 10
+}
+},
+{
+"rating": 4,
+"today": "2026-09-20",
+"card": {
+"state": "review",
+"due": "2026-10-19",
+"last_review": "2026-09-20",
+"stability": 28.813330279156226,
+"difficulty": 4.673665360444115,
+"reps": 5,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 29,
+"preview": {
+"1": 8,
+"2": 29,
+"3": 29,
+"4": 42
+}
+},
+{
+"rating": 1,
+"today": "2026-11-20",
+"card": {
+"state": "review",
+"due": "2026-11-23",
+"last_review": "2026-11-20",
+"stability": 2.528082597375384,
+"difficulty": 8.234498392350368,
+"reps": 6,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 4
+}
+},
+{
+"rating": 4,
+"today": "2026-11-20",
+"card": {
+"state": "review",
+"due": "2026-11-24",
+"last_review": "2026-11-20",
+"stability": 4.299119374829889,
+"difficulty": 7.629778396745615,
+"reps": 7,
+"lapses": 2,
+"last_rating": 4
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 7
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-02-25",
+"card": {
+"state": "review",
+"due": "2026-02-26",
+"last_review": "2026-02-25",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 1,
+"today": "2026-02-26",
+"card": {
+"state": "review",
+"due": "2026-02-27",
+"last_review": "2026-02-26",
+"stability": 0.3753949287873252,
+"difficulty": 8.378632117467106,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-04-15",
+"card": {
+"state": "review",
+"due": "2026-04-23",
+"last_review": "2026-04-15",
+"stability": 7.709019775262198,
+"difficulty": 7.822074896164778,
+"reps": 3,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 2,
+"2": 8,
+"3": 8,
+"4": 12
+}
+},
+{
+"rating": 1,
+"today": "2026-04-15",
+"card": {
+"state": "review",
+"due": "2026-04-17",
+"last_review": "2026-04-15",
+"stability": 2.3928322641314184,
+"difficulty": 9.269359197556906,
+"reps": 4,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-03-06",
+"card": {
+"state": "review",
+"due": "2026-03-07",
+"last_review": "2026-03-06",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-03-07",
+"card": {
+"state": "review",
+"due": "2026-03-09",
+"last_review": "2026-03-07",
+"stability": 1.8867876195204154,
+"difficulty": 6.402115069296838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 3,
+"today": "2026-04-19",
+"card": {
+"state": "review",
+"due": "2026-05-09",
+"last_review": "2026-04-19",
+"stability": 20.073674622324937,
+"difficulty": 6.3909413235243795,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 20,
+"preview": {
+"1": 6,
+"2": 20,
+"3": 20,
+"4": 30
+}
+},
+{
+"rating": 4,
+"today": "2026-05-09",
+"card": {
+"state": "review",
+"due": "2026-07-25",
+"last_review": "2026-05-09",
+"stability": 76.56646499712808,
+"difficulty": 5.170190465277389,
+"reps": 4,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 77,
+"preview": {
+"1": 20,
+"2": 77,
+"3": 77,
+"4": 104
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-02-27",
+"card": {
+"state": "review",
+"due": "2026-02-28",
+"last_review": "2026-02-27",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-02-28",
+"card": {
+"state": "review",
+"due": "2026-03-01",
+"last_review": "2026-02-28",
+"stability": 1.219217274379578,
+"difficulty": 7.604209769076838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-04-25",
+"card": {
+"state": "review",
+"due": "2026-04-26",
+"last_review": "2026-04-25",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-04-25",
+"card": {
+"state": "review",
+"due": "2026-04-26",
+"last_review": "2026-04-25",
+"stability": 0.24668918777567272,
+"difficulty": 6.402115069296838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 3,
+"today": "2026-05-14",
+"card": {
+"state": "review",
+"due": "2026-05-19",
+"last_review": "2026-05-14",
+"stability": 4.66379814570794,
+"difficulty": 6.3909413235243795,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 5,
+"preview": {
+"1": 1,
+"2": 5,
+"3": 5,
+"4": 8
+}
+},
+{
+"rating": 2,
+"today": "2026-05-19",
+"card": {
+"state": "review",
+"due": "2026-05-29",
+"last_review": "2026-05-19",
+"stability": 10.325323968628043,
+"difficulty": 7.589367037717998,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 10,
+"preview": {
+"1": 3,
+"2": 10,
+"3": 10,
+"4": 16
+}
+},
+{
+"rating": 2,
+"today": "2026-05-29",
+"card": {
+"state": "review",
+"due": "2026-06-16",
+"last_review": "2026-05-29",
+"stability": 17.883387614252786,
+"difficulty": 8.384937873438004,
+"reps": 5,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 18,
+"preview": {
+"1": 5,
+"2": 18,
+"3": 18,
+"4": 27
+}
+},
+{
+"rating": 1,
+"today": "2026-06-16",
+"card": {
+"state": "review",
+"due": "2026-06-18",
+"last_review": "2026-06-16",
+"stability": 1.7900250931758965,
+"difficulty": 9.45436843071837,
+"reps": 6,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 3,
+"today": "2026-08-03",
+"card": {
+"state": "review",
+"due": "2026-08-11",
+"last_review": "2026-08-03",
+"stability": 7.901301257444013,
+"difficulty": 9.440142431584489,
+"reps": 7,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 8,
+"preview": {
+"1": 2,
+"2": 8,
+"3": 8,
+"4": 12
+}
+},
+{
+"rating": 2,
+"today": "2026-08-03",
+"card": {
+"state": "review",
+"due": "2026-08-11",
+"last_review": "2026-08-03",
+"stability": 7.901301257444013,
+"difficulty": 9.613568826019932,
+"reps": 8,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 8,
+"preview": {
+"1": 2,
+"2": 8,
+"3": 8,
+"4": 12
+}
+},
+{
+"rating": 4,
+"today": "2026-08-11",
+"card": {
+"state": "review",
+"due": "2026-08-27",
+"last_review": "2026-08-11",
+"stability": 15.804474055996458,
+"difficulty": 9.46966990466534,
+"reps": 9,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 16,
+"preview": {
+"1": 5,
+"2": 16,
+"3": 16,
+"4": 24
+}
+},
+{
+"rating": 2,
+"today": "2026-08-11",
+"card": {
+"state": "review",
+"due": "2026-08-27",
+"last_review": "2026-08-11",
+"stability": 15.804474055996458,
+"difficulty": 9.633170538631246,
+"reps": 10,
+"lapses": 1,
+"last_rating": 2
+},
+"interval": 16,
+"preview": {
+"1": 5,
+"2": 16,
+"3": 16,
+"4": 24
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-07-09",
+"card": {
+"state": "review",
+"due": "2026-07-17",
+"last_review": "2026-07-09",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 3,
+"today": "2026-07-09",
+"card": {
+"state": "review",
+"due": "2026-07-17",
+"last_review": "2026-07-09",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 2,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 3,
+"today": "2026-07-17",
+"card": {
+"state": "review",
+"due": "2026-08-25",
+"last_review": "2026-07-17",
+"stability": 38.90514998232684,
+"difficulty": 1.0,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 39,
+"preview": {
+"1": 11,
+"2": 39,
+"3": 39,
+"4": 55
+}
+},
+{
+"rating": 2,
+"today": "2026-08-25",
+"card": {
+"state": "review",
+"due": "2026-12-11",
+"last_review": "2026-08-25",
+"stability": 107.5218323053593,
+"difficulty": 4.010608969296839,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 108,
+"preview": {
+"1": 28,
+"2": 108,
+"3": 108,
+"4": 143
+}
+}
+],
+[
+{
+"rating": 1,
+"today": "2026-05-30",
+"card": {
+"state": "review",
+"due": "2026-05-31",
+"last_review": "2026-05-30",
+"stability": 0.212,
+"difficulty": 6.4133,
+"reps": 1,
+"lapses": 0,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 2,
+"today": "2026-05-31",
+"card": {
+"state": "review",
+"due": "2026-06-01",
+"last_review": "2026-05-31",
+"stability": 1.219217274379578,
+"difficulty": 7.604209769076838,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 2,
+"today": "2026-06-01",
+"card": {
+"state": "review",
+"due": "2026-06-03",
+"last_review": "2026-06-01",
+"stability": 2.342084543898678,
+"difficulty": 8.39479117018528,
+"reps": 3,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+},
+{
+"rating": 2,
+"today": "2026-06-02",
+"card": {
+"state": "review",
+"due": "2026-06-05",
+"last_review": "2026-06-02",
+"stability": 3.2255824868944973,
+"difficulty": 8.919615945334357,
+"reps": 4,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 5
+}
+},
+{
+"rating": 3,
+"today": "2026-06-03",
+"card": {
+"state": "review",
+"due": "2026-06-07",
+"last_review": "2026-06-03",
+"stability": 4.389883307387908,
+"difficulty": 8.90592469868586,
+"reps": 5,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 7
+}
+},
+{
+"rating": 4,
+"today": "2026-06-03",
+"card": {
+"state": "review",
+"due": "2026-06-10",
+"last_review": "2026-06-03",
+"stability": 7.19898850844008,
+"difficulty": 8.525564086192553,
+"reps": 6,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 11
+}
+},
+{
+"rating": 2,
+"today": "2026-06-10",
+"card": {
+"state": "review",
+"due": "2026-06-21",
+"last_review": "2026-06-10",
+"stability": 11.270537783367176,
+"difficulty": 9.006429100997872,
+"reps": 7,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 11,
+"preview": {
+"1": 3,
+"2": 11,
+"3": 11,
+"4": 17
+}
+},
+{
+"rating": 1,
+"today": "2026-06-21",
+"card": {
+"state": "review",
+"due": "2026-06-22",
+"last_review": "2026-06-21",
+"stability": 1.4223900290508888,
+"difficulty": 9.658648371076952,
+"reps": 8,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 3
+}
+},
+{
+"rating": 4,
+"today": "2026-07-02",
+"card": {
+"state": "review",
+"due": "2026-07-09",
+"last_review": "2026-07-02",
+"stability": 6.939512588832471,
+"difficulty": 9.529812932973615,
+"reps": 9,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 7,
+"preview": {
+"1": 2,
+"2": 7,
+"3": 7,
+"4": 11
+}
+}
+],
+[
+{
+"rating": 2,
+"today": "2026-01-13",
+"card": {
+"state": "review",
+"due": "2026-01-14",
+"last_review": "2026-01-13",
+"stability": 1.2931,
+"difficulty": 5.112170705601056,
+"reps": 1,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 2
+}
+},
+{
+"rating": 1,
+"today": "2026-01-14",
+"card": {
+"state": "review",
+"due": "2026-01-15",
+"last_review": "2026-01-14",
+"stability": 0.3753949287873252,
+"difficulty": 8.378632117467106,
+"reps": 2,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 1,
+"preview": {
+"1": 1,
+"2": 1,
+"3": 1,
+"4": 1
+}
+},
+{
+"rating": 4,
+"today": "2026-01-15",
+"card": {
+"state": "review",
+"due": "2026-01-18",
+"last_review": "2026-01-15",
+"stability": 2.544318236817047,
+"difficulty": 7.822074896164778,
+"reps": 3,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 3,
+"preview": {
+"1": 1,
+"2": 3,
+"3": 3,
+"4": 4
+}
+},
+{
+"rating": 3,
+"today": "2026-03-16",
+"card": {
+"state": "review",
+"due": "2026-04-04",
+"last_review": "2026-03-16",
+"stability": 18.822376929337885,
+"difficulty": 7.809481190565451,
+"reps": 4,
+"lapses": 1,
+"last_rating": 3
+},
+"interval": 19,
+"preview": {
+"1": 6,
+"2": 19,
+"3": 19,
+"4": 28
+}
+},
+{
+"rating": 1,
+"today": "2026-04-04",
+"card": {
+"state": "review",
+"due": "2026-04-06",
+"last_review": "2026-04-04",
+"stability": 1.841359023961406,
+"difficulty": 9.265219732163605,
+"reps": 5,
+"lapses": 2,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 3
+}
+},
+{
+"rating": 2,
+"today": "2026-04-28",
+"card": {
+"state": "review",
+"due": "2026-05-03",
+"last_review": "2026-04-28",
+"stability": 5.262420002516023,
+"difficulty": 9.497446986746557,
+"reps": 6,
+"lapses": 2,
+"last_rating": 2
+},
+"interval": 5,
+"preview": {
+"1": 2,
+"2": 5,
+"3": 5,
+"4": 9
+}
+},
+{
+"rating": 4,
+"today": "2026-04-30",
+"card": {
+"state": "review",
+"due": "2026-05-08",
+"last_review": "2026-04-30",
+"stability": 8.08605364019016,
+"difficulty": 9.31474555798451,
+"reps": 7,
+"lapses": 2,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 4,
+"today": "2026-04-30",
+"card": {
+"state": "review",
+"due": "2026-05-13",
+"last_review": "2026-04-30",
+"stability": 12.737947621398595,
+"difficulty": 9.07099382561677,
+"reps": 8,
+"lapses": 2,
+"last_rating": 4
+},
+"interval": 13,
+"preview": {
+"1": 4,
+"2": 13,
+"3": 13,
+"4": 19
+}
+},
+{
+"rating": 4,
+"today": "2026-06-04",
+"card": {
+"state": "review",
+"due": "2026-07-17",
+"last_review": "2026-06-04",
+"stability": 43.35616562221876,
+"difficulty": 8.745791623122457,
+"reps": 9,
+"lapses": 2,
+"last_rating": 4
+},
+"interval": 43,
+"preview": {
+"1": 12,
+"2": 43,
+"3": 43,
+"4": 61
+}
+},
+{
+"rating": 1,
+"today": "2026-06-25",
+"card": {
+"state": "review",
+"due": "2026-06-27",
+"last_review": "2026-06-25",
+"stability": 2.4440543058418873,
+"difficulty": 9.572978604434152,
+"reps": 10,
+"lapses": 3,
+"last_rating": 1
+},
+"interval": 2,
+"preview": {
+"1": 1,
+"2": 2,
+"3": 2,
+"4": 4
+}
+}
+],
+[
+{
+"rating": 4,
+"today": "2026-02-11",
+"card": {
+"state": "review",
+"due": "2026-02-19",
+"last_review": "2026-02-11",
+"stability": 8.2956,
+"difficulty": 1.0,
+"reps": 1,
+"lapses": 0,
+"last_rating": 4
+},
+"interval": 8,
+"preview": {
+"1": 3,
+"2": 8,
+"3": 8,
+"4": 13
+}
+},
+{
+"rating": 2,
+"today": "2026-02-27",
+"card": {
+"state": "review",
+"due": "2026-04-05",
+"last_review": "2026-02-27",
+"stability": 37.41972077621997,
+"difficulty": 4.010608969296839,
+"reps": 2,
+"lapses": 0,
+"last_rating": 2
+},
+"interval": 37,
+"preview": {
+"1": 10,
+"2": 37,
+"3": 37,
+"4": 53
+}
+},
+{
+"rating": 3,
+"today": "2026-03-17",
+"card": {
+"state": "review",
+"due": "2026-06-06",
+"last_review": "2026-03-17",
+"stability": 81.2395369158542,
+"difficulty": 4.00182672962438,
+"reps": 3,
+"lapses": 0,
+"last_rating": 3
+},
+"interval": 81,
+"preview": {
+"1": 22,
+"2": 81,
+"3": 81,
+"4": 110
+}
+},
+{
+"rating": 1,
+"today": "2026-07-04",
+"card": {
+"state": "review",
+"due": "2026-07-08",
+"last_review": "2026-07-04",
+"stability": 3.640978182477346,
+"difficulty": 8.013669602902612,
+"reps": 4,
+"lapses": 1,
+"last_rating": 1
+},
+"interval": 4,
+"preview": {
+"1": 1,
+"2": 4,
+"3": 4,
+"4": 6
+}
+},
+{
+"rating": 4,
+"today": "2026-07-04",
+"card": {
+"state": "review",
+"due": "2026-07-10",
+"last_review": "2026-07-04",
+"stability": 6.044798623388891,
+"difficulty": 7.335158916486008,
+"reps": 5,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 6,
+"preview": {
+"1": 2,
+"2": 6,
+"3": 6,
+"4": 10
+}
+},
+{
+"rating": 4,
+"today": "2026-07-07",
+"card": {
+"state": "review",
+"due": "2026-07-23",
+"last_review": "2026-07-07",
+"stability": 15.70821085926264,
+"difficulty": 6.4299215772669625,
+"reps": 6,
+"lapses": 1,
+"last_rating": 4
+},
+"interval": 16,
+"preview": {
+"1": 5,
+"2": 16,
+"3": 16,
+"4": 24
+}
+}
+]
+]

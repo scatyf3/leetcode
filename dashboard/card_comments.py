@@ -62,7 +62,9 @@ def _write_all(rows: list):
     os.replace(tmp, LOG)
 
 
-def add(deck: str, cid_card, title: str, text: str) -> dict:
+def add(deck: str, cid_card, title: str, text: str,
+        cid: str | None = None, ts: int | None = None, day: str | None = None) -> dict:
+    """cid / ts / day 只有手机上记的批注会传(见 inbox.py): cid 沿用事件的 eid, 时间用手机上那一刻的。"""
     text = (text or "").strip()
     if deck not in DECKS:
         return {"ok": False, "error": "bad deck"}
@@ -76,7 +78,8 @@ def add(deck: str, cid_card, title: str, text: str) -> dict:
             cid_card = int(cid_card)
         except (TypeError, ValueError):
             return {"ok": False, "error": "题号不是整数"}
-    row = {"cid": secrets.token_hex(4), "ts": int(time.time()), "date": date.today().isoformat(),
+    row = {"cid": cid or secrets.token_hex(4), "ts": ts or int(time.time()),
+           "date": day or date.today().isoformat(),
            "deck": deck, "id": cid_card, "title": title or "", "text": text, "status": "open"}
     with _LOCK:
         with LOG.open("a", encoding="utf-8") as f:

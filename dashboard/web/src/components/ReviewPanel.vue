@@ -12,6 +12,9 @@ import { esc } from '@/lib/esc'
 import { fmtInterval, todayStr } from '@/lib/dates'
 import { highlightPython } from '@/lib/highlight'
 import { DECKS, DECK_LABEL, RV_MODES, orderQueue } from '@/lib/queue'
+import { newCard, preview as fsrsPreview } from '@/lib/fsrs'
+import type { InboxEvent } from '@/lib/inbox'
+import { syncState } from '@/sync'
 import type { QuizBlock, QuizState } from '@/lib/quiz'
 import type { Deck, QueueMode } from '@/lib/types'
 
@@ -31,6 +34,29 @@ export interface ReviewHost {
   openStats: () => void
   /** reviews.jsonl 多了一行, 让 📈 下次重新拉 */
   reviewsChanged: () => void
+  // ---- 下面三个只有只读站连上 GitHub 时用(见 ../sync.ts): 本地是直接打 server.py ----
+  /** 记一条事件, 并且就地放到行上(评分改调度字段, 暂停记日期) */
+  record: (e: Pick<InboxEvent, 'deck' | 'id' | 'op'> & Partial<InboxEvent>) => InboxEvent
+  /** 今天最后一次评 1 的(server.review_carry 的 again, 从还没落进 main 的事件里算) */
+  again: (deck: Deck) => (number | string)[]
+  /** 还没落进 main 的批注, 和 card-comments.jsonl 的行同形状 */
+  pendingComments: () => any[]
+}
+
+// 只读站没有 session.json, 「押到队尾」记在浏览器里, 形状同 session.json 的 defers
+const DEFERS_KEY = 'lc-rv-defers'
+function loadDefers(deck: Deck): (number | string)[] {
+  try {
+    const d = JSON.parse(localStorage.getItem(DEFERS_KEY) || 'null')
+    return d && d.date === todayStr() && Array.isArray(d[deck]) ? d[deck] : []
+  } catch { return [] }
+}
+function saveDefers(deck: Deck, ids: (number | string)[]) {
+  try {
+    const old = JSON.parse(localStorage.getItem(DEFERS_KEY) || 'null')
+    const keep = old && old.date === todayStr() ? old : {}
+    localStorage.setItem(DEFERS_KEY, JSON.stringify({ ...keep, date: todayStr(), [deck]: ids }))
+  } catch { /* 隐私模式 */ }
 }
 
 function savedMode(): QueueMode {
@@ -76,6 +102,7 @@ export default defineComponent({
       deck: savedDeck(),
       counts: { problems: 0, syntax: 0 } as Record<Deck, number>,   // 标在牌组按钮上的到期数
       readOnly: isReadOnly(),
+      sync: syncState,               // 只读站连上 GitHub 之后能评分(见 writable)
       MODES: [{ k: 'fsrs', label: '到期优先' }, { k: 'order', label: '顺序' }, { k: 'random', label: '随机' }] as { k: QueueMode; label: string }[],
       DECKS: [{ k: 'problems', label: '题目' }, { k: 'syntax', label: '语法' }] as { k: Deck; label: string }[],
       KEYS: 'ABCD',
@@ -86,6 +113,9 @@ export default defineComponent({
 
   computed: {
     isSyntax(): boolean { return this.deck === 'syntax' },
+    // 能不能评分 / 暂停 / 批注: 本地 server.py 永远能; 只读站要连上 GitHub(记成事件推到 data 分支)。
+    // 「改一下」答案卡不算在内 —— 那是改内容文件, 只读站上一直是 readOnly 说了算
+    writable(): boolean { return !this.readOnly || this.sync.mode === 'github' },
     // 左上角那个胶囊: 题目是题号, 语法卡是主题(= 文件名), 都是"这是哪一类"的定位信息
     pillText(): string { return this.d ? String(this.isSyntax ? this.d.topic : this.d.id) : '' },
     metaLine(): string {
@@ -124,7 +154,7 @@ export default defineComponent({
       return this.comments.filter((c) => c.deck === this.deck && String(c.id) === id)
     },
     openComments(): number { return this.cardComments.filter((c) => c.status === 'open').length },
-    showCmt(): boolean { return !this.readOnly && (this.cbox || this.cardComments.length > 0) },
+    showCmt(): boolean { return this.cbox || this.cardComments.length > 0 },
     // 选择题只有题目牌组有 —— 它测的是"该用哪个模板"的辨别力, 语法卡没有这个维度
     hasQuiz(): boolean { return !this.isSyntax && (this.quiz.ideas.some((b) => b.state) || !!this.quiz.cx) },
     quizBlocks(): QuizBlock[] {
@@ -195,7 +225,7 @@ export default defineComponent({
     // 快照里只有 deferred(今天押过队尾的)会被 start() 经 /api/review/carry 读回来。
     // 失败了不影响复习, 顶多是关掉重开后押过的题回到原位。
     syncSession() {
-      if (this.readOnly) return                   // 只读站没有写接口
+      if (this.readOnly) { saveDefers(this.deck, this.deferred); return }   // 只读站没有写接口, 只留押队尾
       postJSON('/api/review/session', {
         open: this.open, deck: this.deck, mode: this.mode, done: this.done, total: this.total,
         current: this.d ? this.d.id : null, queue: this.queue, deferred: this.deferred,
@@ -222,6 +252,8 @@ export default defineComponent({
         } catch (e) {
           console.error('[review] 拉今天的押队尾/评 1 记录失败, 按现算队列来', e)
         }
+      } else {
+        carry = { deferred: loadDefers(deck), again: this.writable ? this.host.again(deck) : [] }
       }
       // 等的时候又开了一次 / 切了牌组(都会再进 start(), 由新的那次接手), 或者已经关掉了
       if (gen !== this.startGen || !this.open) return
@@ -297,6 +329,13 @@ export default defineComponent({
         this.syncSession()
         return
       }
+      // 只读站: 导出的 fsrs / fsrs_preview 是导出那天的, 还没算上手机上评过的。
+      // 行上的调度字段已经重放过(app.js 的 applyPending), 按它和今天现算按钮上的间隔
+      if (this.readOnly) {
+        const row = this.host.rows(this.deck).find((x) => x.id === id)
+        const card = row && row.fsrs && Object.keys(row.fsrs).length ? row.fsrs : newCard()
+        d = { ...d, fsrs: card, fsrs_preview: fsrsPreview(card, todayStr()) }
+      }
       this.d = d
       this.quiz = this.host.quiz(this.isSyntax ? {} : this.d)
       this.active = 0
@@ -370,13 +409,16 @@ export default defineComponent({
     // 之后跟 agent 说一句「处理卡片批注」统一改(见 .claude/skills/card-comments)。
     // 和「改一下」的分工: 那个是自己一句话就能改完的; 这个是要查 note / 对全库口径 / 重写干扰项的。
     async loadComments() {
-      if (this.readOnly) return                   // 只读站不导出批注
+      if (this.readOnly) {                        // 只读站不导出批注, 只看得到自己记的、还没落进 main 的
+        this.comments = this.host.pendingComments()
+        return
+      }
       try {
         this.comments = (await api('/api/card-comments')).comments || []
       } catch (e) { console.error('[review] 拉卡片批注失败', e) }
     },
     openComment() {
-      if (!this.d || this.readOnly) return
+      if (!this.d || !this.writable) return
       this.cbox = true
       this.$nextTick(() => {
         (this.$refs.cmt as HTMLElement | undefined)?.scrollIntoView({ block: 'nearest' });
@@ -390,6 +432,14 @@ export default defineComponent({
     async sendComment() {
       const text = this.cdraft.trim()
       if (!text || !this.d) return
+      if (this.readOnly) {
+        if (!this.writable) return
+        this.host.record({ deck: this.deck, id: this.d.id, op: 'comment', title: this.d.title, text })
+        this.comments = this.host.pendingComments()
+        this.cdraft = ''
+        this.closeComment()
+        return
+      }
       let r: any
       try {
         r = await postJSON('/api/card-comments', { deck: this.deck, id: this.d.id, title: this.d.title, text })
@@ -442,18 +492,23 @@ export default defineComponent({
     // 暂停当前这道: 不评分, 从本轮队列里整个拿掉(押过队尾 / 评 1 追加的也一起), 以后也不再进队列,
     // 直到在详情页取消勾选。和押队尾的区别 —— 押队尾是"等会儿再问", 这个是"这阵子都别问"。
     async pause() {
-      if (!this.d || this.busy || this.isSyntax || this.readOnly) return
+      if (!this.d || this.busy || this.isSyntax || !this.writable) return
       const id = this.d.id
       this.busy = true
       let ok = false
-      try { ok = (await this.host.putMeta(id, { paused: true })).ok } catch { ok = false }
+      if (this.readOnly) {                         // 记成事件, 行上的 paused 由 record 就地写好
+        this.host.record({ deck: 'problems', id, op: 'pause' })
+        ok = true
+      } else {
+        try { ok = (await this.host.putMeta(id, { paused: true })).ok } catch { ok = false }
+      }
       if (!ok) {
         this.busy = false
         this.note = '⚠ 没暂停成功(服务没起?) —— 这道还在'
         return
       }
       const p = this.host.rows('problems').find((x) => x.id === id)
-      if (p) p.paused = todayStr()
+      if (p && !p.paused) p.paused = todayStr()
       this.queue = this.queue.filter((x) => x !== id)
       this.deferred = this.deferred.filter((x) => x !== id)
       this.total = this.done + this.queue.length   // 这道不再算进本轮
@@ -467,9 +522,16 @@ export default defineComponent({
     // 这中间卡面还停在当前这道且 revealed=true, 手快按第二下就会给同一道题再记一次复习。
     // 服务端每条都照单全收(reviews.jsonl 里 #1 连记 6 次那次就是这么来的), 只能前端拦。
     async rate(r: number) {
-      if (!this.revealed || this.busy) return
+      if (!this.revealed || this.busy || !this.writable) return
       const id = this.d.id
       this.busy = true
+      if (this.readOnly) {
+        // 只读站: 记一条事件(先存本机, 停手 2 秒推到 data 分支), 行上的调度字段由 record 就地重算。
+        // 不会失败 —— 推不上去的留在本机, 下次联网再推
+        this.host.record({ deck: this.deck, id, op: 'rate', rating: r as 1 | 2 | 3 | 4 })
+        await this.afterRate(id, r)
+        return
+      }
       // 语法卡的 id 是 "主题/标题"(带中文和空格), 塞不进 URL 路径, 所以走 body
       const [url, body] = this.isSyntax
         ? ['/api/syntax/review', { id, rating: r }]
@@ -493,6 +555,10 @@ export default defineComponent({
         p.last_review = res.card.last_review; p.fsrs_state = res.card.state
         p.fsrs = res.card; p.fsrs_preview = res.preview
       }
+      await this.afterRate(id, r)
+    },
+    // 评完之后两边一样的那半段: 评 1 排回队尾、刷看板、取下一题, 最后放开 busy
+    async afterRate(id: number | string, r: number) {
       if (r === 1) { this.queue.push(id); this.total++ }   // 忘了 -> 本次会话末尾再问一遍
       this.host.reviewsChanged()
       this.done++
@@ -519,15 +585,15 @@ export default defineComponent({
       if (e.ctrlKey || e.metaKey || e.altKey || e.isComposing || e.keyCode === 229) return false
       if (/^(INPUT|TEXTAREA|SELECT)$/.test((e.target as HTMLElement).tagName)) return false
       if (e.key === 'w' && !this.revealed && this.canWrite) { this.focusWrite(); return true }
-      if (e.key === 'c' && !this.readOnly) { this.openComment(); return true }
+      if (e.key === 'c' && this.writable) { this.openComment(); return true }
       if (e.key === ' ') {
         if (!this.revealed) this.reveal()
-        else if (this.readOnly) this.skip()     // 只读站没有评分按钮, 空格 = 下一题
+        else if (!this.writable) this.skip()    // 没连 GitHub 的只读站没有评分按钮, 空格 = 下一题
         // 本地站揭晓后不响应空格: 必须按 1-4, 防止手滑跳过一道没评分
         return true
       }
       if (e.key === '0') { this.defer(); return true }
-      if (this.revealed && !this.readOnly && '1234'.includes(e.key)) { this.rate(+e.key); return true }
+      if (this.revealed && this.writable && '1234'.includes(e.key)) { this.rate(+e.key); return true }
       return false
     },
     onEsc() {
@@ -618,7 +684,8 @@ export default defineComponent({
                 <span class="rv-cmt-st" v-text="CMT_ST[c.status] || c.status"></span>
                 <span class="rv-cmt-text" v-text="c.text"></span>
                 <span class="hint" v-text="c.date"></span>
-                <span v-if="c.status === 'open'" class="rv-cmt-x" @click="dropComment(c)">撤回</span>
+                <span v-if="c.pending" class="hint" title="在 data 分支上等电脑的 server.py 拉下来">未落盘</span>
+                <span v-else-if="c.status === 'open'" class="rv-cmt-x" @click="dropComment(c)">撤回</span>
                 <div v-if="c.reply" class="rv-cmt-reply" v-text="'↳ ' + c.reply"></div>
               </div>
             </template>
@@ -672,8 +739,8 @@ export default defineComponent({
 
         <div class="rv-foot">
           <button v-if="!revealed" class="rv-reveal" @click="reveal">显示答案 <em>空格</em></button>
-          <!-- 只读站没有写接口: 没有评分按钮, 只有单纯的「下一题」自测 -->
-          <div v-else-if="!readOnly" class="rv-rate">
+          <!-- 没连 GitHub 的只读站没有写接口: 没有评分按钮, 只有单纯的「下一题」自测 -->
+          <div v-else-if="writable" class="rv-rate">
             <button v-for="r in [1, 2, 3, 4]" :key="r" class="rv-btn" :data-r="r" @click="rate(r)">
               <b v-text="RATE[r][0]"></b>
               <i v-text="fmtInterval(preview[r] || 0)"></i>
@@ -683,9 +750,9 @@ export default defineComponent({
           <button v-else class="rv-next" @click="skip">下一题 <em>空格</em></button>
           <button class="ghost rv-defer" :class="{ off: !queue.length }" @click="defer"
                   title="不评分 · 不写 FSRS —— 只把当前这张挪到本次会话的最后再问一遍">↓ 押到队尾 <em>0</em></button>
-          <button v-if="!isSyntax && !readOnly" class="ghost rv-pause" @click="pause"
+          <button v-if="!isSyntax && writable" class="ghost rv-pause" @click="pause"
                   title="这阵子都别问: 不评分, 以后不进复习队列, interval 一起冻住 —— 在详情页取消勾选恢复">⏸ 暂停</button>
-          <button v-if="!readOnly" class="ghost rv-cmt-btn" @click="openComment"
+          <button v-if="writable" class="ghost rv-cmt-btn" @click="openComment"
                   title="给 agent 留一句这张卡哪儿不对 —— 攒着让 agent 统一改, 不评分、不影响调度">💬 批注 <em>c</em><b v-if="openComments" v-text="openComments"></b></button>
         </div>
       </template>

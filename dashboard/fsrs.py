@@ -262,10 +262,41 @@ def _selftest():
         print(f"  {n:>3} 天 -> {_retrievability(w, 10.0, n):.4f}")
 
 
+def _fixture(path: str):
+    """给前端的 TS 版(web/src/lib/fsrs.ts)对拍用: 60 条固定种子的随机复习序列,
+    同一天重评 / 提前 / 按时 / 逾期都有。改了这里的公式就重新生成一份, 再跑 npm test。"""
+    import random
+    rnd = random.Random(7)
+    p = {"w": list(DEFAULT_W), "retention": DEFAULT_RETENTION}   # 前端只认默认参数
+    cases = []
+    for _ in range(60):
+        c, d, steps = new_card(), date(2026, 1, 1) + timedelta(days=rnd.randint(0, 300)), []
+        for _ in range(rnd.randint(1, 10)):
+            r = rnd.choice(RATINGS)
+            c, iv = review(c, r, d.isoformat(), p)
+            steps.append({"rating": r, "today": d.isoformat(), "card": c, "interval": iv,
+                          "preview": preview(c, d.isoformat(), p)})
+            due, x = date.fromisoformat(c["due"]), rnd.random()
+            if x < 0.15:
+                pass                                                # 同一天再评
+            elif x < 0.4:
+                d += timedelta(days=max(1, (due - d).days // 2))   # 提前
+            elif x < 0.75:
+                d = due                                             # 按时
+            else:
+                d = due + timedelta(days=rnd.randint(1, 60))        # 逾期
+        cases.append(steps)
+    Path(path).write_text(json.dumps(cases, indent=0), encoding="utf-8")
+    print(sum(len(c) for c in cases), "步 ->", path)
+
+
 if __name__ == "__main__":
     import sys
     if "--selftest" in sys.argv:
         _selftest()
+    elif "--fixture" in sys.argv:
+        _fixture(sys.argv[sys.argv.index("--fixture") + 1])
     else:
         print(__doc__.strip().split("\n")[0])
         print("用法: python dashboard/fsrs.py --selftest")
+        print("      python dashboard/fsrs.py --fixture dashboard/web/src/lib/__tests__/fixtures/fsrs-py.json")

@@ -163,11 +163,12 @@ def list_cards(today: str) -> dict:
 
 
 # ------------------------------------------------------------------ 复习 ----
-def review_card(cid: str, rating: int, today: str):
+def review_card(cid: str, rating: int, today: str, extra: dict | None = None):
     """评一次分: 更新 state.json + 往 reviews.jsonl 追一行。
 
     ⚠️ 调用方必须持有 server 的 _REVIEW_LOCK —— 这里是"读 state -> 改 -> 写回"加追加日志,
     两个请求同时进来会丢掉其中一次评分。
+    extra 并进日志那一行(手机上评的带 eid 等, 见 inbox.py)。
     """
     if cid not in {c["id"] for c in read_cards()}:
         return None
@@ -196,6 +197,7 @@ def review_card(cid: str, rating: int, today: str):
         "new_difficulty": card["difficulty"],
         "interval": interval,
         "due": card["due"],
+        **(extra or {}),
     }
     with REVIEW_LOG.open("a", encoding="utf-8") as f:
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")

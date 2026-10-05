@@ -2,6 +2,9 @@
 // 复习面板是 ./components/ReviewPanel.vue —— 这个文件只剩"拿数据 -> 拼 DOM -> 绑事件"。
 import { createApp } from 'vue';
 import ReviewPanel from './components/ReviewPanel.vue';
+import SyncControl from './components/SyncControl.vue';
+import { initSync, pendingEvents, record as recordEvent } from './sync';
+import { againToday, applyEvent, commentRow } from './lib/inbox';
 import { api, isReadOnly } from './api';
 import { esc } from './lib/esc';
 import { FAM, FAM_LEVELS, L_NEXT, depthOf, famCls, famInfo, famKey, famOf, ledgerOf } from './lib/fam';
@@ -25,6 +28,9 @@ const on = (sel, ev, fn, opt) => {
 
 let PROBLEMS = [];
 let SYNTAX = [];           // 语法牌组的全部卡片(/api/syntax), 见 dashboard/syntax.py
+// 只读站 + GitHub token: 还没落进 main 的复习事件重放出来的 reviews.jsonl 行(见 ./sync.ts)。
+// 本地 server.py 那份看板永远是空的
+let SYNTH_REVIEWS = [];
 let CURRENT = null; // detail object
 
 // ---- detail ----
@@ -604,8 +610,39 @@ const RV = createApp(ReviewPanel, {
     putMeta: (id, body) => putMeta(id, body),
     openStats: () => openStats(),
     reviewsChanged: () => { REVIEWS = null; },
+    // 只读站连上 GitHub 之后才走这几个(面板里看 syncState.mode 决定)
+    record: (e) => {
+      const ev = recordEvent(e);
+      applyOne(ev);
+      if (ev.op === 'rate') REVIEWS = null;
+      return ev;
+    },
+    again: (deck) => againToday(SYNTH_REVIEWS, deck, todayStr()),
+    pendingComments: () => pendingEvents().filter((e) => e.op === 'comment').map(commentRow),
   },
 }).mount('#review-app');
+
+// ---- 只读站的复习同步 ---------------------------------------------------------
+// 导出的数据是 main 当时的状态; 手机上评过、还没落进 main 的事件(./sync.ts)在它上面重放一遍,
+// 到期数 / 队列 / 📈 才对得上。重放用的 FSRS 是 lib/fsrs.ts —— fsrs.py 的逐行移植, 有对拍。
+function applyOne(ev) {
+  if (ev.op === 'comment') return;
+  const r = applyEvent(deckRows(ev.deck), ev);
+  if (r) SYNTH_REVIEWS.push(r);
+}
+function applyPending() {
+  SYNTH_REVIEWS = [];
+  for (const ev of pendingEvents()) applyOne(ev);
+  REVIEWS = null;
+}
+if (isReadOnly()) {
+  const box = document.createElement('div');
+  const actions = $('header .actions');
+  if (actions) {
+    actions.insertBefore(box, $('#theme-toggle'));
+    createApp(SyncControl).mount(box);
+  }
+}
 
 // ---- 📈 复习进度: 到期预测 / 记忆强度 / 复习历史 -----------------------------
 // 每个数字都从 /api/problems 的 fsrs 列 + /api/reviews(reviews.jsonl) **现算**,
@@ -830,6 +867,7 @@ async function openStats() {
   if (REVIEWS === null) {
     // 只读站没有这个文件时 shim 会回一个空壳; 拿不到历史也要能画出到期预测那部分
     try { REVIEWS = (await api('/api/reviews')).reviews || []; } catch { REVIEWS = []; }
+    REVIEWS = [...REVIEWS, ...SYNTH_REVIEWS];      // 只读站: 还没落进 main 的那几次也算上
   }
   if (EDITS === null) {
     try { EDITS = (await api('/api/edits')).edits || []; } catch { EDITS = []; }
@@ -2167,6 +2205,11 @@ async function reload() {
     SYNTAX = (await api('/api/syntax')).cards || [];
   } catch { SYNTAX = []; }
   SYNTAX.forEach((c, i) => { c.ord = i; });   // 书写顺序, 给「题号」那档排序用
+  if (isReadOnly()) {
+    // 别的设备推上来新事件时再 reload 一次: 行是重新拉的导出数据, 重放不会叠两遍
+    await initSync(() => { reload(); });
+    applyPending();
+  }
   buildGrid();
   loadTodo();                          // 刷新 📋 TODO 上的角标
   renderPaused();                      // ⏸ 暂停上的角标

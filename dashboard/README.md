@@ -59,7 +59,10 @@ dashboard/
     src/lib/*.ts             ← 纯计算(熟练度阶梯 / 排队 / 选择题 / 时间轴 / markdown / 高亮), 有单测
     src/styles.css           ← 全部样式; 最上面一块是设计 token(VitePress 配色), 换主题只改那里
     public/static-shim.js + ro.css ← 只读静态站专用, 只有 export_static.py 会把它们挂进 index.html
+    src/sync.ts + components/SyncControl.vue ← 只读站的复习同步(☁), 见[手机上复习](#手机上复习同步)
   fsrs.py        ← FSRS-6 调度算法（移植自 py-fsrs，纯标准库；`--selftest` 可自查）
+  inbox.py       ← 手机上的复习记录: 拉 data 分支 → 落回 meta.json / reviews.jsonl（server 启动和 ↻ Sync 时自动跑）
+  sync-applied.jsonl ← 落过的手机事件账本（按 eid 去重），git 追踪
   backfill_edits.py ← 从 git 历史回填 edits.jsonl（时间轴开写之前那一截）
   syntax.py      ← 语法牌组: 解析 syntax/*.md + 调度 + 就地改背面
   reviews.jsonl  ← 每次复习评分追加一行（**两个牌组共用**，靠 `deck` 字段区分），git 追踪
@@ -176,6 +179,7 @@ dashboard/
 它按 `.claude/skills/card-comments/SKILL.md` 把所有待改的一次清掉。
 
 - 存在 `dashboard/card-comments.jsonl`（git 追踪，不导出到只读站），一条批注一行，两个牌组共用，靠 `deck` 区分。
+  线上站连上 GitHub 后也能批，经 `data` 分支回来（见[手机上复习](#手机上复习同步)），那边只看得到自己还没落盘的几条。
   是一个集中文件而不是 `meta.json` 里的字段：语法卡没有 per-card 的 meta，而 agent 第一步就是「找出所有没处理的」。
 - 处理完**不删**，改成 `done` / `skip` 并带一句 `reply`。卡上的批注区会显示状态和回复 ——
   **揭晓后才显示内容**，揭晓前只报条数，因为批注和回复多半会提到正确答案。
@@ -211,6 +215,7 @@ dashboard/
   外加一个 `deck` 字段区分牌组（**老记录没有这个字段 = 题目牌组**，没有回填，也不需要）。
   正好是 FSRS 优化器要的格式。
 - 只读的线上站没有写接口，复习模式会退化成**纯自测**：题面 → 空格 → 答案 → 「下一题」，不记录进度。
+  **连上 GitHub token 之后**可以照常评分 / 暂停 / 批注，记录经 `data` 分支回到本机，见[手机上复习](#手机上复习同步)。
 
 自查算法有没有移植错：
 
@@ -519,7 +524,7 @@ L4 思路都不知道           ├─→ 还没到 S1
 | POST | `/api/problems`          | `{"query": "105"}` 或 `{"query": "word break"}` → 建题目文件夹并入表 |
 | PUT  | `/api/problems/{id}/answer` | 保存答案卡到 answer.md（内容为空则删掉该文件） |
 | POST | `/api/review/{id}`       | `{"rating": 1..4}` 评一次分（写 meta.json + reviews.jsonl）；`{"op":"reset"}` 退回非卡片 |
-| POST | `/api/sync`              | 重扫文件夹、重建索引 |
+| POST | `/api/sync`              | 拉 `data` 分支落手机上的复习记录（`inbox`），再重扫文件夹、重建索引 |
 | GET  | `/api/card-comments`     | `card-comments.jsonl` 全部行（两个牌组的卡片批注） |
 | POST | `/api/card-comments`     | `{"deck","id","title","text"}` 记一条；`{"op":"delete","cid"}` 撤回一条还没处理的 |
 | GET  | `/api/plan`              | 坐标系的分层 + 时间线 |
@@ -540,7 +545,53 @@ python -m http.server -d dist 8000
 - `static-shim.js` 把 `fetch` 改道到这些 JSON，写请求就地拒绝；`ro.css` 把编辑入口藏掉。
   **`app.js` 一行没改**，本地跑 `server.py` 还是完整的可写看板。
 - `notes/scratch.md` 和 `notes/todo.md` 不上线（`PRIVATE_NOTES`）。
-- 线上没有任何写接口存在 —— 不是关掉，是压根没导出。
+- 线上没有任何写接口存在 —— 不是关掉，是压根没导出。唯一的例外是下面的复习同步，它不走看板的 API，直接写 GitHub。
+
+### 手机上复习（同步）
+
+照着 [ai-infra-inferview](https://github.com/scatyf3/ai-infra-inferview) 的闪卡同步做的：出门用手机打开线上站，
+复习照样能评分，回到电脑上记录自己落进 `meta.json`。
+
+**设置（每台设备一次）**：线上站顶栏点 ☁ → 按提示建一个 fine-grained token（只授权这个仓库，
+*Contents* 选 *Read and write*）→ 粘贴、连接。token 只存在那台设备的浏览器里，手机丢了去 GitHub 吊销。
+没连 token 的站和以前一样是纯自测 —— 路人打开也不会多出评分按钮。
+
+**连上之后**复习面板里这几样能用，每一下都记成一条**事件**：
+
+| 动作 | 回到本机后落在哪 |
+|---|---|
+| 评分 `1`–`4` | 那题的 `meta.json` `fsrs` / `syntax/state.json` + `reviews.jsonl` 一行（带 `eid`、`src: "sync"`） |
+| ⏸ 暂停 | `meta.json` 的 `paused`（日期是手机上按的那天）+ `edits.jsonl` 一行 |
+| 💬 批注 | `card-comments.jsonl` 一行（`cid` = 事件的 `eid`），之后照常「处理卡片批注」 |
+
+「押到队尾」只存在那台设备的浏览器里（和本地的 `session.json` 一样是易失状态）。「改一下」答案卡仍然只有本地能用 ——
+那是改内容文件，不是复习记录。
+
+**数据怎么走**：
+
+```
+手机评分 → localStorage（立刻生效、离线不丢）
+        → 停手 2 秒 / 切后台 / 重新联网 → data 分支的 dashboard/sync-inbox.json（一次同步一个 commit）
+电脑 server.py 启动 / 点 ↻ Sync → git fetch origin data → inbox.py 落还没落过的 → 记进 sync-applied.jsonl
+你 commit + push main → 线上站重新部署, 导出的 api/sync-applied.json 里有了这些 eid
+手机下次同步 → 这些事件从 inbox 里删掉, 也不再重放
+```
+
+- **为什么记事件而不是同步状态**（ai-infra-inferview 同步的是整份 json）：这边的调度状态散在一百多个 `meta.json` 里，
+  电脑上的看板也在同时评分。事件只追加、不修改，合并就是按 `eid` 取并集，两台设备怎么交错都不会互相覆盖；
+  `sync-applied.jsonl` 按 `eid` 去重，同一份 inbox 拉多少遍都只落一次。
+- **为什么是单独的 `data` 分支**：手机每次同步是一个 commit，不混进 main 的历史、不触发部署，
+  电脑上 `git push` 也不会因此被拒。分支第一次同步时从 main 自动建出来。
+- **手机上看到的 due 是临时算的**：线上站的数据是 main 当时的状态，还没落进 main 的事件用
+  `web/src/lib/fsrs.ts`（`fsrs.py` 的逐行移植）在上面重放一遍，到期数 / 队列 / 📈 / 按钮上的间隔才对得上。
+  真正落盘时 `fsrs.py` 按同一条事件再算一次。两份实现有对拍（`lib/__tests__/fsrs.test.ts`，固定种子的 319 步，
+  `python dashboard/fsrs.py --fixture …` 重新生成）。
+- **事件晚到**（手机评过、还没落盘，电脑上又评了同一题）：按 `max(事件那天, 上次复习那天)` 算，当成同一天又评了一次，
+  不会排出负的间隔。两边是同一条规则（`server._fsrs_day` / `lib/inbox.ts` 的 `fsrsDay`）。
+- 落不下去的事件（题被删了、语法卡改了标题 = 换了 id）在账本里记成 `missing`，不会每次都重试；
+  格式不对的事件跳过、不进账本。`fsrs_params.json` 换了参数的话手机上的临时 due 会和落盘的不一样 —— 记得 `fsrs.ts` 也改。
+- 命令行：`python dashboard/inbox.py`（拉 + 落）、`--dry-run`（只列出来）、`--no-fetch`（用上次拉下来的）。
+- 已经落过、还没 push 的事件在手机上会一直显示「等电脑落盘」，push 之后自然清掉。
 
 ### 队列快照 `dashboard/session.json`
 

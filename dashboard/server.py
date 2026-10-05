@@ -34,6 +34,7 @@ import fsrs              # FSRS-6 调度算法(见 dashboard/fsrs.py)
 import scaffold          # 题号/题名 -> 建题目文件夹(见 dashboard/scaffold.py)
 import syntax            # 第二个牌组: 语法卡(见 dashboard/syntax.py)
 import card_comments     # 复习时给 agent 留的卡片批注(见 dashboard/card_comments.py)
+import inbox             # 手机上(只读站 + GitHub token)的复习记录, 经 data 分支落回来(见 dashboard/inbox.py)
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -149,12 +150,13 @@ SCHEMA = """CREATE TABLE problems(
     familiarity REAL, complexity TEXT,   -- REAL: 阶梯有半档(L1.5)
     due TEXT, stability REAL, reps INTEGER, last_review TEXT, fsrs_state TEXT,
     paused TEXT,                         -- 暂停复习的起始日期, "" = 没暂停
-    cluster TEXT                         -- 变体簇名, "" = 没挂
+    cluster TEXT,                        -- 变体簇名, "" = 没挂
+    fsrs TEXT                            -- 完整的 fsrs 卡(JSON)。只读站在手机上评分要从它接着算, 见 inbox.py
 )"""
 
 COLUMNS = ("id", "title", "folder", "structures", "paradigms", "techniques",
            "difficulty", "status", "familiarity", "complexity",
-           "due", "stability", "reps", "last_review", "fsrs_state", "paused", "cluster")
+           "due", "stability", "reps", "last_review", "fsrs_state", "paused", "cluster", "fsrs")
 
 
 def init_db():
@@ -190,6 +192,7 @@ def sync():
                 f.get("state", ""),
                 m.get("paused") or "",
                 m.get("cluster") or "",
+                json.dumps(f, ensure_ascii=False),
             )
         )
     cols = ",".join(COLUMNS)
@@ -204,6 +207,7 @@ def _unpack(row):
     for k in ("structures", "paradigms", "techniques"):
         d[k] = json.loads(d[k] or "[]")
     d["complexity"] = json.loads(d["complexity"] or "{}")
+    d["fsrs"] = json.loads(d.get("fsrs") or "{}")
     # familiarity 列是 REAL(阶梯有半档), 于是整数档读回来是 2.0 —— 收敛回 2,
     # 否则 API 和静态站导出的 JSON 里整数档全带个小数点。
     if d.get("familiarity") is not None:
@@ -758,41 +762,52 @@ def review_carry(deck: str) -> dict:
 def review_card(pid: int, rating: int):
     """评一次分: 更新 meta.json 的 fsrs 字段 + 追加日志 + 重建索引。整段串行。"""
     with _REVIEW_LOCK:
-        with db() as con:
-            r = con.execute("SELECT folder FROM problems WHERE id=?", (pid,)).fetchone()
-        if not r:
-            return None
-        folder = r["folder"]
-        meta = read_meta(folder)
-        before = meta.get("fsrs") or fsrs.new_card()
-        today = today_str()
-        card, interval = fsrs.review(before, rating, today)
+        res = _review_problem(pid, rating, today_str())
+        if res:
+            sync()
+        return res
 
-        meta["fsrs"] = card
-        write_meta(folder, meta)
 
-        last = before.get("last_review") or ""
-        append_review_log({
-            "ts": int(time.time()),
-            "date": today,
-            "id": pid,
-            "rating": rating,
-            # --- 评分前的状态 ---
-            "state": before.get("state", "new"),
-            "elapsed_days": (
-                (date.fromisoformat(today) - date.fromisoformat(last)).days if last else None
-            ),
-            "stability": before.get("stability"),
-            "difficulty": before.get("difficulty"),
-            # --- 评分后 ---
-            "new_stability": card["stability"],
-            "new_difficulty": card["difficulty"],
-            "interval": interval,
-            "due": card["due"],
-        })
-        sync()
-        return {"ok": True, "id": pid, "interval": interval, "due": card["due"],
-                "card": card, "preview": fsrs.preview(card, today)}
+def _review_problem(pid: int, rating: int, today: str, extra: dict | None = None):
+    """评分的本体, **调用方持有 _REVIEW_LOCK**, 不重建索引。
+
+    today 是 FSRS 按哪天算; extra 并进日志那一行 —— 手机上评的(inbox.py)靠它带上
+    eid / 真实的 ts 和 date, 本地评的不传。
+    """
+    with db() as con:
+        r = con.execute("SELECT folder FROM problems WHERE id=?", (pid,)).fetchone()
+    if not r:
+        return None
+    folder = r["folder"]
+    meta = read_meta(folder)
+    before = meta.get("fsrs") or fsrs.new_card()
+    card, interval = fsrs.review(before, rating, today)
+
+    meta["fsrs"] = card
+    write_meta(folder, meta)
+
+    last = before.get("last_review") or ""
+    append_review_log({
+        "ts": int(time.time()),
+        "date": today,
+        "id": pid,
+        "rating": rating,
+        # --- 评分前的状态 ---
+        "state": before.get("state", "new"),
+        "elapsed_days": (
+            (date.fromisoformat(today) - date.fromisoformat(last)).days if last else None
+        ),
+        "stability": before.get("stability"),
+        "difficulty": before.get("difficulty"),
+        # --- 评分后 ---
+        "new_stability": card["stability"],
+        "new_difficulty": card["difficulty"],
+        "interval": interval,
+        "due": card["due"],
+        **(extra or {}),
+    })
+    return {"ok": True, "id": pid, "interval": interval, "due": card["due"],
+            "card": card, "preview": fsrs.preview(card, today)}
 
 
 def reset_card(pid: int) -> bool:
@@ -831,6 +846,87 @@ def syntax_reset(cid: str) -> bool:
 def syntax_save_back(cid: str, content: str) -> bool:
     with _REVIEW_LOCK:
         return syntax.save_back(cid, content)
+
+
+# ------------------------------------------------ 手机上的复习记录(inbox) ---
+# 只读站连上 GitHub 之后, 评分 / 暂停 / 批注记成事件推到 data 分支(见 inbox.py 顶部)。
+# 这里把还没落过的按发生顺序重放进真相源, 和本地评分走同一个 _review_problem / syntax.review_card。
+_INBOX_STATE = {"last": None}      # 上一次跑的结果, 给 /api/sync 和启动日志看
+
+
+def _fsrs_day(ev_date: str, last_review: str) -> str:
+    """FSRS 按哪天算。一般就是手机上评分那天; 但要是本机在那之后已经评过这张卡
+    (事件晚到了), 按那天算会得到负的间隔 —— 退到上次复习那天, 当成同一天又评了一次。
+    前端 lib/inbox.ts 的 applyEvent 是同一条规则, 两边算出来的 due 才对得上。"""
+    return max(ev_date, last_review or "")
+
+
+def _apply_event(e: dict) -> str:
+    """落一条事件, 返回写进账本的 result。调用方持有 _REVIEW_LOCK。"""
+    extra = {"ts": int(e["ts"]), "date": e["date"], "eid": e["eid"], "src": "sync"}
+    if e.get("device"):
+        extra["device"] = str(e["device"])[:40]
+    op, deck, cid = e["op"], e["deck"], e["id"]
+
+    if op == "rate" and deck == "problems":
+        with db() as con:
+            r = con.execute("SELECT folder FROM problems WHERE id=?", (cid,)).fetchone()
+        if not r:
+            return "missing"
+        last = (read_meta(r["folder"]).get("fsrs") or {}).get("last_review", "")
+        res = _review_problem(cid, e["rating"], _fsrs_day(e["date"], last), extra)
+        return "ok" if res else "missing"
+
+    if op == "rate":                                   # 语法卡
+        last = (syntax.load_state().get(cid) or {}).get("last_review", "")
+        res = syntax.review_card(cid, e["rating"], _fsrs_day(e["date"], last), extra)
+        return "ok" if res else "missing"              # 多半是改了卡标题(= 换了 id)
+
+    if op == "pause":
+        if deck != "problems":
+            return "skip"                              # 语法卡没有暂停
+        with db() as con:
+            r = con.execute("SELECT folder FROM problems WHERE id=?", (cid,)).fetchone()
+        if not r:
+            return "missing"
+        meta = read_meta(r["folder"])
+        old = meta.get("paused")
+        set_paused(meta, True, e["date"])              # 已经在暂停 = 空操作
+        if meta.get("paused") != old:
+            write_meta(r["folder"], meta)
+            write_edit_rows([{"ts": int(e["ts"]), "date": e["date"], "id": cid, "field": "paused",
+                              "from": old, "to": meta["paused"], "eid": e["eid"]}])
+        return "ok"
+
+    if op == "comment":
+        res = card_comments.add(deck, cid, str(e.get("title") or ""), str(e.get("text") or ""),
+                                cid=e["eid"], ts=int(e["ts"]), day=e["date"])
+        return "ok" if res.get("ok") else "skip"
+    return "skip"
+
+
+def ingest_inbox(fetch_first: bool = True) -> dict:
+    """拉 data 分支 -> 落还没落过的事件 -> 记账本 -> 重建索引。可以反复跑。"""
+    err = inbox.fetch() if fetch_first else ""
+    events = inbox.read_remote()
+    with _REVIEW_LOCK:
+        todo = inbox.pending(events, inbox.applied_eids())
+        rows, counts = [], {}
+        for e in todo:
+            try:
+                result = _apply_event(e)
+            except Exception as ex:                    # 一条坏了不连累后面的; 不进账本, 下次再试
+                print(f"[inbox] {e.get('eid')} 落不下去: {ex!r}", file=sys.stderr)
+                continue
+            rows.append(inbox.ledger_row(e, result))
+            counts[result] = counts.get(result, 0) + 1
+        inbox.append_ledger(rows)
+        if rows:
+            sync()
+    res = {"fetch_error": err, "remote": len(events), "applied": len(rows), "results": counts,
+           "ts": time.strftime("%Y-%m-%d %H:%M:%S")}
+    _INBOX_STATE["last"] = res
+    return res
 
 
 def read_jsonl(path: Path) -> list:
@@ -1118,7 +1214,9 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         path = urlparse(self.path).path
         if path == "/api/sync":
-            return self._send(200, {"synced": sync()})
+            # 顺手把手机上的复习记录拉下来落盘(要联网; 失败了照样重建索引)
+            got = ingest_inbox()
+            return self._send(200, {"synced": sync(), "inbox": got})
         if path == "/api/attempts":
             # 「做了一遍」打卡。op=undo 撤销今天这道题的那一次(手滑用)。
             body = self._body_json()
@@ -1236,9 +1334,19 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 
+def _ingest_at_startup():
+    res = ingest_inbox()
+    if res["fetch_error"]:
+        print(f"[inbox] {res['fetch_error']}")
+    if res["applied"]:
+        print(f"[inbox] 落了 {res['applied']} 条手机上的复习记录 {res['results']} —— 记得 commit")
+
+
 def main():
     n = sync()
     print(f"indexed {n} problems -> {DB.name}")
+    # 拉手机上的复习记录要 git fetch, 放后台线程, 不拖慢启动
+    threading.Thread(target=_ingest_at_startup, daemon=True).start()
     print(f"serving  http://localhost:{PORT}   (Ctrl+C to stop)")
     if not (WEB_DIST / "index.html").is_file():
         print("⚠ 前端还没构建 —— 在仓库根目录跑 `npm install && npm run build`, 或者 `npm run dev` 走热更新")

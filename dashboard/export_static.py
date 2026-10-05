@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 import server                       # 复用 sync/list/get_* —— 单一真相还是 meta.json
+import inbox                        # 手机复习记录的账本(哪些事件已经落进 main)
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
@@ -83,6 +84,8 @@ def export(out: Path) -> dict:
     write_json(api / "attempts.json", {"attempts": server.read_attempts()})  # 做题打卡: 日课那两半
     write_json(api / "weak.json", server.weak_list())                 # 攻坚: 弱题列表
     write_json(api / "mock.json", {"mocks": server.read_mocks()})     # 随机两题 mock 的历史
+    # 已经落进 main 的手机事件。手机据此把它们从 data 分支的 inbox 里删掉、也不再重放(见 inbox.py)
+    write_json(api / "sync-applied.json", {"eids": sorted(inbox.applied_eids())})
 
     # 分组标签 = 看板上可点开的通用 trick 文档, 两个维度各导一份
     docs = 0
