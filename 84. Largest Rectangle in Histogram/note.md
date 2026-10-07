@@ -1,5 +1,8 @@
 # 84. Largest Rectangle in Histogram
 
+## pass3
+wok同样的左边界错误
+
 ## pass 2
 我们实现了类似温度那版，但没考虑到左边界，即`[2,1,2]`，这里直接用stack top拿到免费左边界
 
