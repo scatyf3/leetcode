@@ -126,3 +126,7 @@
 {"ts": 1791254000, "date": "2026-10-05", "id": 136, "kind": "new", "fam": 1, "born": "2026-10-05", "seen": false}
 {"ts": 1791254196, "date": "2026-10-05", "id": 169, "kind": "redo", "fam": 4, "born": "2026-09-01", "seen": false}
 {"ts": 1791254710, "date": "2026-10-05", "id": 75, "kind": "new", "fam": 1, "born": "2026-10-05", "seen": false}
+{"ts": 1791331566, "date": "2026-10-06", "id": 560, "kind": "warm", "fam": 2, "born": "2026-10-03", "seen": true}
+{"ts": 1791331856, "date": "2026-10-06", "id": 1143, "kind": "warm", "fam": 2, "born": "2026-10-05", "seen": true}
+{"ts": 1791332174, "date": "2026-10-06", "id": 72, "kind": "redo", "fam": 3.5, "born": "2026-10-05", "seen": true}
+{"ts": 1791335056, "date": "2026-10-06", "id": 79, "kind": "redo", "fam": 3, "born": "2026-09-06", "seen": true}

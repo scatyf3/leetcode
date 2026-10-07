@@ -672,3 +672,10 @@
 {"ts": 1791254262, "date": "2026-10-05", "id": 75, "field": "exists", "from": null, "to": true}
 {"ts": 1791254709, "date": "2026-10-05", "id": 75, "field": "familiarity", "from": null, "to": 1}
 {"ts": 1791254727, "date": "2026-10-05", "id": 75, "field": "familiarity", "from": 1, "to": 2}
+{"ts": 1791331289, "date": "2026-10-06", "id": 124, "field": "exists", "from": null, "to": true}
+{"ts": 1791331566, "date": "2026-10-06", "id": 560, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791331855, "date": "2026-10-06", "id": 1143, "field": "familiarity", "from": 4, "to": 2}
+{"ts": 1791332176, "date": "2026-10-06", "id": 72, "field": "familiarity", "from": 3.5, "to": 2}
+{"ts": 1791332277, "date": "2026-10-06", "id": 1143, "field": "familiarity", "from": 2, "to": 2.5}
+{"ts": 1791332387, "date": "2026-10-06", "id": 72, "field": "familiarity", "from": 2, "to": 2.5}
+{"ts": 1791335094, "date": "2026-10-06", "id": 79, "field": "familiarity", "from": 3, "to": 2}

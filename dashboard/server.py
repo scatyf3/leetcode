@@ -10,7 +10,7 @@ LeetCode dashboard — 数据结构 x 算法范式 看板.
 笔记   : 题目文件夹里的 note.md / explain.md ... 直接读写磁盘
 
 第二个视图「坐标系」(覆盖 x 深度) 的分层和时间线在 dashboard/plan.json (手改, git 追踪).
-掌握度不另存: S1/S2/S3 全部由 meta.json 的 familiarity (L0..L4, 含半档 L1.5) 算出来.
+掌握度不另存: S1/S2/S3 全部由 meta.json 的 familiarity (L0..L4, 含半档 L1.5 / L2.5 / L3.5) 算出来.
 一个字段一条阶梯, 不会出现 "L2 但标了 S1" 这种自相矛盾的状态.
 
 run:

@@ -13,7 +13,7 @@ data.db 是 /api/sync 重建出来的索引层, server 没跑、或者刚手改�
 
 两个数一起看才知道第一层卡在哪: 不是没题做, 是二十道 L3–L4 的欠账没还。
 
-    欠账 = 摸过但没到 L2 的题数 (familiarity > 2, 即 L3 / L3.5 / L4)
+    欠账 = 摸过但没到 L2 的题数 (familiarity > 2.5, 即 L3 / L3.5 / L4)
 
 欠账涨 = 在囤题, 欠账掉 = 在消化。**不设阈值** —— 开不开新题当场自己判断, 这个脚本只报数。
 
@@ -22,7 +22,7 @@ data.db 是 /api/sync 重建出来的索引层, server 没跑、或者刚手改�
     没建   plan 里有这道题, 本地连文件夹都没有
     见过   建了文件夹(题面抓到本地了), familiarity 还是空的 —— 阶梯的地板
     摸过   有 familiarity, 不管是 L0 还是 L4
-    S2     familiarity <= 2 (L0–L2, 含 L1.5) —— OA 门槛
+    S2     familiarity <= 2.5 (L0–L2.5, 含 L1.5 / L2.5) —— OA 门槛
     欠账   摸过 - S2
 
 会员题(lists.json 的 premium)单独摘出来报, 不算进"该做还没做"。
@@ -44,7 +44,7 @@ REPO = HERE.parent
 PLAN = HERE / "plan.json"
 LISTS = HERE / "lists.json"
 
-S2_MAX = 2.0          # familiarity <= 2 算 S2 达标(L0–L2, 含 L1.5)
+S2_MAX = 2.5          # familiarity <= 2.5 算 S2 达标(L0–L2.5, 含 L1.5 / L2.5)
 BAR = 22              # 进度条宽度
 
 

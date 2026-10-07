@@ -13,7 +13,7 @@
   --bg:#ffffff; --panel:#f6f6f7; --panel2:#ebebef; --line:#e2e2e3;
   --fg:#3c3c43; --dim:#67676c; --accent:#2563eb; --accent2:#18794e; --violet:#8b5cf6;
   --easy:#2f9e6a; --medium:#c98a14; --hard:#d6455d; --chip:#ebebef;
-  --fam0:#14a090; --fam1:#2f9e6a; --fam15:#2b9bb5; --fam2:#3b7cf0;
+  --fam0:#14a090; --fam1:#2f9e6a; --fam15:#2b9bb5; --fam2:#3b7cf0; --fam25:#8a63d2;
   --fam3:#c98a14; --fam35:#d9773f; --fam4:#d6455d;
   --soft:rgba(142,150,170,.14); --soft-hover:rgba(142,150,170,.22);
   --brand-soft:rgba(37,99,235,.12);
@@ -28,7 +28,7 @@
   --bg:#1b1b1f; --panel:#202127; --panel2:#2a2b32; --line:#2e2e32;
   --fg:#dfdfd6; --dim:#98989f; --accent:#3b82f6; --accent2:#3dd68c; --violet:#a78bfa;
   --easy:#54c78b; --medium:#e2b04a; --hard:#e06c75; --chip:#2e2f36;
-  --fam0:#22b8a6; --fam1:#54c78b; --fam15:#5fbcd0; --fam2:#6ea8fe;
+  --fam0:#22b8a6; --fam1:#54c78b; --fam15:#5fbcd0; --fam2:#6ea8fe; --fam25:#b195f0;
   --fam3:#e2b04a; --fam35:#e48f5c; --fam4:#e06c75;
   --soft:rgba(101,117,133,.16); --soft-hover:rgba(101,117,133,.26);
   --brand-soft:rgba(59,130,246,.16);
@@ -485,6 +485,7 @@ main{padding:28px 32px 72px;overflow:auto}
 .lbar i.f1{background:var(--fam1)}
 .lbar i.f1_5{background:var(--fam15)}
 .lbar i.f2{background:var(--fam2)}
+.lbar i.f2_5{background:var(--fam25)}
 .lbar i.f3{background:var(--fam3)}
 .lbar i.f3_5{background:var(--fam35)}
 .lbar i.f4{background:var(--fam4)}
@@ -495,7 +496,7 @@ main{padding:28px 32px 72px;overflow:auto}
 .lkey i{width:9px;height:9px;border-radius:3px;flex:none}
 .lkey.f0 i{background:var(--fam0)}
 .lkey.f1 i{background:var(--fam1)} .lkey.f1_5 i{background:var(--fam15)}
-.lkey.f2 i{background:var(--fam2)}
+.lkey.f2 i{background:var(--fam2)} .lkey.f2_5 i{background:var(--fam25)}
 .lkey.f3 i{background:var(--fam3)} .lkey.f3_5 i{background:var(--fam35)}
 .lkey.f4 i{background:var(--fam4)}
 .lkey.fnone i{background:var(--dim);opacity:.55}
@@ -507,12 +508,14 @@ main{padding:28px 32px 72px;overflow:auto}
 .lchip.f1{color:var(--fam1);border-color:color-mix(in srgb,var(--fam1) 45%,transparent)}
 .lchip.f1_5{color:var(--fam15);border-color:color-mix(in srgb,var(--fam15) 45%,transparent)}
 .lchip.f2{color:var(--fam2);border-color:color-mix(in srgb,var(--fam2) 45%,transparent)}
+.lchip.f2_5{color:var(--fam25);border-color:color-mix(in srgb,var(--fam25) 45%,transparent)}
 .lchip.f3{color:var(--fam3);border-color:color-mix(in srgb,var(--fam3) 45%,transparent)}
 .lchip.f3_5{color:var(--fam35);border-color:color-mix(in srgb,var(--fam35) 45%,transparent)}
 .lchip.f4{color:var(--fam4);border-color:color-mix(in srgb,var(--fam4) 45%,transparent)}
 .lchip.f1 .lfam{background:color-mix(in srgb,var(--fam1) 18%,transparent)}
 .lchip.f1_5 .lfam{background:color-mix(in srgb,var(--fam15) 18%,transparent)}
 .lchip.f2 .lfam{background:color-mix(in srgb,var(--fam2) 18%,transparent)}
+.lchip.f2_5 .lfam{background:color-mix(in srgb,var(--fam25) 18%,transparent)}
 .lchip.f3 .lfam{background:color-mix(in srgb,var(--fam3) 20%,transparent)}
 .lchip.f3_5 .lfam{background:color-mix(in srgb,var(--fam35) 20%,transparent)}
 .lchip.f4 .lfam{background:color-mix(in srgb,var(--fam4) 20%,transparent)}
@@ -722,6 +725,7 @@ main{padding:28px 32px 72px;overflow:auto}
 .chart i.f1,.skey i.f1{background:var(--fam1)}
 .chart i.f1_5,.skey i.f1_5{background:var(--fam15)}
 .chart i.f2,.skey i.f2{background:var(--fam2)}
+.chart i.f2_5,.skey i.f2_5{background:var(--fam25)}
 .chart i.f3,.skey i.f3{background:var(--fam3)}
 .chart i.f3_5,.skey i.f3_5{background:var(--fam35)}
 .chart i.f4,.skey i.f4{background:var(--fam4)}

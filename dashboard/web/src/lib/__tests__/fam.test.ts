@@ -30,7 +30,7 @@ describe('famKey / famCls', () => {
 
 describe('depthOf', () => {
   it.each([
-    [0, 3], [1, 2], [1.5, 2], [2, 2], [3, 1], [3.5, 0], [4, 0], [null, 0],
+    [0, 3], [1, 2], [1.5, 2], [2, 2], [2.5, 2], [3, 1], [3.5, 0], [4, 0], [null, 0],
   ])('L%s -> S%s', (f, s) => {
     expect(depthOf({ familiarity: f })).toBe(s)
   })
@@ -41,12 +41,12 @@ describe('L_NEXT', () => {
   it('从未评一路走到 L0 再回到未评, 每档恰好经过一次', () => {
     const seen: (number | null)[] = []
     let k = 'none'
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 9; i++) {
       const nx = L_NEXT[k]
       seen.push(nx)
       k = famKey(nx)
     }
-    expect(seen).toEqual([4, 3.5, 3, 2, 1.5, 1, 0, null])
+    expect(seen).toEqual([4, 3.5, 3, 2.5, 2, 1.5, 1, 0, null])
   })
 })
 

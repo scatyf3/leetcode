@@ -1,5 +1,7 @@
 # 1143. Longest Common Subsequence
 
+这里还是像默写而不是真的会，但是dp说是考得少，只能这样了
+
 我对这个2d dp的建模很疑惑，为啥`dp[i][j]: text1 前 i 个字符 和 text2 前 j 个字符 的 LCS 长度`，而不是用切片语义建模？
 
 ---
