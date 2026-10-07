@@ -679,3 +679,4 @@
 {"ts": 1791332277, "date": "2026-10-06", "id": 1143, "field": "familiarity", "from": 2, "to": 2.5}
 {"ts": 1791332387, "date": "2026-10-06", "id": 72, "field": "familiarity", "from": 2, "to": 2.5}
 {"ts": 1791335094, "date": "2026-10-06", "id": 79, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791391704, "date": "2026-10-07", "id": 118, "field": "exists", "from": null, "to": true}
