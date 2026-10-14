@@ -1,6 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string",
+    "heap"
+  ],
+  "paradigms": [
+    "greedy",
+    "heap"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

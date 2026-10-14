@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "lexicographic-greedy",
+    "two-pointer"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

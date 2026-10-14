@@ -1,6 +1,10 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

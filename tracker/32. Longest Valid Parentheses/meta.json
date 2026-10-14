@@ -1,6 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string",
+    "stack"
+  ],
+  "paradigms": [
+    "stack",
+    "1d-dp"
+  ],
   "techniques": [],
   "difficulty": "hard",
   "status": "solved",

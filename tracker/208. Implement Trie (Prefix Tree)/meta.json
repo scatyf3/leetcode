@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "trie",
+    "string"
+  ],
+  "paradigms": [
+    "design"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

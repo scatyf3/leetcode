@@ -3,7 +3,8 @@
     "array"
   ],
   "paradigms": [
-    "two-pointer"
+    "two-pointer",
+    "lexicographic-greedy"
   ],
   "techniques": [
     "降序后缀 = 已到顶, 找它左边的 i",

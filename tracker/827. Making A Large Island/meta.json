@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "grid",
+    "hash-table"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
   "techniques": [],
   "difficulty": "hard",
   "status": "solved",

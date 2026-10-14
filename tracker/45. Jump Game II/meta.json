@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "greedy",
+    "intervals"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "todo",

@@ -1,6 +1,10 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "backtracking"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "todo",

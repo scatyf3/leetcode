@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "hash-table",
+    "linked-list"
+  ],
+  "paradigms": [
+    "design"
+  ],
   "techniques": [],
   "difficulty": "hard",
   "status": "todo",
