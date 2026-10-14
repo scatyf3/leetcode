@@ -3,7 +3,9 @@
     "linked-list",
     "hash-table"
   ],
-  "paradigms": [],
+  "paradigms": [
+    "design"
+  ],
   "techniques": [
     "哈希表 key → 链表节点",
     "双向链表 + 头尾哨兵",

@@ -46,6 +46,8 @@ jobs:
       # rmtree(dist) 重建, 反过来跑的话 dist/jobs 会被它整个删掉。
       # 线上只有方法论, 投递状态不导出(见 jobs/export_static.py 的 EXPORT_APPLICATIONS)。
       - run: python jobs/export_static.py dist/jobs
+      # tag 没挂上 blog 页、blog 指向 tracker 的链接失效 —— 这两样 VitePress 构建都不报, 在这里挡。
+      - run: python dashboard/check_links.py
       # 知识库挂在 /blog/ 子路径(config.mts 的 base)。同理必须在 dashboard export 之后。
       # 构建时会读 tracker/*/meta.json 给每篇列题, 所以 checkout 要带上 tracker/(默认就带)。
       - run: npm ci && npm run docs:build

@@ -2,7 +2,9 @@
   "structures": [
     "linked-list"
   ],
-  "paradigms": [],
+  "paradigms": [
+    "design"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "todo"
