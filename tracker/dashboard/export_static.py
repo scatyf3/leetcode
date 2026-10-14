@@ -42,7 +42,7 @@ PRIVATE_NOTES = {"scratch.md", "todo.md"}
 # public 的。只读站上它退化成纯自测(空格揭晓 -> 下一张, 不记录), 和题目牌组一个待遇。
 EXPORT_SYNTAX = True
 
-# 前端是 Vite 的构建产物(源码 dashboard/web/), 先在仓库根目录 `npm run build`。
+# 前端是 Vite 的构建产物(源码 dashboard/web/), 先在 tracker/ 目录下 `npm run build`。
 # 产物里 ro.css / static-shim.js 来自 web/public/, 原样拷过来, 只在这里被 index.html 引用 ——
 # 本地 server.py 伺候的同一份 dist 不挂它们, 所以本地照样可写。
 WEB_DIST = HERE / "web" / "dist"
@@ -62,7 +62,7 @@ def safe_name(name: str) -> str | None:
 
 def export(out: Path) -> dict:
     if not (WEB_DIST / "index.html").is_file():
-        sys.exit("dashboard/web/dist/ 不存在 —— 先在仓库根目录跑 `npm ci && npm run build`")
+        sys.exit("dashboard/web/dist/ 不存在 —— 先在 tracker/ 目录下跑 `npm ci && npm run build`")
     n = server.sync()                       # 从各文件夹的 meta.json 重建索引
     if out.exists():
         shutil.rmtree(out)

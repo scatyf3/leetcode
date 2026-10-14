@@ -3,7 +3,7 @@
 LeetCode dashboard — 数据结构 x 算法范式 看板.
 
 后端纯标准库(http.server + sqlite3),零 pip 安装. 前端是 dashboard/web/ 下的 Vite 工程,
-这里只伺候它的构建产物 dashboard/web/dist/ (先在仓库根目录 npm install && npm run build).
+这里只伺候它的构建产物 dashboard/web/dist/ (先在 tracker/ 目录下 npm install && npm run build).
 
 真相源 : 每个题目文件夹里的 meta.json (git 可追踪)
 索引层 : data.db  (SQLite, 由 /api/sync 从 meta.json 重建, gitignore)
@@ -53,7 +53,7 @@ MOCK_LOG = HERE / "mock.jsonl"         # 随机抽题模拟面试, 一轮一行(
 SESSION_FILE = HERE / "session.json"  # 当前这轮复习的队列快照, **易失状态**, 不进 git
 _REVIEW_LOCK = threading.Lock()       # ThreadingHTTPServer + meta.json 读改写 + 日志追加, 必须串行
 # 前端是 Vite 构建的(源码 dashboard/web/, 见 README「前端」), 这里只伺候产物。
-# 产物 gitignore 了: 新 clone 下来要先在仓库根目录 `npm install && npm run build` 一次。
+# 产物 gitignore 了: 新 clone 下来要先在 tracker/ 目录下 `npm install && npm run build` 一次。
 WEB_DIST = HERE / "web" / "dist"
 STATIC_TYPES = {
     ".html": "text/html; charset=utf-8",
@@ -67,7 +67,7 @@ STATIC_TYPES = {
 NO_BUILD_PAGE = """<!doctype html><meta charset="utf-8"><title>LeetCode 看板 · 还没构建</title>
 <body style="font:15px/1.7 system-ui,sans-serif;max-width:620px;margin:12vh auto;padding:0 20px">
 <h2>前端还没构建</h2>
-<p>API 已经起来了, 但 <code>dashboard/web/dist/</code> 不存在。在仓库根目录跑一次:</p>
+<p>API 已经起来了, 但 <code>dashboard/web/dist/</code> 不存在。在 tracker/ 目录下跑一次:</p>
 <pre style="background:#f6f6f7;padding:12px 14px;border-radius:8px">npm install
 npm run build</pre>
 <p>然后刷新这页。改前端时用 <code>npm run dev</code>(热更新, http://localhost:5173, /api 自动代理到这里)。</p>
@@ -1251,7 +1251,7 @@ class Handler(BaseHTTPRequestHandler):
         return json.loads(self.rfile.read(n) or b"{}")
 
     def _static(self, path):
-        """前端产物: dashboard/web/dist/ (仓库根目录 `npm run build` 生成)。只认 dist 里面的文件。"""
+        """前端产物: dashboard/web/dist/ (tracker/ 目录下 `npm run build` 生成)。只认 dist 里面的文件。"""
         if not (WEB_DIST / "index.html").is_file():
             return self._send(503, NO_BUILD_PAGE, "text/html; charset=utf-8")
         rel = "index.html" if path in ("/", "/index.html") else unquote(path).lstrip("/")
@@ -1447,7 +1447,7 @@ def main():
     threading.Thread(target=_ingest_at_startup, daemon=True).start()
     print(f"serving  http://localhost:{PORT}   (Ctrl+C to stop)")
     if not (WEB_DIST / "index.html").is_file():
-        print("⚠ 前端还没构建 —— 在仓库根目录跑 `npm install && npm run build`, 或者 `npm run dev` 走热更新")
+        print("⚠ 前端还没构建 —— 在 tracker/ 目录下跑 `npm install && npm run build`, 或者 `npm run dev` 走热更新")
     try:
         ThreadingHTTPServer(("127.0.0.1", PORT), Handler).serve_forever()
     except KeyboardInterrupt:

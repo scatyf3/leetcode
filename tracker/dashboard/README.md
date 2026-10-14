@@ -52,7 +52,7 @@ dashboard/
   server.py      ← 标准库 http + sqlite 索引 + API
   scaffold.py    ← 题号/题名 → 抓题面 + 建空题目文件夹（TODO 加条目时自动调）
   fetch_desc.py  ← 批量补抓已有文件夹的 problem.html
-  web/           ← 前端 (Vite 工程, 配置在仓库根目录 vite.config.ts / package.json)
+  web/           ← 前端 (Vite 工程, 配置在tracker/ 下的 vite.config.ts / package.json)
     index.html               ← 页面骨架 + 首帧前落定深浅色的那段内联脚本
     src/main.ts              ← 入口: 字体 + 样式 + 主题开关 + app.js
     src/app.js               ← 看板的手写 DOM 部分(首页 / 各个 overlay)
