@@ -22,6 +22,10 @@ npm run docs:build    # ignoreDeadLinks: false，坏链会让构建失败
 复制 `templates/topic.md` 到对应层的目录，填 frontmatter。sidebar 和首页分层图都从 frontmatter 生成，
 层本身定义在 `docs/.vitepress/layers.ts`（唯一手工维护的结构信息）。
 
+一个套路是另一个的子集（滑动窗口 ⊂ 双指针、回溯 ⊂ DFS）时，在子页 frontmatter 写 `parent: <父页 slug>`：
+sidebar、首页分层图、层目录都会把它挂在父页下面，两页正文前面互相标出来。只许一层、只能同层，写错构建失败
+（校验在 `docs/.vitepress/nest.ts`）。
+
 每篇底部自动列出 `tracker/<题>/meta.json` 里打了这个标签的题：structures 层对 `structures` 字段，
 paradigms 层对 `paradigms` 字段，匹配文件名或 `alias`。按熟练度从生到熟排。
 

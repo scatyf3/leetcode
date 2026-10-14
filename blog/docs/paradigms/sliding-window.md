@@ -2,6 +2,7 @@
 title: 滑动窗口
 status: draft
 order: 2
+parent: two-pointer
 related: []
 ---
 

@@ -2,6 +2,7 @@
 title: 字典序贪心
 status: draft
 order: 10
+parent: greedy
 related: []
 ---
 

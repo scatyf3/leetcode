@@ -2,6 +2,7 @@
 title: 读写指针
 status: todo
 order: 17
+parent: two-pointer
 alias: []
 related: [/paradigms/two-pointer]
 ---

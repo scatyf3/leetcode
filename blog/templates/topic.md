@@ -3,6 +3,7 @@ title: 中文标题（API / 术语保留英文）
 status: todo            # todo | draft | reviewed —— 写错值构建失败
 order: 99               # 层内排序
 alias: []               # 除了文件名，meta.json 里还有哪些标签算这一页的题（python 层无效）
+parent:                 # 可选。同层另一页的 slug：这一页是那个套路的子集（如 sliding-window -> two-pointer），只许一层
 related: []             # 绝对路径，不含 base，如 /structures/heap
 ---
 

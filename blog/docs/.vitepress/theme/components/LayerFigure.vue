@@ -4,14 +4,17 @@ import { data as topics } from '../../data/topics.data'
 import { data as problems } from '../../data/problems.data'
 import { layers } from '../../layers'
 import { problemsOf } from '../problems'
+import { nest } from '../../nest'
 
 // 首页分层图：L3 套路在最上，L1 Python 内置在最下 —— 读法是「套路靠结构撑着，结构靠 Python 容器落地」。
 // 格子 = 一篇文章；虚线格 = status: todo 的占位；右上角数字 = tracker 里打了这个标签的题数。
+// 有子套路的（parent，见 nest.ts）父格和子格框在一起，子格小一号。
 const rows = [...layers].reverse().map((l) => ({
   ...l,
-  items: topics
-    .filter((t) => t.dir === l.dir)
-    .map((t) => ({ ...t, n: problemsOf(problems, l, t).length })),
+  items: nest(
+    topics.filter((t) => t.dir === l.dir).map((t) => ({ ...t, n: problemsOf(problems, l, t).length })),
+    l.dir,
+  ),
 }))
 </script>
 
@@ -26,14 +29,16 @@ const rows = [...layers].reverse().map((l) => ({
         </span>
       </a>
       <div class="lf-boxes">
-        <a
-          v-for="t in l.items"
-          :key="t.url"
-          class="lf-box"
-          :class="{ ph: t.status === 'todo' }"
-          :href="withBase(t.url)"
-          :title="t.status === 'todo' ? '还没写，只有题目列表' : t.title"
-        >{{ t.title }}<sup v-if="t.n">{{ t.n }}</sup></a>
+        <span v-for="t in l.items" :key="t.url" :class="{ 'lf-group': t.children.length }">
+          <a
+            v-for="(b, i) in [t, ...t.children]"
+            :key="b.url"
+            class="lf-box"
+            :class="{ ph: b.status === 'todo', sub: i > 0 }"
+            :href="withBase(b.url)"
+            :title="(i > 0 ? `${t.title} 的子集 · ` : '') + (b.status === 'todo' ? '还没写，只有题目列表' : b.title)"
+          >{{ b.title }}<sup v-if="b.n">{{ b.n }}</sup></a>
+        </span>
       </div>
       <div class="lf-scope">{{ l.scope }}</div>
     </div>
@@ -60,6 +65,11 @@ const rows = [...layers].reverse().map((l) => ({
 .lf-box:hover { border-color: var(--lc); color: var(--lc); }
 .lf-box.ph { border-style: dashed; color: var(--vp-c-text-2); }
 .lf-box sup { margin-left: 3px; font-size: 10px; color: var(--vp-c-text-2); }
+.lf-group {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 2px;
+  border-radius: 8px; background: color-mix(in srgb, var(--lc) 12%, transparent);
+}
+.lf-box.sub { font-size: 12px; padding: 2px 7px; }
 .lf-scope { font-size: 12px; color: var(--vp-c-text-2); margin-top: 6px; }
 @media (max-width: 640px) {
   .lf-row { grid-template-columns: 1fr; }
