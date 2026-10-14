@@ -30,6 +30,7 @@ return l      # 35. Search Insert Position —— 该插入的位置
 ```
 
 不用背两个模板。「找元素」和「找插入位」是同一个循环的两种收尾。
+
 ## 唯一的记忆锚点
 
 > **`l` / `r` 是状态量，`mid` 是过程量。循环外只能从状态量读答案。**
@@ -133,8 +134,8 @@ l = mid + 1   # 相等也往右收 -> 收敛到 bisect_right（第一个 > targe
 
 ## 相关
 
-- `35. Search Insert Position` —— 模板 + `return l`
-- `704. Binary Search` —— 模板 + `return -1`
-- `295. Find Median from Data Stream` —— 半开区间版，坑记在 sol.py 底部
-- `153. Find Minimum in Rotated Sorted Array` —— 比较对象换成 `nums[r]`
-- `139. Word Break` —— 同一个思维模式：节点是缝不是字符
+- [35. Search Insert Position](https://github.com/scatyf3/leetcode/blob/main/tracker/35.%20Search%20Insert%20Position/note.md) —— 模板 + `return l`
+- [704. Binary Search](https://github.com/scatyf3/leetcode/blob/main/tracker/704.%20Binary%20Search/note.md) —— 模板 + `return -1`
+- [295. Find Median from Data Stream](https://github.com/scatyf3/leetcode/blob/main/tracker/295.%20Find%20Median%20from%20Data%20Stream/sol.py) —— 半开区间版，坑记在 sol.py 底部
+- [153. Find Minimum in Rotated Sorted Array](https://github.com/scatyf3/leetcode/blob/main/tracker/153.%20Find%20Minimum%20in%20Rotated%20Sorted%20Array/note.md) —— 比较对象换成 `nums[r]`
+- [139. Word Break](https://github.com/scatyf3/leetcode/blob/main/tracker/139.%20Word%20Break/note.md) —— 同一个思维模式：节点是缝不是字符

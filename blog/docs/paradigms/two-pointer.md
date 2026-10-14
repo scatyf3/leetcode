@@ -9,7 +9,7 @@ related: []
 
 ## 什么是双指针
 
-什么是双指针? 我们得定义下什么是双指针，使用两个index并不完全是这类题型的本质，比如在算法题的terminalogy里，binary search 也用l/r两个index，然而并不通常被归类为双指针。
+什么是双指针? 我们得定义下什么是双指针，使用两个index并不完全是这类题型的本质，比如在算法题的terminology里，binary search 也用l/r两个index，然而并不通常被归类为双指针。
 
 **定义：两个下标互相提供信息、各自单调推进，合起来 O(n) 走完一遍。** 三条缺一不可：
 
@@ -30,6 +30,7 @@ related: []
 二分里 `l` / `r` **从不参与比较**，它们只负责**记账**：记「答案还可能落在哪一段」。
 真正干活的是第三个下标 `mid`。所以二分是**一个探针 + 一对边界**，不是两个指针 ——
 [binary-search.md](binary-search.md) 的记忆锚点说的就是这件事：
+<!-- TODO(整理): 上一句以冒号结尾，后面缺了要引用的那条锚点（binary-search.md 的「l / r 是状态量，mid 是过程量」） -->
 
 **其他「也用两个下标、但同样不算双指针」的：**
 
@@ -180,6 +181,7 @@ related: []
 这四族的 O(n) 来源互不相同，写题时要说得出自己在用哪一条。
 （第五族「相向·对称扫」不在这里 —— 它不排除任何候选，论证一句话就完了，见 §1.B。）
 
+<!-- TODO(整理): 183-223 和 structures/array.md 140-167 重复，见那边的 TODO -->
 ### 相向·夹逼：支配论证
 
 每步要能证明「**被移走的端点，其最优值已经结算完，不可能翻身**」。
@@ -250,7 +252,7 @@ related: []
 覆盖式（保序，搬运次数 = 要保留的个数）和交换式（不保序，搬运次数 = 要删的个数）怎么选、
 返回 `w` 还是 `w+1`，见 [structures/array.md](../structures/array.md) §「读写指针」与
 [notes/two-pointer-array-partition.md](https://github.com/scatyf3/leetcode/blob/main/tracker/notes/two-pointer-array-partition.md)。
-半开区间约定见 [structures/array.md](../structures/array.md) §0。
+半开区间约定见 [structures/array.md](../structures/array.md) §「约定」。
 
 ## 3. 拿到新题怎么选
 

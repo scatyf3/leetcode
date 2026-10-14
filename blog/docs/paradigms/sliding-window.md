@@ -119,7 +119,7 @@ O(n²) 来自「r 回退」，不来自「枚举 l」。
    以上都不是        → 枚举 r
 ```
 
-到目前为止，**没有任何一条已验证的理由需要枚举 l**。仓库里 8/8 都是枚举 r。
+到目前为止，**没有任何一条已验证的理由需要枚举 l**。仓库里 9/9 都是枚举 r。
 
 ## 仓库现状
 
@@ -129,7 +129,8 @@ O(n²) 来自「r 回退」，不来自「枚举 l」。
 | [76](https://github.com/scatyf3/leetcode/blob/main/tracker/76.%20Minimum%20Window%20Substring/sol.py) | 变长 | r | 合法就缩并结算（骨架 B） | 闭 |
 | [424 sol2](https://github.com/scatyf3/leetcode/blob/main/tracker/424.%20Longest%20Repeating%20Character%20Replacement/sol2.py) | 变长 | r | 非法就缩（骨架 A） | 闭 |
 | [424 sol3](https://github.com/scatyf3/leetcode/blob/main/tracker/424.%20Longest%20Repeating%20Character%20Replacement/sol3.py) | 变长 | **l** | 有预算就扩 | 半开 ← 形状逼的 |
-| [567](https://github.com/scatyf3/leetcode/blob/main/tracker/567.%20Permutation%20in%20String/sol2.py) | 定长 | r | 无，`pop(s2[r-n])` | 无记法 |
+| [567](https://github.com/scatyf3/leetcode/blob/main/tracker/567.%20Permutation%20in%20String/sol.py) | 定长 | r | 无，`win[s2[r-n]] -= 1` | 无记法 |
+| [438](https://github.com/scatyf3/leetcode/blob/main/tracker/438.%20Find%20All%20Anagrams%20in%20a%20String/sol.py) | 定长 | r | `while r-l+1 > len(p)` 缩回定长 | 闭 |
 | [239](https://github.com/scatyf3/leetcode/blob/main/tracker/239.%20Sliding%20Window%20Maximum/sol.py) | 定长 | r | 单调队列吐旧 | 无记法 |
 | [121](https://github.com/scatyf3/leetcode/blob/main/tracker/121.%20Best%20Time%20to%20Buy%20and%20Sell%20Stock/sol2.py) | 坍缩 | r | 无，`cur_min` 标量 | — |
 | [53](https://github.com/scatyf3/leetcode/blob/main/tracker/53.%20Maximum%20Subarray/sol.py) | 坍缩 | r | 无，`dp[i-1]` 标量 | — |

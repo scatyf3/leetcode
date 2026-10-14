@@ -85,7 +85,7 @@ dfs(0, ...)
 | **按位填（笛卡尔积）** | 当前这一位的所有选项 | 17 · 22 | 填满 `len(digits)` / 左右括号都用完 |
 | **切分型** | 下一刀切在哪（这一块到哪结束） | 131 | `start == len(s)` |
 | **路径搜索** | 往哪个方向走 | 79 | `k == len(word)` → 返回 True |
-| **约束放置** | 这一行的皇后放哪一列 | 51（还没做） | 放满 n 行 |
+| **约束放置** | 这一行的皇后放哪一列 | 51 | 放满 n 行 |
 
 前四类本质一样：都是 for 循环挑一个，区别只在**挑的范围**。
 排列型没有 `start`（顺序本身就是答案的一部分），靠"已用集合"防止同一个元素用两次。
@@ -233,9 +233,10 @@ for i in range(start, n):
 | [90 Subsets II](https://github.com/scatyf3/leetcode/blob/main/tracker/90.%20Subsets%20II/note.md) | 组合 + 去重 | 78 + sort + 同层去重 |
 | [39 Combination Sum](https://github.com/scatyf3/leetcode/blob/main/tracker/39.%20Combination%20Sum/note.md) | 组合 | 可复用 → 传 `i`；只有叶子 valid |
 | [40 Combination Sum II](https://github.com/scatyf3/leetcode/blob/main/tracker/40.%20Combination%20Sum%20II/note.md) | 组合 + 去重 | 39 改成传 `i+1`，加同层去重 |
+| [77 Combinations](https://github.com/scatyf3/leetcode/blob/main/tracker/77.%20Combinations/note.md) | 组合 | 78 只收长度为 k 的节点 |
 | [46 Permutations](https://github.com/scatyf3/leetcode/blob/main/tracker/46.%20Permutations/note.md) | 排列 | 没有 start，靠已用集合；两份状态成对改 |
 | [17 Letter Combinations](https://github.com/scatyf3/leetcode/blob/main/tracker/17.%20Letter%20Combinations%20of%20a%20Phone%20Number/note.md) | 按位填 | 每层选项来自 map；结算用 `"".join` |
 | [22 Generate Parentheses](https://github.com/scatyf3/leetcode/blob/main/tracker/22.%20Generate%20Parentheses/note.md) | 按位填 + 约束 | 每层两个选项，`right > left` 才能放右括号 |
 | [131 Palindrome Partitioning](https://github.com/scatyf3/leetcode/blob/main/tracker/131.%20Palindrome%20Partitioning/note.md) | 切分 | 每层决定下一刀；只查切下来的块 |
 | [79 Word Search](https://github.com/scatyf3/leetcode/blob/main/tracker/79.%20Word%20Search/note.md) | 路径搜索 | 网格 DFS + visited 撤销；返回 bool |
-| [51 N-Queens](https://github.com/scatyf3/leetcode/blob/main/tracker/51.%20N-Queens/note.md) | 约束放置 | 还没做：每行一层，列 + 两条对角线三个集合剪枝 |
+| [51 N-Queens](https://github.com/scatyf3/leetcode/blob/main/tracker/51.%20N-Queens/note.md) | 约束放置 | 每行一层，列 + 两条对角线三个集合剪枝 |

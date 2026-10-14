@@ -71,8 +71,8 @@ next permutation 的好处是**不用真的建树、不用回溯栈**，只看�
 
 | 题 | 目标 | 改哪一位 | 其余部分 |
 |---|---|---|---|
-| **LC 31** Next Permutation | 刚好大一点 | **最右边**能变大的位 | 调到最小（反转成升序） |
-| **LC 556** Next Greater Element III | 同 31，对象是整数的各位 | 同 31 | 同 31，外加两种 -1：已是最大排列 / 超 `2**31 - 1` |
+| **[LC 31](https://github.com/scatyf3/leetcode/blob/main/tracker/31.%20Next%20Permutation/note.md)** Next Permutation | 刚好大一点 | **最右边**能变大的位 | 调到最小（反转成升序） |
+| **[LC 556](https://github.com/scatyf3/leetcode/blob/main/tracker/556.%20Next%20Greater%20Element%20III/note.md)** Next Greater Element III | 同 31，对象是整数的各位 | 同 31 | 同 31，外加两种 -1：已是最大排列 / 超 `2**31 - 1` |
 | **LC 670** Maximum Swap | 只换一次，换到最大 | **最左边**那个「右侧有更大数」的位 | 和右侧最大值的**最右一次出现**换 |
 | **LC 738** Monotone Increasing Digits | ≤ n 的最大单调递增数 | 最左边破坏单调的位（遇到相等要往回退） | 该位 -1，右边全变 9 |
 | **LC 402** Remove K Digits | 删 k 位让结果最小 | 从左往右，左边的大数优先删 | 单调栈实现 |
