@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "matrix"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "右上角出发, 每步扔一行或一列",
+    "起点: 行最大 + 列最小",
+    "转 45° 就是 BST"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(m + n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "从右上角出发，每步扔掉一整行或一整列",
+    "wrong": [
+      "从左上角出发，每步扔掉一整行或一整列",
+      "二维二分：和中点比，一次扔掉三个象限",
+      "先二分第一列定位行，再在该行里二分"
+    ],
+    "then": [
+      {
+        "q": "站在右上角的 x 上，怎么走？",
+        "idea": "x > target 往左（扔这一列），x < target 往下（扔这一行）",
+        "wrong": [
+          "x > target 往下（扔这一行），x < target 往左（扔这一列）",
+          "x > target 往上（扔这一行），x < target 往右（扔这一列）",
+          "x > target 往左（扔这一列），x < target 往左下走一格"
+        ]
+      }
+    ]
+  }
+}

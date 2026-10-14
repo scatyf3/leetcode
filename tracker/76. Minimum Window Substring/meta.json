@@ -1,0 +1,42 @@
+{
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "sliding-window",
+    "counting"
+  ],
+  "techniques": [
+    "Counter 语义是 need：入窗 -、出窗 +",
+    "先结算再收左",
+    "valid 可降为维护 missing 计数 O(1)"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(m·|Σ| + n)",
+    "space": "O(|Σ|)"
+  },
+  "quiz": {
+    "q": "用什么做？",
+    "idea": "滑窗：右扩到覆盖 t，再收左直到不覆盖，过程中记最短",
+    "wrong": [
+      "滑窗：窗口长固定为 len(t)，逐格右移比对计数",
+      "滑窗：右扩到覆盖 t 就立刻记答案，左边界不动",
+      "双指针：从两端往中间收，直到再缩就不覆盖 t"
+    ],
+    "then": [
+      {
+        "q": "cnt = Counter(t) 当 need 用，进出窗口怎么改、何时算覆盖？",
+        "idea": "入窗 cnt[c] -= 1，出窗 += 1，全部 ≤ 0 即覆盖",
+        "wrong": [
+          "入窗 cnt[c] += 1，出窗 -= 1，全部 ≤ 0 即覆盖",
+          "入窗 cnt[c] -= 1，出窗 += 1，全部 == 0 即覆盖",
+          "入窗 cnt[c] -= 1，出窗 += 1，任一 ≤ 0 即覆盖"
+        ]
+      }
+    ]
+  }
+}

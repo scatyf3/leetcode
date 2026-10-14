@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "sliding-window",
+    "counting"
+  ],
+  "techniques": [
+    "固定长度 len(p) 的窗口",
+    "Counter(p) 进窗减、出窗加",
+    "cnt 全 0 即异位词"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n·|Σ|)",
+    "space": "O(|Σ|)"
+  },
+  "quiz": {
+    "idea": "窗口定长 len(p)，进窗减计数、出窗加回，cnt 全 0 记 l",
+    "wrong": [
+      "窗口定长 len(p)，窗口字符集合等于 set(p) 就记 l",
+      "窗口定长 len(p)，窗口字符 ASCII 和等于 p 的就记 l",
+      "窗口定长 len(p)，进窗减计数、出窗加回，cnt 有 0 就记 l"
+    ],
+    "then": [
+      {
+        "q": "for r 循环体里怎么排？",
+        "idea": "s[r] 进窗 → 长度超了先加回 cnt[s[l]] 再 l += 1 → 检查",
+        "wrong": [
+          "检查 → s[r] 进窗 → 长度超了先加回 cnt[s[l]] 再 l += 1",
+          "s[r] 进窗 → 检查 → 长度超了先加回 cnt[s[l]] 再 l += 1",
+          "s[r] 进窗 → 长度超了先 l += 1 再加回 cnt[s[l]] → 检查"
+        ]
+      }
+    ]
+  }
+}

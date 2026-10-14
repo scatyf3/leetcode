@@ -1,0 +1,31 @@
+
+py heap默认是min heap
+
+最naive的解法，用binary search插入有序数组，这样天然通过index好找median， insert O(logn), 访问想要的东西O(1)
+
+这里需要注意的是二分搜索各种变体。
+
+一个进阶的解法是用heap，一个存前半，另一个存后半？
+0. 不需要全局有序
+1. 把数据切成"较小的一半"和"较大的一半"
+2. 较小那半里最大的是谁、较大那半里最小的是谁
+
+ok，这里的思路是
+1. 比较num和小堆和大堆的顶，insert到对应的半边
+2. 然后rebalance两个堆
+    1. 其实偷懒的做法是如果这玩意在中间，直接insert两次，这valid吗 => 不行，后面带来误差了
+    2. 或者默认low可以比high多一个元素，如果奇数选low，偶数两者的顶
+
+
+这里比insert的复杂度差在哪里
+1. insert是n个O(logn)
+2. 这个好像也是？
+
+并非，insert是O(n)，其实search还行
+---
+
+"不需要全局有序"这一条是跨题的 pattern，和 128 / 347 是同一条线（**维护不变式的代价 ∝ 不变式的强度**）：有序数组的不变式是"两两有序"，太强，insert 要 O(n) 挪元素来修复；双堆全局只有中位那一刀是精确的，修复只要 O(log n)。完整的"有序度阶梯"表写在 `128. Longest Consecutive Sequence/note.md` 末尾。
+
+---
+
+update了个更好记的，把balance两个heap单独抽象封装

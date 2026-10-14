@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "哨兵节点统一删头",
+    "删除时 prev 不动"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "命中 cur.val == val 后，指针怎么动？",
+    "idea": "prev.next = cur.next，cur = prev.next，prev 不动",
+    "wrong": [
+      "prev.next = cur.next，cur = prev.next.next，prev 不动",
+      "prev.next = cur.next，cur 和 prev 都前进一步",
+      "prev.next = cur.next，prev = cur，cur = cur.next"
+    ]
+  }
+}

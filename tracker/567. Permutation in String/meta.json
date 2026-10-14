@@ -1,0 +1,30 @@
+{
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "sliding-window",
+    "counting"
+  ],
+  "techniques": [
+    "定长窗口：进一个出一个",
+    "两个 Counter 直接比较"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(26n)",
+    "space": "O(26)"
+  },
+  "quiz": {
+    "q": "窗口怎么滑、怎么判命中？",
+    "idea": "定长 n：进 s2[r]、出 s2[r-n]，判 win == need",
+    "wrong": [
+      "变长：只推 r 往 need 里扣，need 全为 0 即命中",
+      "定长 n：进 s2[r]、出 s2[r-n]，判两边 set 相等",
+      "定长 n：need 计数归零就 del，len(need) == 0 即命中"
+    ]
+  }
+}

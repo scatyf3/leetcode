@@ -1,0 +1,27 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "read-write-pointer"
+  ],
+  "techniques": [
+    "读写分离双指针",
+    "交换而非覆盖, 0 被换到尾部"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "读指针扫到非零就和写指针处交换，写指针前进",
+    "wrong": [
+      "读指针扫到 0 就和末尾指针处交换，末尾指针左移",
+      "左指针找 0、右指针找非零，相向而行两两交换",
+      "读指针扫到非零就和写指针处交换，遇 0 写指针前进"
+    ]
+  }
+}

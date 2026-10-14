@@ -1,0 +1,740 @@
+{"ts": 1787153823, "date": "2026-08-19", "id": 26, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 26, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 26, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 26, "field": "techniques", "added": ["快慢指针", "原地覆盖"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 26, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 26, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 27, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 27, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 27, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 27, "field": "techniques", "added": ["快慢指针", "原地覆盖"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 27, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 27, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 42, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 42, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 42, "field": "paradigms", "added": ["two-pointer", "dp"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 42, "field": "techniques", "added": ["左右夹逼", "前缀最大/后缀最大"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 42, "field": "difficulty", "from": null, "to": "hard", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 42, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 88, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 88, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 88, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 88, "field": "techniques", "added": ["从后往前归并"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 88, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 88, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 121, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 121, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 121, "field": "paradigms", "added": ["greedy", "dp"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 121, "field": "techniques", "added": ["滚动最小值", "状态压缩"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 121, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 121, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 122, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 122, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 122, "field": "paradigms", "added": ["greedy"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 122, "field": "techniques", "added": ["逐日差", "伸缩求和"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 122, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 122, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 189, "field": "exists", "from": null, "to": true, "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 189, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 189, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 189, "field": "techniques", "added": ["三次反转", "原地交换"], "removed": [], "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 189, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "533cc4f"}
+{"ts": 1787153823, "date": "2026-08-19", "id": 189, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "533cc4f"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 5, "field": "exists", "from": null, "to": true, "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 5, "field": "structures", "added": ["string"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 5, "field": "paradigms", "added": ["two-pointer", "dp"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 5, "field": "techniques", "added": ["中心扩展", "奇偶双中心", "区间DP按长度递增", "Manacher"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 5, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 5, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 133, "field": "exists", "from": null, "to": true, "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 133, "field": "structures", "added": ["graph"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 133, "field": "paradigms", "added": ["dfs", "bfs"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 133, "field": "techniques", "added": ["哈希表兼任visited与映射", "先占位后填充", "显式栈替代递归"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 133, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 133, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 242, "field": "exists", "from": null, "to": true, "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 242, "field": "structures", "added": ["string", "hash-table"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 242, "field": "paradigms", "added": ["counting"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 242, "field": "techniques", "added": ["dict.get 默认值消灭 if-else", "一张表 +1/-1 抵消", "先比长度剪枝"], "removed": [], "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 242, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "e8db69d"}
+{"ts": 1787781665, "date": "2026-08-26", "id": 242, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "e8db69d"}
+{"ts": 1787943898, "date": "2026-08-28", "id": 647, "field": "exists", "from": null, "to": true, "src": "git", "commit": "06c482b"}
+{"ts": 1787943898, "date": "2026-08-28", "id": 647, "field": "structures", "added": ["string"], "removed": [], "src": "git", "commit": "06c482b"}
+{"ts": 1787943898, "date": "2026-08-28", "id": 647, "field": "paradigms", "added": ["two-pointer", "dp"], "removed": [], "src": "git", "commit": "06c482b"}
+{"ts": 1787943898, "date": "2026-08-28", "id": 647, "field": "techniques", "added": ["中心扩展", "奇偶双中心", "边扩边计数", "区间DP按长度递增", "Manacher"], "removed": [], "src": "git", "commit": "06c482b"}
+{"ts": 1787943898, "date": "2026-08-28", "id": 647, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "06c482b"}
+{"ts": 1787943898, "date": "2026-08-28", "id": 647, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "06c482b"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 19, "field": "exists", "from": null, "to": true, "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 19, "field": "structures", "added": ["linked-list"], "removed": [], "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 19, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 19, "field": "techniques", "added": ["快慢指针提前量", "dummy哨兵", "一趟扫描", "删除靠前驱"], "removed": [], "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 19, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 19, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 143, "field": "exists", "from": null, "to": true, "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 143, "field": "structures", "added": ["linked-list"], "removed": [], "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 143, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 143, "field": "techniques", "added": ["快慢指针找中点", "左中点vs右中点", "原地反转后半段", "交替合并", "指针即存储", "不变式消特判"], "removed": [], "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 143, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "244a3fb"}
+{"ts": 1787967767, "date": "2026-08-28", "id": 143, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "244a3fb"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "structures", "added": ["string", "hash-table"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "paradigms", "added": ["sliding-window", "greedy"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "techniques", "added": ["last 表直接跳 l", "l 单调不减", "合法性向下封闭"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 3, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 5, "field": "paradigms", "added": ["2d-dp"], "removed": ["dp"], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 5, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "paradigms", "added": ["two-pointer", "greedy"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "techniques", "added": ["相向双指针", "短板支配论证", "先结算再移动指针"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 11, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "paradigms", "added": ["two-pointer", "hash"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "techniques", "added": ["排序建立单调性", "跳相邻重复去重", "固定一个数 + 相向双指针"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 15, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "structures", "added": ["string", "stack"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "paradigms", "added": ["stack"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "techniques", "added": ["反向映射表 右→左", "栈顶配对", "收尾查栈空"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 20, "field": "familiarity", "from": null, "to": 1, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "structures", "added": ["linked-list"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "techniques", "added": ["哨兵节点消灭空表特例", "剩余链整段接上", "return head.next"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 21, "field": "familiarity", "from": null, "to": 1, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "structures", "added": ["linked-list", "heap"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "paradigms", "added": ["heap"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "techniques", "added": ["k 路归并最小堆", "元组塞下标破平局, 避免比 ListNode", "堆内恒 k 个 → O(N log k)"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "difficulty", "from": null, "to": "hard", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 23, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 26, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 27, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "paradigms", "added": ["binary-search"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "techniques", "added": ["先找旋转点再二分", "两段值域不重叠", "复用 153 的找最小值"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 33, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 35, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 35, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 35, "field": "paradigms", "added": ["binary-search"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 35, "field": "techniques", "added": ["半开区间 [l, r) 模板", "搜索的是缝不是元素: r 取 n 不取 n-1", "返回 l 而不是 mid", "等价于 bisect_left"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 35, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 35, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "paradigms", "added": ["backtracking", "dfs"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "techniques", "added": ["选择-递归-撤销三步骨架", "start 指针防组合重复", "传 i 而非 i+1 实现可重复选", "remain 递减代替 cur_sum 累加", "排序后 break 剪枝"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 39, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 42, "field": "paradigms", "added": ["1d-dp"], "removed": ["dp"], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 42, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "paradigms", "added": ["1d-dp"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "techniques", "added": ["一维递推 f(n)=f(n-1)+f(n-2)", "dp 初始化与 edge case"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 70, "field": "familiarity", "from": null, "to": 1, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 88, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "structures", "added": ["tree"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "paradigms", "added": ["dfs"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "techniques", "added": ["上下界沿路径向下传递", "中序遍历必严格递增", "None base case 吸收叶子/单边分支"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "status", "from": null, "to": "review", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 98, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "structures", "added": ["tree"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "paradigms", "added": ["dfs"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "techniques", "added": ["双树同步递归", "空节点 base case 覆盖叶子分支", "and 短路先比 val"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 100, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 121, "field": "paradigms", "added": ["1d-dp"], "removed": ["dp"], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 121, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 122, "field": "difficulty", "from": "easy", "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 122, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "structures", "added": ["array", "hash-table"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "paradigms", "added": ["hash"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "techniques", "added": ["set 代替显式哈希表", "入口剪枝: 只从链头 x-1∉s 出发", "每条链只走一次"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 128, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 133, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "structures", "added": ["string", "graph", "hash-table"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "paradigms", "added": ["dfs", "1d-dp"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "techniques", "added": ["节点是缝不是字符", "布尔DP转可达性搜索", "显式栈替代递归"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 139, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "structures", "added": ["linked-list"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "paradigms", "added": ["two-pointer"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "techniques", "added": ["快慢指针", "is 比身份不比值", "边界塞进循环条件"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 141, "field": "familiarity", "from": null, "to": 1, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "paradigms", "added": ["1d-dp", "greedy"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "techniques", "added": ["同时维护最大与最小", "滚动变量压掉数组", "三候选转移"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 152, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "paradigms", "added": ["binary-search"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "techniques", "added": ["和 nums[r] 比而不是 nums[l]", "r = mid 不能 mid-1", "已升序早退"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 153, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "structures", "added": ["array", "hash-table"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "paradigms", "added": ["counting"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "techniques", "added": ["Boyer-Moore 投票", "不同元素配对抵消", "计数哈希"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 169, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 189, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "structures", "added": ["bit"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "paradigms", "added": ["bit-manipulation"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "techniques", "added": ["位宽固定 32 轮不能 while n", "res<<1 | n&1 逐位搬运", "f-string 补零"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 190, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "structures", "added": ["bit"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "paradigms", "added": ["bit-manipulation"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "techniques", "added": ["Brian Kernighan: n &= n-1", "循环次数 = 1 的个数", "零位算不算数决定循环条件"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 191, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "structures", "added": ["linked-list"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "paradigms", "added": ["recursion"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "techniques", "added": ["prev/curr/next 三指针翻转", "尾递归传 prev 等价迭代", "后序回溯 head.next.next=head"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 206, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "structures", "added": ["array", "hash-table"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "paradigms", "added": ["hash"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "techniques", "added": ["set 去重比长度", "边扫边查提前返回"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 217, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "structures", "added": ["tree"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "paradigms", "added": ["dfs"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "techniques", "added": ["原地交换左右子树", "靠副作用传信息不用返回值"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 226, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 242, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "structures", "added": ["array", "heap"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "paradigms", "added": ["binary-search", "heap", "design"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "techniques", "added": ["二分找插入位(搜索缝: r 取 n 不取 n-1)", "中位数下标是 n 的纯函数 (n-1)//2 与 n//2", "冗余状态不要存,能算就算", "对顶堆: 大顶堆存小的一半 + 小顶堆存大的一半", "先推后弹再平衡,避开分类讨论"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "difficulty", "from": null, "to": "hard", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "status", "from": null, "to": "review", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 295, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "structures", "added": ["bit", "array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "paradigms", "added": ["1d-dp", "bit-manipulation"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "techniques", "added": ["dp[i>>1] + (i&1)", "复用已算过的答案而非闭式公式"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 338, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "structures", "added": ["grid", "graph"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "paradigms", "added": ["dfs", "bfs"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "techniques", "added": ["反向搜索", "多源BFS", "逆流单调切环", "两次搜索取交集"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 417, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "structures", "added": ["tree", "string"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "paradigms", "added": ["dfs"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "techniques", "added": ["外层递归提供回溯点", "序列化把子树关系转成子串关系", "^ 分隔 + # 占位缺一不可"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 572, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 647, "field": "paradigms", "added": ["2d-dp"], "removed": ["dp"], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 647, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "exists", "from": null, "to": true, "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "paradigms", "added": ["binary-search"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "techniques", "added": ["半开区间 [l, r) 模板", "循环不变量: 答案始终在 [l, r) 内", "找第一个满足条件的位置,而不是找目标本身"], "removed": [], "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "0065a81"}
+{"ts": 1788299328, "date": "2026-09-01", "id": 704, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "0065a81"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 35, "field": "status", "from": "todo", "to": "solved", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 35, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 48, "field": "exists", "from": null, "to": true, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 48, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 48, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 105, "field": "exists", "from": null, "to": true, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 105, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 105, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 167, "field": "exists", "from": null, "to": true, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 167, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 167, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "exists", "from": null, "to": true, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "structures", "added": ["tree"], "removed": [], "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "paradigms", "added": ["dfs", "bfs"], "removed": [], "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "techniques", "added": ["前序 + null 占位才能唯一还原, 中序不行", "iterator 当消费指针", "层序(BFS)是唯一好读的非递归版, 位置对齐所以不用状态位"], "removed": [], "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "difficulty", "from": null, "to": "hard", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 297, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "exists", "from": null, "to": true, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "paradigms", "added": ["1d-dp", "binary-search", "greedy"], "removed": [], "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "techniques", "added": ["dp[i] = 以 i 结尾的最长上升子序列长度, 答案取 max(dp) 不是 dp[-1]", "dp 初值 = 「零次转移」时的真值(1), 不是哨兵", "O(n log n): tails[k] = 长度 k+1 的最小结尾, 下标是长度、内容是值", "严格上升用 bisect_left, 非严格用 bisect_right"], "removed": [], "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 300, "field": "familiarity", "from": null, "to": 1, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 424, "field": "exists", "from": null, "to": true, "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 424, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 424, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "33d6798"}
+{"ts": 1788318448, "date": "2026-09-01", "id": 424, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "33d6798"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 26, "field": "paradigms", "added": ["read-write-pointer"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 27, "field": "paradigms", "added": ["read-write-pointer"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 48, "field": "status", "from": "todo", "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 48, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 49, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 49, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 49, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 49, "field": "familiarity", "from": null, "to": 1, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 53, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 53, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 53, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 53, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 54, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 54, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 54, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 54, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 55, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 55, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 55, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 55, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "paradigms", "added": ["intervals"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "techniques", "added": ["按 start 排 → 只需比 res[-1]", "max 往外推, 处理 [[1,10],[2,3]] 包含关系", "开新的就不回头 = 连通分量封闭"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 56, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "paradigms", "added": ["intervals"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "techniques", "added": ["三段式: 左段抄 / 中段吞 / 右段抄, i 不回退", "while 跑零次吸收边界, 全程无 if", "append 在中段循环外且无条件, 保证 new 恰好放一次", "已排序则别 append+sort 退化成 56, 也别上二分"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 57, "field": "familiarity", "from": null, "to": 3, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 424, "field": "structures", "added": ["string", "hash-table"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 424, "field": "paradigms", "added": ["sliding-window", "counting"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 424, "field": "techniques", "added": ["骨架 A: 无条件纳入 r, 破坏不变式才收缩 l", "合法性判定 (r-l+1) - 最大频次 <= k", "只需要 max count, 不需要知道谁是众数"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 424, "field": "status", "from": "todo", "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "exists", "from": null, "to": true, "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "paradigms", "added": ["intervals", "greedy"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "techniques", "added": ["删最少 = 留最多 (活动选择)", "按 end 排, 交换论证保证不错过最优解", "端点相碰不算重叠: s >= end"], "removed": [], "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "62ba01a"}
+{"ts": 1788557593, "date": "2026-09-04", "id": 435, "field": "familiarity", "from": null, "to": 4, "src": "git", "commit": "62ba01a"}
+{"ts": 1788585876, "date": "2026-09-05", "id": 704, "field": "familiarity", "from": 2, "to": 3, "src": "git", "commit": "999ff44"}
+{"ts": 1788588386, "date": "2026-09-05", "id": 1, "field": "exists", "from": null, "to": true, "src": "git", "commit": "2e5a240"}
+{"ts": 1788588386, "date": "2026-09-05", "id": 1, "field": "difficulty", "from": null, "to": "easy", "src": "git", "commit": "2e5a240"}
+{"ts": 1788588386, "date": "2026-09-05", "id": 1, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "2e5a240"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 1, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 1, "field": "paradigms", "added": ["hash"], "removed": [], "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 1, "field": "status", "from": "todo", "to": "solved", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 1, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 36, "field": "exists", "from": null, "to": true, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 36, "field": "structures", "added": ["matrix"], "removed": [], "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 36, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 36, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 36, "field": "familiarity", "from": null, "to": 3.5, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 238, "field": "exists", "from": null, "to": true, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 238, "field": "structures", "added": ["array"], "removed": [], "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 238, "field": "techniques", "added": ["0 的个数决定答案形状: 0/1/≥2 三档", "前缀积 × 后缀积代替除法"], "removed": [], "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 238, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 238, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 238, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 271, "field": "exists", "from": null, "to": true, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 271, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 271, "field": "status", "from": null, "to": "todo", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 271, "field": "familiarity", "from": null, "to": 2, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 347, "field": "exists", "from": null, "to": true, "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 347, "field": "difficulty", "from": null, "to": "medium", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 347, "field": "status", "from": null, "to": "solved", "src": "git", "commit": "7463bce"}
+{"ts": 1788646092, "date": "2026-09-05", "id": 347, "field": "familiarity", "from": null, "to": 1.5, "src": "git", "commit": "7463bce"}
+{"ts": 1788675669, "date": "2026-09-06", "id": 35, "field": "familiarity", "from": 2, "to": 4}
+{"ts": 1788675669, "date": "2026-09-06", "id": 88, "field": "familiarity", "from": 2, "to": 4}
+{"ts": 1788675669, "date": "2026-09-06", "id": 100, "field": "familiarity", "from": 2, "to": 4}
+{"ts": 1788675669, "date": "2026-09-06", "id": 190, "field": "familiarity", "from": 2, "to": 4}
+{"ts": 1788675669, "date": "2026-09-06", "id": 57, "field": "familiarity", "from": 3, "to": 4}
+{"ts": 1788675669, "date": "2026-09-06", "id": 128, "field": "familiarity", "from": 3, "to": 4}
+{"ts": 1788675669, "date": "2026-09-06", "id": 704, "field": "familiarity", "from": 3, "to": 4}
+{"ts": 1788709857, "date": "2026-09-06", "id": 125, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1788709857, "date": "2026-09-06", "id": 125, "field": "familiarity", "from": 4, "to": 3.5}
+{"ts": 1788709858, "date": "2026-09-06", "id": 125, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1788709858, "date": "2026-09-06", "id": 125, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1788709863, "date": "2026-09-06", "id": 125, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1788709868, "date": "2026-09-06", "id": 125, "field": "paradigms", "added": ["two-pointer"], "removed": []}
+{"ts": 1788709870, "date": "2026-09-06", "id": 125, "field": "structures", "added": ["string"], "removed": []}
+{"ts": 1788710898, "date": "2026-09-06", "id": 167, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1788710901, "date": "2026-09-06", "id": 167, "field": "familiarity", "from": 4, "to": 3.5}
+{"ts": 1788710905, "date": "2026-09-06", "id": 167, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1788710905, "date": "2026-09-06", "id": 167, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1788710907, "date": "2026-09-06", "id": 3, "field": "familiarity", "from": 2, "to": 1.5}
+{"ts": 1788710912, "date": "2026-09-06", "id": 3, "field": "familiarity", "from": 1.5, "to": 2}
+{"ts": 1788710915, "date": "2026-09-06", "id": 167, "field": "familiarity", "from": 2, "to": 4}
+{"ts": 1788711503, "date": "2026-09-06", "id": 15, "field": "familiarity", "from": 3, "to": 3.5}
+{"ts": 1788719013, "date": "2026-09-06", "id": 36, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1788731191, "date": "2026-09-06", "id": 15, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1788731424, "date": "2026-09-06", "id": 11, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1788732816, "date": "2026-09-06", "id": 42, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1788744187, "date": "2026-09-06", "id": 167, "field": "familiarity", "from": 4, "to": 2}
+{"ts": 1788744462, "date": "2026-09-06", "id": 15, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1788745093, "date": "2026-09-06", "id": 11, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1788745273, "date": "2026-09-06", "id": 42, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1788746387, "date": "2026-09-06", "id": 46, "field": "exists", "from": null, "to": true}
+{"ts": 1788746465, "date": "2026-09-06", "id": 46, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1788746530, "date": "2026-09-06", "id": 22, "field": "exists", "from": null, "to": true}
+{"ts": 1788746682, "date": "2026-09-06", "id": 22, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1788746707, "date": "2026-09-06", "id": 79, "field": "exists", "from": null, "to": true}
+{"ts": 1788751597, "date": "2026-09-06", "id": 128, "field": "familiarity", "from": 4, "to": 3.5}
+{"ts": 1788754216, "date": "2026-09-07", "id": 121, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1788818170, "date": "2026-09-07", "id": 424, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1788821638, "date": "2026-09-07", "id": 567, "field": "exists", "from": null, "to": true}
+{"ts": 1788841839, "date": "2026-09-08", "id": 567, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1788841844, "date": "2026-09-08", "id": 567, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1788841851, "date": "2026-09-08", "id": 76, "field": "exists", "from": null, "to": true}
+{"ts": 1788880360, "date": "2026-09-08", "id": 76, "field": "familiarity", "from": 2, "to": 3.5}
+{"ts": 1788882892, "date": "2026-09-08", "id": 76, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1788882898, "date": "2026-09-08", "id": 239, "field": "exists", "from": null, "to": true}
+{"ts": 1788884934, "date": "2026-09-08", "id": 239, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1788885020, "date": "2026-09-08", "id": 155, "field": "exists", "from": null, "to": true}
+{"ts": 1788886046, "date": "2026-09-08", "id": 155, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1788886238, "date": "2026-09-08", "id": 155, "field": "structures", "added": ["stack"], "removed": []}
+{"ts": 1788886249, "date": "2026-09-08", "id": 155, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1788886303, "date": "2026-09-08", "id": 150, "field": "exists", "from": null, "to": true}
+{"ts": 1788887189, "date": "2026-09-08", "id": 150, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1788889556, "date": "2026-09-08", "id": 739, "field": "exists", "from": null, "to": true}
+{"ts": 1788890066, "date": "2026-09-08", "id": 739, "field": "familiarity", "from": null, "to": 1.5}
+{"ts": 1788890070, "date": "2026-09-08", "id": 739, "field": "familiarity", "from": 1.5, "to": 1}
+{"ts": 1788890120, "date": "2026-09-08", "id": 853, "field": "exists", "from": null, "to": true}
+{"ts": 1788890321, "date": "2026-09-08", "id": 704, "field": "familiarity", "from": 4, "to": 1.5}
+{"ts": 1788890323, "date": "2026-09-08", "id": 704, "field": "familiarity", "from": 1.5, "to": 2}
+{"ts": 1788894093, "date": "2026-09-08", "id": 46, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1788894260, "date": "2026-09-08", "id": 104, "field": "exists", "from": null, "to": true}
+{"ts": 1788894399, "date": "2026-09-08", "id": 104, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1788894401, "date": "2026-09-08", "id": 104, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1788894409, "date": "2026-09-08", "id": 543, "field": "exists", "from": null, "to": true}
+{"ts": 1788894788, "date": "2026-09-08", "id": 543, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1788894824, "date": "2026-09-08", "id": 543, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1788895186, "date": "2026-09-08", "id": 110, "field": "exists", "from": null, "to": true}
+{"ts": 1788895627, "date": "2026-09-08", "id": 110, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1788895630, "date": "2026-09-08", "id": 110, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1788973521, "date": "2026-09-09", "id": 74, "field": "exists", "from": null, "to": true}
+{"ts": 1788973548, "date": "2026-09-09", "id": 84, "field": "exists", "from": null, "to": true}
+{"ts": 1788974558, "date": "2026-09-09", "id": 84, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1788976464, "date": "2026-09-09", "id": 74, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1788977054, "date": "2026-09-09", "id": 100, "field": "familiarity", "from": 4, "to": 1}
+{"ts": 1788977062, "date": "2026-09-09", "id": 703, "field": "exists", "from": null, "to": true}
+{"ts": 1788978121, "date": "2026-09-09", "id": 703, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1788978127, "date": "2026-09-09", "id": 1046, "field": "exists", "from": null, "to": true}
+{"ts": 1788978631, "date": "2026-09-09", "id": 1046, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1788978762, "date": "2026-09-09", "id": 155, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1788980717, "date": "2026-09-09", "id": 295, "field": "familiarity", "from": 4, "to": 2}
+{"ts": 1789001537, "date": "2026-09-09", "id": 78, "field": "exists", "from": null, "to": true}
+{"ts": 1789001697, "date": "2026-09-09", "id": 39, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1789001713, "date": "2026-09-09", "id": 17, "field": "exists", "from": null, "to": true}
+{"ts": 1789001798, "date": "2026-09-09", "id": 131, "field": "exists", "from": null, "to": true}
+{"ts": 1789002088, "date": "2026-09-09", "id": 51, "field": "exists", "from": null, "to": true}
+{"ts": 1789067936, "date": "2026-09-10", "id": 190, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 191, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 338, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 435, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 56, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789067936, "date": "2026-09-10", "id": 57, "field": "paused", "from": null, "to": "2026-09-10"}
+{"ts": 1789073473, "date": "2026-09-10", "id": 153, "field": "familiarity", "from": 3, "to": 3.5}
+{"ts": 1789073475, "date": "2026-09-10", "id": 153, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1789073481, "date": "2026-09-10", "id": 153, "field": "familiarity", "from": 3, "to": 1.5}
+{"ts": 1789161710, "date": "2026-09-11", "id": 981, "field": "exists", "from": null, "to": true}
+{"ts": 1789163285, "date": "2026-09-11", "id": 981, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789181184, "date": "2026-09-11", "id": 138, "field": "exists", "from": null, "to": true}
+{"ts": 1789187758, "date": "2026-09-12", "id": 138, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789188008, "date": "2026-09-12", "id": 138, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789188019, "date": "2026-09-12", "id": 2, "field": "exists", "from": null, "to": true}
+{"ts": 1789191194, "date": "2026-09-12", "id": 2, "field": "familiarity", "from": null, "to": 1.5}
+{"ts": 1789191196, "date": "2026-09-12", "id": 2, "field": "familiarity", "from": 1.5, "to": 1}
+{"ts": 1789191227, "date": "2026-09-12", "id": 287, "field": "exists", "from": null, "to": true}
+{"ts": 1789229348, "date": "2026-09-12", "id": 287, "field": "familiarity", "from": null, "to": 1.5}
+{"ts": 1789230564, "date": "2026-09-12", "id": 146, "field": "exists", "from": null, "to": true}
+{"ts": 1789233391, "date": "2026-09-12", "id": 146, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1789233454, "date": "2026-09-12", "id": 235, "field": "exists", "from": null, "to": true}
+{"ts": 1789234005, "date": "2026-09-12", "id": 203, "field": "exists", "from": null, "to": true}
+{"ts": 1789234005, "date": "2026-09-12", "id": 83, "field": "exists", "from": null, "to": true}
+{"ts": 1789234005, "date": "2026-09-12", "id": 707, "field": "exists", "from": null, "to": true}
+{"ts": 1789234821, "date": "2026-09-12", "id": 235, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789234825, "date": "2026-09-12", "id": 235, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789234911, "date": "2026-09-12", "id": 102, "field": "exists", "from": null, "to": true}
+{"ts": 1789236096, "date": "2026-09-12", "id": 102, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789236203, "date": "2026-09-12", "id": 102, "field": "familiarity", "from": 2, "to": 3}
+{"ts": 1789236206, "date": "2026-09-12", "id": 102, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789236208, "date": "2026-09-12", "id": 102, "field": "familiarity", "from": 2, "to": 3}
+{"ts": 1789236241, "date": "2026-09-12", "id": 199, "field": "exists", "from": null, "to": true}
+{"ts": 1789236848, "date": "2026-09-12", "id": 199, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789236903, "date": "2026-09-12", "id": 1448, "field": "exists", "from": null, "to": true}
+{"ts": 1789237648, "date": "2026-09-12", "id": 1448, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789237664, "date": "2026-09-12", "id": 1448, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789239496, "date": "2026-09-12", "id": 230, "field": "exists", "from": null, "to": true}
+{"ts": 1789239938, "date": "2026-09-12", "id": 230, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1789239956, "date": "2026-09-12", "id": 230, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789240191, "date": "2026-09-12", "id": 155, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789240193, "date": "2026-09-12", "id": 155, "field": "familiarity", "from": 2, "to": 1}
+{"ts": 1789240459, "date": "2026-09-12", "id": 572, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1789330713, "date": "2026-09-13", "id": 128, "field": "familiarity", "from": 3.5, "to": 1}
+{"ts": 1789410155, "date": "2026-09-14", "id": 105, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1789410310, "date": "2026-09-14", "id": 973, "field": "exists", "from": null, "to": true}
+{"ts": 1789410469, "date": "2026-09-14", "id": 973, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1789410487, "date": "2026-09-14", "id": 215, "field": "exists", "from": null, "to": true}
+{"ts": 1789414221, "date": "2026-09-14", "id": 215, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1789414226, "date": "2026-09-14", "id": 621, "field": "exists", "from": null, "to": true}
+{"ts": 1789418866, "date": "2026-09-14", "id": 621, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789419802, "date": "2026-09-14", "id": 355, "field": "exists", "from": null, "to": true}
+{"ts": 1789423090, "date": "2026-09-14", "id": 355, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1789423188, "date": "2026-09-14", "id": 355, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789423226, "date": "2026-09-14", "id": 355, "field": "familiarity", "from": 3, "to": 3.5}
+{"ts": 1789424655, "date": "2026-09-14", "id": 200, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789425077, "date": "2026-09-14", "id": 36, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789426513, "date": "2026-09-14", "id": 355, "field": "paused", "from": null, "to": "2026-09-14"}
+{"ts": 1789426680, "date": "2026-09-14", "id": 138, "field": "structures", "added": ["linked-list", "hash-table"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 138, "field": "paradigms", "added": ["hash"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 138, "field": "techniques", "added": ["两趟: 先建节点填表, 再查表连指针", "key 是原节点本身, 不是 val(val 可重复)"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 230, "field": "structures", "added": ["tree"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 230, "field": "paradigms", "added": ["dfs"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 230, "field": "techniques", "added": ["BST 中序遍历 = 升序序列", "数到第 k 个就停"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 235, "field": "structures", "added": ["tree"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 235, "field": "paradigms", "added": ["dfs"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 235, "field": "techniques", "added": ["BST 大小关系决定往哪边走", "相等也算分叉点: node 本身可能就是 p 或 q", "递归传子节点, 别写成 root"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 1448, "field": "structures", "added": ["tree"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 1448, "field": "paradigms", "added": ["dfs"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 1448, "field": "techniques", "added": ["路径最大值当参数往下传", "相等也算 good: 用 >="], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "structures", "added": ["hash-table", "heap"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "paradigms", "added": ["design", "heap"], "removed": []}
+{"ts": 1789426680, "date": "2026-09-14", "id": 355, "field": "techniques", "added": ["先列每个 API 读写哪些状态", "全局自增 time 排序, tweetId 不代表时间", "getNewsFeed = 合并 k 个有序列表", "unfollow 用 set.discard"], "removed": []}
+{"ts": 1789441438, "date": "2026-09-14", "id": 200, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789442034, "date": "2026-09-14", "id": 394, "field": "exists", "from": null, "to": true}
+{"ts": 1789442703, "date": "2026-09-14", "id": 739, "field": "familiarity", "from": 1, "to": 3}
+{"ts": 1789483820, "date": "2026-09-15", "id": 695, "field": "exists", "from": null, "to": true}
+{"ts": 1789486068, "date": "2026-09-15", "id": 695, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789486071, "date": "2026-09-15", "id": 695, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789487172, "date": "2026-09-15", "id": 994, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1789487539, "date": "2026-09-15", "id": 130, "field": "exists", "from": null, "to": true}
+{"ts": 1789488986, "date": "2026-09-15", "id": 130, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789489516, "date": "2026-09-15", "id": 35, "field": "familiarity", "from": 4, "to": 1}
+{"ts": 1789489770, "date": "2026-09-15", "id": 34, "field": "exists", "from": null, "to": true}
+{"ts": 1789490606, "date": "2026-09-15", "id": 34, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789490780, "date": "2026-09-15", "id": 162, "field": "exists", "from": null, "to": true}
+{"ts": 1789491672, "date": "2026-09-15", "id": 162, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1789491744, "date": "2026-09-15", "id": 162, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1789491952, "date": "2026-09-15", "id": 744, "field": "exists", "from": null, "to": true}
+{"ts": 1789492190, "date": "2026-09-15", "id": 744, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1789493733, "date": "2026-09-15", "id": 15, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789493742, "date": "2026-09-15", "id": 283, "field": "exists", "from": null, "to": true}
+{"ts": 1789494136, "date": "2026-09-15", "id": 283, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1789572187, "date": "2026-09-16", "id": 150, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1789572346, "date": "2026-09-16", "id": 150, "field": "familiarity", "from": 1, "to": 0}
+{"ts": 1789572946, "date": "2026-09-16", "id": 22, "field": "familiarity", "from": 3, "to": 0}
+{"ts": 1789573584, "date": "2026-09-16", "id": 739, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789574438, "date": "2026-09-16", "id": 84, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1789580091, "date": "2026-09-16", "id": 150, "field": "familiarity", "from": 3, "to": 0}
+{"ts": 1789580094, "date": "2026-09-16", "id": 22, "field": "familiarity", "from": 3, "to": 0}
+{"ts": 1789580098, "date": "2026-09-16", "id": 739, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1789580105, "date": "2026-09-16", "id": 84, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1789581221, "date": "2026-09-16", "id": 853, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1789920146, "date": "2026-09-20", "id": 83, "field": "familiarity", "from": null, "to": 0}
+{"ts": 1789920147, "date": "2026-09-20", "id": 83, "field": "familiarity", "from": 0, "to": 1.5}
+{"ts": 1789920171, "date": "2026-09-20", "id": 83, "field": "familiarity", "from": 1.5, "to": 1}
+{"ts": 1789920661, "date": "2026-09-20", "id": 203, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1789921880, "date": "2026-09-20", "id": 424, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789923328, "date": "2026-09-20", "id": 567, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1789924431, "date": "2026-09-20", "id": 198, "field": "exists", "from": null, "to": true}
+{"ts": 1789924676, "date": "2026-09-20", "id": 198, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1790538367, "date": "2026-09-27", "id": 98, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1790538627, "date": "2026-09-27", "id": 230, "field": "familiarity", "from": 4, "to": 1}
+{"ts": 1790696831, "date": "2026-09-29", "id": 200, "field": "paused", "from": null, "to": "2026-09-29"}
+{"ts": 1790696832, "date": "2026-09-29", "id": 110, "field": "paused", "from": null, "to": "2026-09-29"}
+{"ts": 1790696834, "date": "2026-09-29", "id": 153, "field": "paused", "from": null, "to": "2026-09-29"}
+{"ts": 1790697428, "date": "2026-09-29", "id": 417, "field": "paused", "from": null, "to": "2026-09-29"}
+{"ts": 1790711708, "date": "2026-09-29", "id": 994, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1790712075, "date": "2026-09-29", "id": 994, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1790713144, "date": "2026-09-29", "id": 130, "field": "familiarity", "from": 3.5, "to": 2}
+{"ts": 1790715882, "date": "2026-09-29", "id": 417, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1790716985, "date": "2026-09-29", "id": 133, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1790718223, "date": "2026-09-29", "id": 207, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1790791937, "date": "2026-09-30", "id": 417, "field": "paused", "from": "2026-09-29", "to": null}
+{"ts": 1790791938, "date": "2026-09-30", "id": 200, "field": "paused", "from": "2026-09-29", "to": null}
+{"ts": 1790791947, "date": "2026-09-30", "id": 153, "field": "paused", "from": "2026-09-29", "to": null}
+{"ts": 1790791948, "date": "2026-09-30", "id": 110, "field": "paused", "from": "2026-09-29", "to": null}
+{"ts": 1790794388, "date": "2026-09-30", "id": 207, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1790796291, "date": "2026-09-30", "id": 239, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1790797402, "date": "2026-09-30", "id": 56, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1790882026, "date": "2026-10-01", "id": 78, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1790882033, "date": "2026-10-01", "id": 78, "field": "familiarity", "from": 2, "to": 3}
+{"ts": 1790882769, "date": "2026-10-01", "id": 39, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1790882952, "date": "2026-10-01", "id": 90, "field": "exists", "from": null, "to": true}
+{"ts": 1790883472, "date": "2026-10-01", "id": 90, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1790883532, "date": "2026-10-01", "id": 40, "field": "exists", "from": null, "to": true}
+{"ts": 1790886851, "date": "2026-10-01", "id": 40, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1790889417, "date": "2026-10-01", "id": 79, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1790891187, "date": "2026-10-01", "id": 131, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1790892248, "date": "2026-10-01", "id": 17, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1790958867, "date": "2026-10-02", "id": 146, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1790958883, "date": "2026-10-02", "id": 142, "field": "exists", "from": null, "to": true}
+{"ts": 1790960127, "date": "2026-10-02", "id": 142, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1790960149, "date": "2026-10-02", "id": 148, "field": "exists", "from": null, "to": true}
+{"ts": 1790969573, "date": "2026-10-02", "id": 148, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1790970069, "date": "2026-10-02", "id": 138, "field": "familiarity", "from": 3.5, "to": 1}
+{"ts": 1790970078, "date": "2026-10-02", "id": 236, "field": "exists", "from": null, "to": true}
+{"ts": 1790971653, "date": "2026-10-02", "id": 236, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1790972839, "date": "2026-10-02", "id": 102, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1791047420, "date": "2026-10-03", "id": 438, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1791048716, "date": "2026-10-03", "id": 148, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791049126, "date": "2026-10-03", "id": 142, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791050659, "date": "2026-10-03", "id": 25, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791052158, "date": "2026-10-03", "id": 236, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791053408, "date": "2026-10-03", "id": 560, "field": "exists", "from": null, "to": true}
+{"ts": 1791054636, "date": "2026-10-03", "id": 560, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1791056515, "date": "2026-10-03", "id": 53, "field": "familiarity", "from": 4, "to": 1}
+{"ts": 1791058250, "date": "2026-10-03", "id": 239, "field": "status", "from": "todo", "to": "solved"}
+{"ts": 1791058966, "date": "2026-10-03", "id": 76, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791062013, "date": "2026-10-03", "id": 54, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1791062327, "date": "2026-10-03", "id": 48, "field": "familiarity", "from": 4, "to": 1}
+{"ts": 1791062441, "date": "2026-10-03", "id": 322, "field": "exists", "from": null, "to": true}
+{"ts": 1791063137, "date": "2026-10-03", "id": 322, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791224659, "date": "2026-10-05", "id": 560, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1791225420, "date": "2026-10-05", "id": 56, "field": "familiarity", "from": 3, "to": 1}
+{"ts": 1791226452, "date": "2026-10-05", "id": 239, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791227072, "date": "2026-10-05", "id": 33, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791228207, "date": "2026-10-05", "id": 54, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791228608, "date": "2026-10-05", "id": 322, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791230387, "date": "2026-10-05", "id": 139, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791230598, "date": "2026-10-05", "id": 1143, "field": "exists", "from": null, "to": true}
+{"ts": 1791231652, "date": "2026-10-05", "id": 1143, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791231654, "date": "2026-10-05", "id": 1143, "field": "familiarity", "from": 3, "to": 4}
+{"ts": 1791231704, "date": "2026-10-05", "id": 72, "field": "exists", "from": null, "to": true}
+{"ts": 1791232207, "date": "2026-10-05", "id": 72, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1791232208, "date": "2026-10-05", "id": 72, "field": "familiarity", "from": 4, "to": 3.5}
+{"ts": 1791232392, "date": "2026-10-05", "id": 31, "field": "exists", "from": null, "to": true}
+{"ts": 1791233337, "date": "2026-10-05", "id": 31, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1791233567, "date": "2026-10-05", "id": 78, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791236135, "date": "2026-10-05", "id": 394, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1791240965, "date": "2026-10-05", "id": 234, "field": "exists", "from": null, "to": true}
+{"ts": 1791241562, "date": "2026-10-05", "id": 234, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1791241574, "date": "2026-10-05", "id": 94, "field": "exists", "from": null, "to": true}
+{"ts": 1791241773, "date": "2026-10-05", "id": 94, "field": "familiarity", "from": null, "to": 0}
+{"ts": 1791241774, "date": "2026-10-05", "id": 94, "field": "familiarity", "from": 0, "to": 1}
+{"ts": 1791241782, "date": "2026-10-05", "id": 101, "field": "exists", "from": null, "to": true}
+{"ts": 1791242029, "date": "2026-10-05", "id": 101, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791242099, "date": "2026-10-05", "id": 108, "field": "exists", "from": null, "to": true}
+{"ts": 1791243543, "date": "2026-10-05", "id": 108, "field": "familiarity", "from": null, "to": 0}
+{"ts": 1791243544, "date": "2026-10-05", "id": 108, "field": "familiarity", "from": 0, "to": 1}
+{"ts": 1791243557, "date": "2026-10-05", "id": 160, "field": "exists", "from": null, "to": true}
+{"ts": 1791244039, "date": "2026-10-05", "id": 160, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1791250885, "date": "2026-10-05", "id": 24, "field": "exists", "from": null, "to": true}
+{"ts": 1791253384, "date": "2026-10-05", "id": 24, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791253852, "date": "2026-10-05", "id": 136, "field": "exists", "from": null, "to": true}
+{"ts": 1791254000, "date": "2026-10-05", "id": 136, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791254240, "date": "2026-10-05", "id": 169, "field": "familiarity", "from": 4, "to": 1}
+{"ts": 1791254262, "date": "2026-10-05", "id": 75, "field": "exists", "from": null, "to": true}
+{"ts": 1791254709, "date": "2026-10-05", "id": 75, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791254727, "date": "2026-10-05", "id": 75, "field": "familiarity", "from": 1, "to": 2}
+{"ts": 1791331289, "date": "2026-10-06", "id": 124, "field": "exists", "from": null, "to": true}
+{"ts": 1791331566, "date": "2026-10-06", "id": 560, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791331855, "date": "2026-10-06", "id": 1143, "field": "familiarity", "from": 4, "to": 2}
+{"ts": 1791332176, "date": "2026-10-06", "id": 72, "field": "familiarity", "from": 3.5, "to": 2}
+{"ts": 1791332277, "date": "2026-10-06", "id": 1143, "field": "familiarity", "from": 2, "to": 2.5}
+{"ts": 1791332387, "date": "2026-10-06", "id": 72, "field": "familiarity", "from": 2, "to": 2.5}
+{"ts": 1791335094, "date": "2026-10-06", "id": 79, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1791391704, "date": "2026-10-07", "id": 118, "field": "exists", "from": null, "to": true}
+{"ts": 1791399261, "date": "2026-10-07", "id": 124, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791399734, "date": "2026-10-07", "id": 118, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1791399752, "date": "2026-10-07", "id": 62, "field": "exists", "from": null, "to": true}
+{"ts": 1791399981, "date": "2026-10-07", "id": 62, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791400152, "date": "2026-10-07", "id": 62, "field": "familiarity", "from": 1, "to": 1.5}
+{"ts": 1791400154, "date": "2026-10-07", "id": 64, "field": "exists", "from": null, "to": true}
+{"ts": 1791400434, "date": "2026-10-07", "id": 64, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791400469, "date": "2026-10-07", "id": 240, "field": "exists", "from": null, "to": true}
+{"ts": 1791402047, "date": "2026-10-07", "id": 240, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791402403, "date": "2026-10-07", "id": 73, "field": "exists", "from": null, "to": true}
+{"ts": 1791402679, "date": "2026-10-07", "id": 73, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791402923, "date": "2026-10-07", "id": 152, "field": "familiarity", "from": 4, "to": 2}
+{"ts": 1791404428, "date": "2026-10-07", "id": 41, "field": "exists", "from": null, "to": true}
+{"ts": 1791405089, "date": "2026-10-07", "id": 41, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1791405093, "date": "2026-10-07", "id": 437, "field": "exists", "from": null, "to": true}
+{"ts": 1791405671, "date": "2026-10-07", "id": 437, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1791405683, "date": "2026-10-07", "id": 114, "field": "exists", "from": null, "to": true}
+{"ts": 1791406732, "date": "2026-10-07", "id": 114, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791406740, "date": "2026-10-07", "id": 279, "field": "exists", "from": null, "to": true}
+{"ts": 1791407085, "date": "2026-10-07", "id": 279, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791407093, "date": "2026-10-07", "id": 416, "field": "exists", "from": null, "to": true}
+{"ts": 1791407439, "date": "2026-10-07", "id": 56, "field": "paused", "from": "2026-09-10", "to": null}
+{"ts": 1791409912, "date": "2026-10-07", "id": 45, "field": "exists", "from": null, "to": true}
+{"ts": 1791410002, "date": "2026-10-07", "id": 416, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1791571489, "date": "2026-10-09", "id": 394, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1791914914, "date": "2026-10-13", "id": 45, "field": "status", "from": "solved", "to": "todo"}
+{"ts": 1791914914, "date": "2026-10-13", "id": 45, "field": "familiarity", "from": null, "to": 1.5}
+{"ts": 1791915489, "date": "2026-10-13", "id": 416, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1791915926, "date": "2026-10-13", "id": 763, "field": "exists", "from": null, "to": true}
+{"ts": 1791917370, "date": "2026-10-13", "id": 763, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1791918702, "date": "2026-10-13", "id": 131, "field": "familiarity", "from": 3.5, "to": 2.5}
+{"ts": 1791918862, "date": "2026-10-13", "id": 208, "field": "exists", "from": null, "to": true}
+{"ts": 1791919979, "date": "2026-10-13", "id": 41, "field": "familiarity", "from": 4, "to": 3}
+{"ts": 1791920819, "date": "2026-10-13", "id": 4, "field": "exists", "from": null, "to": true}
+{"ts": 1791922436, "date": "2026-10-13", "id": 146, "field": "familiarity", "from": 2, "to": 3}
+{"ts": 1791924136, "date": "2026-10-13", "id": 208, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791924138, "date": "2026-10-13", "id": 208, "field": "familiarity", "from": 3, "to": 3.5}
+{"ts": 1791924190, "date": "2026-10-13", "id": 32, "field": "exists", "from": null, "to": true}
+{"ts": 1791925318, "date": "2026-10-13", "id": 32, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1791992661, "date": "2026-10-14", "id": 77, "field": "exists", "from": null, "to": true}
+{"ts": 1791992697, "date": "2026-10-14", "id": 77, "field": "status", "from": "solved", "to": "todo"}
+{"ts": 1791992697, "date": "2026-10-14", "id": 77, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1791994745, "date": "2026-10-14", "id": 556, "field": "exists", "from": null, "to": true}
+{"ts": 1791994751, "date": "2026-10-14", "id": 556, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1791996242, "date": "2026-10-14", "id": 1405, "field": "exists", "from": null, "to": true}
+{"ts": 1791996265, "date": "2026-10-14", "id": 1405, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792004277, "date": "2026-10-14", "id": 146, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1792005535, "date": "2026-10-14", "id": 432, "field": "exists", "from": null, "to": true}
+{"ts": 1792005595, "date": "2026-10-14", "id": 432, "field": "status", "from": "solved", "to": "todo"}
+{"ts": 1792005595, "date": "2026-10-14", "id": 432, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792007001, "date": "2026-10-14", "id": 827, "field": "exists", "from": null, "to": true}
+{"ts": 1792007029, "date": "2026-10-14", "id": 827, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792007035, "date": "2026-10-14", "id": 295, "field": "familiarity", "from": 2, "to": 1}
+{"ts": 1792007540, "date": "2026-10-14", "id": 124, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1792009621, "date": "2026-10-14", "id": 4, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1792009993, "date": "2026-10-14", "id": 51, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792009995, "date": "2026-10-14", "id": 51, "field": "familiarity", "from": 4, "to": 3.5}
+{"ts": 1792010704, "date": "2026-10-14", "id": 24, "field": "familiarity", "from": 3, "to": 2}

@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
+  "techniques": [
+    "按层 BFS, 记层长",
+    "每层最后出队的节点",
+    "deque 保证层内左→右"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "层序 BFS，记下每层最后一个出队的节点值",
+    "wrong": [
+      "从根一路只往右孩子走，记下路径上的值",
+      "层序 BFS，记下每层第一个出队的节点值",
+      "DFS 先左后右，记下每层第一次到达的节点值"
+    ]
+  }
+}

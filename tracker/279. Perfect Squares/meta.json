@@ -1,0 +1,27 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp"
+  ],
+  "techniques": [
+    "完全背包 / 零钱兑换同构",
+    "平方数当硬币"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n√n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "dp[i] = min(1 + dp[i - j*j])，枚举所有 j*j <= i",
+    "wrong": [
+      "贪心：每次减去不超过当前值的最大平方数",
+      "dp[i] = 1 + dp[i - k*k]，k 取使 k*k <= i 的最大值",
+      "dp[i] = dp[i-1] + 1，遇到完全平方数重置为 1"
+    ]
+  }
+}

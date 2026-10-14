@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "原地哈希：值 v 住下标 v-1",
+    "while 交换直到放不动"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "O(n) 时间 + O(1) 空间，用什么做？",
+    "idea": "原地哈希：把值 v 换到下标 v-1，再找第一个住错的",
+    "wrong": [
+      "把 1..n 和数组全部异或，剩下的就是答案",
+      "用 n(n+1)/2 减去数组里所有正数之和",
+      "正数全进最小堆，依次弹出找第一个断档"
+    ],
+    "then": [
+      {
+        "q": "第一遍 while 交换的条件？",
+        "idea": "1 <= v <= n 且 nums[v-1] != v",
+        "wrong": [
+          "0 <= v <= n 且 nums[v-1] != v",
+          "1 <= v <= n 且 nums[i] != i+1",
+          "v > 0 且 nums[v-1] != v"
+        ]
+      }
+    ]
+  }
+}

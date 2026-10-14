@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "read-write-pointer"
+  ],
+  "techniques": [
+    "按颜色分趟, 每趟同 283",
+    "0、1 归位后 2 自然在尾部"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "思路是哪个？",
+    "idea": "读写双指针分趟：先把 0 换到前面，再从 write 起换 1",
+    "wrong": [
+      "读写双指针一趟：把所有非 2 的元素按序换到前面",
+      "两端相向：0 和左端换、2 和右端换，换完 i 都前进",
+      "读写双指针分趟：先把 2 换到前面，再从 write 起换 1"
+    ],
+    "then": [
+      {
+        "q": "每一趟里 read / write 怎么走？",
+        "idea": "read 每步都 +1，只有交换时 write 才 +1",
+        "wrong": [
+          "交换后 read 不动、write +1，没交换才 read +1",
+          "read 和 write 每步都同时 +1，碰到目标就交换",
+          "交换时 read +1，没交换时 write +1"
+        ]
+      }
+    ]
+  }
+}

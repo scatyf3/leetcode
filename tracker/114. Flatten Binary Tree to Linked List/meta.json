@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "tree",
+    "linked-list"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "后序递归返回 (头, 尾)",
+    "按先序拼: node → 左链 → 右链",
+    "置空 node.left"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "q": "递归返回 (头, 尾)，怎么拼？",
+    "idea": "node → 左子树拉平的链 → 右子树拉平的链",
+    "wrong": [
+      "node → 右子树拉平的链 → 左子树拉平的链",
+      "左子树拉平的链 → node → 右子树拉平的链",
+      "右子树拉平的链 → node → 左子树拉平的链"
+    ],
+    "then": [
+      {
+        "q": "右指针串好之后，还差什么？",
+        "idea": "把 node.left 置为 None",
+        "wrong": [
+          "不用处理，右指针串好就是链表",
+          "把 left_tail.right 置为 None",
+          "把 left_tail.left 指回 node"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "matrix"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "先二分定行再二分定列",
+    "行命中 = row[0] <= target <= row[-1]"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(log m + log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "第一次二分在行上，命中条件和收缩方向？",
+    "idea": "row[0] <= target <= row[-1] 命中；row[0] > target 则 r = mid-1，否则 l = mid+1",
+    "wrong": [
+      "row[0] == target 命中；row[0] > target 则 r = mid-1，否则 l = mid+1",
+      "row[-1] >= target 命中；row[0] > target 则 r = mid-1，否则 l = mid+1",
+      "row[0] <= target <= row[-1] 命中；row[0] > target 则 l = mid+1，否则 r = mid-1"
+    ]
+  }
+}

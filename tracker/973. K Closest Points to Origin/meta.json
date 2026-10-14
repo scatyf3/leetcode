@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "heap",
+    "array"
+  ],
+  "paradigms": [
+    "heap"
+  ],
+  "techniques": [
+    "按距离建小根堆再弹 k 次"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "q": "用堆怎么取出 k 个最近的点？",
+    "idea": "全部按距离推进小根堆，再弹出 k 个",
+    "wrong": [
+      "全部按距离推进大根堆，再弹出 k 个",
+      "维护大小为 k 的小根堆，超了就弹堆顶",
+      "全部按 x + y 推进小根堆，再弹出 k 个"
+    ]
+  }
+}

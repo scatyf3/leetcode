@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "tree",
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "preorder 首元素是根，inorder 定位根切左右",
+    "按左子树长度切 preorder",
+    "哈希表预存 inorder 下标"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "preorder 首元素是根，在 inorder 里定位它，按左子树长度切两边递归",
+    "wrong": [
+      "inorder 首元素是根，在 preorder 里定位它，按左子树长度切两边递归",
+      "preorder 末元素是根，在 inorder 里定位它，按左子树长度切两边递归",
+      "inorder 正中间的元素是根，左右两半各自递归建成左、右子树"
+    ],
+    "then": [
+      {
+        "q": "根在 inorder 的下标是 idx，preorder 里左子树是哪段？（左闭右开）",
+        "idea": "[pre_l+1, pre_l+1+(idx-in_l))",
+        "wrong": [
+          "[pre_l+1, idx+1)",
+          "[pre_l, pre_l+(idx-in_l))",
+          "[pre_l+1, pre_l+(idx-in_l))"
+        ]
+      }
+    ]
+  }
+}

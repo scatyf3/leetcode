@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "对撞指针",
+    "和大了 r--，和小了 l++",
+    "1-indexed 返回 +1"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "l、r 两头夹：和大了 r 左移，和小了 l 右移",
+    "wrong": [
+      "l、r 两头夹：和大了 l 右移，和小了 r 左移",
+      "l、r 两头夹：和不等就 l、r 同时向中间收",
+      "把下标对 (l, r) 当一维序列，整体二分"
+    ]
+  }
+}

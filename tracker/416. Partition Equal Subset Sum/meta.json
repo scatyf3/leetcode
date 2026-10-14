@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "1d-dp"
+  ],
+  "techniques": [
+    "转成和为 sum/2 的子集",
+    "可达和集合（0/1 背包）"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n·target)",
+    "space": "O(target)"
+  },
+  "quiz": {
+    "q": "先转化成什么问题？",
+    "idea": "能否选出一个子集，和恰好为 sum/2",
+    "wrong": [
+      "排序后从大到小，轮流分给当前较小的一边",
+      "是否存在某个前缀和恰好等于 sum/2",
+      "排序后双指针从两端往中间凑出 sum/2"
+    ],
+    "then": [
+      {
+        "q": "每来一个 x，可达和集合 reachable 怎么更新？",
+        "idea": "reachable |= {s + x for s in reachable}，只收 ≤ target 的",
+        "wrong": [
+          "reachable = {s + x for s in reachable}，只收 ≤ target 的",
+          "for s in reachable: reachable.add(s + x)，只收 ≤ target 的",
+          "reachable |= {x}，再看 target 是否在 reachable 里"
+        ]
+      }
+    ]
+  }
+}

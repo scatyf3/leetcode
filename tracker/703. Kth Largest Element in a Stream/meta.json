@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "heap"
+  ],
+  "paradigms": [
+    "heap",
+    "design"
+  ],
+  "techniques": [
+    "大小为 k 的最小堆，堆顶即第 k 大"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n log k)",
+    "space": "O(k)"
+  },
+  "quiz": {
+    "idea": "大小为 k 的最小堆，堆顶就是第 k 大",
+    "wrong": [
+      "大小为 k 的最大堆，堆顶就是第 k 大",
+      "大小为 k 的最小堆，新值比堆顶小就替换",
+      "大小为 k 的最大堆，新值比堆顶小就替换"
+    ],
+    "then": [
+      {
+        "q": "add(val) 时堆里还不满 k 个，怎么办？",
+        "idea": "直接 push，不和堆顶比较",
+        "wrong": [
+          "和堆顶比，比堆顶大才 push",
+          "先 pop 堆顶，再 push val",
+          "不入堆，直接返回 val"
+        ]
+      }
+    ]
+  }
+}

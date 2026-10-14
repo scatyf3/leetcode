@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "array",
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "中点当根保证平衡",
+    "闭区间下标递归，不切片"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(log n)"
+  },
+  "quiz": {
+    "idea": "取中点当根，左右两半分别递归建子树",
+    "wrong": [
+      "nums[0] 当根，其余元素依次挂成右子树链",
+      "取中点当根，左半挂右子树、右半挂左子树",
+      "按 BFS 层序把数组元素从左到右依次填入"
+    ]
+  }
+}

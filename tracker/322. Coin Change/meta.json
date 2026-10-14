@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp"
+  ],
+  "techniques": [
+    "dp[i] = 凑 i 元最少枚数",
+    "inf / amount+1 当哨兵让 min 绕开",
+    "贪心反例 6, [4,3,1]"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(amount·k)",
+    "space": "O(amount)"
+  },
+  "quiz": {
+    "idea": "一维 DP：dp[i] = 凑出 i 元的最少硬币数",
+    "wrong": [
+      "贪心：每次拿不超过余额的最大面值",
+      "回溯：从大面值往小搜，第一个凑出的解即最优",
+      "一维 DP：dp[i] = 凑出 i 元的组合方案数"
+    ],
+    "then": [
+      {
+        "q": "dp 初值怎么设？（就地 dp[i] = min(dp[i], dp[i-c]+1)）",
+        "idea": "dp[0] = 0，其余设 inf（或 amount+1）",
+        "wrong": [
+          "dp[0] = 0，其余设 -1 表示凑不出",
+          "全部设 0，最后再判断是否凑得出",
+          "dp[0] = 1，其余设 inf（或 amount+1）"
+        ]
+      }
+    ]
+  }
+}

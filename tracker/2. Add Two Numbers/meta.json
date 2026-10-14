@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
+  "techniques": [
+    "dummy 头尾插",
+    "进位 jw 带进循环条件"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(max(m, n))",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "从低位逐位相加带进位，dummy 头尾插新节点",
+    "wrong": [
+      "先反转两条链表，再逐位相加带进位",
+      "逐位相加带进位，新节点用头插法接上",
+      "逐位相加，val % 10 作进位，val // 10 作当前位"
+    ],
+    "then": [
+      {
+        "q": "while 循环的条件？",
+        "idea": "l1 or l2 or jw",
+        "wrong": [
+          "l1 and l2",
+          "l1 or l2",
+          "l1 and l2 or jw"
+        ]
+      }
+    ]
+  }
+}

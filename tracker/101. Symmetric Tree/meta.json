@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "镜像配对：外侧配外侧、内侧配内侧"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "q": "is_eq(a, b) 判两棵子树互为镜像，递归时孩子怎么配对？",
+    "idea": "a.left 配 b.right，a.right 配 b.left",
+    "wrong": [
+      "a.left 配 b.left，a.right 配 b.right",
+      "a.left 配 a.right，b.left 配 b.right",
+      "不递归：中序遍历后判序列是否回文"
+    ],
+    "then": [
+      {
+        "q": "base case 怎么写？",
+        "idea": "两边都空为真，只有一边空为假，都不空再比 val",
+        "wrong": [
+          "两边都空为真，否则直接比 val 再递归下去",
+          "只要有一边空就为真，都不空再比 val",
+          "两边都空为假，只有一边空为真，再比 val"
+        ]
+      }
+    ]
+  }
+}

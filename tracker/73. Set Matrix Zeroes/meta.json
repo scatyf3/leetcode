@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "matrix",
+    "hash-table"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
+  "techniques": [
+    "先记录再修改, 两趟分开",
+    "set 存零行零列"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(mn)",
+    "space": "O(m + n)"
+  },
+  "quiz": {
+    "idea": "先扫一遍把零所在的行号列号记进 set，再统一置零",
+    "wrong": [
+      "边扫边把这个 0 所在的整行整列置零，一趟搞定",
+      "扫到 0 时只把它右边和下边的格子置零，一趟搞定",
+      "遇到 0 就 BFS 向四周相邻格扩散，把连通的格子置零"
+    ]
+  }
+}

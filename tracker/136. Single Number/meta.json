@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "set 开关：成对抵消"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "q": "用 set 怎么做？",
+    "idea": "没见过就加，见过就删，最后剩下的那个就是答案",
+    "wrong": [
+      "没见过就加，第一次遇到见过的就直接返回它",
+      "全部加进 set，返回 set 里最小的那个元素",
+      "全部加进 set，返回 sum(set) - sum(nums)"
+    ]
+  }
+}

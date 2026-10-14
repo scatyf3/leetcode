@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "guard 哨兵",
+    "相邻比较，相等就删 cur、prev 不动"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "prev.val == cur.val 时怎么处理？",
+    "idea": "prev.next = cur.next；cur = prev.next；prev 不动",
+    "wrong": [
+      "prev.next = cur.next；prev = cur；cur = cur.next",
+      "prev.next = cur.next；prev、cur 都留在原地",
+      "prev.next = cur.next.next；cur = prev.next"
+    ]
+  }
+}

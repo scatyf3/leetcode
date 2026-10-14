@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "走完自己走对方，步数对齐",
+    "None is None 同步退出"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(m + n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "O(1) 空间怎么找交点？",
+    "idea": "两指针走完自己的链表就跳到对方头上，相遇处即交点",
+    "wrong": [
+      "两指针同时从各自头出发，第一个相同的节点即交点",
+      "两指针走完自己的链表就回自己头上，相遇处即交点",
+      "快指针一次两步、慢指针一次一步，相遇处即交点"
+    ]
+  }
+}

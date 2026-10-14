@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "greedy"
+  ],
+  "techniques": [
+    "按位置从近到远排序",
+    "比到达时间而非速度",
+    "只记最前车队的到达时间"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3.5,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "按位置从近到远排，到达时间比前车队长就新开一队",
+    "wrong": [
+      "按位置从远到近排，到达时间比前车队长就新开一队",
+      "按速度从快到慢排，到达时间比前车队长就新开一队",
+      "按位置从近到远排，速度比前车队慢就新开一队"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "2d-dp"
+  ],
+  "techniques": [
+    "dp[i][j] = 两个前缀的 LCS",
+    "表开 (m+1)×(n+1)，取字符用 i-1",
+    "不等时 max(左, 上) 跳过一个"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2.5,
+  "complexity": {
+    "time": "O(mn)",
+    "space": "O(mn)"
+  },
+  "quiz": {
+    "q": "dp[i][j] 定义成什么？",
+    "idea": "text1 前 i 个与 text2 前 j 个字符的 LCS 长度",
+    "wrong": [
+      "恰好以 text1[i-1]、text2[j-1] 结尾的公共子串长度",
+      "text1[i:j] 这一段子串里的最长回文子序列长度",
+      "text1 前 i 个与 text2 前 j 个里相同字符的个数"
+    ],
+    "then": [
+      {
+        "q": "text1[i-1] != text2[j-1] 时 dp[i][j] = ?",
+        "idea": "max(dp[i-1][j], dp[i][j-1])",
+        "wrong": [
+          "0",
+          "dp[i-1][j-1]",
+          "max(dp[i-1][j], dp[i][j-1]) + 1"
+        ]
+      }
+    ]
+  }
+}

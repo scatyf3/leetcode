@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
+  "techniques": [
+    "dummy + group_prev 记上一组尾巴",
+    "反转时 prev 初值 = 下一组的头",
+    "先走 k 步探够不够 k 个"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "反转一组 group_prev.next … kth 时，prev 初值设成什么？",
+    "idea": "group_next（kth 原来的 next），反完尾巴直接接上下一组",
+    "wrong": [
+      "group_prev，让反完的新尾巴指回上一组的尾巴",
+      "kth，从这一组的最后一个节点开始往回接",
+      "group_prev.next，即这一组反转前的旧头节点"
+    ],
+    "then": [
+      {
+        "q": "反完这一组，怎么接回前面、怎么推进？",
+        "idea": "group_prev.next = kth，group_prev 挪到这组的旧头",
+        "wrong": [
+          "group_prev.next = kth，group_prev 挪到 kth",
+          "group_prev.next = 旧头，group_prev 挪到 kth",
+          "group_prev 挪到 group_next，再令其 next = kth"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "array",
+    "stack"
+  ],
+  "paradigms": [
+    "stack"
+  ],
+  "techniques": [
+    "单调栈存待定的 (下标, 温度)",
+    "出栈时按 prev_idx 回填"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "单调栈存待定下标，遇到更高温就弹出并回填",
+    "wrong": [
+      "单调栈存待定下标，遇到更低温就弹出并回填",
+      "单调栈存待定下标，遇到不低于栈顶的就弹出回填",
+      "从左往右维护最高温，等待天数取下标差"
+    ],
+    "then": [
+      {
+        "q": "弹出 (prev_idx, prev_temp) 时怎么写结果？",
+        "idea": "res[prev_idx] = idx - prev_idx",
+        "wrong": [
+          "res.append(idx - prev_idx)",
+          "res[idx] = idx - prev_idx",
+          "res[prev_idx] = idx"
+        ]
+      }
+    ]
+  }
+}

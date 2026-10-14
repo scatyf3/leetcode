@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "降序后缀 = 已到顶, 找它左边的 i",
+    "后缀里从右找第一个 > nums[i] 交换",
+    "反转后缀代替排序"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "从右往左扫，要改的那一位 i 是？",
+    "idea": "第一个 nums[i] < nums[i+1] 的位置（降序后缀的左邻）",
+    "wrong": [
+      "第一个 nums[i] > nums[i+1] 的位置（升序后缀的左邻）",
+      "最后一个 nums[i] < nums[-1] 的位置（比末尾小的最右位）",
+      "第一个 nums[i] < nums[i-1] 的位置（下降点的右边那位）"
+    ],
+    "then": [
+      {
+        "q": "找到 i 之后怎么做？",
+        "idea": "后缀里从右找第一个 > nums[i] 的数交换，再反转 i+1 之后",
+        "wrong": [
+          "后缀里从左找第一个 > nums[i] 的数交换，再反转 i+1 之后",
+          "直接和 nums[i+1] 交换，再反转 i+1 之后的整段后缀",
+          "后缀里从右找第一个 > nums[i] 的数交换，再反转 i 及之后"
+        ]
+      }
+    ]
+  }
+}

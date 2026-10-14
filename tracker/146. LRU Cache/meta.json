@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "linked-list",
+    "hash-table"
+  ],
+  "paradigms": [],
+  "techniques": [
+    "哈希表 key → 链表节点",
+    "双向链表 + 头尾哨兵",
+    "节点存 key，淘汰时才能删哈希表"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(1)",
+    "space": "O(capacity)"
+  },
+  "quiz": {
+    "q": "用什么结构？",
+    "idea": "哈希表 key→节点 + 双向链表按最近使用排序",
+    "wrong": [
+      "哈希表 key→值 + 队列按插入顺序，满了弹队首",
+      "哈希表 key→节点 + 双向链表按访问次数排序",
+      "数组按 key 下标存值 + 记下最近访问的那个 key"
+    ],
+    "then": [
+      {
+        "q": "超容量淘汰时，哈希表怎么同步？",
+        "idea": "节点里也存 key，删 tail.prev 并 del mp[它的 key]",
+        "wrong": [
+          "只删链表节点，哈希表那项留着等下次 put 覆盖",
+          "节点只存 val，淘汰时按 val 反查出 key 再删",
+          "删 head.next 那个节点，并 del mp[它的 key]"
+        ]
+      }
+    ]
+  }
+}

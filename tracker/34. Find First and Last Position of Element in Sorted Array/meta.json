@@ -1,0 +1,48 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
+  "techniques": [
+    "两次二分找两条缝",
+    "< 收左缝返回 l，<= 收右缝返回 r"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "找左端点（第一个 == target），闭区间怎么收、返回啥？",
+    "idea": "nums[mid] < target 则 l = mid+1，否则 r = mid-1，返回 l",
+    "wrong": [
+      "nums[mid] < target 则 l = mid+1，否则 r = mid-1，返回 r",
+      "nums[mid] <= target 则 l = mid+1，否则 r = mid-1，返回 l",
+      "nums[mid] < target 则 l = mid+1，否则 r = mid-1，返回 mid"
+    ],
+    "then": [
+      {
+        "q": "找右端点（最后一个 == target），闭区间怎么收、返回啥？",
+        "idea": "nums[mid] <= target 则 l = mid+1，否则 r = mid-1，返回 r",
+        "wrong": [
+          "nums[mid] <= target 则 l = mid+1，否则 r = mid-1，返回 l",
+          "nums[mid] < target 则 l = mid+1，否则 r = mid-1，返回 r",
+          "nums[mid] <= target 则 l = mid+1，否则 r = mid-1，返回 mid"
+        ]
+      },
+      {
+        "q": "左端点二分退出后，怎么判 target 不存在？",
+        "idea": "l >= n 或 nums[l] != target",
+        "wrong": [
+          "nums[l] != target，不用管 l 的范围",
+          "l > r，循环退出就说明没找到",
+          "r < 0 或 nums[r] != target"
+        ]
+      }
+    ]
+  }
+}

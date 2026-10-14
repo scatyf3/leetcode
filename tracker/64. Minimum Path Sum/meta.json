@@ -1,0 +1,27 @@
+{
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "2d-dp"
+  ],
+  "techniques": [
+    "dp[i][j] = min(上, 左) + grid[i][j]",
+    "首行首列先单独累加"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(mn)",
+    "space": "O(mn)"
+  },
+  "quiz": {
+    "idea": "dp[i][j] = min(上, 左) + grid[i][j]，首行首列先累加",
+    "wrong": [
+      "每步贪心：往右、往下两格里挑较小的那格走",
+      "dp[i][j] = min(上, 左, 左上) + grid[i][j]，首行首列先累加",
+      "dp[i][j] = min(上, 左) + grid[i][j]，首行首列初始化为 0"
+    ]
+  }
+}

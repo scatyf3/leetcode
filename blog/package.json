@@ -1,0 +1,20 @@
+{
+  "name": "leetcode-blog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "刷题知识库：Python 内置 → 概念数据结构 → 算法套路 三层，VitePress",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:dev:lan": "vitepress dev docs --host",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "gray-matter": "^4.0.3",
+    "typescript": "~5.7.2",
+    "vitepress": "1.6.4",
+    "vue": "^3.5.13"
+  }
+}

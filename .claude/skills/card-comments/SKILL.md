@@ -1,17 +1,17 @@
 ---
 name: card-comments
-description: 批量处理复习闪卡上攒下来的「给 agent 的批注」—— 读 dashboard/card-comments.jsonl 里 status=open 的条目, 逐条按批注改对应的卡(题目牌组的 meta.json quiz / answer.md / 标签 / 复杂度, 语法牌组的 syntax/*.md), 改完把条目标成 done 或 skip 并写一句回复。用在用户说「处理卡片批注」「按批注改卡」「扫一下 comment」「把闪卡上的意见改了」的时候。
+description: 批量处理复习闪卡上攒下来的「给 agent 的批注」—— 读 tracker/dashboard/card-comments.jsonl 里 status=open 的条目, 逐条按批注改对应的卡(题目牌组的 meta.json quiz / answer.md / 标签 / 复杂度, 语法牌组的 tracker/syntax/*.md), 改完把条目标成 done 或 skip 并写一句回复。用在用户说「处理卡片批注」「按批注改卡」「扫一下 comment」「把闪卡上的意见改了」的时候。
 ---
 
 # 处理卡片批注
 
-用户复习时在卡上按 `c` 记一句「这张卡哪儿不对」,攒在 `dashboard/card-comments.jsonl`。
+用户复习时在卡上按 `c` 记一句「这张卡哪儿不对」,攒在 `tracker/dashboard/card-comments.jsonl`。
 这个 skill 把它们**一次性清掉**:读 → 改卡 → 回写状态 → 汇报。
 
 ## 1. 列出待处理的
 
 ```bash
-python3 dashboard/card_comments.py          # 只列 status=open 的, JSON
+python3 tracker/dashboard/card_comments.py          # 只列 status=open 的, JSON
 ```
 
 每条长这样:`{"cid", "date", "deck": "problems"|"syntax", "id", "title", "text", "status"}`。
@@ -22,13 +22,13 @@ python3 dashboard/card_comments.py          # 只列 status=open 的, JSON
 | deck | id 长什么样 | 要读的文件 |
 |---|---|---|
 | `problems` | 题号整数 `15` | `<id>. <题名>/` 下的 `meta.json`(`quiz` / `structures` / `paradigms` / `techniques` / `complexity`)、`answer.md`、`note.md`、`*.py`、`problem.html` |
-| `syntax` | `<文件名>/<卡标题>` | `syntax/<文件名>.md` 里 `## <卡标题>` 那一节:单独一行 `---` 以上是正面,以下是背面 |
+| `syntax` | `<文件名>/<卡标题>` | `tracker/syntax/<文件名>.md` 里 `## <卡标题>` 那一节:单独一行 `---` 以上是正面,以下是背面 |
 
 改之前先读 `note.md` 和解法 —— 批注常常是「答案卡和我实际写法对不上」,真相在 note 里。
 
 ## 3. 改卡的规矩
 
-这些是 `dashboard/README.md`「🧠 复习」一节里定死的,改卡时**一条都不能破**:
+这些是 `tracker/dashboard/README.md`「🧠 复习」一节里定死的,改卡时**一条都不能破**:
 
 **选择题(`meta.json` 的 `quiz`)**
 - 形状:`{"q"?, "idea": "正确项" | [多个正确项], "wrong": [...], "then"?: [{q, idea, wrong}, ...]}`。选项总数至多 4 个。
@@ -40,7 +40,7 @@ python3 dashboard/card_comments.py          # 只列 status=open 的, JSON
 
 **答案卡(`answer.md`)**:一句话思路,压缩过的结论,不是流水账。长了就砍,细节留在 note。
 
-**语法卡(`syntax/*.md`)**
+**语法卡(`tracker/syntax/*.md`)**
 - **不要改 `##` 卡标题** —— 标题就是 id,改了复习历史就断了。批注明确要求改标题的话,照改,但回复里写明「id 变了,旧历史成孤儿」。
 - 只收用户真栽过的坑;背面末尾那行「栽过:<题号>」保留。
 - 按行原样替换,别顺手重排空行 / 统一列表符号。
@@ -55,8 +55,8 @@ python3 dashboard/card_comments.py          # 只列 status=open 的, JSON
 ## 5. 回写状态
 
 ```bash
-python3 dashboard/card_comments.py done <cid> "干扰项 C 换成「没找到返回 mid」, 原来那个其实也能 AC"
-python3 dashboard/card_comments.py skip <cid> "原答案是对的: 闭区间写法 while l <= r, 批注里的 l < r 是半开区间"
+python3 tracker/dashboard/card_comments.py done <cid> "干扰项 C 换成「没找到返回 mid」, 原来那个其实也能 AC"
+python3 tracker/dashboard/card_comments.py skip <cid> "原答案是对的: 闭区间写法 while l <= r, 批注里的 l < r 是半开区间"
 ```
 
 回复会**贴在卡上揭晓后显示**,所以写成「改了什么 / 为什么没改」的一句话,别写「已处理」这种空话。

@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search",
+    "counting"
+  ],
+  "techniques": [
+    "在值域上二分，不改数组",
+    "C(v) > v 划出 F…F T…T"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1.5,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "值域 [1, n] 上二分，C(v) = #(nums ≤ v)，判据是？",
+    "idea": "C(v) > v 为 T，找第一个 T",
+    "wrong": [
+      "C(v) ≥ v 为 T，找第一个 T",
+      "C(v) < v 为 T，找第一个 T",
+      "C(v) ≠ v 为 T，找第一个 T"
+    ],
+    "then": [
+      {
+        "q": "闭区间 [1, n] 怎么收、返回啥？",
+        "idea": "C(mid) > mid 则 r = mid-1，否则 l = mid+1，返回 l",
+        "wrong": [
+          "C(mid) > mid 则 r = mid-1，否则 l = mid+1，返回 r",
+          "C(mid) > mid 则 l = mid+1，否则 r = mid-1，返回 l",
+          "C(mid) ≥ mid 则 r = mid-1，否则 l = mid+1，返回 l"
+        ]
+      }
+    ]
+  }
+}

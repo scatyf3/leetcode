@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "hash"
+  ],
+  "techniques": [
+    "子数组和 = 两前缀和之差",
+    "Counter 存前缀和次数, 初始 {0: 1}",
+    "先查后存, 用 k=0 测"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "前缀和 + 哈希表计数，查 pre - k 出现过几次",
+    "wrong": [
+      "滑动窗口，窗口和大于 k 就收缩左边界",
+      "前缀和 + 哈希集合，查 pre - k 是否出现过",
+      "前缀和 + 哈希表计数，查 pre + k 出现过几次"
+    ],
+    "then": [
+      {
+        "q": "每一步的顺序和初值？",
+        "idea": "先查 cnt[pre - k] 再 cnt[pre] += 1，初始 cnt[0] = 1",
+        "wrong": [
+          "先 cnt[pre] += 1 再查 cnt[pre - k]，初始 cnt[0] = 1",
+          "先查 cnt[pre - k] 再 cnt[pre] += 1，初始表为空",
+          "先查 cnt[pre - k] 再 cnt[pre] += 1，初始 cnt[k] = 1"
+        ]
+      }
+    ]
+  }
+}

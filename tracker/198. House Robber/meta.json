@@ -1,0 +1,27 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "1d-dp"
+  ],
+  "techniques": [
+    "dp[i] = 前 i 间最优，dp[0] = 0 空集",
+    "滚动两个标量 prev2, prev1"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "dp[i] = 前 i 间最优 = max(dp[i-1], dp[i-2] + nums[i-1])",
+    "wrong": [
+      "奇数下标、偶数下标分别求和，取较大的那个",
+      "每次先偷剩下最大的一间，再划掉它两侧邻居",
+      "dp[i] = 前 i 间最优 = max(dp[i-1], dp[i-1] + nums[i-1])"
+    ]
+  }
+}

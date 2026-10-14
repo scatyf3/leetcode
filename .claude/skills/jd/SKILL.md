@@ -1,23 +1,23 @@
 ---
 name: jd
-description: 查一家(或一批)公司当前开着的 infra / AI infra / platform / MLE 岗位, 把找到的 JD 摆出来给用户挑, 然后写进 localhost:8766 的求职看板(jobs/)。用在用户说「查一下 X 公司」「X 有什么岗」「把 X 加进看板」「找几家做推理的公司」的时候, 也用在用户给了一串公司名要批量补 JD 链接和岗位名的时候。只查公开的招聘页, 不编造链接。
+description: 查一家(或一批)公司当前开着的 infra / AI infra / platform / MLE 岗位, 把找到的 JD 摆出来给用户挑, 然后写进 localhost:8766 的求职看板(tracker/jobs/)。用在用户说「查一下 X 公司」「X 有什么岗」「把 X 加进看板」「找几家做推理的公司」的时候, 也用在用户给了一串公司名要批量补 JD 链接和岗位名的时候。只查公开的招聘页, 不编造链接。
 ---
 
 # 查 JD 并填看板
 
-看板在 `jobs/`,数据走 `http://localhost:8766` 的 HTTP API。这个 skill 做三件事:
+看板在 `tracker/jobs/`,数据走 `http://localhost:8766` 的 HTTP API。这个 skill 做三件事:
 **找到真实的 JD → 摆出来让用户挑 → 写进表**。
 
 ## 0. 先确认服务活着
 
 ```bash
-curl -sf http://localhost:8766/api/apps >/dev/null || (nohup python3 jobs/server.py > /tmp/jobs-server.log 2>&1 &)
+curl -sf http://localhost:8766/api/apps >/dev/null || (nohup python3 tracker/jobs/server.py > /tmp/jobs-server.log 2>&1 &)
 ```
 
-分组定义从 `jobs/plan.json` 现读,**不要把组名写死在这里** —— 用户随时会改:
+分组定义从 `tracker/jobs/plan.json` 现读,**不要把组名写死在这里** —— 用户随时会改:
 
 ```bash
-python3 -c "import json;d=json.load(open('jobs/plan.json'));print([(t['k'],t['role'],t['d']) for t in d['tiers']])"
+python3 -c "import json;d=json.load(open('tracker/jobs/plan.json'));print([(t['k'],t['role'],t['d']) for t in d['tiers']])"
 ```
 
 ## 1. 找 JD
@@ -119,5 +119,5 @@ curl -s -X POST http://localhost:8766/api/apps/bulk \
 —— 表里有 JD 链接的行会显示 `JD` 小标,点行打开详情能直接跳。
 
 `plan.json` 的 `pool` 是**播种清单**,这个 skill 不改它 —— 新公司只进
-`jobs/data/applications.json`(已 gitignore,不出仓库)。用户要把某家固化进计划里
+`tracker/jobs/data/applications.json`(已 gitignore,不出仓库)。用户要把某家固化进计划里
 再手动加到 `pool`。

@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "hash-table",
+    "array"
+  ],
+  "paradigms": [
+    "binary-search",
+    "design"
+  ],
+  "techniques": [
+    "key -> 平行数组 times/vals, append 即有序",
+    "搜缝: 最后一个 <= timestamp 是 r"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3.5,
+  "complexity": {
+    "time": "set O(1) / get O(log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "q": "每个 key 怎么存、怎么查？",
+    "idea": "按时间递增的 (timestamp, value) 列表，get 时二分",
+    "wrong": [
+      "{timestamp: value} 字典，get 时按 timestamp 直接取",
+      "只保留最新一次的 value，get 时直接返回它",
+      "按 timestamp 的小顶堆，get 时弹到超过为止"
+    ],
+    "then": [
+      {
+        "q": "闭区间二分 P = times[mid] <= timestamp，怎么收、返回啥？",
+        "idea": "T 则 l = mid+1，否则 r = mid-1，返回 vals[r]",
+        "wrong": [
+          "T 则 l = mid+1，否则 r = mid-1，返回 vals[l]",
+          "T 则 r = mid-1，否则 l = mid+1，返回 vals[r]",
+          "T 则 l = mid+1，否则 r = mid-1，返回 vals[mid]"
+        ]
+      }
+    ]
+  }
+}

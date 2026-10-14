@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "2d-dp"
+  ],
+  "techniques": [
+    "dp[i][j] = word1[:i] → word2[:j] 的最少操作",
+    "哪边字符被消耗哪边下标减 1",
+    "首行首列初始化为 j / i"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2.5,
+  "complexity": {
+    "time": "O(m·n)",
+    "space": "O(m·n)"
+  },
+  "quiz": {
+    "q": "状态和边界怎么定？",
+    "idea": "dp[i][j] = word1[:i] 变成 word2[:j] 的最少操作，首行首列为 j / i",
+    "wrong": [
+      "dp[i][j] = word1[:i] 变成 word2[:j] 的最少操作，首行首列全为 0",
+      "dp[i][j] = word1[:i] 与 word2[:j] 的 LCS 长度，答案 max(m,n) - dp",
+      "dp[i] = word1[:i] 变成整个 word2 的最少操作，一维就够"
+    ],
+    "then": [
+      {
+        "q": "末尾不相等时，「插入 word2[j-1]」对应哪一格？",
+        "idea": "dp[i][j-1]：插入消耗 word2 一个字符，i 不动",
+        "wrong": [
+          "dp[i-1][j]：插入消耗 word1 一个字符，j 不动",
+          "dp[i-1][j-1]：插入后两边下标一起往前一格",
+          "dp[i+1][j]：word1 多了一个字符，所以 i 加一"
+        ]
+      }
+    ]
+  }
+}

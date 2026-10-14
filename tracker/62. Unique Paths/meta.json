@@ -1,0 +1,30 @@
+{
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "2d-dp"
+  ],
+  "techniques": [
+    "首行首列初始化为 1",
+    "DP 表 = 杨辉三角 = C(m+n-2, m-1)"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1.5,
+  "complexity": {
+    "time": "O(mn)",
+    "space": "O(mn)"
+  },
+  "quiz": {
+    "q": "用什么做？",
+    "idea": [
+      "DP：dp[i][j] = dp[i-1][j] + dp[i][j-1]",
+      "组合数：C(m+n-2, m-1)"
+    ],
+    "wrong": [
+      "DP：dp[i][j] = max(dp[i-1][j], dp[i][j-1]) + 1",
+      "组合数：C(m+n, m)"
+    ]
+  }
+}

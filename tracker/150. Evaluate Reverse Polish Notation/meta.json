@@ -1,0 +1,39 @@
+{
+  "structures": [
+    "stack"
+  ],
+  "paradigms": [
+    "stack"
+  ],
+  "techniques": [
+    "后出栈的是左操作数",
+    "int(a / b) 向 0 截断"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 0,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "q": "遇到运算符时，先弹出的那个数是？",
+    "idea": "右操作数：b = pop(); a = pop(); 算 a op b",
+    "wrong": [
+      "左操作数：a = pop(); b = pop(); 算 a op b",
+      "无所谓，四则运算两边对换结果都一样",
+      "右操作数：b = pop(); a = pop(); 算 b op a"
+    ],
+    "then": [
+      {
+        "q": "除法要求向 0 截断，怎么写？",
+        "idea": "int(a / b)",
+        "wrong": [
+          "a // b",
+          "math.floor(a / b)",
+          "round(a / b)"
+        ]
+      }
+    ]
+  }
+}

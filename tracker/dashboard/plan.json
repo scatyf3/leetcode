@@ -1,0 +1,407 @@
+{
+  "source": "NeetCode 150 · 按 pattern group 分层，不按列表顺序",
+  "note": "计划的真相源。每个 phase 的 weekly 是**一周**的额度 (redo = 重做之前 L3/L3.5/L4 的题; new = 开新题; attack = 攻坚弱题的变体), 只看做没做、不看做没做好; 手改这里就是改周课。milestones 是两周一次的对表点。每组的 tag 指向 paradigms/ 或 structures/ 里那份通用 trick 文档，点组标题打开。手改这个文件即可调整分层 / 时间线。掌握度不在这里 —— S1/S2/S3 全部由每题 meta.json 的 familiarity (L0–L4, 含半档 L1.5 / L2.5 / L3.5) 算出。",
+
+  "familiarity": [
+    { "l": 0, "t": "L0", "d": "英语讲得清" },
+    { "l": 1, "t": "L1", "d": "已经熟悉" },
+    { "l": 1.5, "t": "L1.5", "d": "写得对 · 但不是最优解" },
+    { "l": 2, "t": "L2", "d": "思路会 · 细节易写错" },
+    { "l": 2.5, "t": "L2.5", "d": "默写得出 · 道理不熟" },
+    { "l": 3, "t": "L3", "d": "思路大概知道 · 不熟" },
+    { "l": 3.5, "t": "L3.5", "d": "方向对 · 但只是直觉" },
+    { "l": 4, "t": "L4", "d": "思路都不知道" }
+  ],
+
+  "seen": { "t": "见过", "d": "建了文件夹：题面已经抓到本地，读过一遍 — 阶梯的地板" },
+
+  "stages": [
+    { "s": 1, "t": "S1 · 思路清楚", "d": "L0–L3（不含 L3.5）：至少说得出该用哪个范式" },
+    { "s": 2, "t": "S2 · 写得对", "d": "L0–L2.5（含 L1.5 / L2.5）：细节最多小错，一两次 test 解决 — OA 门槛" },
+    { "s": 3, "t": "S3 · 讲得清", "d": "L0：英语 60 秒讲清思路与复杂度 — 面试门槛" }
+  ],
+
+  "tiers": [
+    { "t": 1, "name": "第一层", "cum": "≈75",  "desc": "核心八模式 + 网格搜索 + 四题 DP" },
+    { "t": 2, "name": "第二层", "cum": "≈110", "desc": "只做回溯 + 图（阶段 3）；区间 / DP 其余 / Tries 其余 灰掉" },
+    { "t": 3, "name": "第三层", "cum": "≈150", "desc": "整层砍掉，除非时间多出来" }
+  ],
+
+  "review_cap": 10,
+  "min_day": "最低日 = 只刷到期闪卡（至多 review_cap 张），不开新题。摆烂/急事那天做到这条就算没断。",
+  "rules": [
+    "按周算预算，一周按 5 个工作日排、留 2 天缓冲；错过的新题直接作废，不补，只顺延里程碑。",
+    "每两周对一次表：落后就砍下一阶段的尾巴，不压缩当前阶段。",
+    "攻坚额度只做弱题的变体簇（同一个坑换题），不重做原题；弱题列表空了额度还给新题。",
+    "有了具体面试：面前 1–2 周切到那家公司的 tag，优先于本计划。"
+  ],
+
+  "phases": [
+    { "n": 1, "name": "打模式底", "from": "2026-09-04", "to": "2026-09-27", "hrs": "18 hr/周（计划）",
+      "weekly": { "redo": 10, "new": 15, "attack": 0 },
+      "goal": "第一层 → S2",
+      "adds": "原计划 9/25 第一层 77 题全部 S2；实际收尾 36/77，落后约 3.5 周。计划本身按「一半时间做科研」做不到，9/27 重排。",
+      "serves": "已结束 · 复盘：日额度 5 题从没达到过" },
+    { "n": 2, "name": "补第一层", "from": "2026-09-27", "to": "2026-10-15", "hrs": "≈45–60 min/天",
+      "weekly": { "redo": 4, "new": 6, "attack": 2 },
+      "goal": "第一层 ≥ 72/77 → S2",
+      "adds": "顺序：Trees → Heap → 网格 → Stack / Binary Search / Linked List / Sliding Window / DP 四题。L3/L4 的老题重做比开新题快，先清它们。10/1 起每周 1 次 mock（10/11 的里程碑 10/1 提前达标，后面整体前移 10 天）。",
+      "serves": "服务 10 月 OA / 电面" },
+    { "n": 3, "name": "图 + 回溯", "from": "2026-10-15", "to": "2026-10-29", "hrs": "≈45–60 min/天",
+      "weekly": { "redo": 3, "new": 7, "attack": 2 },
+      "goal": "Graphs 其余 + Backtracking（17 题）→ S2",
+      "adds": "只做这两组。Intervals / 1-D DP 其余 / Tries 其余 / 第三层全部砍掉，有空再说。第一层 → S3 不单练，交给 mock。",
+      "serves": "服务 11 月面试 · 10/29 收尾，留 10 天缓冲到 11/8 硬线（PhD 申请季）" },
+    { "n": 4, "name": "冻结", "from": "2026-10-29", "to": null, "hrs": "≈5 hr/周",
+      "weekly": { "redo": 5, "new": 0, "attack": 0 },
+      "goal": "位置不动",
+      "adds": "一题新的都不加。闪卡 + 每周 1 次 mock；mock 挂在哪类就补哪类。",
+      "serves": "防退化，不扩覆盖" }
+  ],
+
+  "targets": [
+    { "phase": 1, "tier": 1, "stage": 2 },
+    { "phase": 2, "tier": 1, "stage": 2, "n": 72 },
+    { "phase": 3, "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"] }
+  ],
+
+  "milestones": [
+    { "date": "2026-10-01", "tier": 1, "stage": 2, "n": 56, "focus": "Trees + Heap + 网格", "mock": "第 1 次 mock" },
+    { "date": "2026-10-15", "tier": 1, "stage": 2, "n": 72, "focus": "第一层剩下的零碎", "mock": "mock 过半" },
+    { "date": "2026-10-29", "tier": 2, "stage": 2, "groups": ["Backtracking", "Graphs · 其余"], "short": "图 + 回溯", "focus": "Graphs 其余 + Backtracking", "mock": "mock 基本稳定 → 冻结" },
+
+    { "date": "2026-10-05", "list": "Hot 100", "stage": 2, "n": 70, "from": "2026-10-02", "focus": "冲刺 Day 1–3：二叉树 / 链表 / 矩阵 + 技巧" },
+    { "date": "2026-10-07", "list": "Hot 100", "stage": 2, "n": 87, "from": "2026-10-02", "focus": "冲刺 Day 4–5：数组 · 子串 · 窗口 · 二分 / 回溯 · 栈 · 贪心 · Trie" },
+    { "date": "2026-10-09", "list": "Hot 100", "stage": 2, "from": "2026-10-02", "focus": "冲刺 Day 6–7：DP / 多维 DP + 三道 hard 收尾 → Hot 100 全部 S2" }
+  ],
+
+  "mock": {
+    "minutes": 25,
+    "count": 2,
+    "note": "没见过：从 NeetCode 150 里还没建文件夹的非 hard 题 + 其他题单里没建过的题随机抽。只记 AC 了没、范式判断对了没。",
+    "company": {
+      "list": "TikTok 高频",
+      "mix": ["medium", "hard"],
+      "note": "公司加权：从「TikTok 高频」按频率排名加权抽一道 medium + 一道 hard，做没做过都抽（会员题除外）。"
+    }
+  },
+
+  "topics": [
+    { "name": "TikTok · Hot 100 冲刺 · 10/2–10/8", "short": "H100",
+      "note": "TikTok 以 Hot 100 为主，LeetCode 公司标签也有参考价值。",
+      "sections": [
+        { "name": "Day 1 · 10/2 · 第一批 · 链表 + 二叉树", "key": 146,
+          "problems": [[146, "LRU Cache"], [25, "Reverse Nodes in k-Group"], [142, "Linked List Cycle II"], [148, "Sort List"], [138, "Copy List with Random Pointer"], [236, "Lowest Common Ancestor of a Binary Tree"], [102, "Binary Tree Level Order Traversal"], [105, "Construct Binary Tree from Preorder and Inorder Traversal"]] },
+        { "name": "Day 2 · 10/3 · 第一批 · 数组 / 子串 / 二分 / 矩阵", "key": 560,
+          "problems": [[56, "Merge Intervals"], [560, "Subarray Sum Equals K"], [53, "Maximum Subarray"], [239, "Sliding Window Maximum"], [76, "Minimum Window Substring"], [33, "Search in Rotated Sorted Array"], [54, "Spiral Matrix"], [48, "Rotate Image"]] },
+        { "name": "Day 3 · 10/4 · 第一批 · DP / 回溯 / 栈", "key": 322,
+          "problems": [[322, "Coin Change"], [139, "Word Break"], [1143, "Longest Common Subsequence"], [72, "Edit Distance"], [31, "Next Permutation"], [78, "Subsets"], [79, "Word Search"], [394, "Decode String"]] },
+        { "name": "Day 4 · 10/5 · 第二批 · 简单题", "key": 234,
+          "problems": [[94, "Binary Tree Inorder Traversal"], [101, "Symmetric Tree"], [108, "Convert Sorted Array to Binary Search Tree"], [160, "Intersection of Two Linked Lists"], [234, "Palindrome Linked List"], [24, "Swap Nodes in Pairs"], [136, "Single Number"], [169, "Majority Element"], [75, "Sort Colors"]] },
+        { "name": "Day 5 · 10/6 · 第二批收尾 + 124 / 152", "key": 124,
+          "problems": [[118, "Pascal's Triangle"], [62, "Unique Paths"], [64, "Minimum Path Sum"], [240, "Search a 2D Matrix II"], [73, "Set Matrix Zeroes"], [438, "Find All Anagrams in a String"], [124, "Binary Tree Maximum Path Sum"], [152, "Maximum Product Subarray"]] },
+        { "name": "Day 6 · 10/7 · 第三批 · 能做多少做多少", "key": 84,
+          "problems": [[84, "Largest Rectangle in Histogram"], [41, "First Missing Positive"], [437, "Path Sum III"], [114, "Flatten Binary Tree to Linked List"], [279, "Perfect Squares"], [416, "Partition Equal Subset Sum"], [45, "Jump Game II"]] },
+        { "name": "Day 7 · 10/8 · 第三批 · 时间不够就放", "key": 763,
+          "problems": [[763, "Partition Labels"], [131, "Palindrome Partitioning"], [208, "Implement Trie (Prefix Tree)"], [51, "N-Queens"], [32, "Longest Valid Parentheses"], [4, "Median of Two Sorted Arrays"]] },
+        { "name": "面试前过一遍 · 已到 S2 的高频", "key": 23,
+          "problems": [[3, "Longest Substring Without Repeating Characters"], [15, "3Sum"], [42, "Trapping Rain Water"], [206, "Reverse Linked List"], [23, "Merge k Sorted Lists"], [200, "Number of Islands"], [207, "Course Schedule"], [215, "Kth Largest Element in an Array"], [295, "Find Median from Data Stream"], [300, "Longest Increasing Subsequence"], [5, "Longest Palindromic Substring"], [543, "Diameter of Binary Tree"]] }
+      ] },
+    { "name": "Roblox OA · 实现模拟", "short": "RBX",
+      "note": "CodeSignal 风格：40–80 行一次写对，隐藏测试卡边界。每题写完先过三件事再提交：最大输入、窗口/边界开闭、样例没覆盖的隐含假设。会员题(💰)做不了就跳过。时间不够只做每节加粗那道。",
+      "sections": [
+        { "name": "矩阵旋转 · 坐标映射", "key": 1914,
+          "note": "映射背熟，别现场推：顺时针 (i,j)→(j,n-1-i)，逆时针 (i,j)→(n-1-j,i)，转置 (i,j)→(j,i)。主对角线 i==j，反对角线 i+j==n-1。带条件跳过格子的变体：照常算目标位置，跳过不动的格子。",
+          "problems": [[48, "Rotate Image"], [1886, "Determine Whether Matrix Can Be Obtained By Rotation"], [2319, "Check if Matrix Is X-Matrix"], [867, "Transpose Matrix"], [1914, "Cyclically Rotating a Grid"]] },
+        { "name": "后缀 / 前缀 Trie · 配对计数", "key": 3045,
+          "note": "后缀问题 = 串反转后建 Trie。数「一个是另一个的前/后缀」的 pair：插之前沿路累加途经节点（不含终点）的结尾数 + 终点的经过数（已含相等），O(总长度)，替代两两比较的 O(n²·L)。",
+          "problems": [[208, "Implement Trie (Prefix Tree)"], [3042, "Count Prefix and Suffix Pairs I"], [3045, "Count Prefix and Suffix Pairs II"], [820, "Short Encoding of Words"], [2416, "Sum of Prefix Scores of Strings"], [3093, "Longest Common Suffix Queries"], [1032, "Stream of Characters"]] },
+        { "name": "网格 / 状态模拟", "key": 289, "problems": [[289, "Game of Life"], [1861, "Rotating the Box"], [529, "Minesweeper"], [1706, "Where Will the Ball Fall"], [794, "Valid Tic-Tac-Toe State"], [723, "Candy Crush 💰"]] },
+        { "name": "时间窗口计数", "key": 933, "problems": [[933, "Number of Recent Calls"], [1604, "Alert Using Same Key-Card Three or More Times"], [1797, "Design Authentication Manager"], [362, "Design Hit Counter 💰"], [359, "Logger Rate Limiter 💰"]] },
+        { "name": "更新中维护聚合 · 懒删除堆", "key": 2034, "problems": [[2034, "Stock Price Fluctuation"], [2353, "Design a Food Rating System"], [1845, "Seat Reservation Manager"], [480, "Sliding Window Median"]] },
+        { "name": "日志 / 调用栈解析", "key": 636, "problems": [[636, "Exclusive Time of Functions"], [71, "Simplify Path"], [811, "Subdomain Visit Count"], [609, "Find Duplicate File in System"], [1152, "Analyze User Website Visit Pattern 💰"]] },
+        { "name": "操作序列 / 系统设计实现", "key": 2043, "problems": [[2043, "Simple Bank System"], [2502, "Design Memory Allocator"]] },
+        { "name": "连通块 · 哈希 + 前缀和", "key": 560, "problems": [[1254, "Number of Closed Islands"], [560, "Subarray Sum Equals K"], [523, "Continuous Subarray Sum"]] }
+      ] },
+    { "name": "Infra 实操", "short": "INF",
+      "note": "AI infra 公司常考、题单覆盖不好的设计题。",
+      "sections": [
+        { "name": "", "key": 146, "problems": [[146, "LRU Cache"], [460, "LFU Cache"], [380, "Insert Delete GetRandom O(1)"], [355, "Design Twitter"], [981, "Time Based Key-Value Store"], [295, "Find Median from Data Stream"], [621, "Task Scheduler"], [23, "Merge k Sorted Lists"], [207, "Course Schedule"]] }
+      ] }
+  ],
+
+  "extras": {
+    "note": "坐标系里每组下面, 按题单各框一框 NeetCode 150 没有的题。只看, 不计进格子、组计数和目标。lists 的顺序 = 框的顺序 = 去重优先级(一道题在两个题单里, 只进排前面那个的框)。map 是「题单分类 → 组名」, 组名要和 groups[].name 一字不差; 写 \"其他\" 或没写的分类进页面最底下的「其他」组。short 是题卡上的角标。",
+    "lists": [
+      { "name": "Blind 75", "short": "B", "map": {} },
+      { "name": "Hot 100", "short": "H", "map": {
+          "哈希": "Arrays & Hashing",
+          "双指针": "Two Pointers",
+          "滑动窗口": "Sliding Window",
+          "子串": "Sliding Window",
+          "普通数组": "其他",
+          "矩阵": "Math & Geometry",
+          "链表": "Linked List",
+          "二叉树": "Trees",
+          "图论": "Graphs · 其余",
+          "回溯": "Backtracking",
+          "二分查找": "Binary Search",
+          "栈": "Stack",
+          "堆": "Heap / Priority Queue",
+          "贪心算法": "Greedy",
+          "动态规划": "1-D DP · 其余",
+          "多维动态规划": "2-D DP",
+          "技巧": "其他"
+      }},
+      { "name": "Top Interview 150", "short": "T", "map": {
+          "数组 / 字符串": "其他",
+          "双指针": "Two Pointers",
+          "滑动窗口": "Sliding Window",
+          "矩阵": "Math & Geometry",
+          "哈希表": "Arrays & Hashing",
+          "区间": "Intervals",
+          "栈": "Stack",
+          "链表": "Linked List",
+          "二叉树 通用": "Trees",
+          "二叉树 BFS": "Trees",
+          "图 通用": "Graphs · 其余",
+          "图 BFS": "Graphs · 其余",
+          "字典树": "Tries · 其余",
+          "回溯": "Backtracking",
+          "分治": "Trees",
+          "Kadane": "Greedy",
+          "二分查找": "Binary Search",
+          "堆": "Heap / Priority Queue",
+          "位运算": "Bit Manipulation",
+          "数学": "Math & Geometry",
+          "一维 DP": "1-D DP · 其余",
+          "多维 DP": "2-D DP"
+      }},
+      { "name": "leetcode必吃榜", "short": "必", "map": {
+          "矩阵模拟": "Math & Geometry",
+          "二分查找": "Binary Search",
+          "链表": "Linked List",
+          "排序": "其他",
+          "递归 / DP 入门": "1-D DP · 其余",
+          "栈 / 队列 / 单调栈": "Stack",
+          "二叉树 · 遍历 / BST / 构造": "Trees",
+          "数组 / 字符串": "其他",
+          "滑动窗口": "Sliding Window",
+          "堆 / Top K": "Heap / Priority Queue",
+          "区间": "Intervals",
+          "双指针 · 接雨水": "Two Pointers",
+          "N 皇后": "Backtracking",
+          "二叉树 · LCA / 路径和": "Trees",
+          "回溯 · 子集 / 排列": "Backtracking",
+          "二分图": "Graphs · 其余",
+          "一维 DP · Jump Game / Word Break": "1-D DP · 其余",
+          "二维 DP · 编辑距离 / 正方形": "2-D DP",
+          "图 · BFS / 拓扑": "Graphs · 其余",
+          "DP 进阶": "2-D DP",
+          "Word Search": "Backtracking",
+          "股票": "2-D DP"
+      }}
+    ]
+  },
+
+  "groups": [
+    { "name": "Arrays & Hashing", "tier": 1, "tags": [
+        { "kind": "structures", "name": "array" },
+        { "kind": "structures", "name": "hash-table" }
+      ], "problems": [
+      [217, "Contains Duplicate", "easy"],
+      [242, "Valid Anagram", "easy"],
+      [1, "Two Sum", "easy"],
+      [49, "Group Anagrams", "medium"],
+      [347, "Top K Frequent Elements", "medium"],
+      [271, "Encode and Decode Strings", "medium"],
+      [238, "Product of Array Except Self", "medium"],
+      [36, "Valid Sudoku", "medium"],
+      [128, "Longest Consecutive Sequence", "medium"]
+    ]},
+    { "name": "Two Pointers", "tier": 1, "tag": { "kind": "paradigms", "name": "two-pointer" }, "problems": [
+      [125, "Valid Palindrome", "easy"],
+      [167, "Two Sum II", "medium"],
+      [15, "3Sum", "medium"],
+      [11, "Container With Most Water", "medium"],
+      [42, "Trapping Rain Water", "hard"]
+    ]},
+    { "name": "Sliding Window", "tier": 1, "tag": { "kind": "paradigms", "name": "sliding-window" }, "problems": [
+      [121, "Best Time to Buy and Sell Stock", "easy"],
+      [3, "Longest Substring Without Repeating", "medium"],
+      [424, "Longest Repeating Char Replacement", "medium"],
+      [567, "Permutation in String", "medium"],
+      [76, "Minimum Window Substring", "hard"],
+      [239, "Sliding Window Maximum", "hard"]
+    ]},
+    { "name": "Stack", "tier": 1, "tag": { "kind": "paradigms", "name": "stack" }, "problems": [
+      [20, "Valid Parentheses", "easy"],
+      [155, "Min Stack", "medium"],
+      [150, "Evaluate Reverse Polish Notation", "medium"],
+      [22, "Generate Parentheses", "medium"],
+      [739, "Daily Temperatures", "medium"],
+      [853, "Car Fleet", "medium"],
+      [84, "Largest Rectangle in Histogram", "hard"]
+    ]},
+    { "name": "Binary Search", "tier": 1, "tag": { "kind": "paradigms", "name": "binary-search" }, "problems": [
+      [704, "Binary Search", "easy"],
+      [74, "Search a 2D Matrix", "medium"],
+      [875, "Koko Eating Bananas", "medium"],
+      [153, "Find Min in Rotated Sorted Array", "medium"],
+      [33, "Search in Rotated Sorted Array", "medium"],
+      [981, "Time Based Key-Value Store", "medium"],
+      [4, "Median of Two Sorted Arrays", "hard"]
+    ]},
+    { "name": "Linked List", "tier": 1, "tag": { "kind": "structures", "name": "linked-list" }, "problems": [
+      [206, "Reverse Linked List", "easy"],
+      [21, "Merge Two Sorted Lists", "easy"],
+      [141, "Linked List Cycle", "easy"],
+      [143, "Reorder List", "medium"],
+      [19, "Remove Nth Node From End", "medium"],
+      [138, "Copy List With Random Pointer", "medium"],
+      [2, "Add Two Numbers", "medium"],
+      [287, "Find the Duplicate Number", "medium"],
+      [146, "LRU Cache", "medium"],
+      [23, "Merge K Sorted Lists", "hard"],
+      [25, "Reverse Nodes in k-Group", "hard"]
+    ]},
+    { "name": "Trees", "tier": 1, "tag": { "kind": "structures", "name": "tree" }, "problems": [
+      [226, "Invert Binary Tree", "easy"],
+      [104, "Maximum Depth of Binary Tree", "easy"],
+      [543, "Diameter of Binary Tree", "easy"],
+      [110, "Balanced Binary Tree", "easy"],
+      [100, "Same Tree", "easy"],
+      [572, "Subtree of Another Tree", "easy"],
+      [235, "Lowest Common Ancestor of BST", "medium"],
+      [102, "Binary Tree Level Order Traversal", "medium"],
+      [199, "Binary Tree Right Side View", "medium"],
+      [1448, "Count Good Nodes in Binary Tree", "medium"],
+      [98, "Validate Binary Search Tree", "medium"],
+      [230, "Kth Smallest Element in a BST", "medium"],
+      [105, "Construct Tree from Preorder/Inorder", "medium"],
+      [124, "Binary Tree Maximum Path Sum", "hard"],
+      [297, "Serialize and Deserialize Binary Tree", "hard"]
+    ]},
+    { "name": "Heap / Priority Queue", "tier": 1, "tag": { "kind": "structures", "name": "heap" }, "problems": [
+      [703, "Kth Largest Element in a Stream", "easy"],
+      [1046, "Last Stone Weight", "easy"],
+      [973, "K Closest Points to Origin", "medium"],
+      [215, "Kth Largest Element in an Array", "medium"],
+      [621, "Task Scheduler", "medium"],
+      [355, "Design Twitter", "medium"],
+      [295, "Find Median from Data Stream", "hard"]
+    ]},
+    { "name": "网格 BFS / DFS", "tier": 1, "sub": "从 Graphs 里先摘出来的一支", "tag": { "kind": "structures", "name": "grid" }, "problems": [
+      [200, "Number of Islands", "medium"],
+      [695, "Max Area of Island", "medium"],
+      [994, "Rotting Oranges", "medium"],
+      [130, "Surrounded Regions", "medium"],
+      [417, "Pacific Atlantic Water Flow", "medium"]
+    ]},
+    { "name": "1-D DP · 前置四题", "tier": 1, "sub": "从阶段三提前上来 — OA 高频，成本曲线拉平", "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
+      [70, "Climbing Stairs", "easy"],
+      [198, "House Robber", "medium"],
+      [213, "House Robber II", "medium"],
+      [322, "Coin Change", "medium"]
+    ]},
+    { "name": "Tries · 模板题", "tier": 1, "tag": { "kind": "structures", "name": "trie" }, "problems": [
+      [208, "Implement Trie", "medium"]
+    ]},
+
+    { "name": "Backtracking", "tier": 2, "tag": { "kind": "paradigms", "name": "backtracking" }, "problems": [
+      [78, "Subsets", "medium"],
+      [39, "Combination Sum", "medium"],
+      [46, "Permutations", "medium"],
+      [90, "Subsets II", "medium"],
+      [40, "Combination Sum II", "medium"],
+      [79, "Word Search", "medium"],
+      [131, "Palindrome Partitioning", "medium"],
+      [17, "Letter Combinations of a Phone Number", "medium"],
+      [51, "N-Queens", "hard"]
+    ]},
+    { "name": "1-D DP · 其余", "tier": 2, "low": true, "sub": "10/29 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "1d-dp" }, "problems": [
+      [746, "Min Cost Climbing Stairs", "easy"],
+      [5, "Longest Palindromic Substring", "medium"],
+      [647, "Palindromic Substrings", "medium"],
+      [91, "Decode Ways", "medium"],
+      [152, "Maximum Product Subarray", "medium"],
+      [139, "Word Break", "medium"],
+      [300, "Longest Increasing Subsequence", "medium"],
+      [416, "Partition Equal Subset Sum", "medium"]
+    ]},
+    { "name": "Intervals", "tier": 2, "low": true, "sub": "10/29 前不做 · 有空再说", "tag": { "kind": "paradigms", "name": "intervals" }, "problems": [
+      [57, "Insert Interval", "medium"],
+      [56, "Merge Intervals", "medium"],
+      [435, "Non-overlapping Intervals", "medium"],
+      [252, "Meeting Rooms", "easy"],
+      [253, "Meeting Rooms II", "medium"],
+      [1851, "Minimum Interval to Include Each Query", "hard"]
+    ]},
+    { "name": "Graphs · 其余", "tier": 2, "tag": { "kind": "structures", "name": "graph" }, "problems": [
+      [133, "Clone Graph", "medium"],
+      [286, "Walls and Gates", "medium"],
+      [207, "Course Schedule", "medium"],
+      [210, "Course Schedule II", "medium"],
+      [261, "Graph Valid Tree", "medium"],
+      [323, "Number of Connected Components", "medium"],
+      [684, "Redundant Connection", "medium"],
+      [127, "Word Ladder", "hard"]
+    ]},
+    { "name": "Tries · 其余", "tier": 2, "low": true, "sub": "10/29 前不做 · 212 是 Trie × Backtracking，排在回溯之后", "tag": { "kind": "structures", "name": "trie" }, "problems": [
+      [211, "Design Add and Search Words", "medium"],
+      [212, "Word Search II", "hard"]
+    ]},
+
+    { "name": "2-D DP", "tier": 3, "low": true, "sub": "砍掉 · 除非时间多出来", "tag": { "kind": "paradigms", "name": "2d-dp" }, "problems": [
+      [62, "Unique Paths", "medium"],
+      [1143, "Longest Common Subsequence", "medium"],
+      [309, "Buy and Sell Stock With Cooldown", "medium"],
+      [518, "Coin Change II", "medium"],
+      [494, "Target Sum", "medium"],
+      [97, "Interleaving String", "medium"],
+      [72, "Edit Distance", "medium"],
+      [329, "Longest Increasing Path in a Matrix", "hard"],
+      [115, "Distinct Subsequences", "hard"],
+      [312, "Burst Balloons", "hard"],
+      [10, "Regular Expression Matching", "hard"]
+    ]},
+    { "name": "Advanced Graphs", "tier": 3, "low": true, "sub": "砍掉 · 除非时间多出来", "tag": { "kind": "structures", "name": "graph" }, "problems": [
+      [1584, "Min Cost to Connect All Points", "medium"],
+      [743, "Network Delay Time", "medium"],
+      [787, "Cheapest Flights Within K Stops", "medium"],
+      [332, "Reconstruct Itinerary", "hard"],
+      [778, "Swim in Rising Water", "hard"],
+      [269, "Alien Dictionary", "hard"]
+    ]},
+    { "name": "Greedy", "tier": 3, "low": true, "sub": "每题一个 trick，迁移性最低 — 排最后，砍起来最不心疼", "tag": { "kind": "paradigms", "name": "greedy" }, "problems": [
+      [53, "Maximum Subarray", "medium"],
+      [55, "Jump Game", "medium"],
+      [45, "Jump Game II", "medium"],
+      [134, "Gas Station", "medium"],
+      [846, "Hand of Straights", "medium"],
+      [1899, "Merge Triplets to Form Target", "medium"],
+      [763, "Partition Labels", "medium"],
+      [678, "Valid Parenthesis String", "medium"]
+    ]},
+
+    { "name": "Math & Geometry", "tier": 3, "low": true, "sub": "低频，最先放弃的一组", "tag": { "kind": "structures", "name": "matrix" }, "problems": [
+      [48, "Rotate Image", "medium"],
+      [54, "Spiral Matrix", "medium"],
+      [73, "Set Matrix Zeroes", "medium"],
+      [202, "Happy Number", "easy"],
+      [66, "Plus One", "easy"],
+      [50, "Pow(x, n)", "medium"],
+      [43, "Multiply Strings", "medium"],
+      [2013, "Detect Squares", "medium"]
+    ]},
+    { "name": "Bit Manipulation", "tier": 3, "low": true, "sub": "知道就秒、不知道就卡，学不到可迁移的东西", "tag": { "kind": "paradigms", "name": "bit-manipulation" }, "problems": [
+      [136, "Single Number", "easy"],
+      [191, "Number of 1 Bits", "easy"],
+      [338, "Counting Bits", "easy"],
+      [190, "Reverse Bits", "easy"],
+      [268, "Missing Number", "easy"],
+      [371, "Sum of Two Integers", "medium"],
+      [7, "Reverse Integer", "medium"]
+    ]}
+  ]
+}

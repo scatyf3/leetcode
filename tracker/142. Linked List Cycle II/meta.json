@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "Floyd 快慢指针判环",
+    "a = c + (n-1)(b+c)：一个回 head 同速走"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "快慢指针相遇后，怎么找入环点？",
+    "idea": "一个指针回 head，两个都每次走 1 步，再相遇处即是",
+    "wrong": [
+      "一个指针回 head，仍按快 2 慢 1 走，再相遇处即是",
+      "第一次相遇的那个节点就是入环点，直接返回",
+      "两个都留在相遇点，各自每次走 1 步直到再相遇"
+    ],
+    "then": [
+      {
+        "q": "要让「回 head 同速走」成立，第一阶段怎么初始化？",
+        "idea": [
+          "slow = fast = head",
+          "slow = head.next，fast = head.next.next"
+        ],
+        "wrong": [
+          "slow = head，fast = head.next",
+          "slow = head.next，fast = head.next.next.next"
+        ]
+      }
+    ]
+  }
+}

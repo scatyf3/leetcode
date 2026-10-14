@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer"
+  ],
+  "techniques": [
+    "快慢指针找中点",
+    "反转后半段再比较"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "O(1) 空间怎么判？",
+    "idea": "快慢指针找中点，反转后半段，再和前半段逐个比",
+    "wrong": [
+      "原地反转整条链表，再和原链表逐个比",
+      "快慢指针一直走，相遇说明是回文",
+      "首尾两个指针往中间收，逐个比较 val"
+    ]
+  }
+}

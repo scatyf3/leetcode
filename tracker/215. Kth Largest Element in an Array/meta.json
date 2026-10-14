@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "array",
+    "heap"
+  ],
+  "paradigms": [
+    "heap"
+  ],
+  "techniques": [
+    "size-k 小顶堆, 堆顶即门槛",
+    "比堆顶大才换入"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n log k)",
+    "space": "O(k)"
+  },
+  "quiz": {
+    "idea": "大小 k 的小顶堆，比堆顶大就替换，返回堆顶",
+    "wrong": [
+      "大小 k 的大顶堆，比堆顶小就替换，返回堆顶",
+      "大小 k 的小顶堆，比堆顶小就替换，返回堆顶",
+      "全部建小顶堆，弹出 k 次，返回最后弹出的"
+    ]
+  }
+}

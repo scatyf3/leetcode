@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "heap",
+    "array"
+  ],
+  "paradigms": [
+    "heap",
+    "simulation"
+  ],
+  "techniques": [
+    "取反把最小堆当最大堆"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "idea": "取反建最大堆，每轮弹两颗最重的，差值不为 0 就压回",
+    "wrong": [
+      "排序一次，从大到小两两相撞，差值追加到末尾",
+      "建最小堆，每轮弹两颗最轻的，差值不为 0 就压回",
+      "取反建最大堆，每轮弹两颗最重的，差值直接丢掉"
+    ]
+  }
+}

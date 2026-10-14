@@ -1,0 +1,26 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
+  "techniques": [
+    "上一行相邻两数相加"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n²)",
+    "space": "O(n²)"
+  },
+  "quiz": {
+    "idea": "首尾是 1，中间 row[j] = prev[j-1] + prev[j]",
+    "wrong": [
+      "首尾是 1，中间 row[j] = prev[j] + prev[j+1]",
+      "首尾是 1，中间 row[j] = row[j-1] + prev[j-1]",
+      "首尾是 1，中间 row[j] = prev[j-1] + prev[j+1]"
+    ]
+  }
+}

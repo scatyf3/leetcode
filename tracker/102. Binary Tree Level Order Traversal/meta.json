@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
+  "techniques": [
+    "进层前取 len(q) 锁住当前层",
+    "孩子判 None 再入队"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(n)"
+  },
+  "quiz": {
+    "q": "BFS 怎么把节点按层切开？",
+    "idea": "每层开头记下 len(q)，只弹这么多个",
+    "wrong": [
+      "一直弹到 q 为空，弹出来的就是同一层",
+      "每弹一个就重新读 len(q) 判断是否到层尾",
+      "用栈代替队列，每层从右往左依次弹出"
+    ]
+  }
+}

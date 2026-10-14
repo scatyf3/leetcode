@@ -1,0 +1,38 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
+  "techniques": [
+    "dummy 哨兵",
+    "四个指针 prev/cur/nxt/nxt_nxt 一对一对换"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "idea": "dummy 接头，每轮把 prev→cur→nxt 改成 prev→nxt→cur",
+    "wrong": [
+      "只交换相邻两个节点的 val，指针都不动",
+      "快慢指针找中点，反转后半段再交织合并",
+      "prev/curr 三指针把整条链整体反转一遍"
+    ],
+    "then": [
+      {
+        "q": "一对 cur、nxt 换完后，下一轮怎么前进？",
+        "idea": "prev = cur，cur = nxt_nxt",
+        "wrong": [
+          "prev = nxt，cur = nxt_nxt",
+          "prev = cur，cur = cur.next.next",
+          "prev = nxt，cur = cur.next"
+        ]
+      }
+    ]
+  }
+}

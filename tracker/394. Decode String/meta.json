@@ -1,0 +1,30 @@
+{
+  "structures": [
+    "string",
+    "stack"
+  ],
+  "paradigms": [
+    "stack"
+  ],
+  "techniques": [
+    "栈存 (外层 cur, 重复次数)",
+    "栈 + cur = 手动模拟递归",
+    "多位数 num = num*10 + d"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "complexity": {
+    "time": "O(n + L)",
+    "space": "O(n + L)"
+  },
+  "quiz": {
+    "q": "遇到 [ 和 ] 分别做什么？",
+    "idea": "[ 压入 (cur, num) 并清零；] 弹出 prev, k，cur = prev + cur*k",
+    "wrong": [
+      "[ 压入 (cur, num) 并清零；] 弹出 prev, k，cur = (prev + cur)*k",
+      "[ 只压入 num，cur 不清零；] 弹出 k，cur = cur*k",
+      "[ 往后找第一个 ]，把中间内容重复 num 次再拼回去"
+    ]
+  }
+}

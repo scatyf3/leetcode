@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "linked-list"
+  ],
+  "paradigms": [
+    "two-pointer",
+    "recursion"
+  ],
+  "techniques": [
+    "快慢指针找左中点 fast = head.next",
+    "先存 slow.next 再断开",
+    "dummy 归并, 剩余整段接上"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n log n)",
+    "space": "O(log n)"
+  },
+  "quiz": {
+    "q": "快慢指针找中点并切开，怎么写？",
+    "idea": "slow, fast = head, head.next；mid = slow.next，再断开 slow.next",
+    "wrong": [
+      "slow, fast = head, head；mid = slow.next，再断开 slow.next",
+      "slow, fast = head, head.next；mid = slow，再断开 slow.next",
+      "slow, fast = head, head.next；mid = slow.next，不用断开"
+    ],
+    "then": [
+      {
+        "q": "合并时一条先走空了，怎么收尾？",
+        "idea": "cur.next = left or right，剩下那段整体接上",
+        "wrong": [
+          "cur.next = right，右半边一定是后走空的",
+          "不用处理，while 循环里已经全部接完",
+          "cur.next = right.next，跳过已比较过的节点"
+        ]
+      }
+    ]
+  }
+}

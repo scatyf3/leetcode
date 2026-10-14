@@ -1,0 +1,31 @@
+{
+  "structures": [
+    "array",
+    "hash-table"
+  ],
+  "paradigms": [
+    "greedy",
+    "counting"
+  ],
+  "techniques": [
+    "只看最多的任务搭骨架",
+    "并列最多的几种站在尾巴上",
+    "替代: heap 存可发射 + deque 等冷却"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3.5,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "最少需要多少格？",
+    "idea": "max((max_cnt-1)*(n+1) + num_max, len(tasks))",
+    "wrong": [
+      "(max_cnt-1)*(n+1) + num_max",
+      "max((max_cnt-1)*(n+1) + 1, len(tasks))",
+      "max(max_cnt*(n+1), len(tasks))"
+    ]
+  }
+}

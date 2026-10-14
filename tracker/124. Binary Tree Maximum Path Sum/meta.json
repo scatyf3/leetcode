@@ -1,0 +1,41 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs",
+    "recursion"
+  ],
+  "techniques": [
+    "dfs 返回单边最大贡献",
+    "nonlocal 全局在拐点处更新",
+    "负分支直接不要"
+  ],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "q": "dfs(node) 返回什么？",
+    "idea": "以 node 为顶、只往一侧向下的最大路径和",
+    "wrong": [
+      "经过 node、左右两侧都可走的最大路径和",
+      "以 node 为根的整棵子树里的最大路径和",
+      "从 node 一直走到某个叶子的最大路径和"
+    ],
+    "then": [
+      {
+        "q": "全局答案在哪更新？",
+        "idea": "每个节点处用 val+L+R（负分支舍掉）更新",
+        "wrong": [
+          "只在根节点处用 val+L+R 算一次",
+          "每个节点处用 dfs 的返回值更新",
+          "只在叶子节点处用路径累加和更新"
+        ]
+      }
+    ]
+  }
+}

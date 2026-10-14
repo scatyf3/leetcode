@@ -1,0 +1,28 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "外层枚举起点，内层向下累减",
+    "换起点只在外层，否则重复计数"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n²)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "q": "路径必须连续向下、可以不从根开始，怎么枚举？",
+    "idea": "外层枚举每个起点，内层从起点往下传剩余值",
+    "wrong": [
+      "一趟 DFS，每个节点可接上父路径或从 target 重开",
+      "只从根出发 DFS，走到叶子时检查剩余值是否为 0",
+      "每个节点选或不选，像求子集一样回溯凑出 target"
+    ]
+  }
+}

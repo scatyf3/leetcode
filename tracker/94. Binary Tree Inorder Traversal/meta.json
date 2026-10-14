@@ -1,0 +1,27 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "dfs"
+  ],
+  "techniques": [
+    "左-根-右",
+    "None 作 base case"
+  ],
+  "difficulty": "easy",
+  "status": "solved",
+  "familiarity": 1,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(h)"
+  },
+  "quiz": {
+    "idea": "先 dfs(left)，再记录 node.val，最后 dfs(right)",
+    "wrong": [
+      "先记录 node.val，再 dfs(left)，最后 dfs(right)",
+      "先 dfs(left)，再 dfs(right)，最后记录 node.val",
+      "用队列逐层弹出节点，按出队顺序记录 node.val"
+    ]
+  }
+}

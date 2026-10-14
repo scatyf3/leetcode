@@ -1,0 +1,40 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "greedy",
+    "1d-dp"
+  ],
+  "techniques": [
+    "T…T F…F 前缀只存一个数",
+    "维护最远可达下标"
+  ],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2,
+  "complexity": {
+    "time": "O(n)",
+    "space": "O(1)"
+  },
+  "quiz": {
+    "q": "dp[i] = 能否到达 i 永远是 T…T F…F，其实只需维护哪个量？",
+    "idea": "目前为止能到达的最远下标 max_reach",
+    "wrong": [
+      "目前为止见过的最大跳跃长度 nums[i]",
+      "从下标 0 到当前位置所需的最少跳数",
+      "上一次起跳时所在的那个落脚点下标"
+    ],
+    "then": [
+      {
+        "q": "扫到下标 i 时怎么判断、怎么更新？",
+        "idea": "i > max_reach 则返回 False，否则 max_reach = max(max_reach, i + nums[i])",
+        "wrong": [
+          "i > max_reach 则返回 False，否则 max_reach = max(max_reach, nums[i])",
+          "i >= max_reach 则返回 False，否则 max_reach = max(max_reach, i + nums[i])",
+          "nums[i] == 0 则返回 False，否则 max_reach = max(max_reach, i + nums[i])"
+        ]
+      }
+    ]
+  }
+}
