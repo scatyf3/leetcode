@@ -17,15 +17,118 @@ related: [/python/dict-set]
 [array.md](array.md) §和其他结构的联系 1，那边是「array 能替代 hash」，
 这边是「hash 什么时候必须是 hash」。
 
-## WTF is hash
+## 0. 哈希表是怎么实现的
 
-两类东西
-1. hashtable
-2. hashset
+### 骨架：一个数组 + 一个哈希函数
 
-通过hash函数判断元素的的桶，然后桶内比较（当然简化下可以理解为不同元素的hash，不考虑碰撞，肯定一样），区别是:
-1. hashtable explict存key value pair
-2. hashset隐式通过key判断元素在不在, agent:  set 是 map 的退化情形：只有 key，value 是空的
+数组按下标取是 O(1)，但 key 不是下标。哈希函数做的就是**把任意 key 翻译成一个下标**：
+
+```
+桶号 = hash(key) % m          m 是底层数组（「桶」）的长度
+```
+
+拿 m = 8 依次放入 3、11、6（Python 里小整数的 `hash(x)` 就是 `x` 本身，可以自己验证）：
+
+```
+hash:  3 % 8 = 3      11 % 8 = 3      6 % 8 = 6
+
+桶号    0    1    2    3    4    5    6    7
+       [ ]  [ ]  [ ]  [3]  [ ]  [ ]  [6]  [ ]
+                       ↑
+                       11 也想进 3 号桶 —— 碰撞
+```
+
+### 碰撞躲不掉，只能处理
+
+key 的可能取值无穷多，桶只有 m 个，鸽巢原理保证一定有两个 key 落进同一个桶。两种处理办法：
+
+```
+拉链法（chaining）：每个桶挂一条链，碰撞了就往链上追加
+桶号    0    1    2    3          4 ...
+       [ ]  [ ]  [ ]  [3 → 11]   [ ]
+
+开放寻址（open addressing）：桶里只放一个，被占了就按固定规则去找下一个空桶
+桶号    0    1    2    3    4    5    6    7
+       [ ]  [ ]  [ ]  [3]  [11] [ ]  [6]  [ ]        3 号被占 → 试 4 号（线性探测）
+```
+
+- 拉链法好写好懂，Java 的 `HashMap` 用它。
+- 开放寻址省掉链表指针、内存连续、cache 友好，Python 的 `dict` / `set` 用它，细节见 [python/dict-set.md](../python/dict-set.md)。
+- 开放寻址**删除不能直接清空**：查 11 时是从 3 号桶开始往后找的，如果把 3 清空，查找走到空桶就会以为 11 不存在。
+  所以删除只留一个「墓碑」标记，意思是「这里有过东西，接着往后找」。
+
+### 查找：先比 hash，再比 `==`
+
+`key in table` 的完整流程：
+
+1. 算 `hash(key)`，定位到桶（开放寻址则是一串候选桶）。
+2. 在桶里逐个比较：**hash 值相同、并且 `==` 也相等**，才算找到。
+3. 碰到空桶（拉链法：链走完）还没找到，就是不存在。
+
+由此推出两条规矩：
+
+- **hash 相同 ≠ key 相同**。上例中 3 和 11 在 m = 8 时落进同一个桶，所以第 2 步一定要再比 `==`。
+- **相等的 key 必须有相同的 hash，而且 hash 不能变**。要是一个 list 放进表之后又被 `append` 改了，
+  它的 hash 就变了，按新 hash 去找会找错桶，再也找不回来。所以 Python 干脆规定可变对象不可哈希，
+  这就是 §5 里「list 要转 tuple」的根源。
+
+### 为什么是 O(1)：负载因子 + 扩容
+
+**负载因子** α = 元素个数 n / 桶数 m，可以理解为平均每个桶里有几个元素。α 是常数，单次查找就是常数次比较。
+
+元素越塞越多，α 就会涨，所以 α 超过阈值（Java 是 0.75，CPython `dict` 约 2/3）时：
+
+1. 开一个大约 2 倍大的新数组。
+2. **所有元素按新的 m 重新算桶号**，因为 `% m` 变了，原来的位置全部作废。
+
+一次扩容是 O(n)，但它每翻倍才发生一次，摊到每次插入上是 O(1)，和 `list.append` 的倍增是同一个道理。
+
+最坏情况是所有 key 都撞进同一个桶，表退化成一条链，查找 O(n)。正常数据碰不到这种情况。
+Python 对 `str` 的 hash 加了随机种子（每个进程不同），就是为了防止有人专门构造会全部碰撞的输入。
+
+### 自己写一个（拉链法，约 20 行）
+
+```python
+class HashMap:
+    def __init__(self, m=8):
+        self.buckets = [[] for _ in range(m)]     # 每个桶是一条「链」，这里用 list 代替链表
+        self.n = 0
+
+    def _bucket(self, key):
+        return self.buckets[hash(key) % len(self.buckets)]
+
+    def get(self, key):
+        for k, v in self._bucket(key):            # 桶里逐个比 ==
+            if k == key:
+                return v
+        raise KeyError(key)
+
+    def put(self, key, value):
+        b = self._bucket(key)
+        for i, (k, _) in enumerate(b):
+            if k == key:                          # 已存在：覆盖 value，个数不变
+                b[i] = (key, value)
+                return
+        b.append((key, value))
+        self.n += 1
+        if self.n > len(self.buckets) * 3 // 4:   # 负载因子 > 0.75 就扩容
+            self._resize()
+
+    def _resize(self):
+        old = [kv for b in self.buckets for kv in b]
+        self.buckets = [[] for _ in range(2 * len(self.buckets))]
+        for k, v in old:                          # m 变了，每个元素都要重新算桶号
+            self._bucket(k).append((k, v))
+```
+
+对应的练习题是 LC 705 Design HashSet 和 LC 706 Design HashMap，就是让你写这个。
+
+### map 和 set 是同一张表
+
+- **hash map**（`dict`）：桶里存 `(key, value)`，按 key 找、带出 value。
+- **hash set**（`set`）：桶里只存 key。可以看成 value 恒为空的 map，只回答「在不在」。
+
+下面的 §1 讲的就是「到底该用哪个、value 里存什么」。
 
 ## 1. 存什么：五档阶梯
 
