@@ -9,7 +9,7 @@ related: [/python/deque]
 
 链表题拆开看就两层:
 
-- **原语层**(这篇):dummy、删除靠前驱、尾插建链、先存再写、双向链表的四根指针 —— 几乎每题都在用
+- **原语层**(这篇):dummy(含尾插建新链)、删除靠前驱、先存再写、双向链表的四根指针 —— 几乎每题都在用
 - **套路层**:找中点 / 反转 / 交替合并三件套,单独写在 [linked-list-template.md](https://github.com/scatyf3/leetcode/blob/main/tracker/notes/linked-list-template.md),这里不重复
 
 > 两条底层事实,所有 trick 都从这里长出来:
@@ -36,6 +36,19 @@ return dummy.next          # 不是 head: 头被删 / 被换时 head 已经是�
 
 dummy 的本质:**给"头的前驱"造一个实体**。19 的推导里待删节点前驱是 idx L-n-1,删头时变成 idx -1 —— dummy 就是那个 -1。
 
+**「新链的头还不存在」那一行**(21 / 148 / 2)再配一个 `tail` 指着末尾,一路往后接:
+
+```python
+dummy = tail = ListNode()
+while ...:
+    tail.next = 某个节点      # 接到末尾
+    tail = tail.next
+return dummy.next
+```
+
+归并的收尾 **`tail.next = l1 or l2`**:循环退出时至少一条已空,剩下那条本来就有序,整段接上
+(148 踩过写成 `right.next`,跳过一个节点还会在 None 上炸)。
+
 ### 原语 2:删除 —— prev 和 cur 一起走
 
 单链表只能往前走,要删 `cur` 就得改它**前一个**节点的指针,所以遍历时 `prev` 和 `cur` 一起走。
@@ -60,7 +73,7 @@ while cur:
 **要记的只有一点:删了的话 `prev` 不动。** `cur` 没了,`prev` 后面紧接着就是 `nxt`,
 下一轮检查 `nxt` 时,`prev` 正好还是它的前一个。203 踩过:删完写成 `cur = prev.next.next`,多跳了一步。
 
-第一行 `nxt = cur.next` 是另一件事 —— 改指针的顺序,见原语 4。
+第一行 `nxt = cur.next` 是另一件事 —— 改指针的顺序,见原语 3。
 
 83 去重只比相邻的两个,可以不要 `prev`,`cur` 自己就是前驱:
 
@@ -72,37 +85,7 @@ while cur and cur.next:
         cur = cur.next
 ```
 
-### 原语 3:尾插建新链 —— dummy + tail
-
-要从空开始、一个节点一个节点**接到末尾**拼出一条新链表(合并、逐位相加都是)。
-
-- **`tail`**:一直指着最后一个节点。不记的话,每次接之前都得从头走到尾,O(n)。
-- **`dummy`**:一开始链表是空的,`tail` 没地方指。先造一个假的头节点让 `tail` 指着它,
-  第一个节点就不用特殊处理了。
-
-```
-开始:    dummy                tail = dummy
-接上 1:  dummy → 1            tail = 1
-接上 2:  dummy → 1 → 2        tail = 2
-返回 dummy.next = 1 → 2(跳过假的头)
-```
-
-```python
-dummy = tail = ListNode()
-while ...:
-    tail.next = 某个节点      # 接到末尾
-    tail = tail.next          # tail 挪到新的末尾
-return dummy.next
-```
-
-不用 dummy 的话,要写 `if head is None: head = tail = node` 单独处理第一个节点。
-
-用在:21 合并两个有序链表(每次把两条链里较小的头接上去)、2 两数相加(每算出一位接一个节点)、148 排序的归并那一步。
-
-归并的收尾 **`tail.next = l1 or l2`**:循环退出时至少有一条已经空了,剩下那条本来就有序,整段接上就行。
-(148 踩过写成 `right.next`,跳过一个节点,还会在 None 上炸。)
-
-### 原语 4:改指针的顺序 —— 先存再写
+### 原语 3:改指针的顺序 —— 先存再写
 
 任何 `x.next = ...` 之前问一句:**`x.next` 原来指向的东西后面还要不要?** 要就先存进 `nxt`。
 
