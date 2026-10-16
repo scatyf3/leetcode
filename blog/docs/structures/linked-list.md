@@ -87,10 +87,11 @@ while cur and cur.next:
 
 ### 原语 3:改指针的顺序 —— 先存再写
 
-任何 `x.next = ...` 之前问一句:**`x.next` 原来指向的东西后面还要不要?** 要就先存进 `nxt`。
+**改任何 `x.next` 之前,一律先把它原来的值存下来**(`nxt = x.next`),不用去判断后面还要不要。
+判断本身就可能判错;多存一个变量没有代价。要改几根就先存几根。
 
 - 206 反转:`nxt = curr.next` 必须在 `curr.next = prev` 之前
-- 143 交替合并:`n1, n2 = first.next, second.next` 两个都要先存
+- 143 交替合并:要改 `first.next` 和 `second.next` 两根,就先存两根 `n1, n2 = first.next, second.next`
 - 148 切半:`mid = slow.next` 必须在 `slow.next = None` 之前(踩过写成 `mid = slow`,右半整段丢失还自环)
 
 为什么是 prev+curr 两个真状态、nxt 只是 tmp,见 [206 的笔记](https://github.com/scatyf3/leetcode/blob/main/tracker/206.%20Reverse%20Linked%20List/note.md)。
