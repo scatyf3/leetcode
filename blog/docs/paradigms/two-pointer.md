@@ -158,7 +158,7 @@ related: []
 判回文（LC 125）就是逐对比较，原地反转（LC 189 的 `rev`、LC 48 的每行反转）就是逐对交换。
 它和夹逼长得一样、论证完全不同 —— 夹逼要证「丢得起」，它压根没在丢。
 `rev(AB) = rev(rev(A) + rev(B))` 那套段交换原语见
-[structures/array.md](../structures/array.md) §2「反转」。
+[structures/array.md](../structures/array.md) §「反转」。
 
 ### C. 另一条轴：`l` / `r` 指的是元素，还是缝
 
@@ -208,8 +208,6 @@ related: []
 
 第一条决定**能不能**收缩，第二条决定收缩**划不划算**。计数、去重、求和都可撤销
 （LC 3 的 last 表、LC 424 的频次表），所以它们能滑；乘积、区间最值撤不掉，就滑不动。
-可逆性这一栏的来历见 [structures/array.md](../structures/array.md)
-§「切片本身的 expand 是否可逆」。
 
 **`l` 怎么收缩，有三档，需要的条件从弱到强：**
 
