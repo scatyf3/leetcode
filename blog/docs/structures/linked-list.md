@@ -43,15 +43,23 @@ dummy 的本质:**给"头的前驱"造一个实体**。19 的推导里待删节�
 ```python
 prev, cur = dummy, head
 while cur:
+    nxt = cur.next                # 先把下一个显式存下来
     if 要删 cur:
-        prev.next = cur.next      # prev 不动!
+        prev.next = nxt           # prev 不动!
     else:
         prev = cur
-    cur = prev.next               # 两个分支统一从 prev 重新取 cur
+    cur = nxt                     # 删没删都一样: 走到原来的下一个
 ```
 
-**关键不对称:删除分支里 prev 不前进。** 删完之后 `prev.next` 已经是新的下一个,下一轮要接着检查它。
-203 踩过:写成 `cur = prev.next.next`,等于删完又多跳一步,连续两个要删的节点会漏掉第二个。
+**关键不对称:删除分支里 prev 不前进。** 删掉 `cur` 之后,`prev` 的下一个变成了 `nxt`,下一轮要接着检查它,所以 `prev` 留在原地。
+
+`cur` 每轮都只走到「原来的下一个」`nxt`,不从 `prev` 去推。
+203 第一版就是从 `prev` 推、写成了 `cur = prev.next.next`,删完又多跳一步,连续两个要删的节点会漏掉第二个;
+显式存 `nxt` 之后这个错写不出来。
+
+> **什么时候必须先存 `nxt`:要改写 `cur.next` 的时候。** 206 反转一执行 `cur.next = prev`,原来的下一个就丢了。
+> 删除不碰 `cur.next`,严格说不存也行(`cur = prev.next` 两个分支都对),但统一先存一个 `nxt`,
+> 所有「边走边改」的链表循环就都是同一个形状。
 
 只比相邻的(83)可以省掉 prev:`while cur and cur.next: if cur.val == cur.next.val: cur.next = cur.next.next else: cur = cur.next` —— 这里"前驱"就是 `cur` 自己。
 
