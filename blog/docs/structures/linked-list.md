@@ -108,22 +108,81 @@ while cur and cur.next:
 
 146 LRU 的全部难点都在这里。哈希表负责 O(1) 定位,双向链表负责 O(1) 挪位置和淘汰(见 [hash-table.md](hash-table.md))。
 
-**头尾都放哨兵**,真实节点永远夹在 `head` 和 `tail` 之间,所有 `if x is not None` 都能删掉:
+**头尾都放哨兵**,真实节点永远夹在 `head` 和 `tail` 之间,所有 `if x is not None` 都能删掉。下面是 146 pass 4 的写法:
 
 ```python
-def unlink(node):                 # 摘下: 2 根
-    node.prev.next = node.next
-    node.next.prev = node.prev
+class Node:
+    def __init__(self, key, value):
+        self.key = key              # 存 key:淘汰尾节点时要靠它 del hash_table[key]
+        self.value = value
+        self.prev = None
+        self.next = None
+    def __repr__(self):             # 调试用:print(self.head) 能打出整条链
+        return f"Node({self.key}, next={self.next})"
 
-def push_front(node):             # 插到 head 后: 4 根
-    node.prev, node.next = head, head.next   # 先接好 node 自己的两根
-    node.prev.next = node                    # 剩下两根都经由 node 去找邻居,
-    node.next.prev = node                    # 顺序就无所谓了
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.hash_table = {}
+        self.head = Node(-1, -1)
+        self.tail = Node(-1, -1)
+        self.capacity = capacity
+        self.size = 0
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def get(self, key: int) -> int:
+        if key not in self.hash_table:
+            return -1
+        node = self._remove_from_lst(key)
+        self._insert_head(node)
+        return node.value
+
+    def put(self, key: int, value: int) -> None:
+        if key not in self.hash_table:
+            node = Node(key, value)
+            self.size += 1
+        else:
+            node = self._remove_from_lst(key)
+            node.value = value
+        self._insert_head(node)
+        if self.size > self.capacity:
+            self._remove_tail()
+            self.size -= 1
+
+    # assert node exist
+    def _remove_from_lst(self, key) -> Node:
+        node = self.hash_table[key]
+        node_prev = node.prev
+        node_next = node.next
+        node_prev.next = node_next  # 1
+        node_next.prev = node_prev  # 2
+        del self.hash_table[key]
+        return node
+
+    def _insert_head(self, node):
+        head_node = self.head.next
+        # 4 link
+        head_node.prev = node
+        node.next = head_node
+        node.prev = self.head
+        self.head.next = node
+        self.hash_table[node.key] = node
+
+    def _remove_tail(self):
+        tail_node = self.tail.prev
+        tail_node_prev = tail_node.prev
+        tail_node_prev.next = self.tail
+        self.tail.prev = tail_node_prev
+        del self.hash_table[tail_node.key]
 ```
 
-先接自己、再让邻居指回来:这样后两行不依赖 `head.next` 的旧值,写反顺序也不会错。
+设计上的三点(146 的 note,pass 4):
 
-LRU 只需要这两个原语:`get` = unlink + push_front;`put` 新 key = push_front(满了再 unlink `tail.prev`);`put` 已有 key = 改 val + unlink + push_front。
+1. **三个 helper,每个都同时改链表和哈希表**。`_remove_from_lst` 摘节点时顺手 `del`,`_insert_head` 插节点时顺手登记,
+   两边永远同步。`get` / `put` 主逻辑就只剩几行:`get` = 摘下 + 插到头;`put` 新 key = 新建 + 插到头,已有 key = 摘下 + 改值 + 插到头,超了就删尾。
+2. **改指针前先把邻居存成变量**(原语 3):`node_prev` / `node_next`、`head_node`、`tail_node_prev` 都先存好,
+   之后那几行赋值写成什么顺序都不会错。摘下改 2 根,插入改 4 根。
+3. **`size` 只在两个地方动**:`put` 新建节点时 +1,删尾时 -1。已有 key 的 `put` 不新建节点,所以不动 `size`。
 
 146 pass 2 踩过的三个坑,全是"只改了一个方向":
 
@@ -133,8 +192,7 @@ LRU 只需要这两个原语:`get` = unlink + push_front;`put` 新 key = push_fr
 | 挪到队头时没写 `prev_head.prev = node` | 反向链断,下次删尾删错 |
 | `put` 已有 key 又新建了一个节点 | 旧节点留在链里,被淘汰时把新节点的 map 项删掉 |
 
-> 自检:每个原语写完,数一下改了几根指针。摘下 2 根,插入 4 根,少一根就是 bug。
-> 节点里要**存 key**:淘汰尾节点时得靠它 `del self.mp[node.key]`。
+> 自检:每个 helper 写完,数一下改了几根指针。摘下 2 根,插入 4 根,少一根就是 bug。
 
 ### 链表 = 函数:看到 `i → f(i)` 就想到链表
 
@@ -159,7 +217,7 @@ LRU 只需要这两个原语:`get` = unlink + push_front;`put` 新 key = push_fr
 | [83](https://github.com/scatyf3/leetcode/tree/main/tracker/83.%20Remove%20Duplicates%20from%20Sorted%20List/) 有序去重 | 删除 | 删前驱 | 只比相邻;头不会被删,单游标即可 |
 | [2](https://github.com/scatyf3/leetcode/tree/main/tracker/2.%20Add%20Two%20Numbers/) 两数相加 | 模拟 | dummy + 尾插 | 循环条件 `l1 or l2 or carry`,缺的一位当 0;`//` 取进位,`%` 取本位 |
 | [138](https://github.com/scatyf3/leetcode/tree/main/tracker/138.%20Copy%20List%20with%20Random%20Pointer/) 复制带随机指针 | 图克隆 | 哈希 | 两趟:先建 原→新 表,再查表连边;key 是节点不是 val |
-| [146](https://github.com/scatyf3/leetcode/tree/main/tracker/146.%20LRU%20Cache/) LRU | 双向链表 + 哈希 | 头尾哨兵 | unlink + push_front 两个原语;每次改动数指针 |
+| [146](https://github.com/scatyf3/leetcode/tree/main/tracker/146.%20LRU%20Cache/) LRU | 双向链表 + 哈希 | 头尾哨兵 | 三个 helper(`_remove_from_lst` / `_insert_head` / `_remove_tail`)同时改链表和哈希表;摘 2 根插 4 根 |
 | [287](https://github.com/scatyf3/leetcode/tree/main/tracker/287.%20Find%20the%20Duplicate%20Number/) 找重复数 | 隐式链表 | Floyd | `i → nums[i]`,重复值 = 环入口 |
 | [707](https://github.com/scatyf3/leetcode/tree/main/tracker/707.%20Design%20Linked%20List/) 设计链表 | 原语练习 | dummy + 删前驱 | 还没写;适合拿来把原语 1–3 各手写一遍 |
 
