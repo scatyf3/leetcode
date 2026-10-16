@@ -112,17 +112,17 @@ while cur and cur.next:
 
 ```python
 class Node:
-    def __init__(self, key, value):
+    def __init__(self, key: int, value: int) -> None:
         self.key = key              # 存 key:淘汰尾节点时要靠它 del hash_table[key]
         self.value = value
-        self.prev = None
-        self.next = None
-    def __repr__(self):             # 调试用:print(self.head) 能打出整条链
+        self.prev: Node | None = None
+        self.next: Node | None = None
+    def __repr__(self) -> str:      # 调试用:print(self.head) 能打出整条链
         return f"Node({self.key}, next={self.next})"
 
 class LRUCache:
-    def __init__(self, capacity: int):
-        self.hash_table = {}
+    def __init__(self, capacity: int) -> None:
+        self.hash_table: dict[int, Node] = {}
         self.head = Node(-1, -1)
         self.tail = Node(-1, -1)
         self.capacity = capacity
@@ -150,7 +150,7 @@ class LRUCache:
             self.size -= 1
 
     # assert node exist
-    def _remove_from_lst(self, key) -> Node:
+    def _remove_from_lst(self, key: int) -> Node:
         node = self.hash_table[key]
         node_prev = node.prev
         node_next = node.next
@@ -159,7 +159,7 @@ class LRUCache:
         del self.hash_table[key]
         return node
 
-    def _insert_head(self, node):
+    def _insert_head(self, node: Node) -> None:
         head_node = self.head.next
         # 4 link
         head_node.prev = node
@@ -168,7 +168,7 @@ class LRUCache:
         self.head.next = node
         self.hash_table[node.key] = node
 
-    def _remove_tail(self):
+    def _remove_tail(self) -> None:
         tail_node = self.tail.prev
         tail_node_prev = tail_node.prev
         tail_node_prev.next = self.tail
