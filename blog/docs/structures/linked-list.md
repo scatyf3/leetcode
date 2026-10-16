@@ -36,32 +36,42 @@ return dummy.next          # 不是 head: 头被删 / 被换时 head 已经是�
 
 dummy 的本质:**给"头的前驱"造一个实体**。19 的推导里待删节点前驱是 idx L-n-1,删头时变成 idx -1 —— dummy 就是那个 -1。
 
-### 原语 2:删除靠前驱 —— 删了不动,没删才走
+### 原语 2:删除 —— 删了 prev 不动
 
-单链表删 `cur` 必须改 `prev.next`,所以游标得停在**待删节点的前一个**。
+要删掉 `cur`,就让它前面的 `prev` 直接指向它后面的 `nxt`,把 `cur` 跳过去:
+
+```
+删之前:  prev → cur → nxt
+删之后:  prev ──────→ nxt
+```
+
+所以遍历时要一直带着 `prev`:
 
 ```python
 prev, cur = dummy, head
 while cur:
-    nxt = cur.next                # 先把下一个显式存下来
+    nxt = cur.next          # 先记住下一个
     if 要删 cur:
-        prev.next = nxt           # prev 不动!
+        prev.next = nxt     # 跳过 cur,prev 不动
     else:
-        prev = cur
-    cur = nxt                     # 删没删都一样: 走到原来的下一个
+        prev = cur          # 没删,prev 才往前走
+    cur = nxt
 ```
 
-**关键不对称:删除分支里 prev 不前进。** 删掉 `cur` 之后,`prev` 的下一个变成了 `nxt`,下一轮要接着检查它,所以 `prev` 留在原地。
+**只有一个要记的点:删了的话 `prev` 不动。** `cur` 没了,`prev` 后面紧接着就是 `nxt`,
+下一轮检查 `nxt` 时,`prev` 正好还是它的前一个。
 
-`cur` 每轮都只走到「原来的下一个」`nxt`,不从 `prev` 去推。
-203 第一版就是从 `prev` 推、写成了 `cur = prev.next.next`,删完又多跳一步,连续两个要删的节点会漏掉第二个;
-显式存 `nxt` 之后这个错写不出来。
+(203 踩过:删完写成 `cur = prev.next.next`,多跳了一步。先存 `nxt`、每轮走到 `nxt`,就不会错。)
 
-> **什么时候必须先存 `nxt`:要改写 `cur.next` 的时候。** 206 反转一执行 `cur.next = prev`,原来的下一个就丢了。
-> 删除不碰 `cur.next`,严格说不存也行(`cur = prev.next` 两个分支都对),但统一先存一个 `nxt`,
-> 所有「边走边改」的链表循环就都是同一个形状。
+83 去重只比相邻的两个,可以不要 `prev`,`cur` 自己就是前驱:
 
-只比相邻的(83)可以省掉 prev:`while cur and cur.next: if cur.val == cur.next.val: cur.next = cur.next.next else: cur = cur.next` —— 这里"前驱"就是 `cur` 自己。
+```python
+while cur and cur.next:
+    if cur.val == cur.next.val:
+        cur.next = cur.next.next    # 删掉 cur 后面那个,cur 不动
+    else:
+        cur = cur.next
+```
 
 ### 原语 3:尾插建新链 —— dummy + tail
 
