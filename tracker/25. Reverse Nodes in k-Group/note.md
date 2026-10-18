@@ -1,5 +1,11 @@
 # 25. Reverse Nodes in k-Group
 
+## pass2
+
+主要是我们想先写一个reverse k，然后再拼在一起，然而reversek之后难以验证正确性...
+
+## pass1
+
 我自己写了个naive版，但感觉非常麻烦，我们用array存一个reverse区间的start和end，内部reverse，外部连线
 
 但是非常非常容易连出环...agent给了个建议的template

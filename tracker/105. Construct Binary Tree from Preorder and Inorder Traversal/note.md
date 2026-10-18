@@ -1,6 +1,29 @@
 # 105. Construct Binary Tree from Preorder and Inorder Traversal
 
-## 复杂度trick
+## pass3
+
+```python
+class Solution:
+    def buildTree(self, preorder: list[int], inorder: list[int]) -> TreeNode | None:
+        def dfs(prel,prer,inl,inr):
+            if prer<prel or inr<inl:
+                return None
+            root = preorder[prel]
+            in_root_index=inl
+            left_len=0
+            while inorder[in_root_index]!=root:
+                in_root_index+=1
+                left_len+=1
+            left_node = dfs(prel+1,prel+1+left_len-1,inl,in_root_index-1)
+            right_node = dfs(prel+1+left_len-1+1,prer,in_root_index+1,inr)
+
+            root_node = TreeNode(root,left_node,right_node)
+            return root_node
+        return dfs(0,len(preorder)-1,0,len(inorder)-1)
+```
+
+唉这个treelen好麻烦啊
+
 
 ## pass2
 为啥edge case是`if pre_l>=pre_r or in_l>=in_r:`，为啥大于等于
