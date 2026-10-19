@@ -1,5 +1,32 @@
 # 416. Partition Equal Subset Sum
 
+## pass2
+写了个naive的解，本质上bfs on value，但是超时了
+
+```python
+class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+        total = sum(nums)
+        if total%2!=0:
+            return False
+        target = total//2
+        reachable = []
+        reachable.append(0)
+        for elem in nums:
+            len_r = len(reachable)
+            for i in range(len_r):
+                if reachable[i]+elem<target:
+                    reachable.append(reachable[i]+elem)
+                elif reachable[i]+elem==target:
+                    return True
+        return False
+```
+
+这里的问题是用list会重复append一堆重复元素，用set add的时候默认可以去重，减少迭代复杂度。然而用set难以边迭代变edit元素，所以需要每次把set变成一个可以迭代的list 副本，同时edit原set。
+
+
+## pass1
+
 怎么理解，首先切两半是个投机操作，其次怎么从若干数字找sum of target？
 
 用一个reachable的set迭代，每一个数都迭代增加这个set，当然为了复杂性，我们只把小于target的丢到这个set里
