@@ -1,5 +1,12 @@
 # 84. Largest Rectangle in Histogram
 
+## pass 4
+
+很多很多坑
+1. 内部用while而非if，这样while会一直检查，直到不满足里面的条件
+2. 左右边界和找到的stk 当前top，即被pop的element无关，左边界是pop后的栈顶，右边界是迭代触发这个pop的index，所以这里的区间是左右都开，需要-1
+3. 可以在height里加个伪0，清理前面的元素
+
 ## pass3
 wok同样的左边界错误
 

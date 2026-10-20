@@ -3,7 +3,7 @@ title: 模拟
 status: draft
 order: 16
 alias: []
-related: [/structures/matrix, /structures/linked-list, /structures/heap]
+related: [/structures/matrix, /structures/linked-list, /structures/heap, /paradigms/state-machine]
 ---
 
 # 模拟

@@ -23,7 +23,7 @@ related: [/paradigms/two-pointer, /structures/array, /structures/hash-table]
 | 目的地由谁定 | 套路 | 题 |
 |---|---|---|
 | **顺序**：留下的依次排到 `w`，只看「留不留」 | 读写指针 | 26、27、283、75 |
-| **值本身**：v 的家是 v-1 | 原地哈希 | 41、448 |
+| **值本身**：v 的家是 v-1 | 原地哈希（cyclic sort） | 41、448 |
 
 后一种长得像读写指针（也是原地、也在交换），但只有一个指针在动、元素会被往前送回去。
 两者的逐项对比见 [hash-table.md](../structures/hash-table.md) §8「长得像读写指针，但不是」。

@@ -1,28 +1,20 @@
 class Solution:
     def largestRectangleArea(self, heights: List[int]) -> int:
-        '''
-        trap rain water varient?
-        no, max prefix do not make sense in this case
-        naive for loop for every hist, expend until get Rectangle smaller
-        is expend greedy?
-        5 1 1 1 1 1 1 
-        no, 5-2-3-4-5-6, 6 is the better
-
-        hint: Monotonic Stack
-
-        need something to store each [l,r] interval minimal, O(n^2/2)
-        '''
-        n = len(heights)
-        stack = []
-        best = 0
-
-        for i in range(n + 1): # 枚举每个柱子
-            h = 0 if i == n else heights[i]   
-            while stack and heights[stack[-1]] >= h: 
-                top = stack.pop()
-                left = stack[-1] if stack else -1  # left就是之前的最小值index
-                width = i - left - 1               # 
-                best = max(best, heights[top] * width) # update max
-            stack.append(i)
-
-        return best
+        # lowest height dominate the Rectangle => increase stack
+        stk = []
+        res = 0
+        for idx,height in enumerate(heights+[0]):
+            while stk and heights[stk[-1]]>height: # increase检查大于
+                # POP
+                prev_index = stk.pop()
+                prev_height = heights[prev_index]
+                if stk: # 右边界是idx，左边界是pop后的栈顶而不是prev_index
+                    size = (idx-stk[-1]-1) * prev_height # 用prev height
+                else: 
+                    size = idx * prev_height # idx -(-1) - 1
+                # print(size)
+                # print(idx, size)
+                res = max(res,size)
+            # append new
+            stk.append(idx)
+        return res
