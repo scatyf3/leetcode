@@ -1,5 +1,9 @@
 # 25. Reverse Nodes in k-Group
 
+## pass3
+
+group内swap没错，group外不好搞
+
 ## pass2
 
 主要是我们想先写一个reverse k，然后再拼在一起，然而reversek之后难以验证正确性...

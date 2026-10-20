@@ -181,3 +181,4 @@
 {"ts": 1792362211, "date": "2026-10-18", "id": 694, "kind": "new", "fam": null, "born": "2026-10-18", "seen": false}
 {"ts": 1792364810, "date": "2026-10-18", "id": 134, "kind": "new", "fam": 3, "born": "2026-10-18", "seen": false}
 {"ts": 1792366060, "date": "2026-10-18", "id": 845, "kind": "new", "fam": 4, "born": "2026-10-18", "seen": false, "attack": true, "result": "wrong-idea"}
+{"ts": 1792370288, "date": "2026-10-18", "id": 25, "kind": "redo", "fam": 3, "born": null, "seen": true}
