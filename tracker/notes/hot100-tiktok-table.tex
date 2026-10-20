@@ -1,0 +1,224 @@
+% 由 tracker 里每题的 answer.md 整理；† = 还没刷，内容是补充的
+% xelatex 编译；Overleaf 上把 SimSun / SimHei 换成 FandolSong / FandolHei
+\documentclass[10pt]{article}
+\usepackage{xeCJK}
+\setCJKmainfont{SimSun}[BoldFont=SimHei]
+\usepackage[a4paper,margin=1.3cm]{geometry}
+\usepackage{longtable,booktabs,array}
+\usepackage[table]{xcolor}
+\definecolor{grp}{gray}{0.92}
+\definecolor{codefg}{RGB}{150,30,60}
+\newcommand{\code}[1]{\texttt{\textcolor{codefg}{#1}}}
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{4pt}
+\pagestyle{plain}
+
+\begin{document}
+\footnotesize
+
+\section*{Hot 100}
+$\star$ = 也在 TikTok 高频题单里。
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{6.0cm}@{}}
+\toprule
+\textbf{题目} & \textbf{tag} & \textbf{tldr idea} & \textbf{小坑}\\
+\endfirsthead
+\toprule
+\textbf{题目} & \textbf{tag} & \textbf{tldr idea} & \textbf{小坑}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{哈希}}\\*
+\textbf{1}\,$\star$\newline{\scriptsize Two Sum} & 哈希 & 一趟扫，存补数 \code{target-x $\to$ i}，每个数先查 \code{x in remain} & 存的是补数、查的是 \code{x} 本身；先查后存，防止自己配自己\\
+\textbf{49}\newline{\scriptsize Group Anagrams} & 哈希 & \code{"".join(sorted(s))} 当 key 分组 & str 没有 \code{.sort()}\\
+\textbf{128}\,$\star$\newline{\scriptsize Longest Consecutive Seq} & 哈希 & 全进 set，只从链头（\code{x-1 not in set}）往上数 & 不剪链头退化 O(n$^2$)；连续指数值，和位置无关\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{双指针}}\\*
+\textbf{283}\newline{\scriptsize Move Zeroes} & 读写指针 & \code{r} 每步走，非零就和 \code{w} 交换、\code{w+=1} & 是交换不是覆盖\\
+\textbf{11}\newline{\scriptsize Container With Most Water} & 对撞双指针 & 面积 = min(左, 右) $\times$ 宽，每次挪矮的一边 & 矮边决定上限，留着只会更差 $\to$ 可永久排除\\
+\textbf{15}\,$\star$\newline{\scriptsize 3Sum} & 排序+双指针 & 排序，固定 \code{i}，剩下是有序两数和，\code{l, r} 夹逼 & 难点是去重：\code{i} 和左邻比；命中后 \code{l} 跳过重复\\
+\textbf{42}\,$\star$\newline{\scriptsize Trapping Rain Water} & 双指针 / 前后缀 & 每格水 = min(左 max, 右 max) $-$ h & 双指针版动较矮那侧（它的答案已确定）\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{滑动窗口}}\\*
+\textbf{3}\,$\star$\newline{\scriptsize Longest Substr w/o Repeat} & 滑窗+哈希 & \code{last[c]} 记上次位置，\code{l} 直接跳到 \code{last[c]+1} & 守卫 \code{last[c] >= l}，窗外旧记录不算\\
+\textbf{438}\newline{\scriptsize Find All Anagrams} & 定长滑窗+计数 & \code{cnt=Counter(p)}，进 r 减、出 l 加，全 0 记下 \code{l} & 顺序：先进 r $\to$ 再收 l $\to$ 最后检查\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{子串}}\\*
+\textbf{560}\,$\star$\newline{\scriptsize Subarray Sum Equals K} & 前缀和+哈希 & \code{ans += cnt[pre-k]} 再 \code{cnt[pre]+=1}，\code{cnt[0]=1} & 先查后存（k=0 会多算空串）；有负数不能滑窗\\
+\textbf{239}\newline{\scriptsize Sliding Window Maximum} & 单调队列 & dq 存下标、值递减：尾弹被支配的，头弹过期的 & 窗满看 \code{i >= k-1}，不看 dq 长度\\
+\textbf{76}\,$\star$\newline{\scriptsize Minimum Window Substring} & 滑窗+计数 & 右扩 \code{cnt[c]-=1}，全覆盖时先结算最短再收左 & \code{for r} 里别再手动 \code{r+=1}\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{普通数组}}\\*
+\textbf{53}\newline{\scriptsize Maximum Subarray} & Kadane & \code{cur = max(cur+x, x)}，另记 \code{best} & \code{best} 初值 \code{-inf}（全负）；答案不是 \code{dp[-1]}\\
+\textbf{56}\,$\star$\newline{\scriptsize Merge Intervals} & 区间 & 按 start 排序，只和 \code{res[-1]} 比 & 右端点取 max（\code{[[1,10],[2,3]]}）\\
+\textbf{189}\,$\star$\newline{\scriptsize Rotate Array} & 三次反转 & 全反 $\to$ 前 k 反 $\to$ 后 n$-$k 反 & \code{k \%= n}\\
+\textbf{238}\newline{\scriptsize Product Except Self} & 前后缀积 & 左趟写前缀积进 \code{res}，右趟用标量乘后缀积 & 禁除法；除法版要按 0 的个数分三档\\
+\textbf{41}\newline{\scriptsize First Missing Positive} & 原地哈希 & 把 \code{1$\le$v$\le$n} swap 到 \code{v-1}，再找第一个 \code{nums[i] != i+1} & 判停用 \code{nums[v-1] != v}，否则重复值死循环；\code{v=0} 会换到 \code{nums[-1]}\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{矩阵}}\\*
+\textbf{73}\newline{\scriptsize Set Matrix Zeroes} & 标记 & 先收集零行、零列，再统一置零 & 边扫边置零会连锁清空\\
+\textbf{54}\,$\star$\newline{\scriptsize Spiral Matrix} & 模拟 & 四边界 $\to$ $\downarrow$ $\leftarrow$ $\uparrow$，每走完一条边收一格 & $\leftarrow$ 前判 \code{top<=bottom}，$\uparrow$ 前判 \code{left<=right}\\
+\textbf{48}\newline{\scriptsize Rotate Image} & 转置+反转 & 主对角转置 + 每行反转 & 转置只走上三角 \code{j > i}\\
+\textbf{240}\newline{\scriptsize Search 2D Matrix II} & 角落搜索 & 右上角出发：大了 \code{c-=1}，小了 \code{r+=1} & 起点要一个方向变大、一个变小\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{链表}}\\*
+\textbf{160}\newline{\scriptsize Intersection of Two Lists} & 双指针 & A 走完走 B、B 走完走 A，都走 a+b+c 步 & 无交点时同时变 None，自然退出\\
+\textbf{206}\newline{\scriptsize Reverse Linked List} & 三指针 & 先存 \code{nxt}，\code{cur.next = prev}，两指针右移 & 先存 next；返回 \code{prev}\\
+\textbf{234}\newline{\scriptsize Palindrome Linked List} & 快慢+反转 & 找中点 $\to$ 反转后半 $\to$ 逐个比 & \code{fast=head.next} 起步时 slow 停在左中点\\
+\textbf{141}\newline{\scriptsize Linked List Cycle} & 快慢指针 & 慢 1 快 2，有环必相遇 & 先走再比；用 \code{is}\\
+\textbf{142}\newline{\scriptsize Linked List Cycle II} & Floyd & 相遇后一个回 head，同速再遇 = 入环点 & 两指针必须同起点，否则等式不成立\\
+\textbf{21}\newline{\scriptsize Merge Two Sorted Lists} & 归并 & dummy + 接小的 & 走完一条后整段接另一条\\
+\textbf{2}\newline{\scriptsize Add Two Numbers} & 模拟 & 逐位 \code{x+y+jw}，\code{\%10} 建节点、\code{//10} 进位 & 循环条件 \code{l1 or l2 or jw}\\
+\textbf{19}\newline{\scriptsize Remove Nth From End} & 快慢指针 & 拉开 n 步一起走，慢的停在前驱 & dummy，否则删头要特判\\
+\textbf{24}\newline{\scriptsize Swap Nodes in Pairs} & 模拟 & \code{prev$\to$cur$\to$nxt} 改成 \code{prev$\to$nxt$\to$cur} & 下一轮 \code{prev = cur}（不是 \code{nxt}）\\
+\textbf{25}\,$\star$\newline{\scriptsize Reverse Nodes in k-Group} & 分组反转 & 找 \code{kth}，\code{prev} 初值设 \code{group\_next} 反转，再接回 & 反转前先存 \code{group\_next}；别存数组最后统一连（易成环）\\
+\textbf{138}\newline{\scriptsize Copy List w/ Random} & 哈希 & 两趟：先建 \code{old$\to$new}，再连 next / random & key 是节点不是 val\\
+\textbf{148}\newline{\scriptsize Sort List} & 归并排序 & 快慢找左中点切开，递归，dummy 合并 & 先存 \code{mid=slow.next} 再断；fast 从 \code{head.next} 出发\\
+\textbf{23}\,$\star$\newline{\scriptsize Merge k Sorted Lists} & 堆 & 堆里只放 k 个链头，弹最小、推它的 next & 存 \code{(val, idx, node)}，防 val 相等时比 node\\
+\textbf{146}\,$\star$\newline{\scriptsize LRU Cache} & 哈希+双链表 & \code{key$\to$node} + 头尾哨兵，命中挪到头，超容删 \code{tail.prev} & 摘 / 插要改 4 根指针；put 已存在只更新再挪\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{二叉树}}\\*
+\textbf{94}\newline{\scriptsize Inorder Traversal} & DFS & 左 $\to$ 根 $\to$ 右 & 迭代版：一路压左，弹出访问后转右\\
+\textbf{104}\newline{\scriptsize Max Depth} & DFS & \code{max(L, R) + 1}，空返回 0 & —\\
+\textbf{226}\newline{\scriptsize Invert Binary Tree} & DFS & 递归交换左右孩子 & 靠副作用，不需要返回值\\
+\textbf{101}\newline{\scriptsize Symmetric Tree} & DFS & \code{eq(a.left, b.right) and eq(a.right, b.left)} & 先处理「一边空一边不空」\\
+\textbf{543}\newline{\scriptsize Diameter} & 后序 DFS & 返回深度，顺手用 \code{L+R} 更新答案 & \code{nonlocal} 写在内层 dfs 里\\
+\textbf{102}\newline{\scriptsize Level Order} & BFS & 每层先取 \code{len(q)}，只弹这一层 & \code{popleft}；None 别入队\\
+\textbf{108}\newline{\scriptsize Sorted Array $\to$ BST} & 分治 & 中点当根，左右递归 & \code{l > r} 返回 None\\
+\textbf{98}\newline{\scriptsize Validate BST} & DFS & 往下传 \code{(low, high)}；或中序严格递增 & 只比父子是错的（孙子可能比祖父小）\\
+\textbf{230}\newline{\scriptsize Kth Smallest in BST} & 中序 & 中序第 k 个 & 数到 k 就停，O(h+k)\\
+\textbf{199}\newline{\scriptsize Right Side View} & BFS & 每层最后一个出队的 & 用 deque，stack 会打乱层内顺序\\
+\textbf{114}\newline{\scriptsize Flatten to Linked List} & 后序 DFS & 返回 \code{(head, tail)}，拼成 node $\to$ 左链 $\to$ 右链 & 别忘 \code{node.left = None}\\
+\textbf{105}\newline{\scriptsize Build from Pre + Inorder} & 分治 & \code{pre[l]} 是根，哈希查 inorder 下标，\code{left\_size} 切 & preorder 只能靠 \code{left\_size} 切\\
+\textbf{437}\,$\star$\newline{\scriptsize Path Sum III} & 双重 DFS / 前缀和 & 外层换起点、内层往下减；最优：前缀和+哈希回溯 O(n) & 换起点只能在外层，否则重复计数\\
+\textbf{236}\newline{\scriptsize LCA of Binary Tree} & 后序 DFS & 返回子树有无 p / q，两边都有 $\to$ LCA & 自身也算：\code{node is p or left\_has\_p}\\
+\textbf{124}\newline{\scriptsize Max Path Sum} & 后序 DFS & 返回单边最大，节点处用 \code{val+L+R} 更新 & 交给父亲只能单边；初值 \code{-inf}\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{图论}}\\*
+\textbf{200}\,$\star$\newline{\scriptsize Number of Islands} & BFS / DFS & 见 1 计数，flood fill 沉岛 & 入队时就标记，出队再标会重复入队 TLE\\
+\textbf{994}\newline{\scriptsize Rotting Oranges} & 多源 BFS & 所有 2 入队，按层扩散，数 \code{fresh} & \code{while q and fresh>0}；入队时标 2\\
+\textbf{207}\,$\star$\newline{\scriptsize Course Schedule} & 拓扑排序 & Kahn：入度 0 入队，出队数 == n & 靠入度（AND）不靠 visited（OR）\\
+\textbf{208}\newline{\scriptsize Implement Trie} & Trie & 节点 = \code{children} dict + \code{is\_end}，迭代走 & \code{search} 要判 \code{is\_end}，\code{startsWith} 不用\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{回溯}}\\*
+\textbf{46}\newline{\scriptsize Permutations} & 回溯 & 每层挑一个没用过的，用完才收 & 两份状态同步改 / 撤；别边迭代边改候选集\\
+\textbf{78}\,$\star$\newline{\scriptsize Subsets} & 回溯 & \code{for i in range(start, n)}，\code{dfs(i+1)}，进函数就收 & 递归传 \code{i+1} 不是 \code{i}\\
+\textbf{17}\newline{\scriptsize Letter Combinations} & 回溯 & 第 pos 位枚举对应字母 & 空输入返回 \code{[]}，不是 \code{[""]}\\
+\textbf{39}\newline{\scriptsize Combination Sum} & 回溯 & 从 \code{start} 枚举，下一层仍从 \code{i}（可重复） & \code{res.append(path[:])} 要拷贝\\
+\textbf{22}\,$\star$\newline{\scriptsize Generate Parentheses} & 回溯 & 剩 \code{(} 就能放；右剩 > 左剩才能放 \code{)} & 一步只放一个括号\\
+\textbf{79}\,$\star$\newline{\scriptsize Word Search} & 网格回溯 & 每格当起点，\code{visited} 进加出删，返回 bool & 匹配完就 return；起点 \code{\{pair\}} 不是 \code{set(pair)}\\
+\textbf{131}\newline{\scriptsize Palindrome Partitioning} & 回溯 & 每层决定下一刀，前缀是回文才递归 & \code{start == n} 才收\\
+\textbf{51}\,$\star$\newline{\scriptsize N-Queens} & 回溯 & 逐行放，\code{cols / r-c / r+c} 三个 set 判冲突 & 撤销时三个 set 都要还原\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{二分查找}}\\*
+\textbf{35}\newline{\scriptsize Search Insert Position} & 二分 & 闭区间，没找到返回 \code{l} & \code{l} = 第一个 $\ge$ target；别返回 \code{mid}\\
+\textbf{74}\newline{\scriptsize Search a 2D Matrix} & 二分 & 先二分行（区间包含），再行内二分 & 行判据是 \code{row[0] $\le$ t $\le$ row[-1]}\\
+\textbf{34}\,$\star$\newline{\scriptsize First \& Last Position} & 二分 & 两次二分：左端 = 第一个 $\ge$，右端 = 最后一个 $\le$ & \code{l} 可能 = n，先判越界\\
+\textbf{33}\,$\star$\newline{\scriptsize Search Rotated Array} & 二分 & 先找旋转点（153），再在对应段二分 & 前提：元素互异\\
+\textbf{153}\newline{\scriptsize Min in Rotated Array} & 二分 & 判据 \code{x > nums[-1]} 划成 T\ldots{}F，找第一个 F & 能二分靠判据单调，不是数组有序\\
+\textbf{4}\newline{\scriptsize Median of Two Arrays} & 二分 & 在短数组上二分切点 i，使左半 max $\le$ 右半 min & 二分短的那个；切到边界用 ±inf\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{栈}}\\*
+\textbf{20}\,$\star$\newline{\scriptsize Valid Parentheses} & 栈 & 左入栈，右查栈顶 & 栈空遇右括号；最后栈须为空\\
+\textbf{155}\newline{\scriptsize Min Stack} & 辅助栈 & \code{minstk} 同步存当前最小 & 空栈时直接压 \code{val}\\
+\textbf{394}\,$\star$\newline{\scriptsize Decode String} & 栈 & \code{[} 压 \code{(cur, num)}，\code{]} 弹出 \code{prev + cur*k} & 嵌套别找第一个 \code{]}；数字可能多位\\
+\textbf{739}\,$\star$\newline{\scriptsize Daily Temperatures} & 单调栈 & 更暖就弹出，回填 \code{i - prev} & 按 \code{prev\_idx} 回填，不按出栈顺序 append\\
+\textbf{84}\newline{\scriptsize Largest Rectangle} & 单调栈 & 每根柱子当高，递增栈弹出时结算 & 左界是弹完后的新栈顶；末尾补 0 哨兵\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{堆}}\\*
+\textbf{215}\,$\star$\newline{\scriptsize Kth Largest} & 堆 & 大小 k 的小顶堆，堆顶即第 k 大 & 是小顶堆（堆顶 = 门槛）\\
+\textbf{347}\,$\star$\newline{\scriptsize Top K Frequent} & 桶 & Counter 后按频次建桶，从高往低扫 & 内层收满 k 就 return\\
+\textbf{295}\,$\star$\newline{\scriptsize Median from Stream} & 对顶堆 & 大顶堆装小的一半，小顶堆装大的一半 & 先推一边 $\to$ 弹顶给另一边 $\to$ 再平衡；取负模拟大顶堆\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{贪心}}\\*
+\textbf{121}\,$\star$\newline{\scriptsize Best Time to Buy \& Sell} & 贪心 & 维护历史最低价，更新 今天 $-$ 最低 & 最低价必须在卖出日之前\\
+\textbf{55}\newline{\scriptsize Jump Game} & 贪心 & 维护 \code{max\_reach}，\code{i > max\_reach} 就断 & bool dp 永远是前缀 $\to$ 压成一个数\\
+\textbf{45}\newline{\scriptsize Jump Game II} & 贪心 / 分层 BFS & 当前层右界 \code{end}，扫到 \code{end} 就 \code{step+=1, end=far} & 只扫到 n$-$2，到终点不再跳\\
+\textbf{763}\newline{\scriptsize Partition Labels} & 贪心 & 记每个字母最后位置，扩 \code{end}，\code{i == end} 切一刀 & 就是区间合并换皮\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{动态规划}}\\*
+\textbf{70}\newline{\scriptsize Climbing Stairs} & 1D DP & 斐波那契 & 滚动成两个变量\\
+\textbf{118}\newline{\scriptsize Pascal's Triangle} & 模拟 & 首尾 1，中间 \code{prev[j-1] + prev[j]} & 下标边界\\
+\textbf{198}\,$\star$\newline{\scriptsize House Robber} & 1D DP & \code{dp[i] = max(dp[i-1], dp[i-2]+x)}，\code{dp[i]} = 前 i 间 & 定义成「以 i 结尾」会多出特判\\
+\textbf{279}\newline{\scriptsize Perfect Squares} & 完全背包 & \code{dp[i] = min(dp[i-j$^2$] + 1)} & —\\
+\textbf{322}\,$\star$\newline{\scriptsize Coin Change} & 完全背包 & \code{dp[i] = min(dp[i-c] + 1)} & 不能贪心（\code{6, [4,3,1]}）；初值 \code{inf} 不是 -1\\
+\textbf{139}\newline{\scriptsize Word Break} & 1D DP & \code{dp[i]} = 前 i 个能切，找 \code{dp[j] and s[j:i] in dict} & 下标是缝：\code{dp[0]=True}，答案 \code{dp[n]}\\
+\textbf{300}\,$\star$\newline{\scriptsize LIS} & DP / 贪心+二分 & \code{tails[k]} = 长 k+1 的最小结尾，\code{bisect\_left} & \code{tails} 不是真实子序列；O(n$^2$) 版答案是 \code{max(dp)}\\
+\textbf{152}\newline{\scriptsize Max Product Subarray} & 1D DP & 同时维护 \code{mx} 和 \code{mn} & 三候选：\code{x, mx*x, mn*x}\\
+\textbf{32}\,$\star$\newline{\scriptsize Longest Valid Parens} & 栈 / DP & 栈底放「最后一个没配上的下标」（初值 -1），长度 \code{i - stk[-1]} & 弹空时把 \code{i} 压进去当新栈底\\
+\textbf{416}\newline{\scriptsize Partition Equal Subset} & 0-1 背包 & \code{target = total//2}，维护可达和集合 & 总和奇数直接 False；别边遍历边改 set\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{多维动态规划}}\\*
+\textbf{62}\newline{\scriptsize Unique Paths} & 2D DP & 上 + 左；= C(m+n$-$2, m$-$1) & 组合数先乘后除\\
+\textbf{64}\newline{\scriptsize Min Path Sum} & 2D DP & \code{min(上, 左) + grid[i][j]} & 首行首列要前缀累加，不是 0\\
+\textbf{5}\,$\star$\newline{\scriptsize Longest Palindromic Substr} & 中心扩展 & 2n$-$1 个中心各自往外扩 & 不能滑窗（回文不向下封闭）\\
+\textbf{1143}\newline{\scriptsize LCS} & 2D DP & 相等 \code{+1}，否则 \code{max(上, 左)} & 下标是前缀长度，取字符用 \code{text1[i-1]}\\
+\textbf{72}\newline{\scriptsize Edit Distance} & 2D DP & 相等取左上，否则 \code{1 + min(删, 插, 替)} & 边界 \code{dp[i][0]=i}、\code{dp[0][j]=j}\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{技巧}}\\*
+\textbf{136}\newline{\scriptsize Single Number} & 位运算 & 异或，成对抵消（或 set 开关） & set 版两个分支要 \code{else}\\
+\textbf{169}\newline{\scriptsize Majority Element} & 投票 & Boyer--Moore：\code{count==0} 换人，同 +1 异 $-$1 & 前提是众数一定存在\\
+\textbf{75}\,$\star$\newline{\scriptsize Sort Colors} & 读写指针 & 两趟 283：先把 0 换前面，再把 1 换上来 & \code{read} 每步 +1，只有换了 \code{write} 才 +1\\
+\textbf{31}\newline{\scriptsize Next Permutation} & 字典序 & 右起找第一个 \code{nums[i] < nums[i+1]}，后缀里找 > 它的换，后缀反转 & 跳后缀用 \code{>=}；全降序 \code{i=-1} 正好整体反转\\
+\textbf{287}\newline{\scriptsize Find the Duplicate} & 二分值域 / Floyd & \code{C(v) = \#($\le$v)}，找第一个 \code{C(v) > v} & \code{==} 和 \code{<} 走同一分支\\
+\end{longtable}
+
+\section*{TikTok 高频 · Hot 100 以外}
+\dag\ = 还没刷，idea / 坑是补充的，不是自己踩出来的。
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{2.7cm}>{\raggedright\arraybackslash}p{1.6cm}>{\raggedright\arraybackslash}p{6.6cm}>{\raggedright\arraybackslash}p{6.0cm}@{}}
+\toprule
+\textbf{题目} & \textbf{tag} & \textbf{tldr idea} & \textbf{小坑}\\
+\endfirsthead
+\toprule
+\textbf{题目} & \textbf{tag} & \textbf{tldr idea} & \textbf{小坑}\\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{近 30 天}}\\*
+\textbf{340}\,\dag\newline{\scriptsize At Most K Distinct Chars} & 滑窗 & \code{cnt} 哈希，种类 > k 就收左，答案取窗长 & 计数归 0 要 \code{del}，否则 \code{len(cnt)} 不准\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{近 3 个月}}\\*
+\textbf{432}\newline{\scriptsize All O`one Data Structure} & 设计 & \code{key$\to$cnt} + \code{cnt$\to$set} 桶 + 记 min / max；或桶串成双链表 & 次数一次只变 1 $\to$ key 只挪到相邻桶\\
+\textbf{694}\,\dag\newline{\scriptsize Number of Distinct Islands} & DFS+哈希 & DFS 记相对起点的坐标（或方向串）当形状，存 set & 方向串要带回溯标记，否则不同形状同串\\
+\textbf{134}\,\dag\newline{\scriptsize Gas Station} & 贪心 & 总油 < 总耗 $\to$ -1；累计 tank < 0 就从 i+1 重开 & 失败段里的任何点都不可能当起点\\
+\textbf{845}\,\dag\newline{\scriptsize Longest Mountain} & DP / 双指针 & 两趟算 \code{up[i]}、\code{down[i]} & \code{up} 和 \code{down} 都 > 0 才算山\\
+\textbf{1248}\,\dag\newline{\scriptsize Count Nice Subarrays} & 前缀和 & 奇数记 1，转成 560 的「和为 k」 & 或 \code{atMost(k) - atMost(k-1)}\\
+\textbf{1043}\,\dag\newline{\scriptsize Partition for Max Sum} & 1D DP & \code{dp[i] = max(dp[i-j] + mx*j)}，j $\le$ k & 内层往回走时边走边更新段内 \code{mx}\\
+\textbf{974}\,\dag\newline{\scriptsize Sums Divisible by K} & 前缀和+同余 & \code{cnt[pre \% k]}，\code{cnt[0]=1} & 别的语言负数取模要 \code{(x\%k+k)\%k}\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{近 6 个月}}\\*
+\textbf{787}\,\dag\newline{\scriptsize Cheapest Flights K Stops} & Bellman--Ford & 松弛 k+1 轮 & 每轮要基于上一轮的拷贝，否则一轮走多条边\\
+\textbf{886}\,\dag\newline{\scriptsize Possible Bipartition} & 二分图染色 & BFS / DFS 交替染色，冲突就 False & 图可能不连通，每个分量都要起染\\
+\textbf{253}\,\dag\newline{\scriptsize Meeting Rooms II} & 堆 / 扫描线 & 按 start 排序，小顶堆存结束时间，\code{h[0] <= s} 就弹 & 堆的最大规模就是答案\\
+\textbf{68}\,\dag\newline{\scriptsize Text Justification} & 模拟 & 贪心装行，空格按缝均分，余数给左边 & 末行和只有一个词的行左对齐、右补空格\\
+\textbf{1352}\,\dag\newline{\scriptsize Product of Last K} & 前缀积 & 前缀积数组，遇 0 重置为 \code{[1]} & \code{k >= len} 说明窗口含 0 $\to$ 返回 0\\
+\textbf{706}\,\dag\newline{\scriptsize Design HashMap} & 设计 & 桶数组 + 链地址 & put 已存在的 key 要覆盖\\
+\textbf{904}\,\dag\newline{\scriptsize Fruit Into Baskets} & 滑窗 & 就是 340，k = 2 & 同 340\\
+\textbf{428}\,\dag\newline{\scriptsize Serialize N-ary Tree} & DFS & 先序写 \code{val} + 孩子数，反序列化递归读 & 必须记孩子数（或结束符）\\
+\textbf{227}\,\dag\newline{\scriptsize Basic Calculator II} & 栈 & 记上一个运算符：\code{+-} 入栈，\code{*/} 和栈顶算，最后求和 & 末尾也要结算一次；除法向 0 截断 \code{int(a/b)}\\
+\midrule
+\multicolumn{4}{l}{\cellcolor{grp}\textbf{更早 $\cdot$ 全量榜前 50}}\\*
+\textbf{210}\,\dag\newline{\scriptsize Course Schedule II} & 拓扑排序 & Kahn 的出队顺序就是答案 & 出队数 < n 返回 \code{[]}\\
+\textbf{1151}\,\dag\newline{\scriptsize Min Swaps to Group 1s} & 定长滑窗 & 窗长 = 1 的总数，找窗内 1 最多 & 答案 = \code{ones - max}\\
+\textbf{2334}\,\dag\newline{\scriptsize Elements > Varying Threshold} & 单调栈 & 每个数当最小值，左右第一个更小定宽 w，判 \code{x > thr/w} & 和 84 同一套边界\\
+\textbf{670}\,\dag\newline{\scriptsize Maximum Swap} & 贪心 & 记每个数字最后位置，从左扫，找比它大的最大数字换 & 从 9 往下找，取最后出现的那个\\
+\textbf{69}\,\dag\newline{\scriptsize Sqrt(x)} & 二分 & 找最后一个 \code{m*m <= x} & 返回 \code{r}\\
+\textbf{772}\,\dag\newline{\scriptsize Basic Calculator III} & 栈 / 递归 & 227 + 括号：遇 \code{(} 递归求子表达式 & 递归要返回消耗到的下标\\
+\textbf{827}\newline{\scriptsize Making A Large Island} & DFS+哈希 & 先给每座岛编号、记面积；再每个 0 查四邻不同编号求和 & 邻居编号去重；全是 1 时答案 n$^2$\\
+\textbf{1405}\newline{\scriptsize Longest Happy String} & 贪心+堆 & 大顶堆按剩余数取，前两个相同就取次大 & 次大放完要把最大的推回去\\
+\textbf{1802}\,\dag\newline{\scriptsize Max Value at Index} & 二分答案 & 二分峰值，等差求和判 $\le$ maxSum & 降到 1 后剩下的补 1\\
+\textbf{1146}\,\dag\newline{\scriptsize Snapshot Array} & 二分 & 每个下标存 \code{[(snap\_id, val)]}，get 时二分 & \code{bisect\_right(..., snap\_id) - 1}\\
+\textbf{127}\,\dag\newline{\scriptsize Word Ladder} & BFS & 通配模式 \code{h*t $\to$ 词}，层序 BFS & endWord 不在词表 $\to$ 0；访问过就标记\\
+\textbf{329}\,\dag\newline{\scriptsize Longest Increasing Path} & 记忆化 DFS & \code{dfs(i,j) = 1 + max(更大的邻居)} & 严格递增天然无环，不需要 visited\\
+\textbf{380}\,\dag\newline{\scriptsize Insert Delete GetRandom} & 设计 & list + \code{val$\to$idx}，删时和末尾交换再 pop & 先改末元素的 idx 再 pop；删的就是末尾也要对\\
+\textbf{678}\,\dag\newline{\scriptsize Valid Parenthesis String} & 贪心 & 维护未配 \code{(} 数的范围 \code{[lo, hi]} & \code{lo} 截到 0；\code{hi < 0} 立即失败\\
+\textbf{415}\,\dag\newline{\scriptsize Add Strings} & 模拟 & 双指针从尾逐位加 + 进位 & 循环条件带上进位\\
+\textbf{2402}\,\dag\newline{\scriptsize Meeting Rooms III} & 双堆 & 空闲房小顶堆（编号）+ 占用堆 \code{(end, room)} & 先释放 \code{end <= start}；没空房就顺延到最早结束\\
+\end{longtable}
+
+\end{document}
