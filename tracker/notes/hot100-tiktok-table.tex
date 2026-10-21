@@ -55,7 +55,7 @@ $\star$ = 也在 TikTok 高频题单里。
 \textbf{56}\,$\star$\newline{\scriptsize Merge Intervals} & 区间 & 按 start 排序，只和 \code{res[-1]} 比 & 右端点取 max（\code{[[1,10],[2,3]]}）\\
 \textbf{189}\,$\star$\newline{\scriptsize Rotate Array} & 三次反转 & 全反 $\to$ 前 k 反 $\to$ 后 n$-$k 反 & \code{k \%= n}\\
 \textbf{238}\newline{\scriptsize Product Except Self} & 前后缀积 & 左趟写前缀积进 \code{res}，右趟用标量乘后缀积 & 禁除法；除法版要按 0 的个数分三档\\
-\textbf{41}\newline{\scriptsize First Missing Positive} & 原地哈希 & 把 \code{1$\le$v$\le$n} swap 到 \code{v-1}，再找第一个 \code{nums[i] != i+1} & 判停用 \code{nums[v-1] != v}，否则重复值死循环；\code{v=0} 会换到 \code{nums[-1]}\\
+\textbf{41}\newline{\scriptsize First Missing Positive} & 原地哈希 & cyclic sort：把 \code{1$\le$v$\le$n} swap 到 \code{v-1}，再找第一个 \code{nums[i] != i+1} & 判停用 \code{nums[v-1] != v}，否则自换卡死（\code{[1,3,2]}）；别限 n 步，总步数上限 2n\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{矩阵}}\\*
 \textbf{73}\newline{\scriptsize Set Matrix Zeroes} & 标记 & 先收集零行、零列，再统一置零 & 边扫边置零会连锁清空\\
@@ -90,7 +90,7 @@ $\star$ = 也在 TikTok 高频题单里。
 \textbf{98}\newline{\scriptsize Validate BST} & DFS & 往下传 \code{(low, high)}；或中序严格递增 & 只比父子是错的（孙子可能比祖父小）\\
 \textbf{230}\newline{\scriptsize Kth Smallest in BST} & 中序 & 中序第 k 个 & 数到 k 就停，O(h+k)\\
 \textbf{199}\newline{\scriptsize Right Side View} & BFS & 每层最后一个出队的 & 用 deque，stack 会打乱层内顺序\\
-\textbf{114}\newline{\scriptsize Flatten to Linked List} & 后序 DFS & 返回 \code{(head, tail)}，拼成 node $\to$ 左链 $\to$ 右链 & 别忘 \code{node.left = None}\\
+\textbf{114}\newline{\scriptsize Flatten to Linked List} & 后序 DFS & 返回 \code{(head, tail)}，拼成 node $\to$ 左链 $\to$ 右链 & 别忘 \code{node.left = None}；右链为空时 tail 要取左链的 tail\\
 \textbf{105}\newline{\scriptsize Build from Pre + Inorder} & 分治 & \code{pre[l]} 是根，哈希查 inorder 下标，\code{left\_size} 切 & preorder 只能靠 \code{left\_size} 切\\
 \textbf{437}\,$\star$\newline{\scriptsize Path Sum III} & 双重 DFS / 前缀和 & 外层换起点、内层往下减；最优：前缀和+哈希回溯 O(n) & 换起点只能在外层，否则重复计数\\
 \textbf{236}\newline{\scriptsize LCA of Binary Tree} & 后序 DFS & 返回子树有无 p / q，两边都有 $\to$ LCA & 自身也算：\code{node is p or left\_has\_p}\\
@@ -99,7 +99,7 @@ $\star$ = 也在 TikTok 高频题单里。
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{图论}}\\*
 \textbf{200}\,$\star$\newline{\scriptsize Number of Islands} & BFS / DFS & 见 1 计数，flood fill 沉岛 & 入队时就标记，出队再标会重复入队 TLE\\
 \textbf{994}\newline{\scriptsize Rotting Oranges} & 多源 BFS & 所有 2 入队，按层扩散，数 \code{fresh} & \code{while q and fresh>0}；入队时标 2\\
-\textbf{207}\,$\star$\newline{\scriptsize Course Schedule} & 拓扑排序 & Kahn：入度 0 入队，出队数 == n & 靠入度（AND）不靠 visited（OR）\\
+\textbf{207}\,$\star$\newline{\scriptsize Course Schedule} & 拓扑排序 & Kahn：入度 0 入队，出队数 == n & 靠入度（AND）不靠 visited（OR）；入度 0 的起点有多个，全部入队；\code{g} 里没出边的点要判空\\
 \textbf{208}\newline{\scriptsize Implement Trie} & Trie & 节点 = \code{children} dict + \code{is\_end}，迭代走 & \code{search} 要判 \code{is\_end}，\code{startsWith} 不用\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{回溯}}\\*
@@ -125,7 +125,7 @@ $\star$ = 也在 TikTok 高频题单里。
 \textbf{155}\newline{\scriptsize Min Stack} & 辅助栈 & \code{minstk} 同步存当前最小 & 空栈时直接压 \code{val}\\
 \textbf{394}\,$\star$\newline{\scriptsize Decode String} & 栈 & \code{[} 压 \code{(cur, num)}，\code{]} 弹出 \code{prev + cur*k} & 嵌套别找第一个 \code{]}；数字可能多位\\
 \textbf{739}\,$\star$\newline{\scriptsize Daily Temperatures} & 单调栈 & 更暖就弹出，回填 \code{i - prev} & 按 \code{prev\_idx} 回填，不按出栈顺序 append\\
-\textbf{84}\newline{\scriptsize Largest Rectangle} & 单调栈 & 每根柱子当高，递增栈弹出时结算 & 左界是弹完后的新栈顶；末尾补 0 哨兵\\
+\textbf{84}\newline{\scriptsize Largest Rectangle} & 单调栈 & 每根柱子当高，递增栈弹出时结算 & 内层是 \code{while} 不是 \code{if}；左界是弹完后的新栈顶（开区间要 $-$1）；末尾补 0 哨兵\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{堆}}\\*
 \textbf{215}\,$\star$\newline{\scriptsize Kth Largest} & 堆 & 大小 k 的小顶堆，堆顶即第 k 大 & 是小顶堆（堆顶 = 门槛）\\
@@ -148,7 +148,7 @@ $\star$ = 也在 TikTok 高频题单里。
 \textbf{300}\,$\star$\newline{\scriptsize LIS} & DP / 贪心+二分 & \code{tails[k]} = 长 k+1 的最小结尾，\code{bisect\_left} & \code{tails} 不是真实子序列；O(n$^2$) 版答案是 \code{max(dp)}\\
 \textbf{152}\newline{\scriptsize Max Product Subarray} & 1D DP & 同时维护 \code{mx} 和 \code{mn} & 三候选：\code{x, mx*x, mn*x}\\
 \textbf{32}\,$\star$\newline{\scriptsize Longest Valid Parens} & 栈 / DP & 栈底放「最后一个没配上的下标」（初值 -1），长度 \code{i - stk[-1]} & 弹空时把 \code{i} 压进去当新栈底\\
-\textbf{416}\newline{\scriptsize Partition Equal Subset} & 0-1 背包 & \code{target = total//2}，维护可达和集合 & 总和奇数直接 False；别边遍历边改 set\\
+\textbf{416}\newline{\scriptsize Partition Equal Subset} & 0-1 背包 & \code{target = total//2}，维护可达和集合 & 总和奇数直接 False；用 list 存会塞一堆重复和 $\to$ TLE，要 set；别边遍历边改 set\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{多维动态规划}}\\*
 \textbf{62}\newline{\scriptsize Unique Paths} & 2D DP & 上 + 左；= C(m+n$-$2, m$-$1) & 组合数先乘后除\\
@@ -180,16 +180,16 @@ $\star$ = 也在 TikTok 高频题单里。
 \endfoot
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{近 30 天}}\\*
-\textbf{340}\,\dag\newline{\scriptsize At Most K Distinct Chars} & 滑窗 & \code{cnt} 哈希，种类 > k 就收左，答案取窗长 & 计数归 0 要 \code{del}，否则 \code{len(cnt)} 不准\\
+\textbf{340}\newline{\scriptsize At Most K Distinct Chars} & 滑窗 & \code{Counter} 记窗内字符，\code{while len(cnt) > k} 收左，每步更新窗长 & 用 Counter 不用 set；计数归 0 要手动 \code{del}，否则 \code{len(cnt)} 不准\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{近 3 个月}}\\*
 \textbf{432}\newline{\scriptsize All O`one Data Structure} & 设计 & \code{key$\to$cnt} + \code{cnt$\to$set} 桶 + 记 min / max；或桶串成双链表 & 次数一次只变 1 $\to$ key 只挪到相邻桶\\
-\textbf{694}\,\dag\newline{\scriptsize Number of Distinct Islands} & DFS+哈希 & DFS 记相对起点的坐标（或方向串）当形状，存 set & 方向串要带回溯标记，否则不同形状同串\\
-\textbf{134}\,\dag\newline{\scriptsize Gas Station} & 贪心 & 总油 < 总耗 $\to$ -1；累计 tank < 0 就从 i+1 重开 & 失败段里的任何点都不可能当起点\\
-\textbf{845}\,\dag\newline{\scriptsize Longest Mountain} & DP / 双指针 & 两趟算 \code{up[i]}、\code{down[i]} & \code{up} 和 \code{down} 都 > 0 才算山\\
-\textbf{1248}\,\dag\newline{\scriptsize Count Nice Subarrays} & 前缀和 & 奇数记 1，转成 560 的「和为 k」 & 或 \code{atMost(k) - atMost(k-1)}\\
-\textbf{1043}\,\dag\newline{\scriptsize Partition for Max Sum} & 1D DP & \code{dp[i] = max(dp[i-j] + mx*j)}，j $\le$ k & 内层往回走时边走边更新段内 \code{mx}\\
-\textbf{974}\,\dag\newline{\scriptsize Sums Divisible by K} & 前缀和+同余 & \code{cnt[pre \% k]}，\code{cnt[0]=1} & 别的语言负数取模要 \code{(x\%k+k)\%k}\\
+\textbf{694}\newline{\scriptsize Number of Distinct Islands} & DFS+哈希 & DFS 收集每座岛的坐标，平移到 \code{(min\_x, min\_y)} 当形状，存进 set & list 不可哈希，转 \code{tuple} / \code{str}；标准 DFS 是进函数再判越界、是不是 1\\
+\textbf{134}\newline{\scriptsize Gas Station} & 前缀和 & \code{gas-cost} 总和 < 0 $\to$ -1；否则前缀和最低点的下一位就是起点 & 最低点在末尾时要 \code{\% n} 绕回 0；前缀从没跌破 0 $\to$ 从 0 出发\\
+\textbf{845}\newline{\scriptsize Longest Mountain} & 状态机 & 一趟扫，记当前山的 \code{up} / \code{down} 步数：升且已下过坡 $\to$ 开新山，平台 $\to$ 清零 & \code{up} 和 \code{down} 都 > 0 才算山；没上坡的下降不计\\
+\textbf{1248}\newline{\scriptsize Count Nice Subarrays} & 滑窗 & 奇数个数 > k 就收左；== k 时从 \code{l} 往右数前导偶数，都能当左端 & 一个合法 r 对应多个 l：数完要把 \code{l} 回滚到备份；或转 560 前缀和\\
+\textbf{1043}\newline{\scriptsize Partition for Max Sum} & 1D DP & \code{dp[i]} = 前 i 个的最大和，枚举最后一段长 j $\le$ k：\code{dp[i-j] + mx*j} & 贪心挑 top-k 大不行（段内最大值没法局部决定）；\code{mx} 边往回扩边更新\\
+\textbf{974}\newline{\scriptsize Sums Divisible by K} & 前缀和+同余 & \code{(pre\_cur - pre\_prev) \% k == 0} $\Leftrightarrow$ 两个前缀和模 k 相等，\code{cnt[pre \% k]}，\code{cnt[0]=1} & 递推关系要想到同余；别的语言负数取模要 \code{(x\%k+k)\%k}\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{近 6 个月}}\\*
 \textbf{787}\,\dag\newline{\scriptsize Cheapest Flights K Stops} & Bellman--Ford & 松弛 k+1 轮 & 每轮要基于上一轮的拷贝，否则一轮走多条边\\

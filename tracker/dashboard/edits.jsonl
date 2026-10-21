@@ -755,3 +755,9 @@
 {"ts": 1792364810, "date": "2026-10-18", "id": 134, "field": "familiarity", "from": null, "to": 3}
 {"ts": 1792364874, "date": "2026-10-18", "id": 845, "field": "exists", "from": null, "to": true}
 {"ts": 1792366059, "date": "2026-10-18", "id": 845, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792510601, "date": "2026-10-20", "id": 1248, "field": "exists", "from": null, "to": true}
+{"ts": 1792513712, "date": "2026-10-20", "id": 1248, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1792513718, "date": "2026-10-20", "id": 1043, "field": "exists", "from": null, "to": true}
+{"ts": 1792514182, "date": "2026-10-20", "id": 1043, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792514643, "date": "2026-10-20", "id": 974, "field": "exists", "from": null, "to": true}
+{"ts": 1792516011, "date": "2026-10-20", "id": 974, "field": "familiarity", "from": null, "to": 3}
