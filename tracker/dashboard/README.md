@@ -427,8 +427,9 @@ python dashboard/backfill_edits.py --write  # 真写
 
 折叠区「攻坚 · Mock」，覆盖之外的两个数：
 
-- **弱题**（`/api/weak`，`server.weak_list`）：复习忘过 ≥ 2 次，或最近一次打卡不是 `clean`。
-  关掉靠：之后又做一遍 clean，或挂了变体簇（meta.json 的 `cluster`）且同簇**另外两道**题 clean。
+- **弱题**（`/api/weak`，`server.weak_list`）：做过（status 不是 todo）且当前熟练度 L3 / L3.5 / L4。
+  打卡时曾经是 L3+、现在降到 L2.5 及以上的算「已关」。
+  （以前按「忘过 ≥2 次 / 最近一次打卡不是 clean」算：打卡大多不填结果、lapses 只增不减、新题第一遍出 bug 也算，挂满了 L1 / L2，2026-10-24 改掉。）
   meta.json 的 `pit` 是这题栽过的实现细节，复习揭晓时显示在答案卡下面。两者都在详情页标签栏里改。
 - **Mock**（`/api/mock`，`mock.jsonl`）：从没做过的 medium 里随机抽 `plan.mock.count` 道
   （NeetCode 150 未做 + 其他题单未做，砍掉的组、会员题、`plan.topics` 里的专题题、抽过的都不抽）。

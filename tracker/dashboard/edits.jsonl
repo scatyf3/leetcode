@@ -755,3 +755,24 @@
 {"ts": 1792364810, "date": "2026-10-18", "id": 134, "field": "familiarity", "from": null, "to": 3}
 {"ts": 1792364874, "date": "2026-10-18", "id": 845, "field": "exists", "from": null, "to": true}
 {"ts": 1792366059, "date": "2026-10-18", "id": 845, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792783129, "date": "2026-10-23", "id": 117, "field": "exists", "from": null, "to": true}
+{"ts": 1792783134, "date": "2026-10-23", "id": 117, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1792784421, "date": "2026-10-23", "id": 12, "field": "exists", "from": null, "to": true}
+{"ts": 1792784443, "date": "2026-10-23", "id": 12, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1792786030, "date": "2026-10-23", "id": 47, "field": "exists", "from": null, "to": true}
+{"ts": 1792786459, "date": "2026-10-23", "id": 47, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1792864381, "date": "2026-10-24", "id": 286, "field": "exists", "from": null, "to": true}
+{"ts": 1792865268, "date": "2026-10-24", "id": 286, "field": "status", "from": "solved", "to": "todo"}
+{"ts": 1792865268, "date": "2026-10-24", "id": 286, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1792865273, "date": "2026-10-24", "id": 210, "field": "exists", "from": null, "to": true}
+{"ts": 1792867209, "date": "2026-10-24", "id": 210, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1792867275, "date": "2026-10-24", "id": 261, "field": "exists", "from": null, "to": true}
+{"ts": 1792868183, "date": "2026-10-24", "id": 261, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1792868334, "date": "2026-10-24", "id": 323, "field": "exists", "from": null, "to": true}
+{"ts": 1792869145, "date": "2026-10-24", "id": 845, "field": "familiarity", "from": 4, "to": 3.5}
+{"ts": 1793030429, "date": "2026-10-26", "id": 227, "field": "exists", "from": null, "to": true}
+{"ts": 1793030436, "date": "2026-10-26", "id": 227, "field": "familiarity", "from": null, "to": 3.5}
+{"ts": 1793031392, "date": "2026-10-26", "id": 951, "field": "exists", "from": null, "to": true}
+{"ts": 1793031432, "date": "2026-10-26", "id": 951, "field": "familiarity", "from": null, "to": 2}
+{"ts": 1793032897, "date": "2026-10-26", "id": 417, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1793034793, "date": "2026-10-26", "id": 227, "field": "paradigms", "added": ["stack", "state-machine"], "removed": []}

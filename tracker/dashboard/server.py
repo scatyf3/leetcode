@@ -1002,57 +1002,33 @@ def read_lists() -> dict:
 
 # ------------------------------------------------------------ 弱题 / 攻坚 ----
 def weak_list() -> dict:
-    """弱题 = 复习忘过 ≥ 2 次, 或最近一次打卡不是 clean。
+    """弱题 = 做过(status 不是 todo)且当前熟练度 L3 / L3.5 / L4。
 
-    关掉的两种方式(都不靠重做原题刷出来):
-      1. 这题之后又被做了一遍且 clean(通常是 FSRS 过段时间自己排回来的那次);
-      2. 它挂了 cluster, 且从它变弱那天起, 同一 cluster 里**另外两道不同的题**打卡 clean。
-    进度不看 L 值, 看这张表的长度。
+    以前按「忘过 ≥2 次 / 最近一次打卡不是 clean」算, 结果挂满了 L1 / L2:
+    打卡大多不填 result, lapses 只增不减, 新题第一遍出 bug 也算 —— 关不掉的都是信号缺失, 不是真弱。
+    已关 = 打卡记录里曾经是 L3+、现在降到 L2.5 及以上的题。
     """
-    atts = read_attempts()
-    by_id = {}
-    for a in atts:
-        by_id.setdefault(a.get("id"), []).append(a)
-    metas = {pid: (title, read_meta(folder)) for pid, title, folder in scan_folders()}
-    clean_by_cluster = {}
-    for pid, (_, m) in metas.items():
-        c = m.get("cluster")
-        if not c:
-            continue
-        for a in by_id.get(pid, []):
-            if a.get("result") == "clean":
-                clean_by_cluster.setdefault(c, []).append((a.get("date", ""), pid))
-    last_again = {}                          # 每题最后一次复习评「忘了」(1) 的日期
-    for r in read_reviews():
-        if r.get("rating") == 1 and not r.get("deck") in ("syntax",):
-            last_again[r.get("id")] = max(last_again.get(r.get("id"), ""), r.get("date", ""))
+    hist_max = {}                            # 每题打卡时记过的最差档位
+    for a in read_attempts():
+        f = a.get("fam")
+        if f is not None:
+            hist_max[a.get("id")] = max(hist_max.get(a.get("id"), 0), fam_num(f))
     open_, closed = [], []
-    for pid, (title, m) in metas.items():
-        lapses = int((m.get("fsrs") or {}).get("lapses") or 0)
-        rated = sorted((a for a in by_id.get(pid, []) if a.get("result")),
-                       key=lambda a: (a.get("date", ""), a.get("ts", 0)))
-        bad = [a for a in rated if a.get("result") != "clean"]
-        if not (lapses >= 2 or bad):
+    for pid, title, folder in scan_folders():
+        m = read_meta(folder)
+        if m.get("status") == "todo":
             continue
-        # 变弱的那天: 最近一次非 clean 打卡 / 最近一次复习评 1, 取晚的
-        since = max(bad[-1]["date"] if bad else "", last_again.get(pid, ""))
-        last = rated[-1] if rated else None
-        why = []
-        if lapses >= 2:
-            why.append(f"复习忘过 {lapses} 次")
-        if bad:
-            why.append(f"{bad[-1]['date'][5:]} {bad[-1]['result']}")
-        c = m.get("cluster")
-        sibs = sorted({q for d, q in clean_by_cluster.get(c, []) if q != pid and d >= since}) if c else []
-        row = {"id": pid, "title": title, "lapses": lapses, "since": since,
-               "last_result": last.get("result") if last else None,
-               "last_date": last.get("date") if last else None,
-               "pit": m.get("pit") or "", "cluster": c or "",
-               "cluster_clean": sibs, "why": " · ".join(why)}
-        redone = bool(last and last.get("result") == "clean" and last.get("date", "") >= since
-                      and (not bad or last is not bad[-1]))
-        (closed if redone or len(sibs) >= 2 else open_).append(row)
-    key = lambda r: (-r["lapses"], r["id"])
+        fam = fam_level(m)
+        if fam is None:
+            continue
+        row = {"id": pid, "title": title, "fam": fam, "pit": m.get("pit") or "",
+               "cluster": m.get("cluster") or "", "why": f"L{fam:g}"}
+        if fam >= 3:
+            open_.append(row)
+        elif hist_max.get(pid, 0) >= 3:
+            row["why"] = f"L{hist_max[pid]:g} → L{fam:g}"
+            closed.append(row)
+    key = lambda r: (-r["fam"], r["id"])
     return {"open": sorted(open_, key=key), "closed": sorted(closed, key=key)}
 
 

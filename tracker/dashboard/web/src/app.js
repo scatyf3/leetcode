@@ -1872,7 +1872,7 @@ function todayHTML() {
 
 // ---- 攻坚 + mock ---------------------------------------------------------------
 // 覆盖(格子)之外的两个数: 弱题还剩几道没关、随机没见过的题能不能做对。
-// 弱题: server.weak_list 算(忘过 ≥2 次, 或最近一次打卡不是 clean), 关掉靠同簇另外两道 clean 或之后重做 clean。
+// 弱题: server.weak_list 算(做过且当前 L3 / L3.5 / L4), 降到 L2.5 及以上就算关掉。
 // mock: 抽题/记结果都在 server, 这里只画 + 计时。计时器只是显示, 不拦你。
 let WEAK = null;
 let MOCKS = null;
@@ -1918,10 +1918,10 @@ function drillHTML() {
       ${chip(r.id, r.title)}
       <span class="dr-why">${esc(r.why)}</span>
       ${r.pit ? `<span class="dr-pit"><b>坑</b>${esc(r.pit)}</span>` : '<span class="dr-pit none" title="打开题目在「坑」里写一行">没写坑</span>'}
-      ${r.cluster ? `<span class="dr-cl" title="同簇另外两道不同的题 clean 就关掉">${esc(r.cluster)} ${r.cluster_clean.length}/2</span>`
-        : '<span class="dr-cl none" title="挂了簇才能靠变体关掉">没挂簇</span>'}</div>`;
+      ${r.cluster ? `<span class="dr-cl" title="变体簇">${esc(r.cluster)}</span>`
+        : '<span class="dr-cl none" title="在详情页标签栏挂变体簇">没挂簇</span>'}</div>`;
   const weak = `<div class="dr-col">
-      <div class="pc-sub-h" title="关掉: 同簇另外两道 clean, 或之后重做 clean。同一题连 3 次不 clean 就换变体">
+      <div class="pc-sub-h" title="当前熟练度 L3 / L3.5 / L4 的题 · 降到 L2.5 及以上就关掉">
         <b>弱题 · 开着 ${W.open.length}</b><span class="hint">已关 ${W.closed.length}</span></div>
       ${W.open.length ? W.open.map(wrow).join('') : '<p class="empty-hint">没有开着的弱题</p>'}</div>`;
 
