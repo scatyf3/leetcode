@@ -1,5 +1,9 @@
 # 207. Course Schedule
 
+## pass 3
+
+很多小坑，如multi start，忽略空node之类，很烦
+
 
 ## pass2
 
