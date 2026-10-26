@@ -130,6 +130,14 @@
       "note": "AI infra 公司常考、题单覆盖不好的设计题。",
       "sections": [
         { "name": "", "key": 146, "problems": [[146, "LRU Cache"], [460, "LFU Cache"], [380, "Insert Delete GetRandom O(1)"], [355, "Design Twitter"], [981, "Time Based Key-Value Store"], [295, "Find Median from Data Stream"], [621, "Task Scheduler"], [23, "Merge k Sorted Lists"], [207, "Course Schedule"]] }
+      ] },
+    { "name": "状态机", "short": "SM",
+      "note": "同一个输入怎么处理, 取决于之前处在哪个阶段。先列状态和转移表再写代码。讲解见 blog paradigms/state-machine。",
+      "sections": [
+        { "name": "扫描 · 状态藏在计数器里", "key": 845, "problems": [[845, "Longest Mountain in Array"], [376, "Wiggle Subsequence"]] },
+        { "name": "解析 · 显式 state 变量", "key": 8, "problems": [[8, "String to Integer (atoi)"], [65, "Valid Number"]] },
+        { "name": "计算器 · 状态是上一个运算符", "key": 227, "note": "栈只动栈顶, 可以压成一个变量 last。", "problems": [[227, "Basic Calculator II"]] },
+        { "name": "状态入栈 · 括号打断外层状态", "key": 224, "note": "遇到 ( / [ 把外层状态压栈, 遇到 ) / ] 弹出来接着算。", "problems": [[224, "Basic Calculator"], [394, "Decode String"], [772, "Basic Calculator III"]] }
       ] }
   ],
 

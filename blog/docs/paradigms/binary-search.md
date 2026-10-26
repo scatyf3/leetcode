@@ -124,6 +124,82 @@ l = mid + 1   # 相等也往右收 -> 收敛到 bisect_right（第一个 > targe
 # 比较对象换成 nums[r]（跟右端点比），不是跟 target 比
 ```
 
+## 统一视角：所有二分都在找 F → T 的那条缝
+
+上面的模板、变体、153，其实是同一个循环换了不同的判定条件。把每个下标贴上 F / T：
+
+```python
+l, r = lo, hi
+while l <= r:
+    mid = (l + r) // 2
+    if pred(mid):
+        r = mid - 1          # mid 是 T -> 缝在 mid 或它左边
+    else:
+        l = mid + 1          # mid 是 F -> 缝在 mid 右边
+return l                     # 第一个 T
+```
+
+### 不变量只有两句
+
+```
+l - 1 是 F      （初始 l = lo，把 lo-1 当成虚拟的 F）
+r + 1 是 T      （初始 r = hi，把 hi+1 当成虚拟的 T）
+```
+
+依据：`l = mid + 1` 只在 mid 是 F 时发生，所以新的 `l - 1` 就是那个 F；`r` 同理。
+退出时 `l == r + 1`，两句说的是**相邻两格**：`l-1` 是 F，`l` 是 T，`l` 就是那条缝。
+
+> `return l` 不是记出来的，是两句不变量在退出那一刻拼起来的结果。
+
+### 各题的 pred 是什么
+
+| 题 | 下标空间 | pred(i)（T 的条件） | 返回 |
+|---|---|---|---|
+| 35 | `[0, n-1]` | `nums[i] >= target` | `l` |
+| 704 | `[0, n-1]` | 同 35，外加 `==` 提前 return | `-1` |
+| 744 | `[0, n-1]` | `letters[i] > target` | `letters[l]`，`l == n` 时绕回 `[0]` |
+| 34 左界 / 右界 | `[0, n-1]` | `>= target` / `> target` | `l` / `r`（右界 = 最后一个 `<=`，也就是缝左边那格） |
+| 153 | `[0, n-1]` | `nums[i] <= nums[-1]`（落在小段） | `nums[l]` |
+| 287 | **值** `[1, n]` | `count(<= v) > v` | `l` |
+| 162 | `[0, n-2]` | `nums[i] > nums[i+1]`（这一步是下坡） | `l` |
+
+拿到新题先问：**F / T 分别是什么？**说得出来，剩下的就是上面那段循环。
+
+### 162 为什么最抽象：pred 不单调
+
+前面几题的 pred 都是**单调**的（FFF…TTT），只有一条缝，`l - 1 是 F` 能推出 l 左边全是 F。
+
+162 的 pred 是「这一步下坡」，数组有好几个峰时，它长这样：
+
+```
+nums:   1  3  2  4  1
+pred:   F  T  F  T  (n-1 是虚拟的 T)
+```
+
+有好几条缝，不变量只能保证 `l-1` 那**一格**是 F，管不到更左边的格子。那为什么还能二分？
+
+> **两端标签不同，中间必有一处翻转。**左端 F、右端 T，从左走到右总得在某一步从 F 变成 T。
+
+二分每次扔掉一半，但始终保持「左边界外是 F、右边界外是 T」，所以剩下的区间里一定还藏着至少一条缝。
+这和数值分析里的二分法求根是一回事：`f(a) < 0`、`f(b) > 0`，中间一定有根，砍一半，留下仍然异号的那一半。
+
+> **二分要的不是单调，是端点异号。**单调只是让缝变成唯一的那条。
+
+162 的两个端点：
+- `l = 0`：`nums[-1] = -∞`，左边界外是 F（上坡）
+- `r = n-2`：`r+1 = n-1`，而 `nums[n] = -∞`，`n-1` 一定是 T（下坡）
+
+`r` 初值取 `n-2`，一是 `mid + 1` 不会越界，二是让 `r + 1 是 T` 从一开始就成立。
+
+### 同类练习（「pred 不单调 / 和邻居比」）
+
+| 题 | 题单 | 跟 162 的关系 |
+|---|---|---|
+| 1901. Find a Peak Element II | leetcode必吃榜 | 162 的二维版：对行二分，每行取最大值再和上下比 |
+| 852. Peak Index in a Mountain Array | agent补充 | 162 的特例，只有一个峰，pred 退化成单调的。拿来热身 |
+| 540. Single Element in a Sorted Array | agent补充 | 和配对的那个邻居比，自己想 F / T 怎么定义 |
+| 1095. Find in Mountain Array | — | 先用 852 找峰，再在两边各跑一次普通二分 |
+
 ## 备注：另一套半开区间模板
 
 `295. Find Median from Data Stream` 里手写的是半开 `[l, r)`：
@@ -138,4 +214,8 @@ l = mid + 1   # 相等也往右收 -> 收敛到 bisect_right（第一个 > targe
 - [704. Binary Search](https://github.com/scatyf3/leetcode/blob/main/tracker/704.%20Binary%20Search/note.md) —— 模板 + `return -1`
 - [295. Find Median from Data Stream](https://github.com/scatyf3/leetcode/blob/main/tracker/295.%20Find%20Median%20from%20Data%20Stream/sol.py) —— 半开区间版，坑记在 sol.py 底部
 - [153. Find Minimum in Rotated Sorted Array](https://github.com/scatyf3/leetcode/blob/main/tracker/153.%20Find%20Minimum%20in%20Rotated%20Sorted%20Array/note.md) —— 比较对象换成 `nums[r]`
+- [162. Find Peak Element](https://github.com/scatyf3/leetcode/blob/main/tracker/162.%20Find%20Peak%20Element/note.md) —— pred 不单调，靠端点异号
+- [744. Find Smallest Letter Greater Than Target](https://github.com/scatyf3/leetcode/blob/main/tracker/744.%20Find%20Smallest%20Letter%20Greater%20Than%20Target/note.md) —— 找右缝，`l == n` 绕回
+- [34. Find First and Last Position of Element in Sorted Array](https://github.com/scatyf3/leetcode/blob/main/tracker/34.%20Find%20First%20and%20Last%20Position%20of%20Element%20in%20Sorted%20Array/note.md) —— 两条缝，左界 `return l`、右界 `return r`
+- [287. Find the Duplicate Number](https://github.com/scatyf3/leetcode/blob/main/tracker/287.%20Find%20the%20Duplicate%20Number/note.md) —— 在值上二分，不是在下标上
 - [139. Word Break](https://github.com/scatyf3/leetcode/blob/main/tracker/139.%20Word%20Break/note.md) —— 同一个思维模式：节点是缝不是字符

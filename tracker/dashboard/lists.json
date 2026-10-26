@@ -2575,6 +2575,21 @@
           ]
         ]
       }
+    },
+    "agent补充": {
+      "note": "不在其他题单里、agent 为了某个套路补进来的题。按 blog 范式页分类。二分查找这组是 162 的同类：852 是只有一个峰的特例（热身），540 要自己定义 F / T。",
+      "categories": {
+        "二分查找": [
+          [
+            852,
+            "Peak Index in a Mountain Array"
+          ],
+          [
+            540,
+            "Single Element in a Sorted Array"
+          ]
+        ]
+      }
     }
   },
   "premium": [
