@@ -782,3 +782,23 @@
 {"ts": 1793031432, "date": "2026-10-26", "id": 951, "field": "familiarity", "from": null, "to": 2}
 {"ts": 1793032897, "date": "2026-10-26", "id": 417, "field": "familiarity", "from": 3, "to": 2}
 {"ts": 1793034793, "date": "2026-10-26", "id": 227, "field": "paradigms", "added": ["stack", "state-machine"], "removed": []}
+{"ts": 1793212080, "date": "2026-10-28", "id": 323, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1793212676, "date": "2026-10-28", "id": 323, "field": "status", "from": "solved", "to": "todo"}
+{"ts": 1793212676, "date": "2026-10-28", "id": 323, "field": "familiarity", "from": 3, "to": 4}
+{"ts": 1793212679, "date": "2026-10-28", "id": 684, "field": "exists", "from": null, "to": true}
+{"ts": 1793213491, "date": "2026-10-28", "id": 684, "field": "status", "from": "solved", "to": "todo"}
+{"ts": 1793213491, "date": "2026-10-28", "id": 684, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1793213982, "date": "2026-10-28", "id": 435, "field": "familiarity", "from": 4, "to": 2.5}
+{"ts": 1793214795, "date": "2026-10-28", "id": 57, "field": "familiarity", "from": 4, "to": 2.5}
+{"ts": 1793215520, "date": "2026-10-28", "id": 252, "field": "exists", "from": null, "to": true}
+{"ts": 1793215737, "date": "2026-10-28", "id": 252, "field": "familiarity", "from": null, "to": 1}
+{"ts": 1793215769, "date": "2026-10-28", "id": 253, "field": "exists", "from": null, "to": true}
+{"ts": 1793216453, "date": "2026-10-28", "id": 253, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1793216527, "date": "2026-10-28", "id": 1851, "field": "exists", "from": null, "to": true}
+{"ts": 1793217562, "date": "2026-10-28", "id": 621, "field": "familiarity", "from": 3.5, "to": 3}
+{"ts": 1793217577, "date": "2026-10-28", "id": 621, "field": "familiarity", "from": 3, "to": 2}
+{"ts": 1793218120, "date": "2026-10-28", "id": 981, "field": "familiarity", "from": 3.5, "to": 2}
+{"ts": 1793390437, "date": "2026-10-30", "id": 443, "field": "exists", "from": null, "to": true}
+{"ts": 1793390460, "date": "2026-10-30", "id": 443, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1793390466, "date": "2026-10-30", "id": 1901, "field": "familiarity", "from": null, "to": 4}
+{"ts": 1793392426, "date": "2026-10-30", "id": 1043, "field": "familiarity", "from": 4, "to": 3.5}

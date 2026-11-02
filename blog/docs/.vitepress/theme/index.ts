@@ -6,6 +6,7 @@ import LayerIndex from './components/LayerIndex.vue'
 import StructureMap from './components/StructureMap.vue'
 import ProblemList from './components/ProblemList.vue'
 import TopicFamily from './components/TopicFamily.vue'
+import IntervalViz from './components/IntervalViz.vue'
 import './custom.css'
 
 export default {
@@ -20,5 +21,6 @@ export default {
     app.component('LayerFigure', LayerFigure)
     app.component('LayerIndex', LayerIndex)
     app.component('StructureMap', StructureMap)
+    app.component('IntervalViz', IntervalViz)
   },
 } satisfies Theme

@@ -13,7 +13,7 @@
   ],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 3.5,
+  "familiarity": 2,
   "complexity": {
     "time": "set O(1) / get O(log n)",
     "space": "O(n)"

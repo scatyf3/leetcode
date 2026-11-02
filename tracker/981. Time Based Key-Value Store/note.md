@@ -1,5 +1,11 @@
 # 981. Time Based Key-Value Store
 
+### pass2
+
+感觉design还行啊，考虑下edge case即可
+
+### pass1
+
 怎么存，一个key，对应t,value的list pairt，这里相比于我们的方案，`{key:{timestamp:value}}` 的好处是t和val有序
 
 然后get的时候做binary search搜缝，recall binary search结束的时候，l和r分别停在

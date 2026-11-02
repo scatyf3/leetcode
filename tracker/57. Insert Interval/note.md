@@ -1,5 +1,12 @@
 # 57. Insert Interval
 
+### pass1
+
+1. naive的做法是append到interval list之后，然后按照merge intervals迭代下，复杂度太高了，是O(nlogn), sort主导
+2. 优化的办法是左中右，中间是和new interval可能overlap的，左右就忽略，中间不断while迭代。但这样怎么保证一定不会全扩大 => 「往左扩最多扩一次」是由之前的interval没overlap决定的
+
+### pass0
+
 范式：区间题 §1 合并/扫描 —— [paradigms/intervals.md](../../blog/docs/paradigms/intervals.md)
 前置：[56. Merge Intervals](../56.%20Merge%20Intervals/)
 

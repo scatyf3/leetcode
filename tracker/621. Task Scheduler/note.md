@@ -5,3 +5,6 @@
 3. 省🧠的解是heap模拟。 
   1. 一个heap存可以被lauch的task，order by cnt，cnt多的先启动 
   2. deque存等cd的task
+
+
+greedy sim永远是最好的起点
