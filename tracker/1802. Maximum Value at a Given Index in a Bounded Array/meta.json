@@ -1,0 +1,17 @@
+{
+  "structures": [],
+  "paradigms": [],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 3,
+  "quiz": {
+    "q": "峰值为 v 时，它某一侧 k 个格子的最小和怎么算？",
+    "idea": "从 v-1 往下减、减到 1 后全补 1：cnt = min(k, v-1)，和 = (v-1 + v-cnt)*cnt//2 + (k-cnt)",
+    "wrong": [
+      "从 v 开始往下减：(v + v-k+1)*k//2",
+      "这一侧全取 1，和就是 k",
+      "直接按等差 v-1, v-2, … 算 k 项：(v-1 + v-k)*k//2，不用截断"
+    ]
+  }
+}

@@ -211,7 +211,11 @@
           "DP 进阶": "2-D DP",
           "Word Search": "Backtracking",
           "股票": "2-D DP"
-      }}
+      }},
+      { "name": "agent补充", "short": "补", "map": {
+          "二分查找": "Binary Search"
+      }},
+      { "name": "TikTok 高频", "short": "TK", "map": {} }
     ]
   },
 

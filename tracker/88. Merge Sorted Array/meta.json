@@ -10,7 +10,7 @@
   ],
   "difficulty": "easy",
   "status": "solved",
-  "familiarity": 4,
+  "familiarity": 3,
   "complexity": {
     "time": "O(m+n)",
     "space": "O(1)"
