@@ -210,3 +210,4 @@
 {"ts": 1793390439, "date": "2026-10-30", "id": 1901, "kind": "new", "fam": null, "born": null, "seen": false}
 {"ts": 1793392424, "date": "2026-10-30", "id": 1043, "kind": "redo", "fam": 4, "born": "2026-10-20", "seen": true}
 {"ts": 1793393452, "date": "2026-10-30", "id": 845, "kind": "redo", "fam": 3.5, "born": "2026-10-18", "seen": true}
+{"ts": 1794254433, "date": "2026-11-09", "id": 427, "kind": "new", "fam": null, "born": "2026-11-09", "seen": false, "result": "bug"}
