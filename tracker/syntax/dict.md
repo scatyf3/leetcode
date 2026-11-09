@@ -43,3 +43,32 @@ del self.map[queue_tail.key]          # ✔ 按 key 删，O(1)
 真删掉（`del` + `self.size -= 1`）之后，那些特判全部可以删，`key in self.map` 重新等于"在缓存里"。
 
 栽过：146
+
+## 想按 value 从大到小遍历 dict 的 key，这样写对吗
+
+```python
+cnt = {"a": 1, "b": 4, "c": 2}
+for ch in sorted(cnt, key=cnt.values, reverse=True):
+    ...
+```
+
+---
+
+```python
+for ch in sorted(cnt, key=cnt.get, reverse=True):   # ✔ ['b', 'c', 'a']
+```
+
+拆开看：
+
+- `sorted(cnt)` 遍历 dict 拿到的是 **key**，返回的也是 key 的 list
+- `key=` 要的是**函数**：传进一个元素，返回按什么排。`sorted` 对每个 key 调一次 `cnt.get(ch)` 拿到个数，按个数排，但返回的还是 key
+- 传的是 `cnt.get` **不带括号**，把函数本身交给 `sorted` 去调
+
+`cnt.values` 错在：它不收参数，返回的是**全部** value，不是「这个 key 的 value」→ 一调就 `TypeError`。
+
+等价写法：`key=lambda ch: cnt[ch]`。
+
+同一个 `key=` 在 `max` / `min` / `list.sort` 里通用：`max(cnt, key=cnt.get)` 一行就是「个数最多的那个 key」，
+不用手写 `if mx == cnt["a"] … elif …` 那一串。
+
+栽过：1405

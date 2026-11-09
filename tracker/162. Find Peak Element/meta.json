@@ -8,7 +8,7 @@
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4,
+  "familiarity": 2.5,
   "quiz": {
     "idea": "比 mid 和 mid+1：上坡 l = mid+1，否则 r = mid-1，返回 l",
     "wrong": [

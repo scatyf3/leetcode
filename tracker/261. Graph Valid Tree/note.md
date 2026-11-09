@@ -1,5 +1,13 @@
 # 261. Graph Valid Tree
 
+
+## pass2
+
+1. 思路正确，given每个node各自不连通，每次来一个边，把两个node对应的set连起来，一些细节debug对了，迭代完了之后检查是否联通，如果有环则立刻退出
+2. 然而怎么存每记对，存node-leaf index关系而不是value判断是否为一组，否则scan和update set比较麻烦
+
+## pass1
+
 边数 == n − 1 且连通 → 是树。先判边数，再从 0 BFS 数能到几个点。
 
 ## 思路：树 = n − 1 条边 + 连通

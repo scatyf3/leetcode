@@ -9,5 +9,14 @@
   "techniques": [],
   "difficulty": "hard",
   "status": "solved",
-  "familiarity": 4
+  "familiarity": 3.5,
+  "quiz": {
+    "q": "翻一个 0 求最大岛面积，怎么做到每个 0 只查表、不重算岛？",
+    "idea": "先 flood fill 给每座岛编号（从 2 起）并记 area[编号]；每个 0 把上下左右的编号收进 set，1 + sum(area[set])",
+    "wrong": [
+      "flood fill 时把岛的每格直接改成岛面积，每个 0 把上下左右的数加起来再 +1",
+      "先给岛编号记面积，每个 0 把上下左右邻居所属岛的面积逐个相加再 +1",
+      "先给岛编号记面积，每个 0 只取相邻岛里面积最大的那座 +1"
+    ]
+  }
 }

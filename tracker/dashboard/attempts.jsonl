@@ -211,3 +211,18 @@
 {"ts": 1793392424, "date": "2026-10-30", "id": 1043, "kind": "redo", "fam": 4, "born": "2026-10-20", "seen": true}
 {"ts": 1793393452, "date": "2026-10-30", "id": 845, "kind": "redo", "fam": 3.5, "born": "2026-10-18", "seen": true}
 {"ts": 1794254433, "date": "2026-11-09", "id": 427, "kind": "new", "fam": null, "born": "2026-11-09", "seen": false, "result": "bug"}
+{"ts": 1793900142, "date": "2026-11-05", "id": 852, "kind": "new", "fam": null, "born": "2026-11-05", "seen": false, "result": "clean"}
+{"ts": 1793902009, "date": "2026-11-05", "id": 1802, "kind": "new", "fam": null, "born": "2026-11-05", "seen": false}
+{"ts": 1793903222, "date": "2026-11-05", "id": 88, "kind": "redo", "fam": 3, "born": "2026-08-19", "seen": false}
+{"ts": 1793992123, "date": "2026-11-06", "id": 229, "kind": "new", "fam": null, "born": "2026-11-06", "seen": false}
+{"ts": 1793993218, "date": "2026-11-06", "id": 82, "kind": "new", "fam": null, "born": "2026-11-06", "seen": false}
+{"ts": 1793993496, "date": "2026-11-06", "id": 162, "kind": "warm", "fam": 2.5, "born": "2026-09-15", "seen": true}
+{"ts": 1793994151, "date": "2026-11-06", "id": 190, "kind": "warm", "fam": 2, "born": "2026-09-01", "seen": false}
+{"ts": 1793994621, "date": "2026-11-06", "id": 253, "kind": "warm", "fam": 2, "born": "2026-10-28", "seen": true}
+{"ts": 1793995764, "date": "2026-11-06", "id": 261, "kind": "warm", "fam": 1.5, "born": "2026-10-24", "seen": true}
+{"ts": 1794162949, "date": "2026-11-08", "id": 909, "kind": "new", "fam": null, "born": "2026-11-08", "seen": false}
+{"ts": 1794164548, "date": "2026-11-08", "id": 328, "kind": "new", "fam": null, "born": "2026-11-08", "seen": false, "result": "bug"}
+{"ts": 1794165541, "date": "2026-11-08", "id": 684, "kind": "redo", "fam": 3, "born": "2026-10-28", "seen": true}
+{"ts": 1794167301, "date": "2026-11-08", "id": 827, "kind": "redo", "fam": 3.5, "born": "2026-10-14", "seen": true}
+{"ts": 1794169038, "date": "2026-11-08", "id": 1405, "kind": "redo", "fam": 3.5, "born": "2026-10-14", "seen": true}
+{"ts": 1794171191, "date": "2026-11-08", "id": 1802, "kind": "redo", "fam": 3, "born": "2026-11-05", "seen": true}
