@@ -1,5 +1,11 @@
 # 432. All O`one Data Structure
 
+## pass2
+
+head是cnt=0的虚拟桶，然后需要封装
+
+## pass1
+
 想了个双hash的思路，但没有利用「counter」一次只能inc1 的feature
 ```
         # string => counter's hash table?
@@ -55,3 +61,32 @@
 自测：inc a, b, b, c, c, c → max c / min a；dec c ×3 → max b / min a；dec a → max b / min b；dec b ×2 → 都是 `""`。
 
 两个版本都和暴力解随机对拍过（3000 组操作序列）。
+
+### pass2：把 inc / dec 合成一个 `_move` → [sol_move.py](sol_move.py)
+
+[sol_dll.py](sol_dll.py) 的 inc 和 dec 各写一遍「找桶 → 放进去 → 旧桶删掉」，写着写着容易乱。
+其实两个操作是同一件事：**把 key 从桶 `src` 挪到次数 `src.cnt ± 1` 的桶**，差别只在方向。
+
+| 层 | 函数 | 干什么 |
+|---|---|---|
+| 链表原语 | `_insert_after` / `_unlink` | 只有这两个函数改指针 |
+| 找桶 | `_bucket_between(left, right, cnt)` | left / right 里有次数等于 cnt 的就直接返回，没有就插在 left 后面 |
+| 搬家 | `_move(key, src, dst_cnt)` | 先找或建目标桶，登记 key，再把 key 从 src 删掉 |
+| 接口 | `inc` / `dec` | 各两行，传入 `src.cnt + 1` 或 `src.cnt - 1` |
+
+方向只体现在一行：`(src, src.next)` 是往右，`(src.prev, src)` 是往左。
+
+> **head 当作次数 0 的桶，两头都用**：新 key 从 head 出发，`dec` 减到 0 就回到 head（等于删掉）。
+> 这样 cnt == 1 和「新 key」都不用特判。两个哨兵的 `keys` 永远是空集，
+> 所以 `getMax/getMin` 写成 `next(iter(...), "")` 就行，判空也省了。
+
+#### pass2 自己写的时候踩的坑
+
+- **新 key 加进次数 1 的桶之后没有 return**，代码继续往下走，又从 1 挪到了 2
+- **漏写 `key_to_node[key] = next_node`**：新 key 一直被当成新的；老 key 搬走以后，表里还指向已经摘掉的旧桶
+- **`dec` 里写成了 `curr.next.cnt != cnt - 1`**，应该比较 `curr.prev`。次数 -1 的桶在左边，右边的桶永远不会是 cnt - 1，
+  所以每次都会再插一个新桶 → 出现两个次数相同的桶 → 后面 `inc` 照常插桶，链表顺序就乱了 → max / min 返回错的值。
+  复现：`inc a, inc b, inc a, dec a, inc b` 之后链表是 `[2:{b}] ⇄ [1:{a}]`，min 返回 b
+
+前两个坑在 `_move` 里不会再出现：登记 key 和找桶都只写一次。第三个也被 `_bucket_between` 同时检查左右两边挡住了。
+sol_move.py 同样和暴力解随机对拍过（2000 组，每步还检查链表次数严格递增、没有空桶）。
