@@ -12,19 +12,23 @@ related: [/structures/hash-table, /structures/linked-list, /structures/heap, /pa
 它不是 system design，也几乎不需要新算法：最难的那个操作，通常就是一道做过的经典题换了皮。
 所以难点只有两处：选对结构的组合，以及把几份结构**同步**维护对 —— 146 前后写了四遍，pass 2 的三个坑全是「只改了一边」。
 
-## 怎么想：先列 API，再挑结构
+## SOP
 
-355 的 note 里定下的三步：
+前三步是 355 的 note 里定下的，后三步是 146、432、211 栽出来的。
 
-1. 列出每个 API，写清它**读**哪些状态、**写**哪些状态
-2. 每份状态挑一个结构：要按 key 查用 `dict`，要去重用 `set`，按时间追加用 `list`
-3. 找出最难的那个操作，它通常就是一道经典题
+1. **列出每个 API，写清它读哪些状态、写哪些状态。**
+2. **每份状态挑一个结构，找出最难的那个操作。** 要按 key 查用 `dict`，要去重用 `set`，按时间追加用 `list`。最难的操作通常是一道做过的经典题，见下表。
+3. **哈希表的值直接存结构里的节点，同一份信息只存一处。** 432 有一版是 `key → 次数`、`次数 → 桶` 两张表：inc 要先查次数再查桶，「新 key / 老 key」×「目标桶在 / 不在」叠成一堆分支。改成 `where: key → 桶`，次数直接读 `桶.cnt`，分支就没了。
+4. **用哨兵把特殊情况变成普通情况。** head / tail 去掉了「链表为空」「插在两端」这两种情况。432 更进一步：head 的次数设成 0，新 key 当作待在 head 里，和「次数 +1」走同一条路。
+5. **指针和两份结构的同步只在两三个 helper 里写**，主逻辑只调 helper（146 pass 4，见下一节）。
+6. **写完先列测试 case，再和暴力解对拍。** 固定过一遍这几类：空结构上直接查、只有一个元素、同一个 key 反复操作、减到 0 / 删空、并列。
 
 | 题 | 状态 → 结构 | 最难的操作 | 其实是 |
 |---|---|---|---|
 | 146 LRU | `key → 节点`；使用顺序 → 双链表 | 满了淘汰最久没用的 | 双链表 O(1) 摘下 / 插头 |
 | 155 Min Stack | 主栈 + 每层的最小值 | `getMin` | 辅助栈（[stack.md](stack.md) §5） |
 | 208 Trie | 一个字符一条边的树 | `startsWith` | [trie.md](../structures/trie.md) |
+| 211 通配搜索 | 同 208 | `search` 里的 `.` | Trie 上 DFS，`.` 就把所有子节点试一遍 |
 | 295 中位数 | 小的一半 / 大的一半 | `findMedian` | 对顶堆 |
 | 355 Twitter | `userId → [(time, tweetId)]`；`userId → set` | `getNewsFeed` | 合并 k 个有序列表（23） |
 | 432 All O\`one | `key → 次数`；`次数 → keys` | O(1) 拿最大 / 最小次数 | 桶串成双链表 |
@@ -33,6 +37,14 @@ related: [/structures/hash-table, /structures/linked-list, /structures/heap, /pa
 
 355 的 bug 全出在杂活上：tweetId 不代表时间，要自己维护全局自增的 `time`；自己的推文也要算进 feed；
 `unfollow` 用 `set.discard`（没关注过也不报错）；`dict` 换成 `defaultdict` 能省掉一堆 `if key not in`。
+
+第 4、6 步栽过的坑：
+
+- **211**：dfs 一进来先判 `is_leaf`，再判 word 走没走完。存 `"a"`、查 `"ab"` 会返回 true，判的成了「存过的某个词是查询词的前缀」。
+  要先判 `index == len(word)`，走完了再看 `is_leaf`；题目要的是整词匹配，`.` 只顶一个字符
+- **432**：新 key 的 `cur` 写成了新建一个次数为 1 的桶，于是第一次 inc 次数就成了 2。哨兵的意思是 `cur` 就是 head 本身，次数 1 的桶交给「+1」那一步去建。
+  另外 head 里其实没有这个 key，从旧桶删之前要先判 `cur is not self.head`，顺序反了就 `KeyError`
+- **703**：堆还没满 k 个时也拿新值和堆顶比，见下面「堆」一节
 
 ## 哈希表 + 一个顺序结构
 
@@ -133,7 +145,7 @@ class AllOne:
 | 912 Sort an Array | 手写堆排序（下沉） | — |
 | 215 Kth Largest | 不用 heapq：快速选择，或手写堆 | [用 heapq 做过](https://github.com/scatyf3/leetcode/blob/main/tracker/215.%20Kth%20Largest%20Element%20in%20an%20Array/note.md) |
 | 208 Implement Trie | 字典树 | [✓](https://github.com/scatyf3/leetcode/blob/main/tracker/208.%20Implement%20Trie%20%28Prefix%20Tree%29/note.md) |
-| 211 / 212 | Trie + `.` 通配时 DFS / Trie + 网格回溯 | — |
+| 211 / 212 | Trie + `.` 通配时 DFS / Trie + 网格回溯 | [211 ✓](https://github.com/scatyf3/leetcode/blob/main/tracker/211.%20Design%20Add%20and%20Search%20Words%20Data%20Structure/note.md)，212 — |
 | 380 Insert Delete GetRandom O(1) | `dict` 值→下标 + `list`；删除时和末尾交换再 pop | — |
 | 547 / 684 | 并查集（路径压缩） | — |
 | 307 Range Sum Query - Mutable | 树状数组 / 线段树 | — |

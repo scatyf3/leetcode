@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "tree",
+    "matrix"
+  ],
+  "paradigms": [
+    "recursion"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

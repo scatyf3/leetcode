@@ -17,6 +17,22 @@ related: []
 和 [网格 DFS](../structures/grid.md) 是同一个东西：网格 DFS 的"树"是格子之间的邻接，
 回溯的"树"是你自己定义出来的决策顺序。79 Word Search 正好是两者的桥。
 
+### SOP
+
+就是下面一到五节的顺序，栽过的坑全在第六节的表里。
+
+1. **先定「一层 = 一个什么决定」，顺序固定、做完不回头**（第一节）。131 换成「每层决定下一刀切在哪」，重复和越补越多的规则一起消失。
+2. **回答三问两开关，填进唯一的骨架**（第一、二节）：枚举什么、什么时候结算、什么时候剪枝；能不能复用、有没有重复值。
+3. **按答案的形状选交答案的渠道**（第四、七节）。要所有解，往 `res` 里放 `path[:]`；79 只问有没有，dfs 返回 bool。
+4. **有重复值才去重**（第五节）。组合型 sort + 同层去重（40、90），排列型可以按值计数（47）。
+
+第 N 步栽过的坑：
+
+- 第 1 步：131 从单字符往上 merge
+- 第 2 步：78 循环是 for + `start`，结算却是 `depth == len(nums)`，两套写法混了
+- 第 3 步：79 结算后没 `return`，越界；`find = True` 漏了 `nonlocal`
+- 第 4 步：90 `str(cur)` 进 set 却没 sort；40 同层去重的三种错写
+
 ---
 
 ### 一、怎么 formulate：先画树，再回答三个问题
@@ -82,7 +98,7 @@ dfs(0, ...)
 | 类型 | 每层枚举 | 题 | 结算时机 |
 |---|---|---|---|
 | **选元素（组合型）** | 从 `start` 往后挑下一个元素 | 78 · 90 · 39 · 40 | 78/90 每个节点；39/40 `remain == 0` |
-| **排列型** | 还没用过的元素里挑一个放这一位 | 46 | 候选用完 |
+| **排列型** | 还没用过的元素里挑一个放这一位 | 46 · 47 | 候选用完 |
 | **按位填（笛卡尔积）** | 当前这一位的所有选项 | 17 · 22 | 填满 `len(digits)` / 左右括号都用完 |
 | **切分型** | 下一刀切在哪（这一块到哪结束） | 131 | `start == len(s)` |
 | **路径搜索** | 往哪个方向走 | 79 | `k == len(word)` → 返回 True |
@@ -161,6 +177,31 @@ for i in range(start, n):
 `[4,4,4,1,4]` 这种用例照样出重复。而且重复的分支照样整棵跑完，只是在收集时扔掉，
 每次还要 `str(cur)` 花 O(n)。同层去重是在**入口**就把整棵子树剪掉。
 
+**排列型（47）换一个手段：按值计数。** 47 的 note：「就用 cnt 传状态」。把 nums 换成 `Counter`，
+每层的 for 遍历的是**不同的值**，同一层每个值只试一次，值重复的那份根本不会再开一棵子树，也不用 sort。
+46 的「已用集合」也一起省了：计数减到 0，这个值就用完了。
+
+```python
+def permuteUnique(nums):
+    res = []
+    cur = []
+
+    def dfs(remain, cur):
+        if sum(remain.values()) == 0:      # 计数全用完 = 排满了
+            res.append(cur[:])
+        for elem in remain:                # 遍历不同的值，同层天然去重
+            if remain[elem] > 0:
+                remain[elem] -= 1          # 两份状态一起改
+                cur.append(elem)
+                dfs(remain, cur)
+                remain[elem] += 1          # 一起还原
+                cur.pop()
+
+    st_nums = Counter(nums)
+    dfs(st_nums, cur)
+    return res
+```
+
 ---
 
 ### 六、踩过的坑（今天一天全踩了一遍）
@@ -236,6 +277,7 @@ for i in range(start, n):
 | [40 Combination Sum II](https://github.com/scatyf3/leetcode/blob/main/tracker/40.%20Combination%20Sum%20II/note.md) | 组合 + 去重 | 39 改成传 `i+1`，加同层去重 |
 | [77 Combinations](https://github.com/scatyf3/leetcode/blob/main/tracker/77.%20Combinations/note.md) | 组合 | 78 只收长度为 k 的节点 |
 | [46 Permutations](https://github.com/scatyf3/leetcode/blob/main/tracker/46.%20Permutations/note.md) | 排列 | 没有 start，靠已用集合；两份状态成对改 |
+| [47 Permutations II](https://github.com/scatyf3/leetcode/blob/main/tracker/47.%20Permutations%20II/note.md) | 排列 + 去重 | `Counter` 传状态，每层遍历不同的值 |
 | [17 Letter Combinations](https://github.com/scatyf3/leetcode/blob/main/tracker/17.%20Letter%20Combinations%20of%20a%20Phone%20Number/note.md) | 按位填 | 每层选项来自 map；结算用 `"".join` |
 | [22 Generate Parentheses](https://github.com/scatyf3/leetcode/blob/main/tracker/22.%20Generate%20Parentheses/note.md) | 按位填 + 约束 | 每层两个选项，`right > left` 才能放右括号 |
 | [131 Palindrome Partitioning](https://github.com/scatyf3/leetcode/blob/main/tracker/131.%20Palindrome%20Partitioning/note.md) | 切分 | 每层决定下一刀；只查切下来的块 |

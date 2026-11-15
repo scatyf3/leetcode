@@ -1,4 +1,4 @@
-% 由 tracker 里每题的 answer.md 整理；† = 还没刷，内容是补充的
+% 由 tracker 里每题的 answer.md / note.md / sol.py 整理（11/11 更新）；† = 还没刷，内容是补充的
 % xelatex 编译；Overleaf 上把 SimSun / SimHei 换成 FandolSong / FandolHei
 \documentclass[10pt]{article}
 \usepackage{xeCJK}
@@ -186,32 +186,32 @@ $\star$ = 也在 TikTok 高频题单里。
 \textbf{432}\newline{\scriptsize All O`one Data Structure} & 设计 & \code{key$\to$cnt} + \code{cnt$\to$set} 桶 + 记 min / max；或桶串成双链表 & 次数一次只变 1 $\to$ key 只挪到相邻桶\\
 \textbf{694}\newline{\scriptsize Number of Distinct Islands} & DFS+哈希 & DFS 收集每座岛的坐标，平移到 \code{(min\_x, min\_y)} 当形状，存进 set & list 不可哈希，转 \code{tuple} / \code{str}；标准 DFS 是进函数再判越界、是不是 1\\
 \textbf{134}\newline{\scriptsize Gas Station} & 前缀和 & \code{gas-cost} 总和 < 0 $\to$ -1；否则前缀和最低点的下一位就是起点 & 最低点在末尾时要 \code{\% n} 绕回 0；前缀从没跌破 0 $\to$ 从 0 出发\\
-\textbf{845}\newline{\scriptsize Longest Mountain} & 状态机 & 一趟扫，记当前山的 \code{up} / \code{down} 步数：升且已下过坡 $\to$ 开新山，平台 $\to$ 清零 & \code{up} 和 \code{down} 都 > 0 才算山；没上坡的下降不计\\
+\textbf{845}\newline{\scriptsize Longest Mountain} & 状态机 & \code{up}/\code{down} 两个 bit 编三个状态（平地 00 / 上坡 10 / 下坡 11），\code{cur} 记边数；进入或停在 11 就结算 \code{cur+1} & 谷底是两座山共用的：11 遇上升转 10 且 \code{cur=1}（\code{[1,3,1,4,1]}）；相等回 00 并清 \code{cur}；结算挂在进 11 的边上，末尾不用补\\
 \textbf{1248}\newline{\scriptsize Count Nice Subarrays} & 滑窗 & 奇数个数 > k 就收左；== k 时从 \code{l} 往右数前导偶数，都能当左端 & 一个合法 r 对应多个 l：数完要把 \code{l} 回滚到备份；或转 560 前缀和\\
-\textbf{1043}\newline{\scriptsize Partition for Max Sum} & 1D DP & \code{dp[i]} = 前 i 个的最大和，枚举最后一段长 j $\le$ k：\code{dp[i-j] + mx*j} & 贪心挑 top-k 大不行（段内最大值没法局部决定）；\code{mx} 边往回扩边更新\\
+\textbf{1043}\newline{\scriptsize Partition for Max Sum} & 1D DP & \code{dp[i]} = \code{arr[0..i]} 的最大和，枚举最后一段长 j $\le$ k：\code{dp[i-j] + mx*j} & 贪心挑 top-k 大不行（段内最大值没法局部决定）；\code{mx} 边往回扩边更新；\code{i-j < 0} 时前面取 0\\
 \textbf{974}\newline{\scriptsize Sums Divisible by K} & 前缀和+同余 & \code{(pre\_cur - pre\_prev) \% k == 0} $\Leftrightarrow$ 两个前缀和模 k 相等，\code{cnt[pre \% k]}，\code{cnt[0]=1} & 递推关系要想到同余；别的语言负数取模要 \code{(x\%k+k)\%k}\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{近 6 个月}}\\*
 \textbf{787}\,\dag\newline{\scriptsize Cheapest Flights K Stops} & Bellman--Ford & 松弛 k+1 轮 & 每轮要基于上一轮的拷贝，否则一轮走多条边\\
 \textbf{886}\,\dag\newline{\scriptsize Possible Bipartition} & 二分图染色 & BFS / DFS 交替染色，冲突就 False & 图可能不连通，每个分量都要起染\\
-\textbf{253}\,\dag\newline{\scriptsize Meeting Rooms II} & 堆 / 扫描线 & 按 start 排序，小顶堆存结束时间，\code{h[0] <= s} 就弹 & 堆的最大规模就是答案\\
+\textbf{253}\newline{\scriptsize Meeting Rooms II} & 扫描线 & 重叠数只在端点变：端点排序，到 start \code{cur += cnt}、到 end \code{cur -= cnt}，取最大（堆版：小顶堆存结束时间） & 同一点的 start 和 end 都处理完再取 max（\code{[[1,5],[5,9]]} 只要 1 间）；一个点可能有多个区间，用 Counter\\
 \textbf{68}\,\dag\newline{\scriptsize Text Justification} & 模拟 & 贪心装行，空格按缝均分，余数给左边 & 末行和只有一个词的行左对齐、右补空格\\
 \textbf{1352}\,\dag\newline{\scriptsize Product of Last K} & 前缀积 & 前缀积数组，遇 0 重置为 \code{[1]} & \code{k >= len} 说明窗口含 0 $\to$ 返回 0\\
 \textbf{706}\,\dag\newline{\scriptsize Design HashMap} & 设计 & 桶数组 + 链地址 & put 已存在的 key 要覆盖\\
 \textbf{904}\,\dag\newline{\scriptsize Fruit Into Baskets} & 滑窗 & 就是 340，k = 2 & 同 340\\
 \textbf{428}\,\dag\newline{\scriptsize Serialize N-ary Tree} & DFS & 先序写 \code{val} + 孩子数，反序列化递归读 & 必须记孩子数（或结束符）\\
-\textbf{227}\,\dag\newline{\scriptsize Basic Calculator II} & 栈 & 记上一个运算符：\code{+-} 入栈，\code{*/} 和栈顶算，最后求和 & 末尾也要结算一次；除法向 0 截断 \code{int(a/b)}\\
+\textbf{227}\newline{\scriptsize Basic Calculator II} & 栈 / 状态机 & \code{op} 记 num 前面那个运算符，读完一个数按 \code{op} 处理：\code{+-} 入栈，\code{*/} 和栈顶算，最后 \code{sum(stack)} & 最后一位也要结算（\code{i == len(s)-1}）；除法 \code{int(a/b)} 向 0 截断，不是 \code{//}\\
 \midrule
 \multicolumn{4}{l}{\cellcolor{grp}\textbf{更早 $\cdot$ 全量榜前 50}}\\*
-\textbf{210}\,\dag\newline{\scriptsize Course Schedule II} & 拓扑排序 & Kahn 的出队顺序就是答案 & 出队数 < n 返回 \code{[]}\\
+\textbf{210}\newline{\scriptsize Course Schedule II} & 拓扑排序 & Kahn：入度 0 的入队，出队顺序就是答案 & 判环看出队数是否收齐 n，不是看 visited；没边的孤立点也要进答案\\
 \textbf{1151}\,\dag\newline{\scriptsize Min Swaps to Group 1s} & 定长滑窗 & 窗长 = 1 的总数，找窗内 1 最多 & 答案 = \code{ones - max}\\
 \textbf{2334}\,\dag\newline{\scriptsize Elements > Varying Threshold} & 单调栈 & 每个数当最小值，左右第一个更小定宽 w，判 \code{x > thr/w} & 和 84 同一套边界\\
 \textbf{670}\,\dag\newline{\scriptsize Maximum Swap} & 贪心 & 记每个数字最后位置，从左扫，找比它大的最大数字换 & 从 9 往下找，取最后出现的那个\\
 \textbf{69}\,\dag\newline{\scriptsize Sqrt(x)} & 二分 & 找最后一个 \code{m*m <= x} & 返回 \code{r}\\
 \textbf{772}\,\dag\newline{\scriptsize Basic Calculator III} & 栈 / 递归 & 227 + 括号：遇 \code{(} 递归求子表达式 & 递归要返回消耗到的下标\\
 \textbf{827}\newline{\scriptsize Making A Large Island} & DFS+哈希 & 先给每座岛编号、记面积；再每个 0 查四邻不同编号求和 & 邻居编号去重；全是 1 时答案 n$^2$\\
-\textbf{1405}\newline{\scriptsize Longest Happy String} & 贪心+堆 & 大顶堆按剩余数取，前两个相同就取次大 & 次大放完要把最大的推回去\\
-\textbf{1802}\,\dag\newline{\scriptsize Max Value at Index} & 二分答案 & 二分峰值，等差求和判 $\le$ maxSum & 降到 1 后剩下的补 1\\
+\textbf{1405}\newline{\scriptsize Longest Happy String} & 贪心 & 一次只放一个字符：按剩余从多到少，放第一个「还有剩、且不会三连」的；都放不了就结束 & 一次放两个要分情况讨论，放一个就没有；\code{for ... else} 接「都放不了」\\
+\textbf{1802}\newline{\scriptsize Max Value at Index} & 二分答案 & 二分峰值 v，找最后一个 total(v) $\le$ maxSum；一侧 k 格：\code{cnt = min(k, v-1)}，和 = \code{(v-1 + v-cnt)*cnt//2 + (k-cnt)} & 逐格累加 O(n) 会 TLE，side 必须 O(1)；\code{l} 从 1 起；先乘再 \code{//2}\\
 \textbf{1146}\,\dag\newline{\scriptsize Snapshot Array} & 二分 & 每个下标存 \code{[(snap\_id, val)]}，get 时二分 & \code{bisect\_right(..., snap\_id) - 1}\\
 \textbf{127}\,\dag\newline{\scriptsize Word Ladder} & BFS & 通配模式 \code{h*t $\to$ 词}，层序 BFS & endWord 不在词表 $\to$ 0；访问过就标记\\
 \textbf{329}\,\dag\newline{\scriptsize Longest Increasing Path} & 记忆化 DFS & \code{dfs(i,j) = 1 + max(更大的邻居)} & 严格递增天然无环，不需要 visited\\

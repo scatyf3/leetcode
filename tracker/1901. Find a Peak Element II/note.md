@@ -1,5 +1,19 @@
 # 1901. Find a Peak Element II
 
+
+## pass 2
+
+1. 对row二分，row内找max，max一定是dandidate
+2. row内max比上下，如果有坡度信息则开始向对应方向移动。 
+
+有点像2d的gradient下降
+
+api
+1. max同时获得value和index，`lambda x: x[1]` 意思是记作value
+2. down/up处理edge case，如果越界记作-1
+
+## pass 1
+
 前置：[162. Find Peak Element](../162.%20Find%20Peak%20Element/)
 范式：二分 —— [paradigms/binary-search.md](../../blog/docs/paradigms/binary-search.md)
 

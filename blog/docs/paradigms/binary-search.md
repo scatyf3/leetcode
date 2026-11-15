@@ -7,6 +7,24 @@ related: [/python/bisect-sorted]
 
 # binary-search
 
+## SOP
+
+前四步是 1901 的 note 里「拿到新题问这四句」，第 5、6 步是 162、852、1802、35 栽出来的。
+
+1. **先定在什么上二分：下标、值，还是行号。** 287 在值 `[1, n]` 上搜，1802 在峰值 `[1, maxSum]` 上搜，1901 在行号上搜。
+2. **定 pred：mid 是 F 还是 T。** 说得出来，剩下的就是「统一视角」那段循环，各题的 pred 见那一节的表。
+3. **说清凭什么能扔一半：单调，还是端点异号。** 这句说不出来，就还不能写。162、1901 的 pred 不单调，靠的是端点异号（见「162 为什么最抽象」）。
+4. **算一轮的成本，乘上 `log`，和题目要求对一下。** 1802 的 sim 版每轮逐格累加，O(n)，n 到 1e9 会 TLE，所以 `side` 必须是 O(1) 的公式；1901 每轮扫一行，总共 O(n log m)。
+5. **定 `l`、`r` 的初值：`mid ± 1` 不越界，不变量一开始就成立。** 162 的 `r` 取 `n-2`；852 拿 mid 和 `mid+1` 比，因为 mid 向下取整、会一路缩到 0，比 `mid-1` 就越界；1802 的 `l` 从 1 开始，元素是正整数。
+6. **写完过一遍「写完 10 秒自检」，最后一行从缝推。** 要第一个 T 就 `return l`，要最后一个 F 就 `return r`。852 退出时 `r = peak-1`、`l = peak`，sol.py 的 `return r+1` 就是 `l`；1802 要最后一个放得下的峰值，`return r`。
+
+第 N 步栽过的坑：
+
+- 第 1 步 —— **1901**：一开始想先扫出每行的 peak，再「在列上二分验证」。列没排序，二分不了；验证也只要比一下上下邻居。
+- 第 3 步 —— **1901**：mid 行任选一个行内 peak 往上下走，会把唯一的 peak 扔掉。必须选行最大值，它是不变量 `R[lo-1] < R[lo]` 的前提，不是优化。
+- 第 4 步 —— **1802**：`side` 的错一半是同一个原因：侧边从 `v-1` 数起，不是 `v`（首项、`1..v-1` 的和、剩几个 1 都错过）。先写出 `first / last / count` 三个变量，再套 `(first + last) * count // 2`。
+- 第 6 步 —— **35**：最后一行写成 `return mid`，每个「没找到」的用例都偏 1，见下面「踩过的坑」。**34**：target 不在时 `l` 会跑到 `n`，读 `nums[l]` 之前先判 `l >= len(nums)`。
+
 ## 模板：闭区间 [l, r]
 
 ```python
@@ -162,6 +180,9 @@ r + 1 是 T      （初始 r = hi，把 hi+1 当成虚拟的 T）
 | 153 | `[0, n-1]` | `nums[i] <= nums[-1]`（落在小段） | `nums[l]` |
 | 287 | **值** `[1, n]` | `count(<= v) > v` | `l` |
 | 162 | `[0, n-2]` | `nums[i] > nums[i+1]`（这一步是下坡） | `l` |
+| 852 | `[0, n-1]` | 同 162，只有一个峰，pred 单调 | `l`（sol.py 写的 `r+1`） |
+| 1901 | **行号** `[0, m-2]` | `max(第 i 行) >= max(第 i+1 行)` | 第 `l` 行最大值的位置 |
+| 1802 | **值** `[1, maxSum]` | `total(v) > maxSum`（放不下） | `r`（最后一个放得下的） |
 
 拿到新题先问：**F / T 分别是什么？**说得出来，剩下的就是上面那段循环。
 
@@ -195,8 +216,8 @@ pred:   F  T  F  T  (n-1 是虚拟的 T)
 
 | 题 | 题单 | 跟 162 的关系 |
 |---|---|---|
-| 1901. Find a Peak Element II | leetcode必吃榜 | 162 的二维版：对行二分，每行取最大值再和上下比 |
-| 852. Peak Index in a Mountain Array | agent补充 | 162 的特例，只有一个峰，pred 退化成单调的。拿来热身 |
+| 1901. Find a Peak Element II | leetcode必吃榜 [✓](https://github.com/scatyf3/leetcode/blob/main/tracker/1901.%20Find%20a%20Peak%20Element%20II/note.md) | 162 的二维版：对行二分，每行取最大值再和上下比 |
+| 852. Peak Index in a Mountain Array | agent补充 [✓](https://github.com/scatyf3/leetcode/blob/main/tracker/852.%20Peak%20Index%20in%20a%20Mountain%20Array/note.md) | 162 的特例，只有一个峰，pred 退化成单调的。拿来热身 |
 | 540. Single Element in a Sorted Array | agent补充 | 和配对的那个邻居比，自己想 F / T 怎么定义 |
 | 1095. Find in Mountain Array | — | 先用 852 找峰，再在两边各跑一次普通二分 |
 
@@ -218,4 +239,7 @@ pred:   F  T  F  T  (n-1 是虚拟的 T)
 - [744. Find Smallest Letter Greater Than Target](https://github.com/scatyf3/leetcode/blob/main/tracker/744.%20Find%20Smallest%20Letter%20Greater%20Than%20Target/note.md) —— 找右缝，`l == n` 绕回
 - [34. Find First and Last Position of Element in Sorted Array](https://github.com/scatyf3/leetcode/blob/main/tracker/34.%20Find%20First%20and%20Last%20Position%20of%20Element%20in%20Sorted%20Array/note.md) —— 两条缝，左界 `return l`、右界 `return r`
 - [287. Find the Duplicate Number](https://github.com/scatyf3/leetcode/blob/main/tracker/287.%20Find%20the%20Duplicate%20Number/note.md) —— 在值上二分，不是在下标上
+- [852. Peak Index in a Mountain Array](https://github.com/scatyf3/leetcode/blob/main/tracker/852.%20Peak%20Index%20in%20a%20Mountain%20Array/note.md) —— 比 `mid` 和 `mid+1`，退出时 `r = peak-1`、`l = peak`
+- [1901. Find a Peak Element II](https://github.com/scatyf3/leetcode/blob/main/tracker/1901.%20Find%20a%20Peak%20Element%20II/note.md) —— 在行号上二分，每行压成最大值就是 162
+- [1802. Maximum Value at a Given Index in a Bounded Array](https://github.com/scatyf3/leetcode/blob/main/tracker/1802.%20Maximum%20Value%20at%20a%20Given%20Index%20in%20a%20Bounded%20Array/note.md) —— 在峰值上二分，每轮 O(1) 算两侧最小和，`return r`
 - [139. Word Break](https://github.com/scatyf3/leetcode/blob/main/tracker/139.%20Word%20Break/note.md) —— 同一个思维模式：节点是缝不是字符

@@ -16,6 +16,21 @@ related: []
 [notes/sliding-window-template.md](https://github.com/scatyf3/leetcode/blob/main/tracker/notes/sliding-window-template.md)。这篇只记 protocol：
 **区间怎么写、枚举谁、为什么。**
 
+## SOP
+
+步骤按「什么时候枚举 l」最后那段判定顺序排，坑来自 567、424、76、3、1248 的 note。
+
+1. **窗口是定长吗？** 是就不用存 `l`，`l = r-k+1`（567、239）。
+2. **state 删得掉吗？** 删不掉先换数据结构：239 要窗口最大值，换成单调队列。见「什么时候枚举 l」。
+3. **默认枚举 r，套形状 2：先把 `r` 加进 state，非法才缩 `l`。** 缩的时候先 remove 再 `l += 1`（438、424 pass4）。骨架见「两个骨架」。
+4. **结算放哪，看问的是什么。** 最长：while 外结算，此刻必合法（424）；最短：while 里先结算再缩（76）；计数：一个 r 可能对应好几个合法的 l（1248）。
+
+第 N 步栽过的坑：
+
+- 第 3 步 —— **567**：只推 `r` 不动 `l`，「窗口」成了整个前缀，`s1="ab" s2="axxxb"` 假阳。**424**：形状 1 第一版打了三个补丁，`A`/k=2 返回 0。**76**：`for r` 里又手写了一句 `r+=1`。
+  **3**：把滑窗当成切段，冲突时 `l = r` 重启，答案横跨切口就漏了。
+- 第 4 步 —— **1248**：要「恰好 k 个奇数」，`[l, r]` 合法时，`l` 往右跨过前导偶数也还合法。sol.py 先备份 `l`，往右走一格计一个，再回滚，代价见「仓库现状」表下。
+
 ## 三层「两个写法」，三层答案不同
 
 | 层 | 两个选项 | 结论 | 理由 |
@@ -120,7 +135,7 @@ O(n²) 来自「r 回退」，不来自「枚举 l」。
    以上都不是        → 枚举 r
 ```
 
-到目前为止，**没有任何一条已验证的理由需要枚举 l**。仓库里 9/9 都是枚举 r。
+到目前为止，**没有任何一条已验证的理由需要枚举 l**。仓库里 10/10 都是枚举 r。
 
 ## 仓库现状
 
@@ -130,6 +145,7 @@ O(n²) 来自「r 回退」，不来自「枚举 l」。
 | [76](https://github.com/scatyf3/leetcode/blob/main/tracker/76.%20Minimum%20Window%20Substring/sol.py) | 变长 | r | 合法就缩并结算（骨架 B） | 闭 |
 | [424 sol2](https://github.com/scatyf3/leetcode/blob/main/tracker/424.%20Longest%20Repeating%20Character%20Replacement/sol2.py) | 变长 | r | 非法就缩（骨架 A） | 闭 |
 | [424 sol3](https://github.com/scatyf3/leetcode/blob/main/tracker/424.%20Longest%20Repeating%20Character%20Replacement/sol3.py) | 变长 | **l** | 有预算就扩 | 半开 ← 形状逼的 |
+| [1248](https://github.com/scatyf3/leetcode/blob/main/tracker/1248.%20Count%20Number%20of%20Nice%20Subarrays/sol.py) | 变长 | r | 奇数多了就缩；合法时备份 `l`、数前导偶数、再回滚 | 闭 |
 | [567](https://github.com/scatyf3/leetcode/blob/main/tracker/567.%20Permutation%20in%20String/sol.py) | 定长 | r | 无，`win[s2[r-n]] -= 1` | 无记法 |
 | [438](https://github.com/scatyf3/leetcode/blob/main/tracker/438.%20Find%20All%20Anagrams%20in%20a%20String/sol.py) | 定长 | r | `while r-l+1 > len(p)` 缩回定长 | 闭 |
 | [239](https://github.com/scatyf3/leetcode/blob/main/tracker/239.%20Sliding%20Window%20Maximum/sol.py) | 定长 | r | 单调队列吐旧 | 无记法 |
@@ -138,6 +154,9 @@ O(n²) 来自「r 回退」，不来自「枚举 l」。
 
 形状 2 的本质是**枚举右端点，把所有左端点压缩成一个摘要**：424 的摘要是那个唯一合法的 `l`，
 121 是 `cur_min`，53 是 `dp[i-1]`。121/53 就是窗口坍缩成一个标量的滑窗。
+
+1248 是表里唯一会让 `l` 回退的：每个合法的 r 都把前导偶数重新数一遍。结果是对的（和暴力对拍 3000 组零错），
+但和上面「O(n²) 来自 r 回退」是同一件事，只是回退的换成了 `l`：`[2]*m + [1] + [2]*m`、k=1 时每个 r 都走 m 格，m=4000 走了 1600 万步。
 
 grep `r-l` 会骗人的地方：11 的 `r-l` 是夹逼的宽度不是窗口长度（另一族）；567/239 定长，从不算长度。
 

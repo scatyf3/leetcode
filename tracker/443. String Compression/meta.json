@@ -1,6 +1,10 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "read-write-pointer"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

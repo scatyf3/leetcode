@@ -15,6 +15,21 @@ related: [/paradigms/two-pointer, /structures/array, /structures/hash-table]
 它在双指针里属于「同向·快慢」一族，见 [two-pointer.md](two-pointer.md) §2。这一页只讲怎么认出来、
 以及 26 / 27 之外的两个变体（283 交换、75 三段）。
 
+## SOP
+
+坑全来自 26、27、75、443 的 sol 和 obs。
+
+1. **先问每个元素的目的地由谁定。** 由顺序定是读写指针，由值定是 cyclic sort，见「怎么认出来」。
+2. **只要前 k 个就覆盖，尾部也要对就交换。** 27 不管 `[w, n)` 里剩什么，283 要 0 真的待在尾部。
+3. **定死 `w` 指什么。** 指下一个写入位就 `return w`（27）；指最后一个有效元素就 `return k + 1`（26）。
+4. **用 `while`，只在该推进时推进。** 换过来的数还没读，读指针就不能动（75 一趟版、27 首尾交换版）。
+
+第 N 步栽过的坑：
+
+- 第 2 步 —— **26** wa1：用 set 去重、把重复的换到尾部，既没用上「已排序」，又打乱了前 k 个的顺序。
+- 第 3 步 —— **26** sol2 在返回值上写了「indexing issue again」。**443**：`w` 一次写好几格，`+1` 容易多算，见「26 / 27」一节末尾。
+- 第 4 步 —— **75**：sol.py 交换后 `read` 没动，`w` 跑到 `r` 前面，最后越界。
+
 ## 怎么认出来
 
 题面三件套：**原地**、**O(1) 额外空间**、**返回「前 k 个」或长度 / 保持相对顺序**。
@@ -22,7 +37,7 @@ related: [/paradigms/two-pointer, /structures/array, /structures/hash-table]
 
 | 目的地由谁定 | 套路 | 题 |
 |---|---|---|
-| **顺序**：留下的依次排到 `w`，只看「留不留」 | 读写指针 | 26、27、283、75 |
+| **顺序**：留下的依次排到 `w`，只看「留不留」 | 读写指针 | 26、27、283、75、443 |
 | **值本身**：v 的家是 v-1 | 原地哈希（cyclic sort） | 41、448 |
 
 后一种长得像读写指针（也是原地、也在交换），但只有一个指针在动、元素会被往前送回去。
@@ -36,6 +51,11 @@ related: [/paradigms/two-pointer, /structures/array, /structures/hash-table]
 —— 26 sol2 就在这里写了「indexing issue again」。两种约定、初值和返回值怎么推，见
 [notes/two-pointer-array-partition.md](https://github.com/scatyf3/leetcode/blob/main/tracker/notes/two-pointer-array-partition.md)。
 26 的 wa1 是反面：用 set 去重、把重复的换到尾部，既没用上「已排序」，又打乱了前 k 个的顺序。
+
+[443 String Compression](https://github.com/scatyf3/leetcode/blob/main/tracker/443.%20String%20Compression/sol.py) 也是覆盖式，只是 `w` 一次要写好几格：字符一格，计数的每一位各一格。
+sol.py 里 `len_nums` 从 1 起算，已经含了字符那一格，所以是 `valid_idx += len_nums`，不是 `1 + len_nums`（注释里特意记了）。
+原地写也踩不到未读数据：一组 k 个（k ≥ 2）压成 `1 + 位数` 格，不超过 k，`w` 追不上 `r`。
+sol.py 先把整串读进 `char_list` / `res` 两个 list 再回写，额外空间 O(n)；有这条保证，其实可以边读边写。
 
 ## 283 Move Zeroes：交换，不是覆盖
 

@@ -1,0 +1,13 @@
+{
+  "structures": [
+    "trie"
+  ],
+  "paradigms": [
+    "design",
+    "dfs"
+  ],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 2
+}

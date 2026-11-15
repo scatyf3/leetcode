@@ -1,6 +1,10 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

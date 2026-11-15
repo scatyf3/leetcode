@@ -1,6 +1,11 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "graph"
+  ],
+  "paradigms": [
+    "union-find",
+    "bfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

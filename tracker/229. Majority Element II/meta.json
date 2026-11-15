@@ -1,6 +1,10 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "counting"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

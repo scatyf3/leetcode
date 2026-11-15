@@ -1,8 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "matrix"
+  ],
+  "paradigms": [
+    "binary-search"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
-  "familiarity": 4
+  "familiarity": 3
 }

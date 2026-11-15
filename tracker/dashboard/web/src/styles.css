@@ -244,7 +244,7 @@ main{padding:28px 32px 72px;overflow:auto}
 /* ================= 坐标系 view: 覆盖 x 深度 ================= */
 
 #grid-view{max-width:1180px;margin:0 auto}
-.gr-sec{margin-bottom:38px}
+.gr-sec{margin-bottom:40px}
 .gr-sec-h{margin-bottom:14px}
 .gr-sec-h h2{font-size:16px;margin:0 0 5px;font-weight:650;display:flex;align-items:center;gap:9px}
 
@@ -908,35 +908,107 @@ main{padding:28px 32px 72px;overflow:auto}
 .gr-chip.tp-key{border:1.5px solid var(--accent)}
 .gr-chip.tp-key .gr-nm,.gr-chip.tp-key .gr-id{font-weight:700;color:var(--fg)}
 
-/* ---- 首屏 KPI: 下个里程碑 / 超前落后 / 本周 / 今日复习 ---- */
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 34px}
-.kpi{display:flex;flex-direction:column;gap:4px;min-width:0;padding:14px 16px;
-  background:var(--panel);border:1px solid var(--line);border-radius:12px;transition:border-color .2s,box-shadow .2s}
-.kpi-k{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kpi-v{font:600 28px/1.1 var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.kpi-v small{font-size:14px;font-weight:400;color:var(--dim);letter-spacing:0}
-.kpi-s{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kpi.met .kpi-v,.kpi.ahead .kpi-v{color:var(--accent2)}
-.kpi.behind .kpi-v{color:var(--hard)}
-.kpi.ahead{border-color:color-mix(in srgb,var(--accent2) 40%,var(--line))}
-.kpi.behind{border-color:color-mix(in srgb,var(--hard) 40%,var(--line))}
+/* ---- 首屏 KPI: 今天做题 / 本周做题 / 连续 / 今日复习 ---- */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 36px}
+.kpi{display:flex;flex-direction:column;gap:6px;min-width:0;padding:16px 18px;min-height:104px;
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;transition:border-color .2s,box-shadow .2s,transform .2s}
+.kpi-k{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.02em}
+.kpi-v{font:650 30px/1.05 var(--font-mono);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+.kpi-v small{font-size:13px;font-weight:400;color:var(--dim);letter-spacing:0}
+.kpi-s{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:auto}
+.kpi.met .kpi-v{color:var(--accent2)}
+.kpi.met{border-color:color-mix(in srgb,var(--accent2) 35%,var(--line))}
 /* 今日复习那格是个按钮: 还有卡要刷时用品牌色描边, 点了直接开复习 */
 .kpi[data-review]{cursor:pointer}
-.kpi.go{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:linear-gradient(180deg,var(--brand-soft),var(--panel) 70%)}
+.kpi.go{border-color:color-mix(in srgb,var(--accent) 45%,var(--line));background:linear-gradient(180deg,var(--brand-soft),var(--panel) 75%)}
 .kpi.go .kpi-v{color:var(--accent)}
-.kpi[data-review]:hover{border-color:var(--accent);box-shadow:var(--shadow-2)}
+.kpi[data-review]:hover{border-color:var(--accent);box-shadow:var(--shadow-2);transform:translateY(-1px)}
 .kpi[data-review]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* 本周那格: 三条迷你额度条代替一个大数 */
-.kpi-lanes{display:flex;flex-direction:column;gap:7px;margin-top:4px}
-.kpi-lane{display:grid;grid-template-columns:4.6em 1fr auto;align-items:center;gap:8px;font-size:12px}
-.kpi-lane span{color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kpi-lane i{height:6px;border-radius:3px;background:var(--chip);overflow:hidden}
-.kpi-lane u{display:block;height:100%;border-radius:3px;background:var(--accent);transition:width .25s}
-.kpi-lane u.b-redo{background:var(--accent2)}
-.kpi-lane u.b-attack{background:var(--fam35)}
-.kpi-lane em{font:12px/1 var(--font-mono);font-style:normal;color:var(--dim);font-variant-numeric:tabular-nums}
-.kpi-lane.met em{color:var(--accent2)}
+/* 本周那格: 合计 + 周一到周日七根小柱 */
+.kpi-wk-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:auto}
+.wk-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;height:44px;flex:1;max-width:150px}
+.wk-b{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:3px;font-style:normal;height:100%}
+.wk-b u{display:block;width:100%;border-radius:3px 3px 1px 1px;background:var(--accent);opacity:.75;min-height:2px;
+  box-shadow:inset 0 0 0 100px transparent}
+.wk-b u[style*="height:0%"]{background:var(--chip);opacity:1;height:2px!important}
+.wk-b.now u{opacity:1}
+.wk-b.fut u{background:transparent!important;border-bottom:1px dashed var(--line)}
+.wk-b em{font:10px/1 var(--font-sans);font-style:normal;color:var(--dim)}
+.wk-b.now em{color:var(--accent);font-weight:600}
 @media (max-width:1000px){.kpis{grid-template-columns:repeat(2,1fr)}}
+
+/* ---- 首页的卡片壳 ---- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;min-width:0}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.card-h b{font-size:13px;font-weight:600}
+.card-h .hint{font-size:11.5px;font-variant-numeric:tabular-nums}
+
+/* ---- 每日: 热力图 + 做题柱 ---- */
+.dl-row{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:stretch}
+@media (max-width:900px){.dl-row{grid-template-columns:1fr}}
+.hm{display:grid;grid-template-columns:auto auto;gap:4px 6px;justify-content:start}
+.hm-months,.hm-grid{display:grid;grid-template-columns:repeat(var(--w),13px);gap:3px}
+.hm-months span{font-size:10px;color:var(--dim);white-space:nowrap;line-height:1.2;height:13px}
+.hm-days{display:grid;grid-template-rows:repeat(7,13px);gap:3px;font-size:9.5px;color:var(--dim);line-height:13px}
+.hm-grid{grid-template-rows:repeat(7,13px);grid-auto-flow:column}
+.hm-c{display:block;width:13px;height:13px;border-radius:3px;background:var(--chip)}
+.hm-c.fut{background:transparent}
+.hm-c.l1{background:color-mix(in srgb,var(--accent2) 28%,var(--chip))}
+.hm-c.l2{background:color-mix(in srgb,var(--accent2) 52%,var(--chip))}
+.hm-c.l3{background:color-mix(in srgb,var(--accent2) 76%,var(--chip))}
+.hm-c.l4{background:var(--accent2)}
+.hm-c.now{outline:1.5px solid var(--fg);outline-offset:-1.5px}
+.hm-grid .hm-c:hover{outline:1.5px solid var(--accent);outline-offset:-1.5px}
+.hm-key{display:flex;align-items:center;justify-content:flex-end;gap:3px;margin-top:10px;font-size:10.5px;color:var(--dim)}
+.hm-key .hm-c{width:10px;height:10px;border-radius:2px}
+
+.db{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;height:118px;align-items:end}
+.db-c{display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0;border-radius:4px}
+.db-c:hover{background:var(--soft)}
+.db-bar{flex:1;display:flex;flex-direction:column-reverse;justify-content:flex-start;gap:1px;
+  border-bottom:1px solid var(--line)}
+.db-bar u{display:block;width:100%;border-radius:2px}
+.db-bar u.b-new{background:var(--accent)}
+.db-bar u.b-redo{background:var(--accent2)}
+.db-bar u.b-attack{background:var(--fam35)}
+.db-bar u.b-warm{background:color-mix(in srgb,var(--dim) 45%,var(--chip))}
+.db-c.now .db-bar{border-bottom:2px solid var(--fg)}
+.db-c em{font:10px/1 var(--font-mono);font-style:normal;color:var(--dim);text-align:center;height:16px;padding-top:5px;
+  white-space:nowrap;overflow:visible}
+.db-c.now em{color:var(--fg);font-weight:600}
+.db-key{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:8px;font-size:11px;color:var(--dim)}
+.skey i.b-warm{background:color-mix(in srgb,var(--dim) 45%,var(--chip))}
+
+/* ---- 专题熟练度 ---- */
+.fm-h{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.fm-card{padding:8px 10px 12px}
+.fm-list{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}
+@media (max-width:900px){.fm-list{grid-template-columns:1fr}}
+.fm-row{display:grid;grid-template-columns:minmax(9em,13em) 1fr 3.6em 2.8em;align-items:center;gap:12px;
+  background:transparent;color:var(--fg);border:0;border-radius:8px;padding:7px 8px;text-align:left;font-size:13px;font-weight:400}
+.fm-row:hover{background:var(--soft-hover);filter:none}
+.fm-row.low{opacity:.6}
+.fm-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fm-bar{display:flex;gap:2px;height:10px;border-radius:5px;overflow:hidden;background:var(--chip)}
+.fm-mini{width:84px;height:6px;border-radius:3px;gap:1px}
+.fm-s{display:block;height:100%;min-width:3px}
+.fm-s.l0,.skey i.l0{background:var(--fam0)}
+.fm-s.l1,.skey i.l1{background:var(--fam1)}
+.fm-s.l2,.skey i.l2{background:var(--fam2)}
+.fm-s.l3,.skey i.l3{background:var(--fam3)}
+.fm-s.l4,.skey i.l4{background:var(--fam4)}
+.fm-s.nr,.skey i.nr{background:color-mix(in srgb,var(--dim) 40%,var(--chip))}
+.fm-s.gone,.skey i.gone{background:repeating-linear-gradient(135deg,var(--chip) 0 3px,var(--panel2) 3px 6px)}
+.skey i.gone{border:1px solid var(--line)}
+.fm-n{font:12px/1 var(--font-mono);color:var(--dim);text-align:right;font-variant-numeric:tabular-nums}
+.fm-n b{color:var(--fg);font-weight:600}
+.fm-p{font:600 12px/1 var(--font-mono);text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
+.fm-key{padding:6px 8px 0;border-top:1px solid var(--line);margin-top:8px}
+
+/* 从专题行跳过来的那一组, 闪一下告诉你落在哪 */
+@keyframes flash-hl{0%{background:var(--brand-soft)}100%{background:transparent}}
+.gr-grp.flash-hl{animation:flash-hl 1.6s ease-out;border-radius:12px}
+@media (prefers-reduced-motion:reduce){.gr-grp.flash-hl{animation:none}}
 
 /* ---- 窄屏 ---- */
 @media (max-width:720px){
@@ -945,3 +1017,13 @@ main{padding:28px 32px 72px;overflow:auto}
   main{padding:20px 16px 56px}
   .sub{display:none}
 }
+
+/* 题卡方块: 按熟练度档上色, 盖掉原来按深度(s0–s3)的蓝色深浅 */
+.gr-st.fm-l0{background:var(--fam0);color:#fff}
+.gr-st.fm-l1{background:var(--fam1);color:#fff}
+.gr-st.fm-l2{background:var(--fam2);color:#fff}
+.gr-st.fm-l3{background:color-mix(in srgb,var(--fam3) 85%,var(--panel2));color:#fff}
+.gr-st.fm-l4{background:color-mix(in srgb,var(--fam4) 80%,var(--panel2));color:#fff}
+.gr-st.fm-nr{background:var(--chip);color:var(--dim)}
+.gr-grp{scroll-margin-top:calc(var(--nav-h) + 16px)}
+.sub:empty{display:none}

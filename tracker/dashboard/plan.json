@@ -110,22 +110,6 @@
           "note": "Hot 100 里不在上面几天的 34 道，熟练度都在 L2 及以上（已到 S2）。熟练度没改，L1.5 / L2 的照常走复习。",
           "problems": [[1, "Two Sum"], [49, "Group Anagrams"], [128, "Longest Consecutive Sequence"], [283, "Move Zeroes"], [11, "Container With Most Water"], [189, "Rotate Array"], [238, "Product of Array Except Self"], [141, "Linked List Cycle"], [21, "Merge Two Sorted Lists"], [2, "Add Two Numbers"], [19, "Remove Nth Node From End of List"], [104, "Maximum Depth of Binary Tree"], [226, "Invert Binary Tree"], [98, "Validate Binary Search Tree"], [230, "Kth Smallest Element in a BST"], [199, "Binary Tree Right Side View"], [994, "Rotting Oranges"], [46, "Permutations"], [17, "Letter Combinations of a Phone Number"], [39, "Combination Sum"], [22, "Generate Parentheses"], [35, "Search Insert Position"], [74, "Search a 2D Matrix"], [34, "Find First and Last Position of Element in Sorted Array"], [153, "Find Minimum in Rotated Sorted Array"], [20, "Valid Parentheses"], [155, "Min Stack"], [739, "Daily Temperatures"], [347, "Top K Frequent Elements"], [121, "Best Time to Buy and Sell Stock"], [55, "Jump Game"], [70, "Climbing Stairs"], [198, "House Robber"], [287, "Find the Duplicate Number"]] }
       ] },
-    { "name": "Roblox OA · 实现模拟", "short": "RBX",
-      "note": "CodeSignal 风格：40–80 行一次写对，隐藏测试卡边界。每题写完先过三件事再提交：最大输入、窗口/边界开闭、样例没覆盖的隐含假设。会员题(💰)做不了就跳过。时间不够只做每节加粗那道。",
-      "sections": [
-        { "name": "矩阵旋转 · 坐标映射", "key": 1914,
-          "note": "映射背熟，别现场推：顺时针 (i,j)→(j,n-1-i)，逆时针 (i,j)→(n-1-j,i)，转置 (i,j)→(j,i)。主对角线 i==j，反对角线 i+j==n-1。带条件跳过格子的变体：照常算目标位置，跳过不动的格子。",
-          "problems": [[48, "Rotate Image"], [1886, "Determine Whether Matrix Can Be Obtained By Rotation"], [2319, "Check if Matrix Is X-Matrix"], [867, "Transpose Matrix"], [1914, "Cyclically Rotating a Grid"]] },
-        { "name": "后缀 / 前缀 Trie · 配对计数", "key": 3045,
-          "note": "后缀问题 = 串反转后建 Trie。数「一个是另一个的前/后缀」的 pair：插之前沿路累加途经节点（不含终点）的结尾数 + 终点的经过数（已含相等），O(总长度)，替代两两比较的 O(n²·L)。",
-          "problems": [[208, "Implement Trie (Prefix Tree)"], [3042, "Count Prefix and Suffix Pairs I"], [3045, "Count Prefix and Suffix Pairs II"], [820, "Short Encoding of Words"], [2416, "Sum of Prefix Scores of Strings"], [3093, "Longest Common Suffix Queries"], [1032, "Stream of Characters"]] },
-        { "name": "网格 / 状态模拟", "key": 289, "problems": [[289, "Game of Life"], [1861, "Rotating the Box"], [529, "Minesweeper"], [1706, "Where Will the Ball Fall"], [794, "Valid Tic-Tac-Toe State"], [723, "Candy Crush 💰"]] },
-        { "name": "时间窗口计数", "key": 933, "problems": [[933, "Number of Recent Calls"], [1604, "Alert Using Same Key-Card Three or More Times"], [1797, "Design Authentication Manager"], [362, "Design Hit Counter 💰"], [359, "Logger Rate Limiter 💰"]] },
-        { "name": "更新中维护聚合 · 懒删除堆", "key": 2034, "problems": [[2034, "Stock Price Fluctuation"], [2353, "Design a Food Rating System"], [1845, "Seat Reservation Manager"], [480, "Sliding Window Median"]] },
-        { "name": "日志 / 调用栈解析", "key": 636, "problems": [[636, "Exclusive Time of Functions"], [71, "Simplify Path"], [811, "Subdomain Visit Count"], [609, "Find Duplicate File in System"], [1152, "Analyze User Website Visit Pattern 💰"]] },
-        { "name": "操作序列 / 系统设计实现", "key": 2043, "problems": [[2043, "Simple Bank System"], [2502, "Design Memory Allocator"]] },
-        { "name": "连通块 · 哈希 + 前缀和", "key": 560, "problems": [[1254, "Number of Closed Islands"], [560, "Subarray Sum Equals K"], [523, "Continuous Subarray Sum"]] }
-      ] },
     { "name": "Infra 实操", "short": "INF",
       "note": "AI infra 公司常考、题单覆盖不好的设计题。",
       "sections": [
@@ -138,6 +122,14 @@
         { "name": "解析 · 显式 state 变量", "key": 8, "problems": [[8, "String to Integer (atoi)"], [65, "Valid Number"]] },
         { "name": "计算器 · 状态是上一个运算符", "key": 227, "note": "栈只动栈顶, 可以压成一个变量 last。", "problems": [[227, "Basic Calculator II"]] },
         { "name": "状态入栈 · 括号打断外层状态", "key": 224, "note": "遇到 ( / [ 把外层状态压栈, 遇到 ) / ] 弹出来接着算。", "problems": [[224, "Basic Calculator"], [394, "Decode String"], [772, "Basic Calculator III"]] }
+      ] },
+    { "name": "ACM 进阶", "short": "ACM",
+      "note": "竞赛味的 LC 题：组合计数、函数图 / 环、轮廓线 / 状压 DP、构造。每节加粗的是代表题，时间不够就只做那几道。1259 是会员题。",
+      "sections": [
+        { "name": "组合 / 取模", "key": 2400, "note": "372 快速幂（指数很大时取模）· 2400 组合数取模模板 · 2929 隔板法 + 容斥 · 1866 第一类斯特林数 · 1569 递归里套组合数。", "problems": [[372, "Super Pow"], [2400, "Number of Ways to Reach a Position After Exactly k Steps"], [2929, "Distribute Candies Among Children II"], [1866, "Number of Ways to Rearrange Sticks With K Sticks Visible"], [1569, "Number of Ways to Reorder Array to Get Same BST"]] },
+        { "name": "图 / 环", "key": 2127, "note": "2360 / 2876 / 2127 / 2836 都是函数图（每个点出度为 1）· 802 反向拓扑 · 2608 无向图最短环用 BFS · 947 行列并查集 · 1559 网格判环 · 2392 行列各做一次拓扑。", "problems": [[2360, "Longest Cycle in a Graph"], [2876, "Count Visited Nodes in a Directed Graph"], [802, "Find Eventual Safe States"], [2608, "Shortest Cycle in a Graph"], [2836, "Maximize Value of Function in a Ball Passing Game"], [2127, "Maximum Employees to Be Invited to a Meeting"], [947, "Most Stones Removed with Same Row or Column"], [1559, "Detect Cycles in 2D Grid"], [2392, "Build a Matrix With Conditions"]] },
+        { "name": "DP / 铺砖", "key": 1931, "note": "790 / 1411 先手推转移 · 1931 按列压状态 · 1659 逐格轮廓线 · 1986 状压 DP · 1240 搜索 + 剪枝。", "problems": [[790, "Domino and Tromino Tiling"], [1411, "Number of Ways to Paint N × 3 Grid"], [1931, "Painting a Grid With Three Different Colors"], [1659, "Maximize Grid Happiness"], [1986, "Minimum Number of Work Sessions to Finish the Tasks"], [1240, "Tiling a Rectangle with the Fewest Squares"]] },
+        { "name": "构造 / 思维", "key": 932, "note": "1259 Catalan 数（会员题）· 1916 树上的拓扑序计数 · 2338 附加题：隔板法 + 质因数分解。", "problems": [[667, "Beautiful Arrangement II"], [932, "Beautiful Array"], [1259, "Handshakes That Don't Cross"], [1916, "Count Ways to Build Rooms in an Ant Colony"], [2338, "Count the Number of Ideal Arrays"]] }
       ] }
   ],
 
