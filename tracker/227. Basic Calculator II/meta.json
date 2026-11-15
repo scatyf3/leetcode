@@ -1,5 +1,8 @@
 {
-  "structures": [],
+  "structures": [
+    "string",
+    "stack"
+  ],
   "paradigms": [
     "stack",
     "state-machine"

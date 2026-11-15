@@ -1,6 +1,10 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string"
+  ],
+  "paradigms": [
+    "simulation"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",
