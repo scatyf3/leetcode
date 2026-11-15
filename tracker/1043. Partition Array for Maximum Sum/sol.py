@@ -1,13 +1,14 @@
 class Solution:
     def maxSumAfterPartitioning(self, arr: list[int], k: int) -> int:
-        n = len(arr)
-        dp = [0] * n  # dp[i]：arr[0..i] 分割后的最大和
-
-        for i in range(n):
-            mx = 0
-            for j in range(1, min(k, i + 1) + 1):   # 最后一段长度 j
-                mx = max(mx, arr[i - j + 1])        # 这一段最左边的元素
-                prev = dp[i - j] if i - j >= 0 else 0
-                dp[i] = max(dp[i], prev + mx * j)
-
-        return dp[-1]
+        # dp store max sum in current index
+        # for each elem, check to cover prev 3
+        dp = [0 for i in range(len(arr)+1)]
+        for index,elem in enumerate(arr):
+            dp_index=index+1
+            for subarr_start in range(max(index-k+1,0),index+1):
+                dis = index-subarr_start+1
+                max_sub_arr = max(arr[subarr_start:index+1])
+                # print(arr[index],dis,arr[subarr_start:index+1])
+                dp[dp_index]= max(dp[dp_index],dp[subarr_start]+ max_sub_arr * dis)
+        # print(dp)
+        return dp[len(arr)]
