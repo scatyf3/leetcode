@@ -1,8 +1,9 @@
 # LeetCode Blog
 
-刷题知识库，三层，VitePress。站点：<https://scatyf3.github.io/leetcode/blog/>
+刷题知识库，四层，VitePress。站点：<https://scatyf3.github.io/leetcode/blog/>
 
 ```
+L4 advanced/    竞赛进阶   数据范围 / 取模 / 建模，建在 L3 上（和 L3 共用 paradigms 标签）
 L3 paradigms/   算法套路   题型 → 模板 → 坑
 L2 structures/  概念结构   每多维护一种信息就多一种结构（推导图在 /structures/）
 L1 python/      Python 内置 这个 API 底下是什么，复杂度从哪来

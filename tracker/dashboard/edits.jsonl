@@ -847,3 +847,7 @@
 {"ts": 1794694174, "date": "2026-11-14", "id": 670, "field": "familiarity", "from": null, "to": 3}
 {"ts": 1794695389, "date": "2026-11-14", "id": 1901, "field": "familiarity", "from": 4, "to": 3}
 {"ts": 1794712374, "date": "2026-11-14", "id": 2400, "field": "exists", "from": null, "to": true}
+{"ts": 1794788832, "date": "2026-11-15", "id": 69, "field": "exists", "from": null, "to": true}
+{"ts": 1794788856, "date": "2026-11-15", "id": 69, "field": "familiarity", "from": null, "to": 3}
+{"ts": 1794790448, "date": "2026-11-15", "id": 50, "field": "exists", "from": null, "to": true}
+{"ts": 1794790455, "date": "2026-11-15", "id": 50, "field": "familiarity", "from": null, "to": 3}

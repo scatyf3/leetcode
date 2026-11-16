@@ -34,7 +34,9 @@ ROOT = REPO.parent                      # 仓库根
 BLOG = ROOT / "blog" / "docs"
 PLAN = HERE / "plan.json"
 
-LAYERS = ("structures", "paradigms")    # 和 blog/docs/.vitepress/layers.ts 里带 tag 的两层对应
+LAYERS = ("structures", "paradigms")    # meta.json 里的两个 tag 字段
+# tag 字段 -> 能接住它的 blog 目录。和 layers.ts 里的 tag 对应: L4 advanced/ 也吃 paradigms 标签
+LAYER_DIRS = {"structures": ("structures",), "paradigms": ("paradigms", "advanced")}
 FOLDER_RE = re.compile(r"^(\d+)\.\s*(.+)$")   # 同 server.py
 GH_RE = re.compile(r"https://github\.com/scatyf3/leetcode/(?:blob|tree)/main/(tracker/[^)\s#?]+)")
 ALIAS_RE = re.compile(r"^alias:\s*\[(.*)\]\s*$", re.M)
@@ -43,7 +45,7 @@ ALIAS_RE = re.compile(r"^alias:\s*\[(.*)\]\s*$", re.M)
 def page_keys(layer: str) -> set[str]:
     """这一层所有页面能接住的 tag: 文件名 + frontmatter 的 alias。"""
     keys = set()
-    for f in (BLOG / layer).glob("*.md"):
+    for f in (f for d in LAYER_DIRS[layer] for f in (BLOG / d).glob("*.md")):
         if f.stem == "index":
             continue
         keys.add(f.stem)
@@ -75,7 +77,7 @@ def main() -> int:
                 (warnings if meta.get("status") == "todo" else errors).append(msg)
             for t in tags:
                 if t not in keys[layer]:
-                    errors.append(f"{d.name}: {layer} tag '{t}' 没有对应页面 (blog/docs/{layer}/{t}.md 或 alias)")
+                    errors.append(f"{d.name}: {layer} tag '{t}' 没有对应页面 (blog/docs/{'|'.join(LAYER_DIRS[layer])}/{t}.md 或 alias)")
 
     # 3: plan.json 分组
     for g in json.loads(PLAN.read_text(encoding="utf-8")).get("groups", []):

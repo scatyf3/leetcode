@@ -20,6 +20,7 @@ export default defineConfig({
       { text: 'Python', link: '/python/' },
       { text: '结构', link: '/structures/' },
       { text: '套路', link: '/paradigms/' },
+      { text: '进阶', link: '/advanced/' },
       { text: '看板', link: 'https://scatyf3.github.io/leetcode/' },
     ],
     sidebar: buildSidebar(),

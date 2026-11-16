@@ -4,7 +4,7 @@ title: 首页
 
 hero:
   name: LeetCode Blog
-  text: Python 内置 → 概念数据结构 → 算法套路
+  text: Python 内置 → 概念数据结构 → 算法套路 → 竞赛进阶
   tagline: 刷题过程在 tracker/，沉淀下来的东西在这里
   actions:
     - theme: brand

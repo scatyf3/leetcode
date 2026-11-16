@@ -47,3 +47,6 @@ web 看板右上角 📋 TODO 可以按题号或题名快速加,勾掉 = 做完�
 - [ ] 77 Combinations
 - [ ] 1405 Longest Happy String
 - [ ] 432 All O`one Data Structure
+- [ ] 64 Minimum Path Sum
+- [ ] 69 Sqrt(x)
+- [ ] 50 Pow(x, n)

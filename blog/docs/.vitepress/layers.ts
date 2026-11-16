@@ -1,5 +1,5 @@
 /**
- * 三层：底下是 Python 给的现成容器，中间是概念上的数据结构，最上面是算法套路。
+ * 四层：底下是 Python 给的现成容器，中间是概念上的数据结构，再往上是算法套路，最上面是竞赛进阶（建在套路上的东西）。
  * 一层 = docs/ 下的一个目录。这是唯一手工维护的结构信息，sidebar 和首页分层图都从这里 + frontmatter 生成。
  *
  * tag：这一层的页面和 tracker/<题>/meta.json 里哪个字段对得上 —— 页面 slug（或 frontmatter 的 alias）
@@ -27,6 +27,12 @@ export const layers: Layer[] = [
   {
     id: 3, dir: 'paradigms', name: '算法套路', en: 'Paradigms', color: '#f97316', tag: 'paradigms',
     scope: '题型 → 模板 → 坑',
+  },
+  {
+    // 和 L3 共用 meta.json 的 paradigms 字段：题打 paradigms: ["functional-graph"] 就挂到 advanced/functional-graph。
+    // 所以这一层的 slug 不能和 paradigms/ 下的重名。
+    id: 4, dir: 'advanced', name: '算法竞赛进阶', en: 'Competitive', color: '#a855f7', tag: 'paradigms',
+    scope: '数据范围定算法 · 取模计数 · 先建模再套路',
   },
 ]
 
