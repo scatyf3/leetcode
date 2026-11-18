@@ -7,6 +7,8 @@ import StructureMap from './components/StructureMap.vue'
 import ProblemList from './components/ProblemList.vue'
 import TopicFamily from './components/TopicFamily.vue'
 import IntervalViz from './components/IntervalViz.vue'
+import CandyViz from './components/CandyViz.vue'
+import StickViz from './components/StickViz.vue'
 import './custom.css'
 
 export default {
@@ -22,5 +24,7 @@ export default {
     app.component('LayerIndex', LayerIndex)
     app.component('StructureMap', StructureMap)
     app.component('IntervalViz', IntervalViz)
+    app.component('CandyViz', CandyViz)
+    app.component('StickViz', StickViz)
   },
 } satisfies Theme
