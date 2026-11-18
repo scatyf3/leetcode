@@ -38,3 +38,24 @@ describe('renderMd', () => {
     expect(links(html)).toEqual([42])
   })
 })
+
+describe('renderMd · 公式', () => {
+  const katexCount = (html: string) => (html.match(/class="katex"/g) || []).length
+  it('行内 $...$ 和独立的 $$...$$ 都渲染', () => {
+    const html = renderMd('先 $a^d$ 再看\n\n$$f(i+1) = f(i)^{10}$$\n', rec)
+    expect(katexCount(html)).toBe(2)
+    expect(html).toContain('katex-display')
+    expect(html).not.toContain('data-math')
+  })
+  it('公式里的文字不变成题号链接', () => {
+    expect(links(renderMd('$\\text{LC 42}$ 和 LC 42', rec))).toEqual([42])
+  })
+  it('钱数、转义的 $、代码里的 $ 都不是公式', () => {
+    expect(katexCount(renderMd('花了 $5 和 $10', rec))).toBe(0)
+    expect(katexCount(renderMd('\\$x\\$', rec))).toBe(0)
+    expect(katexCount(renderMd('`$x$`', rec))).toBe(0)
+  })
+  it('写错的公式不炸整页', () => {
+    expect(() => renderMd('$\\frac{1}{$', rec)).not.toThrow()
+  })
+})

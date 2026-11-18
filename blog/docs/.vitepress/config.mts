@@ -13,7 +13,8 @@ export default defineConfig({
   lastUpdated: true,
   // 坏链直接让构建失败；指向题目文件夹 / notes 的链接一律写 GitHub 绝对地址
   ignoreDeadLinks: false,
-  markdown: { lineNumbers: false },
+  // math: $...$ / $$...$$ 用 markdown-it-mathjax3 渲染，和 ai-infra-inferview 同一套
+  markdown: { lineNumbers: false, math: true },
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
