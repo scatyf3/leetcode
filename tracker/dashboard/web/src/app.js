@@ -272,9 +272,12 @@ const editableSol = (it) => !!it && it.html === undefined && !it.readonly;
 
 function buildSolTabs(d) {
   // 题面(如果抓过)排在解法前面, 当成第 0 个 tab
-  SOL_ITEMS = d.description
-    ? [{ name: '📄 题目', html: d.description }, ...d.solutions]
-    : d.solutions.slice();
+  // 再往后是可视化(题目文件夹里的 viz.html), 有就排在题面后面
+  SOL_ITEMS = [
+    ...(d.description ? [{ name: '📄 题目', html: d.description }] : []),
+    ...(d.viz ? [{ name: '🎞 可视化', viz: d.viz, readonly: true }] : []),
+    ...d.solutions,
+  ];
   SOL_EDITING = false;                       // 换题时不要把上一题的编辑态带过来
   $('#sol-msg').textContent = '';
   renderSolTabs(0);
@@ -304,6 +307,17 @@ function showItem(item) {
   // 题面是 HTML, 得渲染; 代码是纯文本, 走高亮器塞进 <pre>
   const desc = $('#sol-desc'), code = $('#sol-code');
   $('#sol-edit').classList.add('hidden');
+  desc.classList.toggle('viz', item.viz !== undefined);
+  if (item.viz !== undefined) {
+    // viz.html 自带脚本, 关进 sandbox iframe(不给 same-origin, 碰不到看板的 DOM / API);
+    // 深浅色在打开 tab 时注入到它的 <html data-theme>
+    const doc = item.viz.replace(/<html\b/i, `<html data-theme="${document.documentElement.dataset.theme || 'light'}"`);
+    desc.innerHTML = `<iframe class="viz-frame" sandbox="allow-scripts" srcdoc="${esc(doc)}"></iframe>`;
+    desc.classList.remove('hidden');
+    code.classList.add('hidden');
+    $('#sol-mode').textContent = '';
+    return;
+  }
   if (item.html !== undefined) {
     desc.innerHTML = item.html;
     desc.scrollTop = 0;

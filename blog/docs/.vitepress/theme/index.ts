@@ -9,6 +9,7 @@ import TopicFamily from './components/TopicFamily.vue'
 import IntervalViz from './components/IntervalViz.vue'
 import CandyViz from './components/CandyViz.vue'
 import StickViz from './components/StickViz.vue'
+import InsertViz from './components/InsertViz.vue'
 import './custom.css'
 
 export default {
@@ -26,5 +27,6 @@ export default {
     app.component('IntervalViz', IntervalViz)
     app.component('CandyViz', CandyViz)
     app.component('StickViz', StickViz)
+    app.component('InsertViz', InsertViz)
   },
 } satisfies Theme

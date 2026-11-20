@@ -87,6 +87,19 @@
   },
 
   "topics": [
+    { "name": "OA 复盘 · 时间戳 KV / 版本存储 / 范围查询", "short": "OA",
+      "note": "OA 三道原题在 LeetCode 上都没有，这里是考点相同的题。顺序 981 → 968 → 2250。题面回忆和分析见 notes/oa-recap.md。",
+      "sections": [
+        { "name": "原题 1 · 带时间戳的 key-value，basetime 判断能不能写", "key": 981,
+          "note": "basetime 大概是乐观并发（compare-and-set）里的版本号：key 的上次修改时间 ≤ basetime 才允许写。这是推测，要对照题面确认。",
+          "problems": [[981, "Time Based Key-Value Store"], [1146, "Snapshot Array"], [1797, "Design Authentication Manager"], [2034, "Stock Price Fluctuation"]] },
+        { "name": "原题 2 · 版本存储：存哪些全量，让每个版本都能在 cost ≤ t 内重建", "key": 968,
+          "note": "版本是一条链时从前往后贪心，版本是一棵树时自底向上。968 的套路几乎一样；45 / 1326 是链上的区间覆盖。",
+          "problems": [[968, "Binary Tree Cameras"], [45, "Jump Game II"], [1326, "Minimum Number of Taps to Open to Water a Garden"]] },
+        { "name": "原题 3 · source + distance，找范围内的 target", "key": 2250,
+          "note": "475 是一维入门，2250 是一维排序、另一维二分，结构最像。1131 / 3102 练曼哈顿距离的 u = x+y、v = x−y 转换。",
+          "problems": [[2250, "Count Number of Rectangles Containing Each Point"], [475, "Heaters"], [1828, "Queries on Number of Points Inside a Circle"], [1131, "Maximum of Absolute Value Expression"], [3102, "Minimize Manhattan Distances"]] }
+      ] },
     { "name": "TikTok · Hot 100 冲刺 · 10/2–10/8", "short": "H100",
       "note": "TikTok 以 Hot 100 为主，LeetCode 公司标签也有参考价值。",
       "sections": [

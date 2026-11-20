@@ -17,6 +17,13 @@ L2 那张推导图上的每个概念，在 Python 里落到哪：
 | 有序集合 | 没有内置：`bisect` + `list`，或 `sortedcontainers.SortedList` | 有序数组 / 分块有序数组 |
 | 字符串 | `str` | 不可变的定长码位数组 |
 
+算法层面，Python 也自带了两样刷题天天用的：
+
+| 算法 | Python | 底层 |
+|---|---|---|
+| 排序 | [`sorted` / `list.sort`](sort.md) | Timsort：切出有序的 run 再归并，稳定 |
+| 二分查找 | [`bisect`](bisect-sorted.md) | 有序 list 上的二分，返回插入位置 |
+
 语法层面的坑另有一套闪卡在 [tracker/syntax/](https://github.com/scatyf3/leetcode/tree/main/tracker/syntax)，
 看板里按 FSRS 抽着复习；这里讲的是坑**为什么**会在那儿。
 

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>插入递推</title>
+<!--
+  看板「🎞 可视化」tab 用 iframe srcdoc 加载本文件, 并在 <html> 上注入 data-theme。
+  插入递推 dp[n][k] = dp[n-1][k-1] + (n-1)·dp[n-1][k] 的完整展开:
+  先把其余 n-1 根(高度 2..n)排好, 再把最矮的 1 插进去。
+  ① 插最左: 1 看得见, 其余要看见 k-1 根; ② 插其余 n-1 个空位: 1 被挡住, 其余要看见 k 根。
+  1 最矮、挡不住任何人, 所以其余木棍看不看得见在插入前后不变。点 dp 表的格子换 (n, k)。
+-->
+<style>
+:root{
+  --bg:#ebebef; --card:#ffffff; --line:#d4d4da; --fg:#3c3c43; --dim:#67676c;
+  --L:#2563eb; --Lsoft:#dbe6fd; --U:#c2410c; --Usoft:#fde7d7;
+  --vis:#8b5cf6; --hid:#a1a1aa; --ins:#dc2626;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2a2b32; --card:#1b1b1f; --line:#3c3d45; --fg:#dfdfd6; --dim:#98989f;
+    --L:#60a5fa; --Lsoft:#1e3355; --U:#fb923c; --Usoft:#4a2a17;
+    --vis:#a78bfa; --hid:#5c5c66; --ins:#f87171;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2a2b32; --card:#1b1b1f; --line:#3c3d45; --fg:#dfdfd6; --dim:#98989f;
+  --L:#60a5fa; --Lsoft:#1e3355; --U:#fb923c; --Usoft:#4a2a17;
+  --vis:#a78bfa; --hid:#5c5c66; --ins:#f87171;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:14px 16px 18px;background:var(--bg);color:var(--fg);font:13.5px/1.6 var(--sans)}
+h1{font-size:15px;margin:0 0 4px}
+.lead{color:var(--dim);font-size:12.5px;margin:0 0 12px}
+.top{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:center}
+
+table{border-collapse:collapse;font:12px var(--mono)}
+th,td{border:1px solid var(--line);padding:2px 0;text-align:center;width:30px;height:24px}
+th{color:var(--dim);font-weight:500}
+td{background:var(--card);color:var(--dim)}
+td.blank{background:transparent}
+td.pick{cursor:pointer}
+td.pick:hover{color:var(--fg);outline:1px solid var(--dim);outline-offset:-1px}
+td.cur{outline:2px solid var(--fg);outline-offset:-2px;color:var(--fg);font-weight:700}
+td.fromL{background:var(--Lsoft);color:var(--L);font-weight:700}
+td.fromU{background:var(--Usoft);color:var(--U);font-weight:700}
+
+.formula{font:14px/1.9 var(--mono)}
+.formula b{font-size:15px}
+.hint{font:12px var(--sans);color:var(--dim)}
+.cL{color:var(--L);font-weight:700}
+.cU{color:var(--U);font-weight:700}
+
+.case{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)}
+.ch{font-size:13px;color:var(--dim);margin-bottom:8px}
+.ch b{color:var(--fg)}
+.tag{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;
+  color:#fff;font-size:11px;margin-right:4px}
+.tag.L{background:var(--L)} .tag.U{background:var(--U)}
+.empty{font-size:13px;color:var(--dim);font-style:italic}
+
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}
+.arrow{color:var(--dim);font-size:16px;padding:0 2px}
+svg{display:block;padding:2px;border-radius:6px;background:var(--card);border:1px solid var(--line)}
+svg.src{border-style:dashed;background:transparent}
+.slot{stroke:var(--ins);stroke-width:1.5;stroke-dasharray:3 2}
+.bar{fill:var(--hid)} .bar.vis{fill:var(--vis)} .bar.ins{fill:var(--ins)}
+.num{font:11px var(--mono);text-anchor:middle;fill:var(--dim)}
+.num.vis{fill:var(--vis);font-weight:700} .num.ins{fill:var(--ins);font-weight:700}
+
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:12px;color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:5px}
+.sw{display:inline-block;width:10px;height:14px;border-radius:2px;background:var(--hid)}
+.sw.vis{background:var(--vis)} .sw.ins{background:var(--ins)}
+.sw.slot{width:0;border-left:2px dashed var(--ins);border-radius:0;background:transparent}
+</style>
+</head>
+<body>
+<h1>插入递推：把最矮的 1 插回去</h1>
+<p class="lead">每一行：其余 n-1 根（高度 2..n）的一种排法 → 把 1 插进虚线空位后的结果。点 dp 表的格子换 (n, k)。</p>
+<div id="app"></div>
+
+<script>
+const MAX = 5
+let n = 3, k = 2
+
+function perms(m) {
+  if (m === 0) return [[]]
+  const out = []
+  for (const p of perms(m - 1)) for (let i = 0; i <= p.length; i++) out.push([...p.slice(0, i), m, ...p.slice(i)])
+  return out
+}
+const seenCount = (p) => { let top = 0, c = 0; for (const v of p) if (v > top) { c++; top = v } return c }
+
+const DP = Array.from({ length: MAX + 1 }, () => Array(MAX + 1).fill(0))
+DP[0][0] = 1
+for (let i = 1; i <= MAX; i++) for (let j = 1; j <= i; j++) DP[i][j] = DP[i - 1][j - 1] + (i - 1) * DP[i - 1][j]
+
+// 其余 m 根看见 j 根的全部排法, 高度整体 +1, 给 1 腾位置
+const sources = (m, j) => perms(m).filter((p) => seenCount(p) === j).map((p) => p.map((v) => v + 1))
+
+const BW = 16, GAP = 8, PAD = 9, HH = 58
+const width = (p) => Math.max(26, PAD * 2 + p.length * (BW + GAP) - GAP)
+const slotX = (s) => PAD + s * (BW + GAP) - GAP / 2
+
+function svg(p, slots, isSrc) {
+  const w = width(p), h = HH + 16
+  let top = 0, body = ''
+  if (!p.length) body += `<text x="${w / 2}" y="${HH - 10}" class="num">∅</text>`
+  for (const s of slots) body += `<line x1="${slotX(s)}" x2="${slotX(s)}" y1="3" y2="${HH}" class="slot"/>`
+  p.forEach((v, i) => {
+    const vis = v > top; if (vis) top = v
+    const cls = v === 1 ? 'ins' : vis ? 'vis' : ''
+    const x = PAD + i * (BW + GAP), bh = (v / n) * (HH - 6)
+    body += `<rect x="${x}" y="${HH - bh}" width="${BW}" height="${bh}" rx="1.5" class="bar ${cls}"/>`
+    body += `<text x="${x + BW / 2}" y="${HH + 12}" class="num ${cls}">${v}</text>`
+  })
+  return `<svg class="${isSrc ? 'src' : ''}" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${p.join(' ') || '空'}">${body}</svg>`
+}
+
+function rows(list) {
+  return list.map(({ src, slots, outs }) =>
+    `<div class="row">${svg(src, slots, true)}<span class="arrow">→</span>${outs.map((o) => svg(o, [], false)).join('')}</div>`
+  ).join('')
+}
+
+function render() {
+  const a = DP[n - 1][k - 1], b = DP[n - 1][k]
+  const left = sources(n - 1, k - 1).map((src) => ({ src, slots: [0], outs: [[1, ...src]] }))
+  const rest = sources(n - 1, k).map((src) => {
+    const idx = src.map((_, i) => i + 1)
+    return { src, slots: idx, outs: idx.map((i) => [...src.slice(0, i), 1, ...src.slice(i)]) }
+  })
+
+  let t = '<table><tr><th>i\\j</th>'
+  for (let j = 0; j <= MAX; j++) t += `<th>${j}</th>`
+  t += '</tr>'
+  for (let i = 0; i <= MAX; i++) {
+    t += `<tr><th>${i}</th>`
+    for (let j = 0; j <= MAX; j++) {
+      const c = []
+      if (j > i) c.push('blank')
+      if (j >= 1 && j <= i) c.push('pick')
+      if (i === n && j === k) c.push('cur')
+      if (i === n - 1 && j === k - 1) c.push('fromL')
+      if (i === n - 1 && j === k) c.push('fromU')
+      t += `<td class="${c.join(' ')}" data-i="${i}" data-j="${j}">${j > i ? '' : DP[i][j]}</td>`
+    }
+    t += '</tr>'
+  }
+  t += '</table>'
+
+  const leftEmpty = `其余 ${n - 1} 根至少看得见最左那根，不可能看见 0 根`
+  const restEmpty = `其余只有 ${n - 1} 根，凑不出 ${k} 根看得见`
+
+  document.getElementById('app').innerHTML = `
+    <div class="top">
+      ${t}
+      <div class="formula">
+        <div>dp[${n}][${k}] = <span class="cL">dp[${n - 1}][${k - 1}]</span> + ${n - 1} × <span class="cU">dp[${n - 1}][${k}]</span></div>
+        <div>= <span class="cL">${a}</span> + ${n - 1} × <span class="cU">${b}</span> = <b>${DP[n][k]}</b></div>
+        <div class="hint"><span class="cL">左上</span>：1 插最左　<span class="cU">正上</span>：1 插其他空位</div>
+      </div>
+    </div>
+    <section class="case">
+      <div class="ch"><span class="tag L">①</span>1 插<b>最左</b> → 看得见。其余 ${n - 1} 根要看见 ${k - 1} 根：<span class="cL">${a}</span> 种 × 1 个空位 = <b>${a}</b></div>
+      ${left.length ? rows(left) : `<div class="empty">没有：${leftEmpty}</div>`}
+    </section>
+    <section class="case">
+      <div class="ch"><span class="tag U">②</span>1 插<b>其他 ${n - 1} 个空位</b> → 被挡住。其余 ${n - 1} 根要看见 ${k} 根：<span class="cU">${b}</span> 种 × ${n - 1} 个空位 = <b>${(n - 1) * b}</b></div>
+      ${rest.length ? rows(rest) : `<div class="empty">没有：${restEmpty}</div>`}
+    </section>
+    <div class="legend">
+      <span><i class="sw vis"></i>看得见</span>
+      <span><i class="sw"></i>被挡住</span>
+      <span><i class="sw ins"></i>插进来的最矮的 1</span>
+      <span><i class="sw slot"></i>1 可以插的空位</span>
+    </div>`
+
+  document.querySelectorAll('td.pick').forEach((td) =>
+    td.addEventListener('click', () => { n = +td.dataset.i; k = +td.dataset.j; render() }))
+}
+render()
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "structures": [
+    "tree"
+  ],
+  "paradigms": [
+    "greedy",
+    "dfs"
+  ],
+  "techniques": [],
+  "difficulty": "hard",
+  "status": "solved",
+  "familiarity": 3.5
+}

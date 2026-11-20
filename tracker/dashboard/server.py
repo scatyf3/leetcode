@@ -236,6 +236,9 @@ def get_detail(pid: int):
     # LeetCode 题面(dashboard/fetch_desc.py 抓的), 没抓过就是空串
     desc = folder / "problem.html"
     d["description"] = desc.read_text(encoding="utf-8", errors="replace") if desc.exists() else ""
+    # 可视化: 题目文件夹里手写的 viz.html(自带样式和脚本), 看板在「🎞 可视化」tab 里用 iframe 跑
+    viz = folder / "viz.html"
+    d["viz"] = viz.read_text(encoding="utf-8", errors="replace") if viz.exists() else ""
     # the note file (existing preferred name, else default note.md)
     note_file = None
     for name in NOTE_NAMES:

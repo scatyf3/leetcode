@@ -41,6 +41,8 @@ npm run typecheck            # vue-tsc
                    还有 complexity（时间/空间）和 fsrs（下次到期日 / stability …）
   answer.md      ← 复习答案卡：**一句话思路**。和 note.md 分开——note 是过程流水账，这个是压缩过的结论
   *.py           ← 解法（面板里按文件名分 tab 展示）
+  viz.html       ← 可选：手写的交互可视化（自带样式和脚本），面板左侧多一个「🎞 可视化」tab，sandbox iframe 里跑；
+                   深浅色由看板注入到 <html data-theme>
   note.md 等     ← 笔记（面板右侧可编辑，Ctrl+S 保存）
 
 ../blog/docs/structures/<结构>.md  ← 该数据结构的通用 trick(点「题目」里的组标题打开)
