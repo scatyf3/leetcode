@@ -14,7 +14,7 @@
   --fg:#3c3c43; --dim:#67676c; --accent:#2563eb; --accent2:#18794e; --violet:#8b5cf6;
   --easy:#2f9e6a; --medium:#c98a14; --hard:#d6455d; --chip:#ebebef;
   --fam0:#14a090; --fam1:#2f9e6a; --fam15:#2b9bb5; --fam2:#3b7cf0; --fam25:#8a63d2;
-  --fam3:#c98a14; --fam35:#d9773f; --fam4:#d6455d;
+  --fam3:#c98a14; --fam35:#d9773f; --fam4:#d6455d; --idea:#b8438f;
   --soft:rgba(142,150,170,.14); --soft-hover:rgba(142,150,170,.22);
   --brand-soft:rgba(37,99,235,.12);
   --shadow-1:0 1px 2px rgba(0,0,0,.04),0 1px 2px rgba(0,0,0,.06);
@@ -29,7 +29,7 @@
   --fg:#dfdfd6; --dim:#98989f; --accent:#3b82f6; --accent2:#3dd68c; --violet:#a78bfa;
   --easy:#54c78b; --medium:#e2b04a; --hard:#e06c75; --chip:#2e2f36;
   --fam0:#22b8a6; --fam1:#54c78b; --fam15:#5fbcd0; --fam2:#6ea8fe; --fam25:#b195f0;
-  --fam3:#e2b04a; --fam35:#e48f5c; --fam4:#e06c75;
+  --fam3:#e2b04a; --fam35:#e48f5c; --fam4:#e06c75; --idea:#e58bc0;
   --soft:rgba(101,117,133,.16); --soft-hover:rgba(101,117,133,.26);
   --brand-soft:rgba(59,130,246,.16);
   --shadow-1:0 1px 2px rgba(0,0,0,.3);
@@ -180,6 +180,23 @@ main{padding:28px 32px 72px;overflow:auto}
 .lc-desc p{margin:.7em 0}
 .lc-desc.viz{padding:0;overflow:hidden}
 .viz-frame{display:block;width:100%;height:100%;border:0}
+
+/* ---- 💬 讨论: chat.md 渲染成气泡(题面 tab 同一个容器) ---- */
+.chat-sess{margin:0 0 14px}
+.chat-sess>summary{cursor:pointer;color:var(--dim);font-size:12px;padding:4px 0;
+  border-bottom:1px solid var(--line);margin-bottom:10px}
+.chat-key{font:11px var(--font-mono);opacity:.6;margin-left:6px}
+.chat-msg{margin:0 0 12px;max-width:92%}
+.chat-me{margin-left:auto}
+.chat-who{font-size:11px;color:var(--dim);margin:0 0 3px 2px}
+.chat-me .chat-who{text-align:right;margin-right:2px}
+.lc-desc .chat-body{flex:none;overflow:visible;cursor:auto;padding:8px 14px;border-radius:10px;
+  background:var(--bg);border:1px solid var(--line)}
+.lc-desc .chat-me .chat-body{background:color-mix(in srgb,var(--accent) 10%,var(--bg));
+  border-color:color-mix(in srgb,var(--accent) 30%,var(--line))}
+.chat-body>:first-child{margin-top:0}
+.chat-body>:last-child{margin-bottom:0}
+.chat-body h1,.chat-body h2,.chat-body h3{font-size:14px;margin:.9em 0 .4em}
 
 .note-head{display:flex;justify-content:space-between;align-items:center;
   padding:8px 12px;background:var(--panel);gap:10px}
@@ -491,6 +508,7 @@ main{padding:28px 32px 72px;overflow:auto}
 .lbar i.f3{background:var(--fam3)}
 .lbar i.f3_5{background:var(--fam35)}
 .lbar i.f4{background:var(--fam4)}
+.lbar i.fidea{background:var(--idea)}
 .lbar i.fnone{background:var(--dim);opacity:.55}   /* 建了但没评熟练度 */
 
 .lkeys{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:7px;font-size:11.5px;color:var(--dim)}
@@ -501,6 +519,7 @@ main{padding:28px 32px 72px;overflow:auto}
 .lkey.f2 i{background:var(--fam2)} .lkey.f2_5 i{background:var(--fam25)}
 .lkey.f3 i{background:var(--fam3)} .lkey.f3_5 i{background:var(--fam35)}
 .lkey.f4 i{background:var(--fam4)}
+.lkey.fidea i{background:var(--idea)}
 .lkey.fnone i{background:var(--dim);opacity:.55}
 .lkey.f-1 i{background:transparent;border:1px dashed var(--line)}
 .lkey b{color:var(--fg);font-variant-numeric:tabular-nums}
@@ -514,6 +533,8 @@ main{padding:28px 32px 72px;overflow:auto}
 .lchip.f3{color:var(--fam3);border-color:color-mix(in srgb,var(--fam3) 45%,transparent)}
 .lchip.f3_5{color:var(--fam35);border-color:color-mix(in srgb,var(--fam35) 45%,transparent)}
 .lchip.f4{color:var(--fam4);border-color:color-mix(in srgb,var(--fam4) 45%,transparent)}
+.lchip.fidea{color:var(--idea);border-color:color-mix(in srgb,var(--idea) 45%,transparent)}
+.lchip.fidea .lfam{background:color-mix(in srgb,var(--idea) 18%,transparent)}
 .lchip.f1 .lfam{background:color-mix(in srgb,var(--fam1) 18%,transparent)}
 .lchip.f1_5 .lfam{background:color-mix(in srgb,var(--fam15) 18%,transparent)}
 .lchip.f2 .lfam{background:color-mix(in srgb,var(--fam2) 18%,transparent)}
@@ -999,6 +1020,7 @@ main{padding:28px 32px 72px;overflow:auto}
 .fm-s.l2,.skey i.l2{background:var(--fam2)}
 .fm-s.l3,.skey i.l3{background:var(--fam3)}
 .fm-s.l4,.skey i.l4{background:var(--fam4)}
+.fm-s.idea,.skey i.idea{background:var(--idea)}
 .fm-s.nr,.skey i.nr{background:color-mix(in srgb,var(--dim) 40%,var(--chip))}
 .fm-s.gone,.skey i.gone{background:repeating-linear-gradient(135deg,var(--chip) 0 3px,var(--panel2) 3px 6px)}
 .skey i.gone{border:1px solid var(--line)}
@@ -1026,6 +1048,9 @@ main{padding:28px 32px 72px;overflow:auto}
 .gr-st.fm-l2{background:var(--fam2);color:#fff}
 .gr-st.fm-l3{background:color-mix(in srgb,var(--fam3) 85%,var(--panel2));color:#fff}
 .gr-st.fm-l4{background:color-mix(in srgb,var(--fam4) 80%,var(--panel2));color:#fff}
+/* idea only: 虚线框 = 有思路没做, 不和实心的 L 档混 */
+.gr-st.fm-idea{width:34px;background:color-mix(in srgb,var(--idea) 16%,var(--panel));color:var(--idea);
+  border:1px dashed var(--idea)}
 .gr-st.fm-nr{background:var(--chip);color:var(--dim)}
 .gr-grp{scroll-margin-top:calc(var(--nav-h) + 16px)}
 .sub:empty{display:none}

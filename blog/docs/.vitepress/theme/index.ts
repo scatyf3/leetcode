@@ -10,6 +10,7 @@ import IntervalViz from './components/IntervalViz.vue'
 import CandyViz from './components/CandyViz.vue'
 import StickViz from './components/StickViz.vue'
 import InsertViz from './components/InsertViz.vue'
+import GraphShapes from './components/GraphShapes.vue'
 import './custom.css'
 
 export default {
@@ -28,5 +29,6 @@ export default {
     app.component('CandyViz', CandyViz)
     app.component('StickViz', StickViz)
     app.component('InsertViz', InsertViz)
+    app.component('GraphShapes', GraphShapes)
   },
 } satisfies Theme

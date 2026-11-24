@@ -1,0 +1,214 @@
+% 第 8 章：搜索 + 剪枝。素材：blog/docs/advanced/search-pruning.md
+\section{搜索 + 剪枝}
+
+没有好的多项式算法、数据又小，就直接暴搜，靠剪枝把搜索树砍小。代表题只有一道：\lc{1240}{Tiling a Rectangle with the Fewest Squares}（看板上它放在「DP / 铺砖」那节，但做法是搜索）。
+
+\subsection{总览：建在回溯上的五种剪枝}
+
+\begin{overview}
+L3 回溯：把所有选择画成一棵树，DFS 走一遍
+  |
+  +-- [1] feasibility   这一步根本放不下 -> 写进枚举范围
+  +-- [2] bound         当前代价 + 下界 >= best -> 掉头
+  |        ^
+  |        +-- [3] order     先试最可能好的分支，best 早变小
+  +-- [4] symmetry      等价状态只生成一次；挑好搜的方向
+  +-- [5] memo          子问题只由小状态决定 -> 缓存（别和 [2] 混用）
+\end{overview}
+
+\textbf{怎么认出来}：数据范围小得反常（$n, m \le 13$），而且想不出 DP 的状态。再加两个信号：
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+\textbf{信号} & \textbf{意味着} & \textbf{1240 里}\\
+\midrule
+试过的贪心 / DP 能找到反例 & 没有好结构可用，老实搜 & $11 \times 13$ 贪心和切一刀 DP 都给 8\\
+求「最少 / 最多」 & 有当前最优解 \code{best}，能拿来剪别的分支（分支定界） & 求最少几块正方形\\
+\bottomrule
+\end{tabularx}
+
+\textbf{效果差多少}：1240 在 $11 \times 13$ 上实测的访问节点数（blog 里跑的）。
+
+\begin{tabularx}{\linewidth}{@{}l r X@{}}
+\toprule
+\textbf{加了什么} & \textbf{节点数} & \textbf{说明}\\
+\midrule
+什么都不剪 & $> 3{,}000{,}000$ & 没跑完，停下时最好才找到 8\\
+最优性剪枝，小方块先试 & 586,392 & 能跑完，答案 6\\
+最优性剪枝，\textbf{大方块先试} & 4,793 & 同样的剪枝换个顺序，少两个数量级\\
+同上，但天际线按长边存 & 10,128 & 矩形转 90° 再搜，多一倍\\
+不剪枝，改成记忆化 & 75,190 个状态 & 换个思路：同一条天际线只算一次\\
+\bottomrule
+\end{tabularx}
+
+\subsection{剪枝 1 + 2：可行性、最优性（分支定界）}
+
+\textbf{直觉}：走到某个节点，如果能证明它下面不会有更好的答案，就不往下走。剪得越早，砍掉的子树越大。
+
+\textbf{可行性}：这一步根本放不下。1240 里方块不能跨出当前那段平地、不能顶出上沿，所以枚举边长时\textbf{直接从可行的最大值开始}。它通常写在枚举范围里，看不出是剪枝，但没有它就会搜一堆非法状态。
+
+\textbf{最优性}：求最小值时维护全局 \code{best}，
+\[
+\text{当前代价} + \underbrace{\text{剩下至少还要的代价}}_{\text{下界}} \ \ge\ \text{best} \quad\Longrightarrow\quad \text{剪掉}
+\]
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{例子} & \textbf{下界} & \textbf{剪枝条件}\\
+\midrule
+1240 铺正方形 & 最粗的：没铺满就至少还要 1 块 & \code{count >= best}（最好也只能打平）\\
+最少硬币（演示骨架） & 剩下全用当前最大面额：$\lceil \text{remain} / \text{coin} \rceil$ & \code{count + ceil(remain/coin) >= best}\\
+\bottomrule
+\end{tabularx}
+
+\begin{principle}
+下界必须是\textbf{真的下界}（只能估少、不能估多），否则会把最优解剪掉。常见来源：把约束松掉后的最优值（硬币允许拿小数枚 $\to \lceil \text{remain} / \text{最大面额} \rceil$），或「剩余量 ÷ 单步最大贡献」。估得越紧剪得越多。
+\end{principle}
+
+\subsection{剪枝 3：搜索顺序}
+
+最优性剪枝靠 \code{best} 剪，\code{best} 越早变小，后面剪得越狠。所以\textbf{先走最可能好的分支}。1240 先试大方块，很快拿到一个 6 块的解，之后凡是用到第 6 块还没铺满的分支全被剪掉：586,392 $\to$ 4,793。
+
+\begin{principle}
+顺序本身不剪任何东西，它是给最优性剪枝「喂」一个好的 \code{best}。两者一起用才有效果。
+\end{principle}
+
+\subsection{剪枝 4：对称性——每种铺法只生成一次}
+
+两种用法：
+\begin{itemize}
+\item \textbf{同一组选择换顺序是同一个解}：1240 规定\textbf{每次只填最低、最靠左的那个空格}。这样已铺部分永远是从底往上长的一排柱子，状态只要一个数组 \code{heights[c]}（第 $c$ 列铺到多高），叫\textbf{天际线}。
+\item \textbf{整体对称，答案不变}：矩形转 90° 答案一样，挑好搜的方向。天际线按短边存（11 列、每列高 13）比按长边存少一半节点：每层可选的位置更少。
+\end{itemize}
+
+\textbf{为什么不重不漏}：设最低最靠左的空格是 $(\text{low}, \text{start})$。它下面的格子都铺了（它最低），它左边那格也铺了（\code{start} 左边的列都比 \code{low} 高）。所以盖住它的正方形，\textbf{左下角一定就在这一格}。在这格枚举边长，所有可能都试到，也不会重复。边长上限 $= \min(\text{平地宽}\ \code{end - start},\ \code{height - low})$。
+
+\textbf{手推 $2 \times 3$}（\code{height = 3}，\code{width = 2}，heights 从左到右）：
+
+\begin{center}\small
+\begin{tabular}{@{}c l c c l@{}}
+\toprule
+\textbf{步} & \textbf{动作} & \textbf{heights} & \textbf{块数} & \textbf{说明}\\
+\midrule
+1 & (0,0) 放 2×2 & [2, 2] & 1 & 平地宽 2、上面还剩 3，最大放 2\\
+2 & (2,0) 放 1×1 & [3, 2] & 2 & 只剩 1 行高\\
+3 & (2,1) 放 1×1 & [3, 3] & 3 & 铺满，\code{best = 3}\\
+4 & 回到第 1 步，改放 1×1 & [1, 0] & 1 & \\
+5 & (0,1) 放 1×1 & [1, 1] & 2 & \\
+6 & (1,0) 放 2×2 & [3, 3] & 3 & $3 \ge$ best，剪掉\\
+7 & 改放 1×1 & [2, 1] & 3 & $3 \ge$ best，剪掉\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{剪枝 5：记忆化，以及它为什么不能和最优性叠加}
+
+剩下的子问题如果只由一个小状态决定，就缓存。1240 剩下要铺的形状完全由 \code{heights} 决定，可以 \code{@lru\_cache}；$11 \times 13$ 共 75,190 种天际线。
+
+\begin{principle}
+记忆化缓存的是「这个状态往下的最优值」，前提是它和怎么走到这里无关。最优性剪枝让返回结果依赖全局 \code{best}：同一个状态早访问时没被剪、晚访问时被剪了，缓存里存的就不是真值。所以两者\textbf{二选一}；硬要叠加，得把「被剪掉」和「算出真值」分开存，或把 bound 也当成状态。
+\end{principle}
+
+\subsection{1240 为什么只能搜}
+
+\begin{minipage}[t]{0.56\linewidth}\vspace{0pt}
+两个看起来对的思路都有反例：
+\begin{itemize}
+\item \textbf{贪心}：每次切出能放下的最大正方形（像辗转相除）。$11 \times 13$ 切出来是 8 块。
+\item \textbf{切一刀 DP}：只允许一刀把矩形切成两个矩形，
+$f(a,b) = \min\big(\min_i f(i,b) + f(a-i,b),\ \min_j f(a,j) + f(a,b-j)\big)$。
+$1 \le n, m \le 13$ 里只有 $11 \times 13$ 算错（给 8）。
+\end{itemize}
+右图是正确答案 6 块（边长 A=7、B=4、C=4、D=6、E=1、F=5）。中间 1×1 的 E 让任何一刀都会切穿某个正方形，切一刀 DP 只能生成「能一刀刀切开」的铺法，永远找不到它。
+\end{minipage}\hfill
+\begin{minipage}[t]{0.4\linewidth}\vspace{0pt}
+\begin{Verbatim}[fontsize=\footnotesize,frame=single,framesep=4pt]
+D D D D D D F F F F F
+D D D D D D F F F F F
+D D D D D D F F F F F
+D D D D D D F F F F F
+D D D D D D F F F F F
+D D D D D D E C C C C
+A A A A A A A C C C C
+A A A A A A A C C C C
+A A A A A A A C C C C
+A A A A A A A B B B B
+A A A A A A A B B B B
+A A A A A A A B B B B
+A A A A A A A B B B B
+\end{Verbatim}
+\end{minipage}
+
+\subsection{模板}
+
+\textbf{天际线 DFS（1240）}：五种剪枝里用了 1--4。$1 \le n, m \le 13$ 全部 169 种输入一共不到 0.1 秒（本地 Python）。
+\begin{lstlisting}
+def tilingRectangle(n, m):
+    height, width = max(n, m), min(n, m)   # [4] 天际线按短边存
+    heights = [0] * width                  # heights[c]: 第 c 列铺到多高
+    best = n * m                           # 初始上界: 全用 1x1
+
+    def dfs(count):
+        nonlocal best
+        if count >= best:                  # [2] 最优性
+            return
+        low = min(heights)
+        if low == height:                  # 铺满了
+            best = count
+            return
+        start = heights.index(low)         # [4] 只填最低、最靠左的格
+        end = start
+        while end < width and heights[end] == low:
+            end += 1                       # [start, end) 是一段平地
+        max_size = min(end - start, height - low)   # [1] 可行性
+        for size in range(max_size, 0, -1):         # [3] 大的先试
+            for c in range(start, start + size):
+                heights[c] += size
+            dfs(count + 1)
+            for c in range(start, start + size):    # 回溯: 拿掉这块
+                heights[c] -= size
+
+    dfs(0)
+    return best
+\end{lstlisting}
+
+\textbf{分支定界骨架（最少硬币，只为演示剪枝怎么写；322 正经做法是 DP）}：
+\begin{lstlisting}
+def fewest_coins(coins, amount):
+    coins = sorted(coins, reverse=True)        # [3] 大面额先试
+    best = float('inf')
+    def dfs(i, remain, count):
+        nonlocal best
+        if remain == 0:
+            best = min(best, count); return
+        if i == len(coins):                    # [1] 没币可用
+            return
+        coin = coins[i]
+        if count + (remain + coin - 1) // coin >= best:   # [2] 下界 >= best
+            return
+        for take in range(remain // coin, -1, -1):        # 这种面额拿几枚, 多的先试
+            dfs(i + 1, remain - take * coin, count + take)
+    dfs(0, amount, 0)
+    return best if best != float('inf') else -1
+\end{lstlisting}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+\lc{1240}{铺正方形} & 天际线 \code{heights}；每次在最低最靠左的空格枚举正方形边长 & 剪枝 1--4（可行性、最优性、大的先试、对称性）；也可改成纯记忆化（剪枝 5）\\
+322 最少硬币（演示） & 每种面额拿几枚，一层一种面额 & 分支定界骨架，下界 $\lceil \text{remain}/\text{coin} \rceil$\\
+\bottomrule
+\end{tabularx}
+
+\subsection{坑}
+\begin{itemize}
+\item \textbf{记忆化 + 最优性剪枝一起写}：缓存里会存进「被剪掉」的假值，二选一
+\item \textbf{下界估多了}：会剪掉最优解，答案偏大。拿不准就用最粗的（1240 的「至少还要 1 块」）
+\item \textbf{只做了剪枝没调顺序}：小方块先试照样能跑完，但慢两个数量级（586,392 vs 4,793）
+\item \textbf{以为贪心 / 切一刀 DP 能过}：$1 \le n, m \le 13$ 里只有 $11 \times 13$ 是反例，很容易测不到
+\item \textbf{回溯忘了还原} \code{heights}：加了几列就要减几列，范围要和加的时候一模一样
+\item \textbf{被问复杂度}：说不准。剪枝改变的是实际访问的节点数，最坏上界通常还是指数级，靠「数据范围小」兜底。答法：最坏指数，实际靠剪枝，给出实测规模
+\end{itemize}

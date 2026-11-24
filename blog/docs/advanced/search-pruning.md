@@ -1,7 +1,7 @@
 ---
 title: 搜索 + 剪枝
 status: draft
-order: 8
+order: 9
 alias: []
 related: [/paradigms/backtracking]
 ---

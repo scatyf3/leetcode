@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>按列 DP</title>
+<!--
+  看板「🎞 可视化」tab 用 iframe srcdoc 加载本文件, 并在 <html> 上注入 data-theme。
+  1931 按列 DP 三步:
+  ① product(range(3), repeat=m) 列出一列的所有涂法, 淘汰列内相邻同色 → states
+  ② 两列同一行都不同色才能挨着 → compat
+  ③ dp[j] = 最右列涂成 states[j] 的方案数, 每加一列 ndp[j] += dp[i] (i 能接 j)
+-->
+<style>
+:root{
+  --bg:#ebebef; --card:#ffffff; --line:#d4d4da; --fg:#3c3c43; --dim:#67676c;
+  --hl:#2563eb; --hlsoft:#dbe6fd; --bad:#dc2626;
+  --c0:#e5484d; --c1:#30a46c; --c2:#3e63dd;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2a2b32; --card:#1b1b1f; --line:#3c3d45; --fg:#dfdfd6; --dim:#98989f;
+    --hl:#60a5fa; --hlsoft:#1e3355; --bad:#f87171;
+    --c0:#e5484d; --c1:#30a46c; --c2:#4f74e8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2a2b32; --card:#1b1b1f; --line:#3c3d45; --fg:#dfdfd6; --dim:#98989f;
+  --hl:#60a5fa; --hlsoft:#1e3355; --bad:#f87171;
+  --c0:#e5484d; --c1:#30a46c; --c2:#4f74e8;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:14px 16px 18px;background:var(--bg);color:var(--fg);font:13.5px/1.6 var(--sans)}
+h1{font-size:15px;margin:0 0 4px}
+h2{font-size:14px;margin:0 0 4px}
+.lead{color:var(--dim);font-size:12.5px;margin:0 0 10px}
+.hint{color:var(--dim);font-size:12.5px;margin:0 0 8px}
+code,.mono{font-family:var(--mono);font-size:12px}
+section{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+button{font:12.5px var(--sans);padding:3px 10px;border:1px solid var(--line);border-radius:6px;
+  background:var(--card);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--dim)}
+button.on{background:var(--hl);border-color:var(--hl);color:#fff}
+button:disabled{opacity:.4;cursor:default}
+
+.legend{display:inline-flex;gap:10px;margin-left:12px;font-size:12px;color:var(--dim)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:3px;
+  font:700 10px/14px var(--mono);color:#fff;text-align:center;font-style:normal}
+
+/* 一列 */
+.strip{display:inline-flex;flex-direction:column;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--card)}
+.strip i{display:block;width:20px;height:20px;font:700 11px/20px var(--mono);color:#fff;text-align:center;font-style:normal}
+.strip i.bad{box-shadow:inset 0 0 0 2px var(--bad)}
+.small .strip i{width:14px;height:14px;font-size:9px;line-height:14px}
+
+.grid{display:flex;flex-wrap:wrap;gap:8px 6px}
+.item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.item .lab{font:11px var(--mono);color:var(--dim);white-space:nowrap}
+.item .lab b{color:var(--fg)}
+.item.dead{opacity:.3}
+.item.pick{cursor:pointer;padding:3px;border-radius:6px;border:2px solid transparent}
+.item.pick:hover{border-color:var(--line)}
+.item.sel{border-color:var(--hl)!important;background:var(--hlsoft)}
+.item.src{border-color:var(--hl)!important}
+.item.fade{opacity:.3}
+
+.loops{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-start}
+pre{margin:0;padding:8px 10px;background:var(--card);border:1px solid var(--line);border-radius:6px;
+  font:12px/1.55 var(--mono);white-space:pre}
+.cnt{font-size:13px}
+.cnt b{color:var(--hl)}
+
+/* 两列配对 */
+.pair{display:inline-flex;align-items:center;gap:2px;padding:4px;border-radius:6px;border:1px solid var(--line);background:var(--card)}
+.pair.no{opacity:.35}
+.mid{display:flex;flex-direction:column}
+.mid span{display:block;width:16px;height:14px;font:700 11px/14px var(--mono);text-align:center;color:var(--dim)}
+.mid span.x{color:var(--bad)}
+.pair .lab{font:10px var(--mono);color:var(--dim);margin-left:3px}
+
+.box{margin-top:10px;padding:8px 10px;border-radius:6px;background:var(--card);border:1px solid var(--line);font:12.5px/1.8 var(--mono)}
+.box b{color:var(--hl)}
+.dpv{font:700 12px var(--mono);color:var(--fg)}
+</style>
+</head>
+<body>
+
+<h1>1931 · 按列 DP：一列一列往右涂</h1>
+<p class="lead">把<b>一整列</b>的涂法当成一个状态，用元组表示从上到下每格的颜色，比如 <code>(0, 2, 1)</code>。
+数字 0/1/2 就是三种颜色：
+<span class="legend"><span><i style="background:var(--c0)">0</i>红</span><span><i style="background:var(--c1)">1</i>绿</span><span><i style="background:var(--c2)">2</i>蓝</span></span></p>
+
+<div class="ctrl">一列有 m 格：<span id="mbtns"></span></div>
+
+<section>
+  <h2>① 列出所有合法的「一列」：<code>product(range(3), repeat=m)</code></h2>
+  <p class="hint">左右两种写法完全等价：product 就是「套 m 层 for，每层取 0/1/2」，每一组取值就是一个 <code>col</code>。</p>
+  <div class="loops"><pre id="loopcode"></pre><pre id="prodcode"></pre></div>
+  <p class="hint" style="margin-top:10px">下面列出 product 生成的<b>全部</b> col。上下相邻两格同色的被淘汰（变灰、红框标出冲突格），对应空 1：<code>col[k] == col[k+1]</code>。
+  留下来的按顺序编号，就是 <code>states</code>。</p>
+  <div id="all" class="grid"></div>
+  <p class="cnt" id="cnt1"></p>
+</section>
+
+<section>
+  <h2>② 哪两列能挨在一起：<code>compat</code></h2>
+  <p class="hint">在下面点一个 state，把它当作<b>左边那列 a</b>。右边那列 b 要和 a 在<b>同一行都不同色</b>（空 2：<code>a[k] == b[k]</code> 就不行）。
+  中间的 <code>≠</code> / <span style="color:var(--bad)">×</span> 是逐行比较的结果。</p>
+  <div id="picker" class="grid small"></div>
+  <div id="pairs" class="grid" style="margin-top:10px"></div>
+  <div class="box" id="compatline"></div>
+</section>
+
+<section>
+  <h2>③ 一列一列往右推：<code>dp</code></h2>
+  <p class="hint"><code>dp[j]</code> = 已经涂好的这几列里，<b>最右边那列涂成 #j</b> 的方案数。每个 state 下面的数字就是它的 dp。
+  点任意一个 state，看它的值是从上一列哪几个 state 加过来的。</p>
+  <div class="ctrl">
+    <button id="prev">◀ 少一列</button>
+    <button id="next">多一列 ▶</button>
+    <span id="ncols" class="mono"></span>
+  </div>
+  <div id="dpgrid" class="grid" style="margin-top:10px"></div>
+  <div class="box" id="dpexplain"></div>
+</section>
+
+<script>
+const MOD = 1e9 + 7;
+const COLOR = ['var(--c0)', 'var(--c1)', 'var(--c2)'];
+let m = 2, sel = 0, cols = 1, pickDp = null;
+let all = [], states = [], compat = [], H = [];
+
+const tup = c => '(' + c.join(', ') + (c.length === 1 ? ',' : '') + ')';
+
+// 按 product 的顺序生成：最后一位变得最快
+function product3(m) {
+  const out = [];
+  for (let x = 0; x < 3 ** m; x++) {
+    const c = [];
+    for (let k = 0; k < m; k++) c.push(Math.floor(x / 3 ** (m - 1 - k)) % 3);
+    out.push(c);
+  }
+  return out;
+}
+const badCells = c => { const s = new Set(); for (let k = 0; k + 1 < c.length; k++) if (c[k] === c[k + 1]) { s.add(k); s.add(k + 1); } return s; };
+const ok = (a, b) => a.every((v, k) => v !== b[k]);
+
+function strip(c, bad = new Set()) {
+  return '<div class="strip">' + c.map((v, k) =>
+    `<i class="${bad.has(k) ? 'bad' : ''}" style="background:${COLOR[v]}">${v}</i>`).join('') + '</div>';
+}
+
+function rebuild() {
+  all = product3(m);
+  states = all.filter(c => badCells(c).size === 0);
+  compat = states.map(a => states.map((b, j) => ok(a, b) ? j : -1).filter(j => j >= 0));
+  H = [states.map(() => 1)];
+  sel = 0; cols = 1; pickDp = null;
+  render();
+}
+function dpAt(c) {            // c 列涂完后的 dp
+  while (H.length < c) {
+    const dp = H[H.length - 1], ndp = states.map(() => 0);
+    for (let i = 0; i < states.length; i++) for (const j of compat[i]) ndp[j] = (ndp[j] + dp[i]) % MOD;
+    H.push(ndp);
+  }
+  return H[c - 1];
+}
+
+function render() {
+  document.getElementById('mbtns').innerHTML = [1, 2, 3, 4, 5].map(v =>
+    `<button class="${v === m ? 'on' : ''}" data-m="${v}">m = ${v}</button>`).join(' ');
+
+  // ① 嵌套循环 vs product
+  const ind = k => '    '.repeat(k);
+  let loop = '';
+  for (let k = 0; k < m; k++) loop += `${ind(k)}for c${k} in range(3):\n`;
+  loop += `${ind(m)}col = (${[...Array(m).keys()].map(k => 'c' + k).join(', ')}${m === 1 ? ',' : ''})`;
+  document.getElementById('loopcode').textContent = `# m = ${m}：手写 ${m} 层循环\n` + loop;
+  document.getElementById('prodcode').textContent =
+    `# 一行搞定，m 是几都行\nfor col in product(range(3), repeat=${m}):\n    ...\n\n# 依次得到：\n# ` +
+    all.slice(0, 4).map(tup).join(', ') + (all.length > 4 ? ', ...' : '');
+
+  let idx = 0;
+  document.getElementById('all').className = 'grid' + (m >= 4 ? ' small' : '');
+  document.getElementById('all').innerHTML = all.map(c => {
+    const bad = badCells(c), dead = bad.size > 0;
+    const lab = (m <= 3 ? tup(c) + ' ' : '') + (dead ? '' : `<b>#${idx++}</b>`);
+    return `<div class="item ${dead ? 'dead' : ''}" title="${tup(c)}">${strip(c, bad)}<span class="lab">${lab || '&nbsp;'}</span></div>`;
+  }).join('');
+  document.getElementById('cnt1').innerHTML =
+    `product 一共生成 3<sup>${m}</sup> = ${all.length} 个 col，合法的 <b>${states.length}</b> 个 → <code>S = len(states) = ${states.length}</code>`;
+
+  // ② compat
+  document.getElementById('picker').innerHTML = states.map((c, i) =>
+    `<div class="item pick ${i === sel ? 'sel' : ''}" data-sel="${i}" title="${tup(c)}">${strip(c)}<span class="lab">#${i}</span></div>`).join('');
+  const a = states[sel];
+  document.getElementById('pairs').innerHTML = states.map((b, j) => {
+    const good = ok(a, b);
+    const mid = a.map((v, k) => v === b[k] ? '<span class="x">×</span>' : '<span>≠</span>').join('');
+    return `<div class="pair ${good ? '' : 'no'}" title="a=#${sel} ${tup(a)}  b=#${j} ${tup(b)}">${strip(a)}<div class="mid">${mid}</div>${strip(b)}<span class="lab">#${j}</span></div>`;
+  }).join('');
+  document.getElementById('compatline').innerHTML =
+    `左边 a = #${sel} ${tup(a)}，能接在它右边的有 <b>${compat[sel].length}</b> 个（亮着的）<br>` +
+    `compat[${sel}] = [${compat[sel].join(', ')}]   ← 空 3：append 的是右边那列的编号 j`;
+
+  // ③ dp
+  const dp = dpAt(cols), prev = cols > 1 ? dpAt(cols - 1) : null;
+  const srcs = pickDp !== null && cols > 1 ? new Set(states.map((_, i) => i).filter(i => compat[i].includes(pickDp))) : null;
+  document.getElementById('ncols').textContent = `已经涂了 ${cols} 列（n = ${cols}）`;
+  document.getElementById('prev').disabled = cols <= 1;
+  document.getElementById('dpgrid').className = 'grid' + (m >= 4 ? ' small' : '');
+  document.getElementById('dpgrid').innerHTML = states.map((c, j) => {
+    let cls = 'item pick';
+    if (j === pickDp) cls += ' sel';
+    return `<div class="${cls}" data-dp="${j}" title="#${j} ${tup(c)}">${strip(c)}<span class="lab">#${j}</span><span class="dpv">${dp[j]}</span></div>`;
+  }).join('');
+
+  const total = dp.reduce((s, v) => (s + v) % MOD, 0);
+  let ex = '';
+  if (pickDp === null) {
+    ex = cols === 1
+      ? '只有 1 列：每个合法的列各算 1 种方案 → <code>dp = [1] * S</code>（空 4）。点「多一列 ▶」往右加。'
+      : '点上面任意一个 state，看它的 dp 是怎么来的。';
+  } else if (cols === 1) {
+    ex = `只有 1 列，最右列就是 #${pickDp}，方案数 1（空 4）。`;
+  } else {
+    const list = [...srcs];
+    ex = `第 ${cols} 列涂成 #${pickDp} ${tup(states[pickDp])}：<br>` +
+      `第 ${cols - 1} 列可以是 ${list.map(i => '#' + i).join(', ')}（它们的 compat 里都有 ${pickDp}）<br>` +
+      `dp[${pickDp}] = ${list.map(i => `dp<sub>旧</sub>[${i}]`).join(' + ')}<br>` +
+      `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= ${list.map(i => prev[i]).join(' + ')} = <b>${dp[pickDp]}</b>   ← 空 5：ndp[j] += dp[i]`;
+  }
+  ex += `<br>最后一列涂成哪种都行，全加起来：答案 = sum(dp) = <b>${total}</b>（空 6）`;
+  document.getElementById('dpexplain').innerHTML = ex;
+
+  // 高亮来源
+  if (srcs) document.querySelectorAll('#dpgrid .item').forEach((el, i) => {
+    if (i === pickDp) return;
+    el.classList.add(srcs.has(i) ? 'src' : 'fade');
+  });
+  if (srcs) {
+    // 来源格子显示上一列的 dp 值，避免和当前值混淆
+    document.querySelectorAll('#dpgrid .item').forEach((el, i) => {
+      if (srcs.has(i)) el.querySelector('.dpv').innerHTML = `<span style="color:var(--hl)">旧 ${prev[i]}</span>`;
+    });
+  }
+}
+
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-m],[data-sel],[data-dp]');
+  if (t && t.dataset.m) { m = +t.dataset.m; rebuild(); return; }
+  if (t && t.dataset.sel) { sel = +t.dataset.sel; render(); return; }
+  if (t && t.dataset.dp) { const j = +t.dataset.dp; pickDp = pickDp === j ? null : j; render(); return; }
+});
+document.getElementById('next').onclick = () => { cols++; render(); };
+document.getElementById('prev').onclick = () => { if (cols > 1) { cols--; render(); } };
+
+rebuild();
+</script>
+</body>
+</html>

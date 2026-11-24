@@ -1,0 +1,255 @@
+% 第 3 章：判环。素材：blog advanced/cycle-detection.md；mynote 来自 tracker 里 207 / 684 的笔记
+\section{判环}
+
+问「有没有环」「最短的环多长」「哪些点永远走不进环」。有向图、无向图、网格，判环的办法各不相同；问「最短」又是另一回事。
+每个点出度为 1 的图（函数图）有更省事的专用办法，在第 4 章，这里讲一般的图。
+在第 2 章的思维导图里，这一章对应一般有向图、一般无向图和基环树三片叶子。
+
+\subsection{总览：工具链 + 几种问法}
+
+\begin{overview}
+有向图（建在 L3 的 DFS / Kahn 拓扑上）
+  3-color DFS ──► (207)   有没有环：DFS 时某条边指向灰点
+  Kahn        ──► 2392    有没有环：排出来的点不满 n 个（建图见第 5 章）
+              └─► 802     哪些点走不进环：反图上按出度剥
+无向图 / 网格（建在 L3 的并查集 / BFS 上）
+  DSU         ──► 1559    有没有环：加边前两端已经同根
+  BFS x n     ──► 2608    最短环：每个点 BFS 一遍，看非树边
+函数图（出度为 1）：时间戳 / 剥叶子，见第 4 章
+\end{overview}
+
+先认清是哪一格，再挑工具：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+& \textbf{有向图} & \textbf{无向图 / 网格}\\
+\midrule
+有没有环 & 三色 DFS，或 Kahn 看排不排得完 & 并查集，或 DFS + 父节点\\
+哪些点走不进环 & 反向拓扑（802） & —（无向图里不问这个）\\
+最短的环多长 & 每个点 BFS，找指回起点的边 & 每个点 BFS，看非树边（2608）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{有向图：三色 DFS / Kahn}
+
+\textbf{直觉：一个 visited 不够}。$0 \to 1 \to 2$、$0 \to 2$：DFS 走完 $0 \to 1 \to 2$ 回到 0，再看 $0 \to 2$，2 来过，但这里没环。
+要分清「来过」和「\textbf{还在当前路径上}」：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\textbf{颜色} & \textbf{含义} & \textbf{边 $u \to v$ 指向它}\\
+\midrule
+白 & 没碰过 & 树边，往下走\\
+灰 & 进了 DFS 还没出来 = \textbf{当前递归栈上} & \textbf{环}：$v$ 是 $u$ 的祖先，$v \leadsto u \to v$\\
+黑 & 出来了，能走到的都处理完 & 不是环（上例的 $0 \to 2$）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{规则}：有环 $\Leftrightarrow$ DFS 中某条边指向灰点。反方向的理由：设 $v$ 是环上\textbf{第一个}变灰的点，此刻环上其余点全白；
+$v$ 变黑之前，沿白点能走到的都会处理掉，包括 $v$ 在环上的前驱 $u$，处理 $u$ 时 $u \to v$ 指向的 $v$ 还是灰的。
+
+\textbf{另一种写法：Kahn}。排出来的点数 $< n$ 就有环。剩下排不出的点 = 环上的点 + 环\textbf{下游}的点：
+$0 \to 1 \to 2 \to 1,\ 2 \to 3$，剥掉 0 以后 1、2、3 都剥不掉，3 不在环上，只是在环下游（函数图的环没有下游，所以第 4 章能直接说「剩下的就是环」）。
+
+\begin{principle}
+有向图里「来过」和「在路上」是两回事，所以要三色；无向图里没有「黑点」这种情况（见下面「无向图」一节），一个 visited 加父节点就够。
+\end{principle}
+
+$n$ 到 $10^5$ 时递归版会爆 Python 的栈（默认 1000 层），模板用显式栈。
+
+\subsection{哪些点走不进环：反向拓扑（802）}
+
+\textbf{安全点}：从它出发怎么走都停在终点（没有出边的点）$\Leftrightarrow$ 走不到任何环（有限图里走不停就一定在绕环）。
+
+\textbf{递推}：终点安全；$u$ 安全 $\Leftrightarrow$ 它的\textbf{所有}出边邻居都安全。这就是 Kahn 的「所有前置修完才轮到我」，方向反过来：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+& \textbf{Kahn（207）} & \textbf{802}\\
+\midrule
+等什么 & 所有\textbf{前置}修完 & 所有\textbf{出边邻居}确认安全\\
+计数器 & 入度 \code{indeg[v]} & 出度 \code{out\_left[u]}\\
+起点 & 入度 0 的点 & 出度 0 的点（终点）\\
+确认 $v$ 以后通知谁 & $v$ 的出边邻居 & 指向 $v$ 的点 $\to$ 要建\textbf{反向图}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+环上的点、能走进环的点，总有一条出边通往不安全的地方，\code{out\_left} 永远减不到 0。
+
+例 \code{graph = [[1,2],[2,3],[5],[0],[5],[],[]]}：$0 \to 1 \to 3 \to 0$ 是环，答案 \code{[2,4,5,6]}。
+三色 DFS 也能做（变黑且没碰到灰点的就是安全点），但反向拓扑不用想「中途发现环以后怎么标记」，更直接。
+
+\subsection{无向图 / 网格：并查集或 DFS + 父节点}
+
+无向图里任何一条通往已访问点、又\textbf{不是来时那条边}的边，都闭上一个环，不用分灰和黑。两种写法：
+
+\begin{itemize}
+\item \textbf{并查集}（684）：边一条条加，\textbf{加之前两端已经同根}，这条边就闭上了一个环。不用管方向，也不用管父节点。
+\item \textbf{DFS + 父节点}：邻居来过、又不是父节点 $\to$ 环。不排除父节点的话，每条边走回去都会被当成环。
+\end{itemize}
+
+\textbf{网格（1559）}：同字母的相邻格子连边，问有没有长度 $\ge 4$ 的环。格子编号 \code{r * cols + c} 当点；
+并查集版只看右和下，每条边处理一次，不用记父格。网格里\textbf{没有三角形}（相邻格的 $r+c$ 奇偶相反，三个格子不可能两两相邻），
+来回走同一条边又被「不走回父格」挡掉，所以只要有环，长度自动 $\ge 4$。
+
+\subsection{最短环：从每个点 BFS（2608）}
+
+\textbf{做法}：从每个点 $s$ BFS，记 \code{dist} 和 \code{parent}。看到边 $u - v$，$v$ 访问过、又不是 $u$ 的父亲（\textbf{非树边}），
+候选 $= \text{dist}[u] + \text{dist}[v] + 1$。所有起点、所有候选取最小，$O(n(n+m))$，2608 里 $n, m \le 1000$。
+
+\textbf{为什么对}（$g$ = 最短环长）：
+\begin{itemize}
+\item \textbf{候选不会偏小}：$s \leadsto u - v \leadsto s$ 是闭合路线；两条树路径先共用一段、在 $w$ 分叉，去掉共用段剩下一个真环，长度 $\le$ 候选。
+\item \textbf{起点在最短环上时能取到 $g$}：最短环上两点的图距离 = 沿环距离（否则抄近路能拼出更短的环）。
+$g$ 奇：环上离 $s$ 最远的是一条边，两端都在第 $\frac{g-1}{2}$ 层，同层边一定是非树边；
+$g$ 偶：最远的是一个点，两个环上邻居都在上一层，它只有一个父亲，另一条是非树边。
+\end{itemize}
+
+\textbf{反例：只 BFS 一次}。三角形 0-1-2 挂一条尾巴 3-0：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\textbf{起点} & \textbf{dist} & \textbf{非树边 1-2 给的候选}\\
+\midrule
+0 & [0, 1, 1, 1] & $1 + 1 + 1 = 3$\\
+3 & [1, 2, 2, 0] & $2 + 2 + 1 = 5$：$3 \to 0 \to 1 \to 2 \to 0 \to 3$，带着一段来回走的尾巴\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{有向图的最短环}：从每个 $s$ BFS，第一次看到指回 $s$ 的边 $u \to s$ 时，$\text{dist}[u] + 1$ 就是过 $s$ 的最短环；
+不能套无向图的 $\text{dist}[u] + \text{dist}[v] + 1$（$v$ 不一定能走回 $s$）。
+
+\subsection{模板}
+
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+def has_cycle_directed(n, graph):  # 三色, 显式栈
+    color = [0] * n         # 0 白 1 灰 2 黑
+    for root in range(n):
+        if color[root]:
+            continue
+        color[root] = 1
+        stack = [(root, 0)]   # (点, 下一个邻居下标)
+        while stack:
+            u, i = stack[-1]
+            if i == len(graph[u]):  # 邻居看完: 变黑
+                color[u] = 2
+                stack.pop()
+                continue
+            stack[-1] = (u, i + 1)
+            v = graph[u][i]
+            if color[v] == 1:       # 指向灰点: 环
+                return True
+            if color[v] == 0:
+                color[v] = 1
+                stack.append((v, 0))
+    return False
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+from collections import deque
+
+def shortest_cycle(n, edges):     # 2608
+    graph = [[] for _ in range(n)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    best = float('inf')
+    for s in range(n):
+        dist, parent = [-1] * n, [-1] * n
+        dist[s] = 0
+        q = deque([s])
+        while q:
+            u = q.popleft()
+            for v in graph[u]:
+                if dist[v] == -1:     # 树边
+                    dist[v] = dist[u] + 1
+                    parent[v] = u
+                    q.append(v)
+                elif v != parent[u]:  # 非树边
+                    best = min(best,
+                               dist[u] + dist[v] + 1)
+    return -1 if best == float('inf') else best
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+def eventual_safe(graph):         # 802
+    n = len(graph)
+    rev = [[] for _ in range(n)]
+    out_left = [len(vs) for vs in graph]
+    for u in range(n):
+        for v in graph[u]:
+            rev[v].append(u)
+    q = deque(u for u in range(n)
+              if out_left[u] == 0)    # 终点
+    safe = [False] * n
+    while q:
+        v = q.popleft()
+        safe[v] = True
+        for u in rev[v]:            # u -> v 确认安全
+            out_left[u] -= 1
+            if out_left[u] == 0:
+                q.append(u)
+    return [u for u in range(n) if safe[u]]
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+def has_cycle_undirected(n, edges):  # 并查集
+    parent = list(range(n))
+    def find(x):
+        while x != parent[x]:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    for u, v in edges:
+        ru, rv = find(u), find(v)
+        if ru == rv:            # 早就连通: 闭环
+            return True
+        parent[rv] = ru         # 只动根
+    return False
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+\textbf{802} 安全点 & 安全 = 走不进环；「所有出边都安全」是 AND & 反图 + 出度当计数器的 Kahn\\
+2608 无向最短环 & $n, m \le 1000$，允许 $O(n(n+m))$ & 每个点 BFS + 非树边\\
+1559 网格判环 & 同色相邻格连边；长度 $\ge 4$ 自动满足 & 并查集（只连右 / 下）或 DFS + 父格\\
+2392 行列条件 & 行、列条件各是一张有向图，任一张有环就无解 & Kahn 排不满 $\to$ 返回 \code{[]}（第 5 章）\\
+207 课程表（L3） & 能不能修完 = 有向图有没有环 & Kahn 或三色 DFS\\
+2360 / 2127 & 出度为 1 & 第 4 章\\
+\bottomrule
+\end{tabularx}
+
+\begin{mynote}
+本章的题还没进 tracker；下面两条来自它们的 L3 前置题。
+\begin{itemize}
+\item \textbf{207}：「很多小坑，如 multi start，忽略空 node」$\to$ Kahn 的起点是\textbf{所有}入度 0 的点一起入队；没有边的点也是点，也要排进去，否则「排出来的个数 $< n$」会误报有环
+\item \textbf{684}：并查集「只操作 root，不能操作本体」$\to$ 合并写 \code{parent[find(v)] = find(u)}，不是 \code{parent[v] = u}
+\end{itemize}
+\end{mynote}
+
+\subsection{坑}
+\begin{itemize}
+\item 有向图用一个 visited：$0 \to 1 \to 2$、$0 \to 2$ 会误判成环
+\item 有向图用并查集判环：加完 $0 \to 1$、$0 \to 2$，1、2 已同根，再加 $1 \to 2$ 就误报，可这张图没有有向环 $\to$ 并查集只管无向
+\item 无向图 DFS 忘了排除父节点：每条边走回去都算成环。有重边时「是父亲」$\ne$「是来时那条边」，要记边的编号（2608 保证没有重边）
+\item 2608 只从一个点 BFS、或找到第一个候选就停：起点不在最短环上时候选偏大
+\item 递归 DFS 在 $n = 10^5$ 的长链上爆栈 $\to$ 显式栈，或 \code{sys.setrecursionlimit}
+\end{itemize}

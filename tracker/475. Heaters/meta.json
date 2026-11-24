@@ -1,0 +1,13 @@
+{
+  "structures": [
+    "array"
+  ],
+  "paradigms": [
+    "binary-search",
+    "modeling"
+  ],
+  "techniques": [],
+  "difficulty": "medium",
+  "status": "solved",
+  "familiarity": 4
+}

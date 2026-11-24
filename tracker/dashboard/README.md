@@ -43,6 +43,8 @@ npm run typecheck            # vue-tsc
   *.py           ← 解法（面板里按文件名分 tab 展示）
   viz.html       ← 可选：手写的交互可视化（自带样式和脚本），面板左侧多一个「🎞 可视化」tab，sandbox iframe 里跑；
                    深浅色由看板注入到 <html data-theme>
+  chat.md        ← 可选：和 Claude 讨论这题的原始记录，面板左侧多一个「💬 讨论」tab（按会话折叠的气泡）。
+                   由 dashboard/save_chat.py 从 ~/.claude/projects/ 下的会话导出；只在本地看板显示，不导出到 Pages
   note.md 等     ← 笔记（面板右侧可编辑，Ctrl+S 保存）
 
 ../blog/docs/structures/<结构>.md  ← 该数据结构的通用 trick(点「题目」里的组标题打开)
@@ -57,6 +59,7 @@ dashboard/
   server.py      ← 标准库 http + sqlite 索引 + API
   scaffold.py    ← 题号/题名 → 抓题面 + 建空题目文件夹（TODO 加条目时自动调）
   fetch_desc.py  ← 批量补抓已有文件夹的 problem.html
+  save_chat.py   ← Claude Code 会话 → 各题 chat.md（按「用户报题名 / 贴代码」切段；重跑幂等，-n 预览，-s/-p 手动指派）
   web/           ← 前端 (Vite 工程, 配置在tracker/ 下的 vite.config.ts / package.json)
     index.html               ← 页面骨架 + 首帧前落定深浅色的那段内联脚本
     src/main.ts              ← 入口: 字体 + 样式 + 主题开关 + app.js
@@ -208,7 +211,7 @@ dashboard/
   仍然至少是明天，但这道题会**排回本次会话的队尾**，今天还会再问你一遍。
   关掉重开也不丢：开面板时会从 `reviews.jsonl` 里找出**今天最后一次评分是 1** 的题追加到队尾
   （评 1 之后重问又评了 2+ 的就不再回来）。注意首页徽章只数到期的，不含这些。
-- **哪些题会进队列**：`status` 是 `solved` / `review` 的。`todo` 不进——没想出来过的思路谈不上复习。
+- **哪些题会进队列**：`status` 是 `solved` / `review` 的。`todo` 不进——没想出来过的思路谈不上复习。`idea`（有思路但没做，在详情页「熟练度」里选 `idea only`，徽章显示 `idea`）也不进，mock 不会抽到它，打卡后自动变成 `solved`。
   「做了一遍」打卡时 `todo` 会自动翻成 `solved`（撤销打卡不翻回去）。
   第一次打开时所有符合条件的题会一次性入队，之后 FSRS 自然把它们摊到不同日期；
   没到期的题不会出现。新卡按熟练度从生到熟排（L4 先来）。
@@ -432,7 +435,7 @@ python dashboard/backfill_edits.py --write  # 真写
 
 折叠区「攻坚 · Mock」，覆盖之外的两个数：
 
-- **弱题**（`/api/weak`，`server.weak_list`）：做过（status 不是 todo）且当前熟练度 L3 / L3.5 / L4。
+- **弱题**（`/api/weak`，`server.weak_list`）：做过（status 不是 todo / idea）且当前熟练度 L3 / L3.5 / L4。
   打卡时曾经是 L3+、现在降到 L2.5 及以上的算「已关」。
   （以前按「忘过 ≥2 次 / 最近一次打卡不是 clean」算：打卡大多不填结果、lapses 只增不减、新题第一遍出 bug 也算，挂满了 L1 / L2，2026-10-24 改掉。）
   meta.json 的 `pit` 是这题栽过的实现细节，复习揭晓时显示在答案卡下面。两者都在详情页标签栏里改。

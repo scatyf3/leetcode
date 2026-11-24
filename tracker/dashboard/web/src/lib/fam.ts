@@ -18,25 +18,34 @@ export const FAM: Record<number, { short: string; label: string }> = {
   4: { short: 'L4', label: '思路都不知道' },
 }
 export const FAM_NONE = { short: '—', label: '未评' }
+// 有思路但没做: 真相是 meta.json 的 status = "idea", **不是** familiarity 的一档 ——
+// 阶梯要能比大小(排序 / 平均 / 深度), 'idea' 不在数轴上。这里只管显示成熟练度的样子。
+export const FAM_IDEA = { short: 'idea', label: 'idea only · 有思路没做' }
+export type FamShown = Familiarity | 'idea'
 export const FAM_LEVELS: Familiarity[] = [0, 1, 1.5, 2, 2.5, 3, 3.5, 4, null] // 最熟 -> 最生 -> 未评
 
 export const famOf = (p: { familiarity?: unknown }): Familiarity => {
   const v = p.familiarity
   return v === null || v === undefined || v === '' ? null : Number(v)
 }
-export const famInfo = (f: Familiarity | undefined) =>
-  f === null || f === undefined ? FAM_NONE : FAM[f]
-export const famKey = (f: Familiarity | undefined | -1): string =>
+// 显示用的档位。评过档就以档位为准; 算数(深度 / 平均 / 排序)一律用 famOf
+export const famShown = (p: { familiarity?: unknown; status?: unknown }): FamShown => {
+  const f = famOf(p)
+  return f === null && p.status === 'idea' ? 'idea' : f
+}
+export const famInfo = (f: FamShown | undefined) =>
+  f === 'idea' ? FAM_IDEA : f === null || f === undefined ? FAM_NONE : FAM[f]
+export const famKey = (f: FamShown | undefined | -1): string =>
   f === null || f === undefined ? 'none' : String(f)
 // CSS 类名里不能直接放小数点(`.f1.5` 会被当成两个类), 所以类名用下划线: f1_5。
 // 只有类名走这个, 对象键 / data 属性一律还是 famKey。
-export const famCls = (f: Familiarity | undefined | -1) => 'f' + famKey(f).replace('.', '_')
+export const famCls = (f: FamShown | undefined | -1) => 'f' + famKey(f).replace('.', '_')
 
 // 还没成为卡片的题进复习队列的顺序: 越生的越先
 export const FAM_ORDER: Record<string, number> = { 4: 0, 3.5: 1, 3: 2, 2.5: 3, 2: 4, none: 5, 1.5: 6, 1: 7, 0: 8 }
 
 // 坐标系上点方块: 顺着"越来越熟"的方向走, 走到顶再回到未评
-export const L_NEXT: Record<string, Familiarity> = { none: 4, 4: 3.5, 3.5: 3, 3: 2.5, 2.5: 2, 2: 1.5, 1.5: 1, 1: 0, 0: null }
+export const L_NEXT: Record<string, Familiarity> = { none: 4, idea: 4, 4: 3.5, 3.5: 3, 3: 2.5, 2.5: 2, 2: 1.5, 1.5: 1, 1: 0, 0: null }
 
 // 深度不另存: 由每题 meta.json 的 familiarity 算出来。一个字段, 一条阶梯:
 //   L0 英语讲得清                      -> S3 讲得清 (面试门槛)

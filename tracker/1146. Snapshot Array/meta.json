@@ -1,6 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "hash-table",
+    "array"
+  ],
+  "paradigms": [
+    "binary-search",
+    "design"
+  ],
   "techniques": [],
   "difficulty": "medium",
   "status": "solved",

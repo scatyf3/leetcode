@@ -1,7 +1,7 @@
 ---
 title: 铺砖 / 轮廓线 DP
 status: draft
-order: 7
+order: 8
 alias: []
 parent: bitmask-dp
 related: [/paradigms/2d-dp]

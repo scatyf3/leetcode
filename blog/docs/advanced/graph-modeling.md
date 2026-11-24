@@ -1,7 +1,7 @@
 ---
 title: 建图：行和列当点
 status: draft
-order: 5
+order: 6
 alias: []
 related: [/paradigms/union-find, /structures/graph]
 ---
@@ -19,6 +19,8 @@ related: [/paradigms/union-find, /structures/graph]
 题面是网格、石头、条件约束，问的却是「连通」「先后顺序」。
 
 建在 L3 的：[并查集](../paradigms/union-find) · [图](../structures/graph)
+
+建完图以后，到 [图的形状](./graph-shapes) 里判断它属于哪一类，再挑工具。
 
 ## 题单
 

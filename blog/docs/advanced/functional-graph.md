@@ -1,7 +1,7 @@
 ---
 title: 函数图
 status: draft
-order: 3
+order: 5
 alias: []
 related: [/paradigms/dfs, /structures/graph]
 ---
@@ -19,6 +19,8 @@ related: [/paradigms/dfs, /structures/graph]
 输入是一个数组 `edges[i]` / `favorite[i]` / `receiver[i]`，意思是点 i 指向另一个点。
 
 建在 L3 的：[DFS](../paradigms/dfs) · [图](../structures/graph)
+
+在 [图的形状](./graph-shapes) 的思维导图里，这一页讲「有向 · 出度都 ≤ 1」那一支：函数图块和它的特例置换。一般的图先看 [判环](./cycle-detection)。
 
 ## 题单
 

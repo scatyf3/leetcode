@@ -1,0 +1,202 @@
+% 第 9 章：构造。素材：blog/docs/advanced/construction.md（+ combinatorics.md 里 1259 的递推思路）
+\section{构造}
+
+不搜索、也不 DP，直接给出一个满足条件的答案。难在观察，代码往往只有十几行。
+
+\subsection{总览：三步 + 四种来路}
+
+\begin{overview}
+L3 回溯 / 全排列：只在 n <= 8 时当「暴搜器」用
+  |
+  v
+[1] brute force (small n) --> [2] spot pattern --> [3] prove，或对拍到 n~100
+                                    |
+      +-----------------------------+
+      +-- 667             小例子归纳：两头交替取，差 k, k-1, ..., 1
+      +-- 932             递归分治 + 不变量：奇左偶右，px+q 保美丽
+      +-- 1259/1916/2338  计数版：拆成独立的几块 -> 公式见第 1 章
+\end{overview}
+
+\textbf{怎么认出来}：题目说「\textbf{返回任意一个}满足条件的数组」，$n$ 到 $10^3 \sim 10^4$。排列有 $n!$ 个搜不动，但只要\textbf{一个}答案，所以要的是一条规则，按规则直接写出答案。先排除别的可能：
+
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+\textbf{信号} & \textbf{多半是} & \textbf{本书哪里}\\
+\midrule
+$n \le 12$ 左右 & 直接搜 & 第 8 章\\
+要「最少 / 最多」 & 贪心或 DP & L3 / 第 5--6 章\\
+「返回任意一个」，$n$ 大 & 构造 & 本章\\
+「有多少种」，模 $10^9+7$ & 计数，但拆结构的思路和构造相通 & 第 1 章\\
+\bottomrule
+\end{tabularx}
+
+\textbf{规则从哪来}（四种来路，一道题常常用到两种）：
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+\textbf{来路} & \textbf{怎么想到} & \textbf{题}\\
+\midrule
+小例子归纳 & 暴搜小 $n$，在一堆答案里挑\textbf{长得最整齐}的，看它怎么排（升序？左右交替？奇偶分开？） & 667\\
+递归 / 分治 & 试着从 $n/2$（或 $n-1$）的答案推出 $n$ 的答案 & 932\\
+找不变量 & 什么变换不破坏性质？有了它，小问题的答案能直接「搬」到大问题上 & 932（$px+q$）\\
+结构分解 & 盯住一个元素，或换个视角，把问题拆成互相独立的几块 & 1259 / 1916 / 2338\\
+\bottomrule
+\end{tabularx}
+
+\subsection{三步：暴搜 → 找规律 → 证明}
+
+\begin{enumerate}
+\item \textbf{小数据暴搜}：$n \le 8$ 时把所有排列枚举一遍，满足条件的全打印出来（模板里的 \code{show\_small}）。
+\item \textbf{找规律}：挑一个最整齐的答案，猜它的排法。
+\item \textbf{证明}：说清楚规则为什么对\textbf{所有} $n$ 成立。证不出来，就写检查器对拍到 $n \approx 100$（模板里的 \code{check\_construction}）。
+\end{enumerate}
+
+\begin{principle}
+规律只在小数据上成立的情况很常见。没证明的规则，最后一定要用检查器对拍到大一点的 $n$；检查器本身也先和按定义写的暴力版对拍一遍。
+\end{principle}
+
+\subsection{\texorpdfstring{667：用锯齿造出 $k$ 种差（小例子归纳）}{667：用锯齿造出 k 种差（小例子归纳）}}
+
+\textbf{题意}：用 $1 \dots n$ 排一个排列，让相邻两数之差的绝对值\textbf{恰好有 $k$ 种}（$1 \le k < n$）。
+
+\textbf{小例子}：$n = 4, k = 3$ 暴搜出 \code{(1,4,2,3) (2,3,1,4) (3,2,4,1) (4,1,3,2)}。看 \code{1,4,2,3}：差是 $3, 2, 1$，\textbf{从两头往中间交替取}，差一次比一次少 1。
+
+\textbf{规则}：在 $k+1$ 个连续整数 $[\text{low}, \text{high}]$ 里按「最小、最大、次小、次大……」排，差依次是 $k, k-1, \dots, 1$（每取一个，区间缩 1，下一步跨的距离也少 1），正好 $k$ 种。剩下 $n-k-1$ 个数\textbf{升序}放在前面，相邻差全是 1，而 1 锯齿里已经有了，不会多出新的差：
+\[
+\underbrace{1,\ 2,\ \dots,\ n-k-1}_{\text{差全是 } 1},\ \underbrace{n-k,\ n,\ n-k+1,\ n-1,\ \dots}_{\text{差是 } k,\ k-1,\ \dots,\ 1}
+\]
+接缝 $n-k-1 \to n-k$ 的差也是 1，所以总共恰好 $k$ 种。
+
+\begin{center}\small
+\begin{tabular}{@{}l *{8}{c}@{}}
+\toprule
+$n=8,\ k=3$ & 1 & 2 & 3 & 4 & 5 & 8 & 6 & 7\\
+\midrule
+和前一个的差 & & 1 & 1 & 1 & 1 & \textbf{3} & \textbf{2} & 1\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$k = n-1$ 时升序那段是空的，整个就是锯齿：$n=5$ 得 \code{[1,5,2,4,3]}，差 $4,3,2,1$。
+
+\begin{principle}
+先用一小段把「要的东西」造齐，剩下的部分用\textbf{不引入新东西}的方式填（这里是差 1，已经出现过）。造「恰好 $k$ 种」比造「至少 / 至多」难，就难在填充不能多出来。
+\end{principle}
+
+\subsection{932：奇偶分治（递归 + 不变量）}
+
+\textbf{题意}：用 $1 \dots n$ 排一个排列，不存在 $i < m < j$ 使 $2A[m] = A[i] + A[j]$，也就是\textbf{任意两个数的平均数都不夹在它们中间}。
+
+\textbf{观察 1：奇数全放左边、偶数全放右边，跨两边的三元组一定安全。}奇 + 偶是奇数，不可能等于 $2A[m]$。坏三元组只可能两头都在同一半，问题缩成「两半各自美丽」。但只分一次不够：奇数半边 \code{1,3,5} 里 $2 \cdot 3 = 1 + 5$，每半边里要\textbf{接着分}。
+
+\textbf{观察 2（不变量）：美丽数组做线性变换 $x \mapsto px + q$（$p \ne 0$）还是美丽的。}
+$2(pa_m + q) = (pa_i + q) + (pa_j + q) \iff 2a_m = a_i + a_j$，坏三元组变换前后一一对应。
+
+\textbf{合起来}：$1 \dots n$ 的奇数是 $2x-1$（$x = 1 \dots \lceil n/2 \rceil$），偶数是 $2x$（$x = 1 \dots \lfloor n/2 \rfloor$）。递归造出长度 $\lceil n/2 \rceil$ 的美丽数组、每个数做 $2x-1$；再造长度 $\lfloor n/2 \rfloor$ 的、每个数做 $2x$；奇数段接偶数段。段内靠观察 2，跨段靠观察 1。
+
+\begin{center}\small
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+\textbf{调用} & \textbf{奇数部分} & \textbf{偶数部分} & \textbf{结果}\\
+\midrule
+b(1) & & & [1]\\
+b(2) & [1] $\to$ [1] & [1] $\to$ [2] & [1, 2]\\
+b(3) & b(2) = [1, 2] $\to$ [1, 3] & [1] $\to$ [2] & [1, 3, 2]\\
+b(5) & b(3) = [1, 3, 2] $\to$ [1, 5, 3] & b(2) = [1, 2] $\to$ [2, 4] & \textbf{[1, 5, 3, 2, 4]}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$n=8$ 得 \code{[1,5,3,7,2,6,4,8]}。另一种写法：把 $x-1$ 写成固定位宽二进制，\textbf{按位反转后的值排序}，结果一样（递归每层按当前最低位先 0 后 1 分组）。
+
+\begin{principle}
+分治构造的关键是那个\textbf{保持性质的变换}：它把「$\lceil n/2 \rceil$ 个奇数」变回「$1 \dots \lceil n/2 \rceil$」这个同类小问题。找不到这种变换，「从 $n/2$ 推 $n$」就接不上。
+\end{principle}
+
+\subsection{计数题里的构造思维：1259 / 1916 / 2338}
+
+这三道问的是「有多少种」，公式和取模在第 1 章。这里只看它们和构造相通的那一步：\textbf{先把结构拆成互相独立的几块}，计数才变成乘法 / 求和。
+
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{题} & \textbf{拆法}\\
+\midrule
+\lc{1259}{握手不交叉} & 盯住 1 号：他握手的那条线把圆切成两边，跨线就交叉，所以两边是两个独立的同类小问题 $\to$ Catalan 递推。和 932「切成两半各自递归」是同一个动作\\
+\lc{1916}{蚁群建房} & 建房顺序就是树的拓扑序：根先建，各子树内部的顺序互不影响，只是交错合并 $\to$ 阶乘 + 逆元\\
+\lc{2338}{理想数组} & 不直接数数组，换个视角：固定末尾的值，按质因数分解后每个质因子「在哪几步涨」各自独立 $\to$ 隔板法，各质因子相乘\\
+\bottomrule
+\end{tabularx}
+
+\subsection{模板}
+
+\textbf{暴搜找规律 + 检查器对拍}（通用）：
+\begin{lstlisting}
+from itertools import permutations
+
+def show_small(n, ok, limit=10):
+    """把 1..n 的排列里满足 ok 的打印出来, 用来找规律。n <= 8 左右"""
+    found = [p for p in permutations(range(1, n + 1)) if ok(p)]
+    print(f"n={n}: {len(found)} 个")
+    for p in found[:limit]:
+        print("  ", p)
+
+def check_construction(build, ok, n_max):
+    """n = 1..n_max 逐个检查: 是 1..n 的排列, 并且满足条件"""
+    for n in range(1, n_max + 1):
+        arr = build(n)
+        assert sorted(arr) == list(range(1, n + 1)), n
+        assert ok(arr), (n, arr)
+\end{lstlisting}
+
+\begin{minipage}[t]{0.49\linewidth}
+\textbf{667：升序 + 锯齿}，$O(n)$
+\begin{lstlisting}
+def constructArray(n, k):
+    ans = list(range(1, n - k))   # 差全是 1
+    low, high = n - k, n          # k+1 个数交替取
+    take_low = True
+    while low <= high:
+        if take_low:
+            ans.append(low); low += 1
+        else:
+            ans.append(high); high -= 1
+        take_low = not take_low
+    return ans
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\textbf{932：奇偶分治}，$O(n \log n)$
+\begin{lstlisting}
+def beautifulArray(n):
+    if n == 1:
+        return [1]
+    odd = beautifulArray((n + 1) // 2)  # 奇数个数
+    even = beautifulArray(n // 2)       # 偶数个数
+    # 线性变换, 美丽性不变
+    return ([2 * x - 1 for x in odd]
+            + [2 * x for x in even])   # 奇+偶 安全
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+\lc{667}{Beautiful Arrangement II} & 前 $n-k-1$ 个升序 + 后 $k+1$ 个两头交替取 & 小例子归纳（构造入门）\\
+\lc{932}{Beautiful Array} & 奇数段（$2x-1$）接偶数段（$2x$），两段各自递归 & 递归分治 + 线性变换不变量\\
+\lc{1259}{握手不交叉} & 1 号的线切出独立两半 & 结构分解 $\to$ Catalan（第 1 章）\\
+\lc{1916}{蚁群建房} & 树的拓扑序计数 & 结构分解 $\to$ 阶乘 + 逆元（第 1 章）\\
+\lc{2338}{理想数组} & 按末尾值的质因子拆开，各自独立 & 结构分解 $\to$ 隔板法（第 1 章）\\
+\bottomrule
+\end{tabularx}
+
+\subsection{坑}
+\begin{itemize}
+\item \textbf{932 只分一次奇偶}：只保证跨段安全，段内照样坏（\code{[1,3,5]}）。要靠线性变换把每段变回同类小问题，继续递归
+\item \textbf{规律没证就交}：小数据上成立、大 $n$ 不成立很常见，至少对拍到 $n \approx 100$
+\item \textbf{没先确认是不是构造题}：$n \le 12$ 就直接搜；有「最少 / 最多」多半是贪心或 DP
+\item \textbf{667 造成了「至少 $k$ 种」}：填充部分要用已经出现过的差（1），否则种类数会多
+\item \textbf{932 重复递归}：同一个 $n$ 会被算多次（\code{b(5)} 和 \code{b(4)} 都要 \code{b(2)}），加 \code{@cache} 省掉重复，但不影响 $O(n \log n)$ 的量级
+\end{itemize}

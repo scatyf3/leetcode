@@ -11,7 +11,7 @@ VitePress 的 ignoreDeadLinks 也只管站内链接; 指向 github.com/.../track
 
 查四件事, 前三件对 tag, 最后一件对链接:
 
-    1. 做过的题(status 不是 todo)structures / paradigms 各至少一个 tag
+    1. 做过的题(status 不是 todo / idea)structures / paradigms 各至少一个 tag
        todo 只警告 —— scaffold.py 新建的题默认就是空 tag
     2. 每个 tag 在 blog/docs/<层>/ 下有同名页面, 或命中某页 frontmatter 的 alias
     3. plan.json 每个 group 的 tag(s) 有对应页面 —— 看板分组点进去要能打开 doc
@@ -74,7 +74,7 @@ def main() -> int:
             tags = meta.get(layer) or []
             if not tags:
                 msg = f"{d.name}: 没有 {layer} tag, 不会出现在任何 {layer} 页"
-                (warnings if meta.get("status") == "todo" else errors).append(msg)
+                (warnings if meta.get("status") in ("todo", "idea") else errors).append(msg)
             for t in tags:
                 if t not in keys[layer]:
                     errors.append(f"{d.name}: {layer} tag '{t}' 没有对应页面 (blog/docs/{'|'.join(LAYER_DIRS[layer])}/{t}.md 或 alias)")

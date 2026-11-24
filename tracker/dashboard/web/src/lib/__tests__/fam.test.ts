@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { FAM_LEVELS, L_NEXT, depthOf, famCls, famInfo, famKey, famOf, ledgerOf } from '../fam'
+import { FAM_LEVELS, L_NEXT, depthOf, famCls, famInfo, famKey, famOf, famShown, ledgerOf } from '../fam'
 
 describe('famOf', () => {
   it('缺键 / null / 空串都是未评, 不是 0', () => {
@@ -25,6 +25,22 @@ describe('famKey / famCls', () => {
   })
   it('每一档都有标签', () => {
     for (const f of FAM_LEVELS) expect(famInfo(f).short).toBeTruthy()
+  })
+})
+
+describe('famShown', () => {
+  it('status idea 且没评档才显示 idea, 评过档以档位为准', () => {
+    expect(famShown({ status: 'idea' })).toBe('idea')
+    expect(famShown({ status: 'idea', familiarity: 0 })).toBe(0)
+    expect(famShown({ status: 'todo' })).toBeNull()
+  })
+  it('有自己的标签和类名, 但不算进 famOf / depthOf', () => {
+    expect(famInfo('idea').short).toBe('idea')
+    expect(famCls('idea')).toBe('fidea')
+    expect(L_NEXT.idea).toBe(4)
+    const rec: { status: string; familiarity?: number } = { status: 'idea' }
+    expect(famOf(rec)).toBeNull()
+    expect(depthOf(rec)).toBe(0)
   })
 })
 

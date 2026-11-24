@@ -1,0 +1,216 @@
+% 第 7 章：铺砖 / 轮廓线 DP。素材：blog/docs/advanced/profile-dp.md
+\section{铺砖 / 轮廓线 DP}
+
+\subsection{总览：短边压成状态，长边变成步数}
+
+\begin{overview}
+二维 DP（L3）+ 状压（第 6 章）
+  └─► 短边（≤ 5）压成状态，长边当步数，只记交界线（轮廓）
+        ├─ 790 1411   状态两三种：手推转移，几个变量滚动
+        ├─ 1931       状态几十种：程序枚举合法列 + 兼容表，一步 O(k^2)
+        └─ 1659       一列放不下 / 约束连着上和左：逐格推，一步只试 3 种
+
+长边到 10^18、转移是线性的：矩阵快速幂（第 1 章快速幂换成矩阵乘法）
+1240 铺正方形看着像铺砖，其实是搜索 + 剪枝，见第 8 章
+\end{overview}
+
+怎么认：铺砖、涂色这类网格题，\textbf{其中一维 $\le 5$ 左右}，另一维很长（$n \le 1000$ 甚至更大）；约束只在\textbf{相邻格子}之间（相邻不同色、骨牌不重叠、邻居影响得分）。
+
+\subsection{为什么只记交界线}
+
+$5 \times 1000$ 的网格涂 3 种颜色，所有涂法 $3^{5000}$ 种，枚举不了。但约束只在相邻格之间：第 $j+1$ 列怎么涂只看第 $j$ 列，前面怎么涂的无所谓。所以把「前 $j$ 列」压成一个状态：\textbf{第 $j$ 列长什么样}。这条交界线就叫轮廓（profile）。
+\[
+\mathrm{ways}[j+1][\mathrm{col}'] = \sum_{\mathrm{col}\ \text{和}\ \mathrm{col}'\ \text{能挨着}} \mathrm{ways}[j][\mathrm{col}]
+\]
+一列最多 $3^m$ 种；$m = 5$ 时 $3^5 = 243$，去掉一列内部就不合法的，只剩 48 种。
+
+\begin{principle}
+数据范围里某一维 $\le 5$ $\to$ 把这一维压成状态，另一维当 DP 的步数。\textbf{永远压短的那一维}：1931 按列压（一列 5 格，48 种）；按行压是一行 1000 格，直接爆炸。
+\end{principle}
+
+\subsection{手推转移：790、1411}
+
+\textbf{790}（$2 \times n$，$1 \times 2$ 骨牌 + L 形三格骨牌铺满）。只看右边界，铺到一半的形状只有两种（上下翻转算同一种）：
+
+\begin{overview}
+# # # #     # # # # #     # # C C     # # # C
+# # # #     # # # # .     # # # C     # # C C
+full[i]     part[i]       L 形 C 盖住第 i 列两格 + 第 i-1 列一格（两种朝向）
+\end{overview}
+
+full[i] = 前 $i$ 列铺满；part[i] = 前 $i$ 列铺满、第 $i+1$ 列多出上面一格。按「谁盖住了最右边」分情况：
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+\textbf{算谁} & \textbf{谁盖住最右边} & \textbf{剩下的}\\
+\midrule
+full[i] & 一根竖骨牌 & full[i-1]\\
+ & 两根横骨牌 & full[i-2]\\
+ & L 形（两种朝向，上图右边两个） & $2 \times$ part[i-2]\\
+part[i] & 横骨牌盖住 (上, $i$)(上, $i+1$)，剩下的形状上下翻转 & part[i-1]\\
+ & L 形盖住 (上, $i+1$)(上, $i$)(下, $i$) & full[i-1]\\
+\bottomrule
+\end{tabularx}
+
+初值 full[0] = 1（空板一种），part[0] = 0。
+
+\begin{center}
+\begin{tabular}{@{}l cccccc@{}}
+\toprule
+$i$ & 0 & 1 & 2 & 3 & 4 & 5\\
+\midrule
+full & 1 & 1 & 2 & 5 & 11 & 24\\
+part & 0 & 1 & 2 & 4 & 9 & 20\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{1411}（$n \times 3$，3 色，相邻不同色）。一行合法涂法 12 种，按形状分两类，同一类往下接的方式数一样（只是换了颜色名）：
+
+\begin{tabularx}{\linewidth}{@{}l l X l@{}}
+\toprule
+\textbf{类} & \textbf{个数} & \textbf{代表行的下一行能接什么} & \textbf{合计}\\
+\midrule
+ABA（两头同色） & $3 \times 2 = 6$ & \code{010} 下面：\code{101 121 202}（ABA），\code{102 201}（ABC） & 3 ABA + 2 ABC\\
+ABC（三格都不同） & $3! = 6$ & \code{012} 下面：\code{101 121}（ABA），\code{120 201}（ABC） & 2 ABA + 2 ABC\\
+\bottomrule
+\end{tabularx}
+
+\[
+\mathrm{aba}' = 3\,\mathrm{aba} + 2\,\mathrm{abc}, \qquad \mathrm{abc}' = 2\,\mathrm{aba} + 2\,\mathrm{abc}, \qquad \text{初值 } (6, 6) \to (30, 24) \to (138, 108)
+\]
+
+\begin{principle}
+状态少到能画出来时，先画「右边界可能长什么样」，再按「谁盖住 / 谁接在最右边」分情况。分类的依据是\textbf{往后接的方式数一样}（1411 的 ABA / ABC），不是颜色本身。
+\end{principle}
+
+\subsection{按列压：1931}
+
+1411 是 1931 的 $m = 3$ 特例（转置一下，\code{colorTheGrid(3, n)} 和 1411 同答案）。$m$ 到 5 手推不动了，交给程序：
+\begin{enumerate}
+\item 枚举一列的所有涂法（\code{itertools.product}），留下上下相邻不同色的 $\to$ 合法列
+\item 两两比一遍，同一行都不同色的才能挨着 $\to$ 兼容表 \code{compat}
+\item \code{ways} 向量沿长边推 $n-1$ 步
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{@{}l ccccc@{}}
+\toprule
+$m$ & 1 & 2 & 3 & 4 & 5\\
+\midrule
+合法列数 $3 \cdot 2^{m-1}$ & 3 & 6 & 12 & 24 & 48\\
+兼容对数 & 6 & 18 & 54 & 162 & 486\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$m = 2$ 时每种列正好接 3 种，答案 $6 \cdot 3^{n-1}$。$m = 5$、$n = 1000$ 总共约 $486 \times 1000 \approx 5 \times 10^5$ 次加法。
+
+\subsection{逐格轮廓线：1659}
+
+$m, n \le 5$，内向的人、外向的人各最多 6 个，放进网格。内向基础 120、每个邻居 $-30$；外向基础 40、每个邻居 $+20$。求最大总幸福度。
+
+\textbf{为什么不按列压}：得分同时看上邻居和左邻居，状态还要带两个剩余人数。按行优先一格一格放，放到 $(r, c)$ 时，正上方是 \textbf{$n$ 格之前}放的，左边是\textbf{上一格}放的 $\to$ 只要记最近放的 $n$ 格。每格 3 种（0 空 / 1 内向 / 2 外向），当成一个 3 进制数，最老的在最高位：
+
+\begin{overview}
+ .  U  *  *  *       第 r-1 行
+ L  X  .  .  .       第 r 行；X 是当前格
+ 轮廓 = U * * * L（最近放的 n 格）：U 是最高位，L 是最低位
+\end{overview}
+
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+\textbf{要什么} & \textbf{写法} & \textbf{备注}\\
+\midrule
+上邻居 & \code{profile // 3**(n-1)} & 最高位\\
+左邻居 & \code{profile \% 3} & 最低位；$c = 0$ 时没有左邻居，当 0\\
+放完 cur 往后挪 & \code{(profile * 3 + cur) \% 3**n} & 挤掉最老的一位\\
+\bottomrule
+\end{tabularx}
+
+\textbf{相邻得分拆成 PAIR 表}：两人相邻，两人各自的变化加起来只看这两人的类型（内-内 $-60$，内-外 $-10$，外-外 $+40$）。放当前格时只和上、左两个邻居结算「两人份」，右、下那两对留给以后放的格子算，不重不漏。
+
+\textbf{手推}：$n = 3$，第 0 行放了 \code{内 空 外}（\code{102}），轮廓 $= 1 \cdot 9 + 0 \cdot 3 + 2 = 11$。
+
+\begin{center}
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+放到 & 轮廓（3 进制） & 上 = 最高位 & 左 = 最低位\\
+\midrule
+$(1, 0)$ & \code{102} = 11 & 1（内向） & 没有（第 0 列）\\
+放了外向后 $\to (1, 1)$ & $(11 \cdot 3 + 2) \bmod 27 = 8$ = \code{022} & 0（空） & 2（外向）\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$(1, 1)$ 正上方是 $(0, 1)$，确实空；左边 $(1, 0)$ 刚放了外向。对上了。状态数 $25 \times 3^5 \times 7 \times 7 \approx 3 \times 10^5$，每个试 3 种。
+
+\pagebreak
+\subsection{模板}
+
+\textbf{按列压}（1931）
+\begin{lstlisting}
+import itertools
+def colorTheGrid(m, n):                   # m 是短边
+    MOD = 10**9 + 7
+    cols = [c for c in itertools.product(range(3), repeat=m)
+            if all(c[r] != c[r + 1] for r in range(m - 1))]    # 一列内部合法
+    k = len(cols)
+    compat = [[b for b in range(k)                             # 能接在 a 右边的列
+               if all(x != y for x, y in zip(cols[a], cols[b]))] for a in range(k)]
+    ways = [1] * k                         # 第一列：每种合法列 1 种
+    for _ in range(n - 1):
+        nxt = [0] * k
+        for a in range(k):
+            for b in compat[a]:
+                nxt[b] = (nxt[b] + ways[a]) % MOD
+        ways = nxt
+    return sum(ways) % MOD
+\end{lstlisting}
+
+\textbf{逐格轮廓线}（1659）
+\begin{lstlisting}
+from functools import lru_cache
+def getMaxGridHappiness(m, n, introvertsCount, extrovertsCount):
+    BASE = [0, 120, 40]                    # 0 空, 1 内向, 2 外向
+    PAIR = [[0, 0, 0], [0, -60, -10], [0, -10, 40]]   # a、b 相邻时两人变化之和
+    top_unit, all_units = 3 ** (n - 1), 3 ** n
+
+    @lru_cache(maxsize=None)
+    def dfs(pos, profile, intro, extro):
+        if pos == m * n:
+            return 0
+        up = profile // top_unit           # 最高位 = 正上方
+        left = profile % 3 if pos % n > 0 else 0   # 第 0 列没有左邻居
+        best = 0
+        for cur in range(3):
+            if (cur == 1 and intro == 0) or (cur == 2 and extro == 0):
+                continue
+            gain = BASE[cur] + PAIR[cur][up] + PAIR[cur][left]
+            nxt = (profile * 3 + cur) % all_units      # 挤掉最老的一位
+            best = max(best, gain + dfs(pos + 1, nxt,
+                                        intro - (cur == 1), extro - (cur == 2)))
+        return best
+
+    return dfs(0, 0, introvertsCount, extrovertsCount)
+\end{lstlisting}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+790 骨牌 + L 形 & full[i] / part[i] 两个状态互相推 & 手推转移，取模\\
+1411 $n \times 3$ 涂色 & aba / abc 两类，$2 \times 2$ 线性转移（系数 3 2 / 2 2） & 手推转移，取模\\
+1931 $m \times n$ 涂色 & 一列 = 一个编号，\code{ways[j][col]}，48 种列 & 按列压 + 兼容表\\
+1659 幸福度 & (第几格, 最近 $n$ 格的 3 进制轮廓, 剩几个内向, 剩几个外向) & 逐格轮廓线 + 记忆化\\
+\bottomrule
+\end{tabularx}
+
+\subsection{坑}
+\begin{itemize}
+\item 1411 滚动更新：\code{nxt\_aba}、\code{nxt\_abc} 都用旧值算完再一起赋回去，别先改 \code{aba} 再拿新值算 \code{abc}
+\item 790 的 L 形有上下两种朝向，\code{part[i-2]} 前面要 $\times 2$
+\item 1659 第 0 列的「左邻居」其实是上一行最后一格，要强制当 0（空）；轮廓宽度是\textbf{列数} $n$，不是行数
+\end{itemize}

@@ -1,0 +1,454 @@
+% 第 1 章：快速幂 / 取模 / 组合计数。骨架来自 ../combinatorics-mod.tex，补充自 blog advanced/modular.md · advanced/combinatorics.md
+\section{快速幂、取模与组合计数}
+
+这一章的题长一个样：问「有多少种」，答案很大，要模 $10^9+7$。思路都是\textbf{不枚举方案，直接算个数}：
+要么推出一个式子，要么写一个计数 DP。工具不多，但一环扣一环，先看总图。
+
+\subsection{总览：工具链 + 几种化法}
+
+\begin{overview}
+工具链（A ──► B：A 是 B 的前置）
+  fast_pow (50)
+    ├──► mod rules (372)       底数、乘积能先模；指数、除法不能
+    ├──► inv = y^(p-2) ──► fact + inv_fact ──► C(n,k) mod p (2400)
+    │                                          ├──► stars & bars C(n+k-1, k-1)
+    │                                          │       └──► + incl-excl (2929)
+    │                                          └──► Catalan C(2m,m)/(m+1)
+    └──► mat_pow               线性递推算到第 1e18 项
+  Pascal C(a,b) = C(a-1,b-1) + C(a-1,b)       只用加法，模数不是质数也行
+    └──► Stirling-1 c(n,k) (1866)             同形状的计数 DP，多乘一个 (i-1)
+
+计数题的几种化法（A 公式 / B DP / C 先拿结构再套公式 / D 指数递推）
+  A  2400  C(k, r),  r = (k+d)/2                     化成公式：选哪几步往右
+  A  2929  sum_j (-1)^j C(3,j) C(n-j(lim+1)+2, 2)    化成公式：隔板 + 容斥，不取模
+  B  1866  dp[i][j] = dp[i-1][j-1] + (i-1)dp[i-1][j] 化成 DP：第一类斯特林数，不用 C
+  C  1569  ways = C(L+R, L) * ways(L) * ways(R)      递归里每层乘一个 C（杨辉三角）
+  C  1916  n! / prod size(v)                         阶乘 + 逆元
+  D  372   f(i+1) = f(i)^10 * a^b[i]                 指数存不下，按十进制位递推
+\end{overview}
+
+\subsection{快速幂}
+
+\textbf{直觉}：$x^{13}$ 老实乘要 12 次。但 $13 = 8+4+1 = 1101_2$，所以 $x^{13} = x^8 \cdot x^4 \cdot x^1$；
+$x^1, x^2, x^4, x^8$ 每个是前一个的平方，缓存着往上平方，\textbf{只乘指数二进制里是 1 的那几位}。$O(\log n)$。
+
+\begin{principle}
+指数这一层的加法，到了值这一层变成乘法：$x^{a+b} = x^a x^b$。同理，指数乘 10，值就变成 10 次方（372 用的就是这一条）。
+\end{principle}
+
+\begin{center}\small
+\begin{tabular}{@{}c c l l l@{}}
+\toprule
+exp & 二进制 & 最低位 & base & ans\\
+\midrule
+13 & 1101 & 1，乘进去 & $3$ & $3$\\
+6 & 110 & 0，跳过 & $3^2 = 9$ & $3$\\
+3 & 11 & 1，乘进去 & $3^4 = 81$ & $3 \cdot 81 = 243$\\
+1 & 1 & 1，乘进去 & $3^8 = 6561$ & $243 \cdot 6561 = 3^{13}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{为什么对}：每轮开始时 $\text{ans} \cdot \text{base}^{\text{exp}} = X^N$ 不变；exp 归零时 $\text{ans} = X^N$。
+exp 每轮右移一位，共 $\lfloor \log_2 N \rfloor + 1$ 轮。
+
+\textbf{50 的两个细节}：负指数先按 $|n|$ 算，最后 \code{1 / ans}（只除一次，浮点误差只引入一次）；
+C++ / Java 里 $n = -2^{31}$ 取反会溢出 int，要先转 \code{long long}，Python 没这个问题。
+
+\subsection{取模规则：取模能放在哪}
+
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+& \textbf{能先取模吗} & \textbf{怎么办}\\
+\midrule
+a) 底数 & $\checkmark$\ $(a \bmod m)^k \equiv a^k$ & \code{base \%= mod}\\
+b) 乘积（加法同理） & $\checkmark$\ $xy \bmod m = (x \bmod m)(y \bmod m) \bmod m$ & 每步都模\\
+c) 指数 & $\times$\ \ $a^b \not\equiv a^{b \bmod m}$ & 372：按十进制位递推；或满足条件时模 $\varphi(m)$\\
+d) 除法 & $\times$\ \ $\frac{x}{y} \bmod m \ne \frac{x \bmod m}{y \bmod m}$ & 乘逆元：$\frac{x}{y} \bmod m = x \cdot y^{-1} \bmod m$\\
+\bottomrule
+\end{tabularx}
+
+\begin{itemize}
+\item \textbf{b) 为什么成立}：$a = q_a m + r_a$，$b = q_b m + r_b$，乘开后除了 $r_a r_b$ 全是 $m$ 的倍数。所以每步乘完立刻模，数永远不超过 $m^2$
+\item 题目要的永远是\textbf{结果}取模；c) 是说「先把指数模小」这条捷径走不通。反例（$m=5$）：$2^5 \bmod 5 = 2$，而 $2^{5 \bmod 5} = 1$
+\item d) 反例（$m=5$）：$12/4 = 3$；先模得 $2/4$，不是整数
+\item 减法：C++ / Java 里 \code{(a - b) \% MOD} 可能是负数，写 \code{(a - b + MOD) \% MOD}；Python 的 \code{\%} 永远非负
+\item 为什么常是 $10^9+7$：它是质数（逆元要用）；小于 $2^{30}$，两个余数相乘装得进 64 位
+\end{itemize}
+
+\textbf{372}（$a^b \bmod 1337$，$b$ 是最多 2000 位的十进制数组）：读数字是 \code{num = 10·num + d}。
+指数存不下，就不存 num，只存 $f = a^{\text{num}}$：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+对指数 num 做的 & 对 $f = a^{\text{num}}$ 做的 & 幂运算律\\
+\midrule
+\code{num * 10} & \code{f ** 10} & $(a^x)^{10} = a^{10x}$\\
+\code{+ digit} & \code{* a ** digit} & $a^x \cdot a^y = a^{x+y}$\\
+\bottomrule
+\end{tabular}
+\qquad
+\begin{tabular}{@{}l l l@{}}
+\toprule
+读到 & 已读的数 & ans（$a=2$）\\
+\midrule
+1 & 1 & $1^{10} \cdot 2 = 2$\\
+2 & 12 & $2^{10} \cdot 2^2 \bmod 1337 = 85$\\
+3 & 123 & $85^{10} \cdot 2^3 \bmod 1337 = 1191$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+能不能先把指数模 $\varphi(1337) = 1140$？要 $\gcd(a, 1337) = 1$。$a = 7$、$b = 1140$ 时正确答案 574，模掉变成 $7^0 = 1$。
+按位递推没有任何前提，更稳。（一行 \code{pow(a, int(...), 1337)} 能过，但这题考的就是「指数存不下」。）
+
+\subsection{\texorpdfstring{逆元 inverse $y^{-1}$}{逆元 inverse}}
+
+\textbf{定义}：$y \cdot y^{-1} \equiv 1 \pmod m$，模下的「$1/y$」。例：模 7 下 $3^{-1} = 5$（$3 \cdot 5 = 15 \equiv 1$）；验证 $6/3$：$6 \cdot 5 = 30 \equiv 2$ \checkmark
+
+\textbf{求法}：$m$ 是质数、$y \bmod m \ne 0$ 时，$y^{-1} \equiv y^{m-2} \pmod m$。指数 $\approx 10^9$，这一步就是快速幂。
+
+\textbf{证明}：
+\begin{enumerate}
+\item 费马小定理：$m$ 是质数、$y \bmod m \ne 0 \Rightarrow y^{m-1} \equiv 1$
+\item $\Rightarrow y \cdot y^{m-2} \equiv 1 \Rightarrow$ 按定义 $y^{-1} = y^{m-2}$
+\end{enumerate}
+
+\textbf{费马小定理怎么来（剩余系重排法）}：$y \cdot \{1, \dots, m-1\}$ 模 $m$ 后只是 $\{1, \dots, m-1\}$ 换了顺序。
+两边相乘 $y^{m-1}(m-1)! \equiv (m-1)!$，约掉 $(m-1)!$。
+
+\begin{center}\small
+\begin{tabular}{@{}l cccc@{}}
+\toprule
+$m=5,\ y=2$ & 1 & 2 & 3 & 4\\
+\midrule
+$2i \bmod 5$ & 2 & 4 & 1 & 3\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item 「只是重排」要两条：不出现 0、不撞车，都靠「质数整除乘积 $\Rightarrow$ 整除某个因子」
+\item 非质数就坏：$m=4,\ y=2 \to 2, 0, 2$。372 的 $1337 = 7 \times 191$ 不是质数，用不了
+\item 模数不是质数：扩展欧几里得解 $y s + m t = 1$，$s$ 就是逆元；$\gcd(y, m) \ne 1$ 时逆元不存在
+\item 其他证法：二项式 + 归纳（$C_p^i$ 是 $p$ 的倍数）、项链计数、拉格朗日定理
+\end{itemize}
+
+\textbf{代码}：\code{pow(y, MOD - 2, MOD)}，或 3.8+ 的 \code{pow(y, -1, MOD)}（不存在时抛 \code{ValueError}）。
+
+\subsection{组合数取模}
+
+\[
+C_n^k = \frac{n!}{k!\,(n-k)!}
+\]
+从 $n$ 个里挑 $k$ 个、不管顺序：先按顺序挑有 $\frac{n!}{(n-k)!}$ 种，同一组被数了 $k!$ 遍，除掉。
+$C_n^0 = C_n^n = 1$，$C_n^k = C_n^{n-k}$，$k > n$ 为 0。
+
+\textbf{算 $C_n^k \bmod m$}：直接套公式要么数太大，要么有除法不能边算边模 $\to$ 三种办法：
+
+\begin{tabularx}{\linewidth}{@{}l X X X@{}}
+\toprule
+& \textbf{杨辉三角}（comb table） & \textbf{阶乘 + 逆元}（fact + inv table） & \textbf{API} \code{math.comb}\\
+\midrule
+怎么绕开除法 & 只用加法 & 除法换乘逆元 & 大整数精确算，最后 \code{\% MOD}\\
+预处理 / 查询 & $O(n^2)$ / $O(1)$ & $O(n)$ / $O(1)$ & 无 / 每次 $O(k)$ 大整数\\
+适用 & $n \le$ 几千；模数不是质数也行 & $n$ 到 $10^5 \sim 10^6$；模数必须是质数 & 只算几次、$n$ 几千内；只有 Python\\
+\bottomrule
+\end{tabularx}
+
+\textbf{杨辉三角}：盯第 $a$ 个元素，选它 / 不选它，两种互不重叠：
+\[
+C_a^b = C_{a-1}^{b-1} + C_{a-1}^{b},\qquad C_a^0 = 1
+\]
+例：$C_4^2$ = 选了 4（$C_3^1 = 3$）+ 没选 4（$C_3^2 = 3$）= 6。$b = a$ 时读到 \code{comb[a-1][a]}，还是初始的 0（$a-1$ 个里选 $a$ 个不可能），不用特判。
+
+\textbf{阶乘 + 逆阶乘}：\code{fact[i]} 从前往后乘；\code{inv\_fact} 只对最后一个求一次逆元，然后\textbf{从后往前}
+$(i-1)!^{-1} = i!^{-1} \cdot i$（因为 $(i-1)! = i!/i$）。整张表 $O(N + \log p)$，每次查询 $O(1)$。
+
+\textbf{穿插数 $C_{L+R}^{L}$}（1569 / 1916 的核心）：两组各自内部顺序定死、互相随便穿插，等于在 $L+R$ 个位置里挑 $L$ 个给左组。
+1569：BST 的根必须第一个，左右子树互相看不见，所以
+$\text{ways}(T) = C_{L+R}^{L} \cdot \text{ways}(\text{左}) \cdot \text{ways}(\text{右})$，答案 $\text{ways} - 1$（去掉原数组）。
+展开后组合数约掉，得闭式 $n!/\prod_v \text{size}(v)$：要先拿到树的结构才能算，闭式里的除法换逆元。
+例 \code{[3,4,5,1,2]}：$C_4^2 = 6$，$5!/(5 \cdot 2 \cdot 1 \cdot 2 \cdot 1) = 6$，答案 5。
+
+\subsection{隔板法：分相同的东西}
+
+$n$ 颗一样的糖分给 $k$ 个人、每人可以拿 0 颗，即 $x_1 + \cdots + x_k = n,\ x_i \ge 0$ 的整数解个数。
+
+\textbf{直觉}：糖排一排，插 $k-1$ 块隔板切成 $k$ 段；两块隔板挨着就是中间那人拿 0。
+一共 $n+k-1$ 个位置，挑 $k-1$ 个放隔板：
+\[
+\text{分法数} = C_{n+k-1}^{k-1}
+\qquad\text{每人至少 1 颗：先每人发 1 颗，剩下随便分，}\ C_{n-1}^{k-1}
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}l cccc@{}}
+\toprule
+3 颗分 2 人，$C_4^1 = 4$ & \verb+|ooo+ & \verb+o|oo+ & \verb+oo|o+ & \verb+ooo|+\\
+\midrule
+分法 & (0, 3) & (1, 2) & (2, 1) & (3, 0)\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{容斥：给每个人加上限}
+
+还是 $x_1 + \cdots + x_k = n$，但每人最多 \code{limit} 颗（2929：$k = 3$，$n, \text{limit} \le 10^6$）。
+上限不好直接数，\textbf{反过来数「有人超限」的，再减掉}。「指定的 $j$ 个人都超限」= 先给他们各发 $\text{limit}+1$ 颗，剩下的回到隔板法：
+\[
+\text{答案} = \sum_{j=0}^{k} (-1)^j\, C_k^j\, C^{\,k-1}_{\,n - j(\text{limit}+1) + k - 1}\qquad(\text{剩下是负数就是 0 种})
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}c c c r l r@{}}
+\toprule
+$j$ & 符号 & $C_3^j$ & 剩下 & ways(剩下) & 贡献\\
+\midrule
+0 & $+$ & 1 & 5 & $C_7^2 = 21$ & $+21$\\
+1 & $-$ & 3 & 2 & $C_4^2 = 6$ & $-18$\\
+2, 3 & & & $<0$ & 0 & 0\\
+\bottomrule
+\end{tabular}
+\quad
+\begin{minipage}{0.4\linewidth}\small
+$n = 5,\ \text{limit} = 2$：$21 - 18 = 3$，即 (1,2,2)、(2,1,2)、(2,2,1)。\\[2pt]
+$n = 6$ 时 (3,3,0) 被「孩子 1 超限」「孩子 2 超限」各减一次，减多了，$j = 2$ 那层加回来。
+\end{minipage}
+\end{center}
+
+\textbf{为什么对}：恰好 $t \ge 1$ 人超限的分法，带符号被数了 $\sum_{j} (-1)^j C_t^j = (1-1)^t = 0$ 次；没人超限的只在 $j = 0$ 数一次。
+
+\begin{principle}
+「至多」不好数 $\to$ 数「超了」的再减。同一层能合并成 $C_k^j$ 一项，前提是「指定 $j$ 个集合的交」的大小只和 $j$ 有关、和选哪几个无关
+（2929 里三人上限一样）；上限各不相同就得枚举 $2^k$ 个子集。
+\end{principle}
+
+\subsection{Catalan 数：第一个东西把剩下切成两半}
+
+\textbf{1259}（会员题）：圆上 $2m$ 个人两两握手、手臂不交叉，几种？盯住 1 号：他和某人握手，这条线把圆切成两边，
+两边只能各握各的（跨过去就交叉），各自是更小的同类问题：
+\[
+\text{Cat}(0) = 1,\qquad \text{Cat}(m) = \sum_{\text{left}=0}^{m-1} \text{Cat}(\text{left}) \cdot \text{Cat}(m-1-\text{left}),\qquad \text{Cat}(m) = \frac{C_{2m}^{m}}{m+1}
+\]
+前几项 $1, 1, 2, 5, 14, 42, 132$。同一个数列还有：$m$ 对括号的合法序列、$m$ 个点的二叉树形状（96）、出栈序列。
+递推 $O(m^2)$；闭式配阶乘表 + 逆元 $O(1)$。
+
+\subsection{第一类斯特林数：从高往低插入（1866）}
+
+$1 \dots n$ 的木棍排一排，从左看恰好看见 $k$ 根（被左边更高的挡住就看不见），几种排法？
+
+\textbf{直觉：从高往低插}。\code{dp[i][j]} 只看相对高矮，任意 $i$ 根互不等高的都一样，所以想象木棍按从高到矮一根根插进来。
+新来的第 $i$ 根比场上都矮：\textbf{它挡不住任何人}，只需管它自己看不看得见。场上 $i-1$ 根有 $i$ 个空位：
+\begin{itemize}
+\item 插最左：前面没人，看得见 $\to$ 其余要贡献 $j-1$ 根：\code{dp[i-1][j-1]}
+\item 插其余 $i-1$ 个空位：每个空位都紧跟在某根木棍后面，一定被挡 $\to$ \code{(i-1) · dp[i-1][j]}
+\end{itemize}
+\[
+\texttt{dp[i][j] = dp[i-1][j-1] + (i-1)·dp[i-1][j]},\qquad \texttt{dp[0][0] = 1}
+\]
+
+\begin{center}\small
+\begin{tabular}{@{}c l@{}}
+\toprule
+$n$ & $c(n, 1..n)$\\
+\midrule
+1 & 1\\
+2 & 1 1\\
+3 & 2 3 1\\
+4 & 6 11 6 1\\
+5 & 24 50 35 10 1\\
+\bottomrule
+\end{tabular}
+\qquad
+\begin{minipage}{0.55\linewidth}\small
+例 $c(3,2) = 3$：\code{dp[2][2]} 只有 \code{2 3}，1 插进两个非最左空位 $\to$ \code{2 1 3}、\code{2 3 1}；
+\code{dp[2][1]} 只有 \code{3 2}，1 插最左 $\to$ \code{1 3 2}。$2 + 1 = 3$ \checkmark\\[3pt]
+特殊值：$c(n,n) = 1$，$c(n,1) = (n-1)!$，$c(n,n-1) = C_n^2$。也是 $x(x+1)\cdots(x+n-1)$ 展开后 $x^k$ 的系数。\\[3pt]
+$O(nk)$，$n \le 1000$ 时 $10^6$ 次。
+\end{minipage}
+\end{center}
+
+\textbf{分组看}：每根看得见的和它后面被它挡住的打包成一组，看得见 $k$ 根 $\Leftrightarrow$ 正好 $k$ 组。
+组内最高的必须站第一个，$s$ 根一组 $(s-1)!$ 种（不是 $s!$）；组之间只能按组头从矮到高排（不能再乘 $k!$）。一组 = 一张圆桌，所以 $c(n,k)$ 也是「$n$ 人坐 $k$ 张圆桌」。
+\textbf{为什么没有公式}：组的大小分法会影响数量，$c(4,2)$ 里 3+1 有 8 种、2+2 只有 3 种，只能一项项加，所以写 DP。（对比 2929：同层项一样大，才能合并。）
+
+\begin{principle}
+写插入式 DP，挑一个\textbf{插进去不影响别人}的元素。盯最高的也行，但它会挡住身后所有人，插进去会改变别人看不看得见，$j$ 怎么变说不清。
+表的形状和杨辉三角一样：每格只读左上 + 正上，正上那项多乘 $(i-1)$。
+\end{principle}
+
+\subsection{矩阵快速幂（一小段）}
+
+线性递推（斐波那契、铺砖转移）要算第 $10^{18}$ 项：把一步转移写成矩阵 $M$，第 $n$ 项 = $M^n \times$ 初值。
+骨架和 \code{fast\_pow} 一模一样，1 换成单位矩阵、乘法换成矩阵乘法，$O(s^3 \log n)$，$s$ 是状态数。
+\[
+\begin{pmatrix} F_n \\ F_{n-1} \end{pmatrix} = \begin{pmatrix} 1 & 1 \\ 1 & 0 \end{pmatrix}^{n-1} \begin{pmatrix} F_1 \\ F_0 \end{pmatrix}
+\]
+
+\subsection{模板}
+
+\noindent\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+MOD = 10**9 + 7
+
+def fast_pow(base, exp, mod):
+    ans = 1
+    base %= mod
+    while exp > 0:
+        if exp & 1:        # 这一位是 1 才乘
+            ans = ans * base % mod
+        base = base * base % mod  # x^(2^i) 平方
+        exp >>= 1
+    return ans
+# 内置 pow(base, exp, mod) 就是快速幂
+
+def inv(y):                # MOD 必须是质数
+    return pow(y, MOD - 2, MOD)
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+# 矩阵快速幂：骨架同 fast_pow
+def mat_mul(A, B):
+    return [[sum(A[i][t] * B[t][j]
+                 for t in range(len(B))) % MOD
+             for j in range(len(B[0]))]
+            for i in range(len(A))]
+
+def mat_pow(M, e):
+    ans = [[int(i == j) for j in range(len(M))]
+           for i in range(len(M))]    # 单位矩阵
+    while e:
+        if e & 1:
+            ans = mat_mul(ans, M)
+        M = mat_mul(M, M)
+        e >>= 1
+    return ans
+\end{lstlisting}
+\end{minipage}
+
+\noindent\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+# 阶乘 + 逆阶乘：N 比最大的 n 大一点
+fact = [1] * N
+for i in range(1, N):
+    fact[i] = fact[i - 1] * i % MOD
+inv_fact = [1] * N
+inv_fact[N-1] = pow(fact[N-1], MOD - 2, MOD)
+for i in range(N - 1, 0, -1):  # 从后往前
+    inv_fact[i - 1] = inv_fact[i] * i % MOD
+
+def C(n, r):
+    if r < 0 or r > n:
+        return 0
+    return fact[n] * inv_fact[r] % MOD \
+           * inv_fact[n - r] % MOD
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+# 杨辉三角：只用加法，模数不是质数也行
+comb = [[0] * (n + 1) for _ in range(n + 1)]
+for a in range(n + 1):
+    comb[a][0] = 1
+    for b in range(1, a + 1):
+        comb[a][b] = (comb[a-1][b-1]
+                      + comb[a-1][b]) % MOD
+
+# 第一类斯特林数（1866）：同形状
+dp = [[0] * (k + 1) for _ in range(n + 1)]
+dp[0][0] = 1               # 空排列算一种
+for i in range(1, n + 1):
+    for j in range(1, min(i, k) + 1):
+        dp[i][j] = (dp[i-1][j-1]          # 最矮插最左
+                    + (i-1) * dp[i-1][j]) % MOD
+\end{lstlisting}
+\end{minipage}
+
+\begin{minipage}[t]{0.6\linewidth}
+\begin{lstlisting}
+from math import comb as mcomb
+
+def bounded(total, people, limit):
+    """每人 0..limit 的分法数：隔板 + 容斥"""
+    def bars(t):              # 隔板：t 颗分给 people 人
+        if t < 0:
+            return 0
+        return mcomb(t + people - 1, people - 1)
+    ans = 0
+    for j in range(people + 1):   # j = 指定 j 个人超限
+        sign = -1 if j & 1 else 1
+        rest = total - j * (limit + 1)   # 这 j 人先各拿 limit+1
+        ans += sign * mcomb(people, j) * bars(rest)
+    return ans
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.37\linewidth}\small\vspace{2pt}
+\code{math.comb} 是精确大整数：$n$ 在几千以内、只算几次，直接用再 \code{\% MOD}；
+$n$ 到 $10^5$ 以上或者查很多次，换阶乘表。\\[3pt]
+2929 就是 \code{bounded(n, 3, limit)}，$O(1)$，不取模。
+\end{minipage}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+\lc{50}{Pow(x, n)} & — & 快速幂模板 + 负指数\\
+\lc{372}{Super Pow} & 按十进制位递推 $f(i+1) = f(i)^{10} \cdot a^{b[i]}$ & 快速幂 + 规则 c)\\
+\lc{2400}{恰好 $k$ 步} & $r = \frac{k+d}{2}$，答案 $C_k^r$；$|d| > k$ 或 $k+d$ 奇数为 0 & C 取模（当模板练：把 \code{math.comb} 换成阶乘表）\\
+\lc{2929}{分糖有上限} & 隔板 $C_{n+2}^2$ + 容斥 & 不取模，$k=3$ 直接写\\
+\lc{1866}{看得见 $k$ 根} & 盯最矮那根：\code{dp[i][j] = dp[i-1][j-1] + (i-1)·dp[i-1][j]} & 取模，杨辉三角形状的 DP，不用 C\\
+\lc{1569}{同一棵 BST} & \code{ways = C(L+R, L) · ways(左) · ways(右)}，答案 $-1$ & C 取模（杨辉三角）\\
+\lc{1916}{蚁群建房} & $\frac{n!}{\prod \mathrm{size}(v)}$ & 阶乘 + 逆元\\
+\lc{1259}{握手不交叉} & Catalan 递推 & 会员题；96 是同一数列\\
+\bottomrule
+\end{tabularx}
+
+\textbf{纯模板练习}：3405（$C_{n-1}^k \cdot m \cdot (m-1)^{n-1-k}$，最推荐）· 62 / 1641（热身，不取模）· 1621 · 1735（多查询）· 2954（多重组合数）
+
+\begin{principle}
+拿到计数题先问：能不能化成一个式子（2400 / 2929）？式子里有除法 $\to$ 逆元。没有式子 $\to$ 盯一个元素写 DP（1866）。
+有式子但依赖结构 $\to$ 先求结构再套（1569）。
+\end{principle}
+
+\subsection{坑}
+\begin{itemize}
+\item \code{a + b * c \% MOD} 只模了乘积项：\code{\%} 和 \code{*} 同级、比 \code{+} 高。1866、1569 都踩了 $\to$ 整个式子加括号
+\item \code{(ways - 1) \% MOD}：ways 模完可能是 0，直接减得负数（C++ / Java 里要 \code{+ MOD}）
+\item 1569 有序输入退化成链，递归 $\sim$1000 层，撞 Python 默认上限 $\to$ \code{sys.setrecursionlimit}
+\item 逆元要求模数是质数；$10^9+7$ 是，1337 不是。$n \ge p$ 时 $n!$ 模下是 0，阶乘表失效（要 Lucas；LC 碰不到）
+\item 2400 的 \code{//} 会把「走不到」悄悄截成一个正常的整数，先判奇偶再判 $|d| \le k$
+\end{itemize}
+
+\begin{mynote}
+\textbf{1866}
+\begin{itemize}
+\item \code{dp[0][0] = 1}，不是 0：空排列算一种，\code{dp[1][1]} 靠它推出来。别的格子都不用手设（第 0 行、第 0 列天然是 0）
+\item 内层 \code{range(1, min(k, sticks) + 1)}，漏了 \code{seen == sticks}；\code{return dp[n][k]}，不是 \code{[n+1][k+1]}
+\item 两个分支存的是\textbf{排法数}（查表），不是木棍数；整段没读过 dp 旧值就不是 DP
+\item \code{dp[i][j] = dp[i-1][j-1] + (i-1) * dp[i-1][j] \% MOD} 返回值超过 MOD（$n=20,\ k=11 \to$ 3647427971）：\code{\%} 只作用在乘积项
+\item $c(n,k)$ 是第一类斯特林数，不是 $C_n^k$：$c(4,2) = 11$，$C_4^2 = 6$
+\end{itemize}
+\textbf{1569}
+\begin{itemize}
+\item \code{nums} 是\textbf{插入顺序}，不是树的序列化；问的是「其他」排列 $\to$ 最后 $-1$
+\item 不用真建树：\code{[x for x in arr if x < root]} 保留原先后顺序，就是左子树的插入序列
+\end{itemize}
+\textbf{2400}：没判奇偶 WA。\code{startPos = 2, endPos = 5, k = 10} 输出 210，应为 0（$k+d = 13$，$r = 6.5$ 被截成 6）\par
+\textbf{372}
+\begin{itemize}
+\item 第一版每读一位乘一次 $a$，算出 $a^{\text{位数}}$。$b = [1, 0]$ 应为 $a^{10}$，它给 $a^2$
+\item 笔记里两层混了，写成「ans $\times$ 10 再加 $a^d$」：乘 10 和加 $d$ 都是对\textbf{指数}做的，落到值上是 \code{ans ** 10 * a ** d}
+\end{itemize}
+\textbf{2929}：第一版回溯逐个孩子枚举拿几颗，结果对但 TLE；$n$ 到 $10^6$ 必须化成 $O(1)$ 公式\par
+\textbf{手写稿里改了的地方}
+\begin{itemize}
+\item Fast pow 框里 \code{while i < n: ans *= x\^{}i; i <<= 1} 会把 $x^1 x^2 x^4 x^8$ 全乘进去，要只乘 $n$ 的二进制里是 1 的位（\code{if exp \& 1}）
+\item reverse $\to$ \textbf{inverse}（逆元）；$y^{-1} \equiv y^{m-2}$ 的前提「$m$ 是质数」要写在公式旁边
+\item b) 右边漏了最外层 mod $m$
+\end{itemize}
+\end{mynote}

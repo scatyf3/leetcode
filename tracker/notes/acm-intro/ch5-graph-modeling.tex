@@ -1,0 +1,210 @@
+% 第 5 章：建图（行和列当点）。素材：blog advanced/graph-modeling.md
+\section{建图：行和列当点}
+
+题面是网格、石头、条件约束，问的却是「连通」「先后顺序」。图不在题面里，要自己决定\textbf{谁是点、谁是边}；
+定下来之后就落回 L3 的并查集 / 拓扑排序。难点全在翻译这一步。
+
+\subsection{总览：三问 + 几种建法}
+
+\begin{overview}
+题面里没有图：按顺序答三问
+  Q1  问的是什么：连通 / 先后 / 有没有环    -> 决定落回哪个 L3 套路
+  Q2  谁是点
+  Q3  谁是边
+
+答完以后（左：题号和 L3 套路）
+  947    DSU       <── 连通：点 = 行和列，边 = 一块石头 (r, c)
+  2392   Kahn x 2  <── 先后：点 = 数字 1..k，边 = 一个条件；行、列各一张图
+  1559   DSU       <── 有没有环：点 = 格子 r*cols+c，边 = 同色相邻（第 3 章）
+  2127   peel      <── 函数图：点 = 人，边 = i -> favorite[i]（第 4 章）
+\end{overview}
+
+\subsection{建图三问}
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+& \textbf{947 删石头} & \textbf{2392 填矩阵}\\
+\midrule
+Q1 问的是什么 & 能删几块 = 哪些石头「连在一起」$\to$ \textbf{连通} & 谁在谁上面、谁在谁左边 $\to$ \textbf{先后}\\
+落到 L3 & 并查集 & 拓扑排序（Kahn）\\
+Q2 点 & \textbf{行和列}（不是石头） & 数字 $1..k$，行、列各一张图\\
+Q3 边 & 石头 $(r, c)$ = 连接「第 $r$ 行」和「第 $c$ 列」的一条边 & 条件 \code{[a, b]} = 边 $a \to b$\\
+\bottomrule
+\end{tabularx}
+
+\begin{principle}
+先认出问的是「连通」还是「先后」，套路就定了；剩下的难点全在「点和边怎么选」。
+第一反应「题面里的东西当点」（石头当点）往往能做但更绕，换个角度可能一步到位。
+\end{principle}
+
+\subsection{\texorpdfstring{947：答案 = 石头数 $-$ 连通块数}{947：答案 = 石头数 − 连通块数}}
+
+\textbf{规则}：一块石头和\textbf{还在场上}的另一块同行或同列，就能删掉它。最多删几块？
+
+\textbf{直觉}：把「同行或同列」当边，石头分成若干连通块，\textbf{每块最后都剩 1 块}，所以答案 = 石头数 $-$ 块数。
+
+\begin{itemize}
+\item \textbf{能删到只剩 1 块}：块里取一棵生成树，\textbf{从叶子往根删}。删非根的石头时，它的树上父亲还在场、和它同行或同列。
+\item \textbf{删不光}：删石头不会让两块原本不同行也不同列的石头变成同行同列；块之间本来就不共行列，
+所以一块只剩最后一个时，场上没人和它同行同列。
+\end{itemize}
+
+例：\code{[[0,0],[0,1],[1,0],[1,2],[2,1],[2,2]]} 六块连成一块，答 5；下一节的例子两块，答 $5 - 2 = 3$。
+
+\subsection{为什么把行和列当点}
+
+\textbf{直觉}：直接按「两块石头同行同列就连边」要比 $\binom{n}{2}$ 对。换个角度：\textbf{同行的石头之所以连通，是因为它们都碰到了同一行}。
+把每一行、每一列各当一个点，石头 $(r, c)$ 就是连接 $R_r$ 和 $C_c$ 的一条边：
+
+\begin{center}
+\begin{minipage}{0.4\linewidth}
+\begin{Verbatim}[fontsize=\small]
+stones: (0,0) (0,2) (1,1) (2,0) (2,2)
+
+  R0 ── C0 ── R2          R1 ── C1
+   │           │
+   C2 ─────────┘
+\end{Verbatim}
+\end{minipage}\hfill
+\begin{minipage}{0.48\linewidth}
+两块石头同行，它们的边就共用一个行点，于是在同一块里。
+所以\textbf{石头的连通块 $\leftrightarrow$ 行列图里带边的连通块}，一一对应。每块石头只做一次 union，$O(n\,\alpha(n))$。
+\end{minipage}
+\end{center}
+
+\textbf{两个细节}：
+\begin{itemize}
+\item \textbf{行号和列号要分开}：第 0 行和第 0 列是两个不同的点。键用 \code{('r', r)} / \code{('c', c)}，或列号加偏移（\code{c + 10001}）。
+\item \textbf{只数碰到过的点}：没有石头的行列不算一块。用 dict 当并查集，只有 \code{find} 过的键才进 \code{parent}，最后数不同的根。
+\end{itemize}
+
+\textbf{反例：行列编号撞车}。石头 \code{(0,1)}、\code{(1,0)} 不同行也不同列，一块都删不掉：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+\textbf{键} & \textbf{union} & \textbf{块数} & \textbf{答案}\\
+\midrule
+\code{('r',0)-('c',1)}，\code{('r',1)-('c',0)} & 两条边各自一块 & 2 & $2 - 2 = 0$ \checkmark\\
+行 $r$、列 $c$ 都直接用数字 & \code{union(0,1)}，\code{union(1,0)} & 1 & $2 - 1 = 1$ $\times$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{principle}
+一个对象同时属于两个「集合」（一行和一列），连通又是靠共用集合传递的 $\to$ \textbf{集合当点，对象当边}。
+点数 = 行数 + 列数，边数 = 对象数，不用两两比较。
+\end{principle}
+
+\subsection{2392：行和列互不相干，各排一次}
+
+\textbf{规则}：把 $1..k$ 放进 $k \times k$ 矩阵；\code{rowConditions} 里 \code{[above, below]} 要求 above 所在行严格在 below 上面，
+\code{colConditions} 里 \code{[left, right]} 要求 left 所在列严格在 right 左边。
+
+\textbf{观察}：行条件只管行号，列条件只管列号。给每个数\textbf{单独一行、单独一列}（$k$ 个数正好 $k$ 行 $k$ 列），两个方向就完全不相干：
+按 rowConditions 排一个拓扑序，第几个就放第几行；按 colConditions 排一个，第几个就放第几列。
+\textbf{无解 $\Leftrightarrow$ 某个方向的条件有环}（Kahn 排不满，第 3 章）；两边都无环，这样放就满足所有条件。
+
+\begin{center}\small
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+$k = 3$ & \textbf{条件} & \textbf{拓扑序} & \textbf{位置}\\
+\midrule
+行 & \code{[[1,2],[3,2]]}：1、3 在 2 上 & [1, 3, 2] & 1 第 0 行，3 第 1 行，2 第 2 行\\
+列 & \code{[[2,1],[3,2]]}：2 在 1 左，3 在 2 左 & [3, 2, 1] & 3 第 0 列，2 第 1 列，1 第 2 列\\
+\bottomrule
+\end{tabular}
+\qquad
+\begin{tabular}{@{}l@{}}
+结果\\
+\code{[[0, 0, 1],}\\
+\code{\ [3, 0, 0],}\\
+\code{\ [0, 2, 0]]}
+\end{tabular}
+\end{center}
+
+题目接受任何合法答案，和官方样例长得不一样没关系。
+
+\subsection{模板}
+
+\begin{minipage}[t]{0.47\linewidth}
+\begin{lstlisting}
+parent = {}         # 点可以是任何可哈希的东西
+
+def find(key):
+    if key not in parent:   # 第一次见: 自己当根
+        parent[key] = key
+    while key != parent[key]:
+        parent[key] = parent[parent[key]]
+        key = parent[key]
+    return key
+
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra != rb:
+        parent[rb] = ra     # 只动根
+
+# 947
+for r, c in stones:
+    union(('r', r), ('c', c))   # 石头 = 一条边
+blocks = len({find(k) for k in parent})
+ans = len(stones) - blocks
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.51\linewidth}
+\begin{lstlisting}
+from collections import deque
+
+def topo_order(k, conditions):
+    """点 1..k, [a, b] = a 排在 b 前。有环返回 []"""
+    graph = [[] for _ in range(k + 1)]
+    indeg = [0] * (k + 1)
+    for a, b in conditions:
+        graph[a].append(b)
+        indeg[b] += 1
+    q = deque(x for x in range(1, k + 1)
+              if indeg[x] == 0)
+    order = []
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in graph[u]:
+            indeg[v] -= 1
+            if indeg[v] == 0:
+                q.append(v)
+    return order if len(order) == k else []
+
+# 2392
+rows = topo_order(k, rowConditions)
+cols = topo_order(k, colConditions)
+if not rows or not cols:
+    return []
+row_of = {x: i for i, x in enumerate(rows)}
+col_of = {x: j for j, x in enumerate(cols)}
+mat = [[0] * k for _ in range(k)]
+for x in range(1, k + 1):
+    mat[row_of[x]][col_of[x]] = x
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+\textbf{947} 删石头 & 点 = 行和列，边 = 石头；答案 = 石头数 $-$ 连通块数 & dict 并查集\\
+2392 填矩阵 & 点 = 数字，行、列各一张图；两个拓扑序当行号、列号 & Kahn $\times 2$，有环无解\\
+1559 网格判环 & 点 = 格子 \code{r * cols + c}，边 = 同色相邻 & 并查集（第 3 章）\\
+2127 圆桌 & 点 = 人，边 = $i \to \text{favorite}[i]$，出度为 1 & 函数图（第 4 章）\\
+\bottomrule
+\end{tabularx}
+
+\subsection{坑}
+\begin{itemize}
+\item 947 行号列号共用同一套编号：第 0 行和第 0 列被当成同一个点，上面 \code{(0,1)}、\code{(1,0)} 的反例会多删一块
+\item 947 用数组版并查集、提前把所有行列都初始化：空行空列会被数成一块 $\to$ 只数碰到过的，或者用 dict
+\item 947 数块数要 \code{find(k)} 再去重，直接数 \code{parent} 里的值，没压缩完的路径会多数
+\item 2392 两个方向都要判环，任一个排不满就返回 \code{[]}
+\item 2392 不需要两个数共用一行：共用反而要同时照顾行和列的约束
+\end{itemize}

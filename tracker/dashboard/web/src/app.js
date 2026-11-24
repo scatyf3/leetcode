@@ -7,10 +7,11 @@ import { initSync, pendingEvents, record as recordEvent } from './sync';
 import { againToday, applyEvent, commentRow } from './lib/inbox';
 import { api, isReadOnly } from './api';
 import { esc } from './lib/esc';
-import { FAM, FAM_LEVELS, L_NEXT, depthOf, famCls, famInfo, famKey, famOf } from './lib/fam';
+import { FAM, FAM_LEVELS, L_NEXT, depthOf, famCls, famInfo, famKey, famOf, famShown } from './lib/fam';
 import { dAdd, dParse, daysSince, fmtDays, mmdd, todayStr, weekStart } from './lib/dates';
 import { highlightPython } from './lib/highlight';
 import { renderMd } from './lib/markdown';
+import { parseChat } from './lib/chat';
 import * as Q from './lib/queue';
 import { buildQuiz as buildQuizFor } from './lib/quiz';
 import { TL_GONE, buildTimeline as buildTimelineFor, depthKey } from './lib/timeline';
@@ -46,8 +47,11 @@ async function openDetail(id) {
   };
   renderChips();
   $('#e-difficulty').value = d.difficulty || '';
-  $('#e-status').value = d.status || 'solved';
-  $('#e-familiarity').value = famOf(d) === null ? '' : String(famOf(d));
+  // idea 只在熟练度下拉里出现; 状态下拉显示成 todo, 存的时候再合回去(autoSaveMeta)
+  $('#e-status').value = d.status === 'idea' ? 'todo' : (d.status || 'solved');
+  const shown = famShown(d);
+  $('#e-familiarity').value = shown === null ? '' : String(shown);
+  syncIdeaOption();
   $('#e-paused').checked = !!d.paused;
   $('#e-pit').value = d.pit || '';
   $('#e-cluster').value = d.cluster || '';
@@ -135,6 +139,12 @@ async function punchAttempt() {
     body: JSON.stringify({ id: CURRENT.id, op: had ? 'undo' : 'punch' }),
   });
   if (!r || r.ok === false) { $('#attempt-msg').textContent = (r && r.error) || '记不上'; return; }
+  // 服务端打卡会把 todo / idea 翻成 solved, 下拉框要跟上, 不然下次自动保存又写回去
+  if (!had && $('#e-status').value === 'todo') {
+    $('#e-status').value = 'solved';
+    leaveIdea();
+    await reloadKeepOpen();
+  }
   ATTEMPTS = null;                    // 重新拉一份, 别在前端猜服务端写了什么
   WEAK = null;
   await loadAttempts();
@@ -214,11 +224,23 @@ function removeTag(field, i) {
   renderChips(); autoSaveMeta();
 }
 
+// 做过的题不能标 idea only: 会清掉熟练度, 还会退出复习队列
+function syncIdeaOption() {
+  $('#e-familiarity option[value="idea"]').disabled = $('#e-status').value !== 'todo';
+}
+
+// 状态改成做过(solved / review), idea only 就不成立了
+function leaveIdea() {
+  if ($('#e-familiarity').value === 'idea' && $('#e-status').value !== 'todo') $('#e-familiarity').value = '';
+  syncIdeaOption();
+}
+
 async function autoSaveMeta() {
+  const fam = $('#e-familiarity').value;
   const body = {
     structures: TAGS.structures, paradigms: TAGS.paradigms, techniques: TAGS.techniques,
-    difficulty: $('#e-difficulty').value, status: $('#e-status').value,
-    familiarity: $('#e-familiarity').value === '' ? null : +$('#e-familiarity').value,
+    difficulty: $('#e-difficulty').value, status: fam === 'idea' ? 'idea' : $('#e-status').value,
+    familiarity: fam === '' || fam === 'idea' ? null : +fam,
     paused: $('#e-paused').checked,        // 服务端幂等: 已经暂停的再发 true 不会重新计时
     pit: $('#e-pit').value, cluster: $('#e-cluster').value.trim(),
   };
@@ -276,6 +298,8 @@ function buildSolTabs(d) {
   SOL_ITEMS = [
     ...(d.description ? [{ name: '📄 题目', html: d.description }] : []),
     ...(d.viz ? [{ name: '🎞 可视化', viz: d.viz, readonly: true }] : []),
+    // 和 Claude 讨论这题的记录(chat.md, dashboard/save_chat.py 导出), 渲染成气泡
+    ...(d.chat ? [{ name: '💬 讨论', chat: d.chat, readonly: true }] : []),
     ...d.solutions,
   ];
   SOL_EDITING = false;                       // 换题时不要把上一题的编辑态带过来
@@ -318,6 +342,14 @@ function showItem(item) {
     $('#sol-mode').textContent = '';
     return;
   }
+  if (item.chat !== undefined) {
+    desc.innerHTML = renderChat(item.chat);
+    desc.scrollTop = 0;
+    desc.classList.remove('hidden');
+    code.classList.add('hidden');
+    $('#sol-mode').textContent = '';
+    return;
+  }
   if (item.html !== undefined) {
     desc.innerHTML = item.html;
     desc.scrollTop = 0;
@@ -333,6 +365,22 @@ function showItem(item) {
   code.classList.remove('hidden');
   desc.classList.add('hidden');
   $('#sol-mode').textContent = '';
+}
+
+// chat.md -> 按会话分组的气泡; 每段会话一个可折叠块, 最新的一段默认展开
+function renderChat(src) {
+  const ss = parseChat(src);
+  const who = { me: '🧑 我', bot: '🤖 Claude', note: '📝' };
+  return ss.map((s, i) => `
+    <details class="chat-sess" ${i === ss.length - 1 ? 'open' : ''}>
+      <summary>${esc(s.date || '手记')} · ${s.bubbles.filter((b) => b.who === 'me').length} 问
+        ${s.key ? `<span class="chat-key">${esc(s.key)}</span>` : ''}</summary>
+      ${s.bubbles.map((b) => `
+        <div class="chat-msg chat-${b.who}">
+          <div class="chat-who">${who[b.who]}</div>
+          <div class="chat-body note-preview">${md(b.text)}</div>
+        </div>`).join('')}
+    </details>`).join('');
 }
 
 function enterSolEdit() {
@@ -895,12 +943,12 @@ const statsOpen = () => !$('#stats-overlay').classList.contains('hidden');
 let LISTS = null;          // {lists: {名字: {source, note, categories}}, premium: [id]}
 let LIST_CUR = null;       // 当前看的是哪个题单
 
-// 一题在题单里的档位: 0..4 = 熟练度, null = 建了但没评, -1 = 仓库里压根没有
+// 一题在题单里的档位: 0..4 = 熟练度, 'idea' = 有思路没做, null = 建了但没评, -1 = 仓库里压根没有
 const listFam = (id) => {
   const p = PROBLEMS.find((x) => x.id === id);
-  return p ? famOf(p) : -1;
+  return p ? famShown(p) : -1;
 };
-const LBUCKETS = FAM_LEVELS;                      // 进度条从"最熟"到"最生", 未做是剩下的空白
+const LBUCKETS = [...FAM_LEVELS.filter((f) => f !== null), 'idea', null];                      // 进度条从"最熟"到"最生", 未做是剩下的空白
 
 function barHTML(items) {
   const n = items.length || 1;
@@ -1277,11 +1325,28 @@ const byId = () => new Map(PROBLEMS.map((p) => [p.id, p]));
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // 题卡左边那个方块的颜色: 按熟练度的档(和专题熟练度那根条同一套色), 没建文件夹 = 不加类
-const stCls = (rec) => (rec ? 'fm-' + (FM_BUCKETS.find(([, , f]) => f(famOf(rec))) || ['nr'])[0] : '');
+const stCls = (rec) => (rec ? 'fm-' + (FM_BUCKETS.find(([, , f]) => f(famShown(rec))) || ['nr'])[0] : '');
 
-// 坐标系里几个折叠区的展开状态(题目 / 其他), 存本地
+// 坐标系里所有折叠区(题目 / 攻坚 / 专题 / 每个专题 / 低优先)的展开状态, 存本地 ——
+// 开新题、评档都会整块重画, 不存就回到默认。只存动过的: k = 展开, !k = 收起, 都没有 = 用默认值。
 function gridFolds() {
   try { return new Set(JSON.parse(localStorage.getItem('lc-grid-folds') || '[]')); } catch (e) { return new Set(); }
+}
+function foldOpen(k, def) {
+  const s = gridFolds();
+  return s.has(k) || (def && !s.has('!' + k));
+}
+// 拼在 <details 后面。data-def = 默认就是展开的
+const foldAttrs = (k, def = false) =>
+  ` data-fold="${esc(k)}"${def ? ' data-def="1"' : ''}${foldOpen(k, def) ? ' open' : ''}`;
+function saveFold(el) {
+  const k = el.dataset.fold, def = !!el.dataset.def;
+  // 带 open 属性插进页面也会触发一次 toggle, 那次状态没变, 不写
+  if (el.open === foldOpen(k, def)) return;
+  const s = gridFolds();
+  s.delete(k); s.delete('!' + k);
+  if (el.open !== def) s.add(el.open ? k : '!' + k);
+  try { localStorage.setItem('lc-grid-folds', JSON.stringify([...s])); } catch (e) { /* private mode */ }
 }
 
 // 其他题单(lists.json)在坐标系每组下面的框。只补 NeetCode 150 没有的题, 每题全页只出现一次:
@@ -1339,11 +1404,12 @@ function buildGrid() {
   // skip = 题卡所在那个框的题单简称 —— 角标只说「还在哪些别的题单里」。
   const chipHTML = (id, title, diff, skip) => {
     const rec = recs.get(id);
-    const L = rec ? famOf(rec) : undefined;        // undefined = 还没建文件夹
+    const L = rec ? famShown(rec) : undefined;     // undefined = 还没建文件夹
     const d = depthOf(rec);
     const badge = rec === undefined ? '+' : famInfo(L).short;
     const tip = rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）'
-      : L === null ? '还没评熟练度 — 点击标 L4' : famTip[L];
+      : L === null ? '还没评熟练度 — 点击标 L4'
+      : L === 'idea' ? `${famInfo(L).label} — 点击标 L4` : famTip[L];
     const src = (X.srcOf.get(id) || []).filter((s) => s !== skip);
     return `<button class="gr-chip" data-id="${id}" data-d="${d}" title="${esc(title)} — ${
       rec === undefined ? '还没建文件夹 — 点击建（去 LeetCode 抓题面）' : '点击打开题目'}">
@@ -1397,8 +1463,7 @@ function buildGrid() {
       <div class="gr-xboxes">${xBoxes(OTHER_GROUP)}</div></div>`;
 
   // 首屏: KPI 一排 + 每日热力图 + 专题熟练度。其余折起来, 展开状态记在 localStorage。
-  const fold = (k, label, body) => `<details class="gr-more" data-fold="${k}"${
-    gridFolds().has(k) ? ' open' : ''}><summary>${label}</summary>${body}</details>`;
+  const fold = (k, label, body) => `<details class="gr-more"${foldAttrs(k)}><summary>${label}</summary>${body}</details>`;
   const topics = topicsHTML();
   $('#grid-view').innerHTML = `
     <section class="kpis" id="gr-kpi">${kpiHTML()}</section>
@@ -1413,15 +1478,11 @@ function buildGrid() {
     <section class="gr-sec" id="gr-fam">${famSecHTML(X, recs)}</section>
     ${fold('problems', '题目', `
       ${g}
-      ${gl ? `<details class="gr-lowbox"><summary>低优先 · 其他题单</summary>${gl}</details>` : ''}`)}
+      ${gl ? `<details class="gr-lowbox"${foldAttrs('low')}><summary>低优先 · 其他题单</summary>${gl}</details>` : ''}`)}
     ${fold('drill', '攻坚 · Mock', '<section class="gr-sec" id="gr-drill"><p class="empty-hint">读取中…</p></section>')}
     ${topics ? fold('topics', '专题', topics) : ''}`;
   $('#grid-view').querySelectorAll('details[data-fold]').forEach((el) =>
-    el.addEventListener('toggle', () => {
-      const s = gridFolds();
-      el.open ? s.add(el.dataset.fold) : s.delete(el.dataset.fold);
-      try { localStorage.setItem('lc-grid-folds', JSON.stringify([...s])); } catch (e) { /* private mode */ }
-    }));
+    el.addEventListener('toggle', () => saveFold(el)));
   renderDaily();         // 异步: 要等 attempts.jsonl + reviews.jsonl
   renderDrill();         // 异步: 要等 /api/weak + /api/mock
 }
@@ -1448,7 +1509,9 @@ const putMeta = (id, body) => {
 async function cycleL(id) {
   const rec = byId().get(id);
   if (!rec) return;                 // 没文件夹的走 startProblem, 不该到这儿
-  await putMeta(id, { familiarity: L_NEXT[famKey(famOf(rec))] });
+  const L = famShown(rec);
+  // 评了档就不是 idea only 了; 没打过卡, 所以退回 todo 而不是 solved
+  await putMeta(id, { familiarity: L_NEXT[famKey(L)], ...(L === 'idea' ? { status: 'todo' } : {}) });
   await reload();
 }
 
@@ -1699,6 +1762,7 @@ const FM_BUCKETS = [
   ['l2', 'L2 · L2.5', (L) => L === 2 || L === 2.5],
   ['l3', 'L3 · L3.5', (L) => L === 3 || L === 3.5],
   ['l4', 'L4', (L) => L === 4],
+  ['idea', 'idea only', (L) => L === 'idea'],
   ['nr', '未评', (L) => L === null],
   ['gone', '没建', () => false],
 ];
@@ -1711,7 +1775,7 @@ function topicFam(grp, X, recs) {
     const rec = recs.get(id);
     if (!rec) { c.gone++; continue; }
     const L = famOf(rec);
-    const b = FM_BUCKETS.find(([, , f]) => f(L));
+    const b = FM_BUCKETS.find(([, , f]) => f(famShown(rec)));
     c[b ? b[0] : 'nr']++;
     if (L !== null) { sum += L; rated++; }
   }
@@ -1751,7 +1815,7 @@ function todayHTML() {
   if (!done.length) return '';
   const chips = done.map((a) => {
     const rec = recs.get(a.id);
-    const L = rec ? famOf(rec) : null;
+    const L = rec ? famShown(rec) : null;
     const famTxt = (a.fam === null || a.fam === undefined) ? '未评' : 'L' + a.fam;
     return `<button class="gr-chip td-chip ${esc(a.kind)}" data-id="${a.id}"
         title="${esc(AT_META[a.kind] ? AT_META[a.kind].label : a.kind)} · 打卡时 ${esc(famTxt)}">
@@ -1802,7 +1866,7 @@ function drillHTML() {
   const chip = (id, title) => {
     const rec = recs.get(id);
     return `<button class="gr-chip" data-id="${id}" title="${esc(title)} — ${rec ? '点击打开题目' : '还没建文件夹 — 点击建'}">
-      <span class="gr-st s${depthOf(rec)} ${stCls(rec)}">${rec ? esc(famInfo(famOf(rec)).short) : '+'}</span>
+      <span class="gr-st s${depthOf(rec)} ${stCls(rec)}">${rec ? esc(famInfo(famShown(rec)).short) : '+'}</span>
       <span class="gr-id">${id}</span><span class="gr-nm">${esc(title)}</span></button>`;
   };
   // 弱题
@@ -1866,7 +1930,7 @@ function topicsHTML() {
   const chip = (id, title, key) => {
     const rec = recs.get(id);
     return `<button class="gr-chip${key ? ' tp-key' : ''}" data-id="${id}" title="${key ? '本节代表题 · ' : ''}${esc(title)} — ${rec ? '点击打开题目' : '还没建文件夹 — 点击建'}">
-      <span class="gr-st s${depthOf(rec)} ${stCls(rec)}">${rec ? esc(famInfo(famOf(rec)).short) : '+'}</span>
+      <span class="gr-st s${depthOf(rec)} ${stCls(rec)}">${rec ? esc(famInfo(famShown(rec)).short) : '+'}</span>
       <span class="gr-id">${id}</span><span class="gr-nm">${esc(title)}</span></button>`;
   };
   // 每节的代表题(sec.key)排第一个、加粗 —— 时间不够就只做这几道
@@ -1876,7 +1940,7 @@ function topicsHTML() {
     const done = ids.filter((id) => depthOf(recs.get(id)) >= 2).length;
     const keys = t.sections.map((x) => x.key).filter(Boolean);
     const kdone = keys.filter((id) => depthOf(recs.get(id)) >= 2).length;
-    return `<details class="tp"${i === 0 ? ' open' : ''}><summary><b>${esc(t.name)}</b>
+    return `<details class="tp"${foldAttrs('tp:' + (t.short || t.name), i === 0)}><summary><b>${esc(t.name)}</b>
         <span class="tp-c">${keys.length ? `代表题 ${kdone}/${keys.length} · ` : ''}全部 ${done}/${ids.length} 到 S2</span><span class="hint">${esc(t.note || '')}</span></summary>
       ${t.sections.map((x) => `<div class="tp-sec">${x.name ? `<div class="tp-sec-h">${esc(x.name)}</div>` : ''}
         ${x.note ? `<p class="tp-sec-note">${esc(x.note)}</p>` : ''}
@@ -2051,7 +2115,7 @@ on('#sol-save', 'click', () => exitSolEdit(true));
 on('#sol-edit', 'blur', () => exitSolEdit(true));  // 点开 = 保存 + 回高亮
 on('#note-edit', 'blur', () => exitEdit(true));   // click away = save + render
 on('#e-difficulty', 'change', autoSaveMeta);
-on('#e-status', 'change', autoSaveMeta);
+on('#e-status', 'change', () => { leaveIdea(); autoSaveMeta(); });
 on('#e-familiarity', 'change', autoSaveMeta);
 on('#e-paused', 'change', autoSaveMeta);
 on('#e-pit', 'change', autoSaveMeta);

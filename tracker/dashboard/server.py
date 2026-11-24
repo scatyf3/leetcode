@@ -239,6 +239,9 @@ def get_detail(pid: int):
     # 可视化: 题目文件夹里手写的 viz.html(自带样式和脚本), 看板在「🎞 可视化」tab 里用 iframe 跑
     viz = folder / "viz.html"
     d["viz"] = viz.read_text(encoding="utf-8", errors="replace") if viz.exists() else ""
+    # 讨论记录: dashboard/save_chat.py 从 Claude Code 会话导出的 chat.md, 看板「💬 讨论」tab 渲染成气泡
+    chat = folder / "chat.md"
+    d["chat"] = chat.read_text(encoding="utf-8", errors="replace") if chat.exists() else ""
     # the note file (existing preferred name, else default note.md)
     note_file = None
     for name in NOTE_NAMES:
@@ -422,6 +425,9 @@ def append_scratch(text: str) -> dict:
     return {"ok": True, "file": SCRATCH}
 
 
+# 还没做过的两种 status: todo = 没看过 / 没想法; idea = 有思路但没做(前端显示在熟练度徽章上)。
+# 都不进复习队列、不算弱题, 打卡后自动翻成 solved。mock 抽题不用这个: idea 的题思路已经见过, 不该再抽到。
+UNDONE = ("todo", "idea")
 LOGGED_FIELDS = ("structures", "paradigms", "techniques", "difficulty", "status", "familiarity", "paused")
 LIST_FIELDS = ("structures", "paradigms", "techniques")
 
@@ -553,10 +559,10 @@ def log_attempt(pid: int, undo: bool = False) -> dict:
                "kind": st["kind"], "fam": fam, "born": st["born"], "seen": st["seen"]}
         with ATTEMPT_LOG.open("a", encoding="utf-8") as f:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
-        # 做过一遍就不再是 todo —— scaffold 建出来的题是 todo, 不在这里翻的话永远进不了复习队列
+        # 做过一遍就不再是 todo / idea —— scaffold 建出来的题是 todo, 不在这里翻的话永远进不了复习队列
         # (2026-10 攒了 58 道做完还挂 todo 的)。undo 不翻回去: 做过的思路不会因为撤销打卡就没见过。
         meta = read_meta(r["folder"])
-        promoted = meta.get("status") == "todo"
+        promoted = meta.get("status") in UNDONE
         if promoted:
             meta["status"] = "solved"
             write_meta(r["folder"], meta)
@@ -1005,7 +1011,7 @@ def read_lists() -> dict:
 
 # ------------------------------------------------------------ 弱题 / 攻坚 ----
 def weak_list() -> dict:
-    """弱题 = 做过(status 不是 todo)且当前熟练度 L3 / L3.5 / L4。
+    """弱题 = 做过(status 不是 todo / idea)且当前熟练度 L3 / L3.5 / L4。
 
     以前按「忘过 ≥2 次 / 最近一次打卡不是 clean」算, 结果挂满了 L1 / L2:
     打卡大多不填 result, lapses 只增不减, 新题第一遍出 bug 也算 —— 关不掉的都是信号缺失, 不是真弱。
@@ -1019,7 +1025,7 @@ def weak_list() -> dict:
     open_, closed = [], []
     for pid, title, folder in scan_folders():
         m = read_meta(folder)
-        if m.get("status") == "todo":
+        if m.get("status") in UNDONE:
             continue
         fam = fam_level(m)
         if fam is None:

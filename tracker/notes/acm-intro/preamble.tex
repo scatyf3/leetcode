@@ -1,0 +1,61 @@
+% 共用版式。xelatex 编译；Overleaf 上把 Songti SC / Heiti SC / Menlo 换成 FandolSong / FandolHei / DejaVu Sans Mono
+\usepackage{xeCJK}
+\setCJKmainfont{Songti SC}[BoldFont=Heiti SC]
+\setCJKsansfont{Heiti SC}
+\setCJKmonofont{Heiti SC}
+\setmonofont{Menlo}[Scale=0.88]
+\usepackage[a4paper,margin=1.8cm]{geometry}
+\usepackage{amsmath}
+% 数学也用 OpenType 字体：老式 Type 1 数学字体（CMSY / CMEX）在部分打印驱动上会丢「(」「−」
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+% unicode-math 下没有 \leadsto；LM Math 没有 \setminus 的字形（U+29F5），换成 \smallsetminus；\checkmark 正文里用，正文字体没有 ✓，借数学字体的
+\newfontfamily\lmmathglyph{Latin Modern Math}
+\AtBeginDocument{\let\setminus\smallsetminus\let\leadsto\rightsquigarrow\renewcommand{\checkmark}{{\lmmathglyph ✓}}}
+\usepackage{booktabs,array,tabularx,longtable}
+\usepackage{graphicx}
+\usepackage[table]{xcolor}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{fancyvrb}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+
+\definecolor{codefg}{RGB}{150,30,60}
+\definecolor{codebg}{gray}{0.95}
+\definecolor{note}{gray}{0.38}
+\definecolor{accent}{RGB}{40,80,150}
+
+% 行内代码
+\newcommand{\code}[1]{\texttt{\textcolor{codefg}{#1}}}
+% 题号 + 题名
+\newcommand{\lc}[2]{\textbf{#1}\,{\small #2}}
+
+% Python 代码块：\begin{lstlisting} ... \end{lstlisting}
+\lstset{language=Python,basicstyle=\ttfamily\small,backgroundcolor=\color{codebg},
+  frame=none,xleftmargin=4pt,aboveskip=5pt,belowskip=5pt,columns=fullflexible,
+  keywordstyle=\color{blue!60!black},commentstyle=\color{note},showstringspaces=false,
+  breaklines=true,extendedchars=false}
+
+% 可迁移的原则：\begin{principle} ... \end{principle}
+\newtcolorbox{principle}{colback=accent!6,colframe=accent!60,boxrule=0.4pt,arc=1pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt,fontupper=\small}
+% 总览图（ASCII 图）：\begin{overview} ... \end{overview}
+\DefineVerbatimEnvironment{overview}{Verbatim}{fontsize=\small,frame=single,framesep=6pt}
+% 「你踩过 / 改过的地方」：\begin{mynote} ... \end{mynote}
+\newtcolorbox{mynote}{colback=gray!5,colframe=gray!50,boxrule=0.4pt,arc=1pt,
+  left=6pt,right=6pt,top=3pt,bottom=3pt,fontupper=\small,title={你踩过的坑},
+  coltitle=black,colbacktitle=gray!15,fonttitle=\small\bfseries}
+
+\titleformat{\section}{\Large\bfseries}{第\thesection 章}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries}{}{0em}{}
+\titlespacing*{\section}{0pt}{0pt}{10pt}
+\titlespacing*{\subsection}{0pt}{12pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{8pt}{2pt}
+\setlist{nosep,leftmargin=1.3em}
+\renewcommand{\arraystretch}{1.3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\renewcommand{\contentsname}{目录}

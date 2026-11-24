@@ -71,7 +71,9 @@ def export(out: Path) -> dict:
     problems = server.list_problems()
     write_json(api / "problems.json", problems)
     for p in problems:
-        write_json(api / "problems" / f"{p['id']}.json", server.get_detail(p["id"]))
+        d = server.get_detail(p["id"])
+        d["chat"] = ""                      # 和 Claude 的聊天记录只在本地看, 不上 Pages
+        write_json(api / "problems" / f"{p['id']}.json", d)
 
     # 第二个牌组。不导的话前端拉到空壳 -> 语法队列是 0, 页面照常(见 app.js 的 reload)
     write_json(api / "syntax.json",

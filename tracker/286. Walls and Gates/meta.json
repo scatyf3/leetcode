@@ -1,8 +1,12 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "grid"
+  ],
+  "paradigms": [
+    "bfs"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo",
+  "status": "solved",
   "familiarity": 2
 }

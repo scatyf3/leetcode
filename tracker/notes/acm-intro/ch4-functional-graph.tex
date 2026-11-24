@@ -1,0 +1,269 @@
+% 第 4 章：函数图。素材：blog advanced/functional-graph.md；2127 的坑来自那次面试官模式对话（tracker 里的 sol.py 是改完的版本）
+\section{函数图：每个点只有一条出边}
+
+输入是一个数组 \code{edges[i]} / \code{favorite[i]} / \code{receiver[i]}，意思是「点 $i$ 指向某个点」。
+每个点恰好一条出边，图就只能长成「环 + 挂在环上的树」。这一章只讲这个结构；一般有向图、无向图怎么判环在第 3 章。
+在第 2 章的思维导图里，这一章是「有向 · 出度都 $\le 1$」那一支：函数图块，以及它的特例置换。
+
+\subsection{总览：工具链 + 几种化法}
+
+\begin{overview}
+结构：出度 = 1  =>  每个连通块 = 一个环 + 挂进环的若干棵树（rho 形）
+
+工具链（左边是它建在哪个 L3 套路上）
+  Kahn topo    ──► A  peel            剥叶子：剥不掉的 = 环上的点，再走一圈量环长
+                   ├──► B  depth DP   剥的同时记「走进 v 的最长链」
+                   └──► C  reverse    倒着剥的顺序做 DP：下游先算好
+  3-color DFS  ──► D  stamp           时间戳：不剥，一遍找出所有环
+  fast_pow     ──► E  jump            倍增：从每个点走 2^j 步到哪
+
+题目的几种化法
+  2360   D             最长环有多长，edges[i] 可以是 -1
+  2876   A + C         每个点出发能走到几个不同的点
+  2127   A + B         圆桌最多请几人：按环长分两种桌子
+  2836   E             传 k 次球的最大得分，k <= 1e10
+\end{overview}
+
+\subsection{\texorpdfstring{结构：$\rho$ 形，每块恰好一个环}{结构：ρ 形，每块恰好一个环}}
+
+\textbf{直觉}：从 $x$ 一直走 $x, f(x), f^2(x), \dots$，只有 $n$ 个点，走 $n+1$ 步必有重复（鸽巢），之后就在绕圈；
+每个点只有一条出边，进了环就出不来。路径形如字母 $\rho$：先一段尾巴，再绕圈。
+
+\textbf{规则}：把边当无向看，$k$ 个点的连通块正好 $k$ 条边 = 生成树（$k-1$ 条）再多 1 条，所以\textbf{每块恰好一个环}，
+其余的点在树上、树根挂在环上。图可以有很多块，所以也可以有很多个环。
+
+\begin{center}
+\begin{minipage}{0.3\linewidth}
+\begin{Verbatim}[fontsize=\small]
+x -> y -\
+         c -> d
+z -> w -/ ^   |
+          |   v
+          f <- e
+\end{Verbatim}
+\end{minipage}
+\begin{minipage}{0.55\linewidth}\small
+\begin{tabular}{@{}l l@{}}
+\toprule
+\textbf{点} & \textbf{怎么认}\\
+\midrule
+环上：c d e f & 剥叶子剥不掉；绕一圈回到自己\\
+树上：x y z w & 入度能剥到 0；走几步进环\\
+没有环的块 & 题目允许 \code{edges[i] = -1}（2360）时才有\\
+\bottomrule
+\end{tabular}
+\end{minipage}
+\end{center}
+
+\begin{principle}
+函数图题几乎都是两步：\textbf{先把点分成环上 / 树上两类，再分开算}。分的办法是剥叶子（A）或时间戳（D）。
+\end{principle}
+
+\subsection{剥叶子：剩下的就是环（A）}
+
+\textbf{做法}：就是 Kahn 拓扑排序。入度为 0 的点入队；剥掉 $u$ 就 \code{indeg[f(u)] -= 1}，减到 0 再入队。
+
+\textbf{为什么剥不掉的正好是环}：环上的点，它在环上的前驱也在环上，那条边永远删不掉，入度 $\ge 1$；
+树有限且无环，从叶子往环的方向一层层剥，一定剥光。（一般有向图里剥不掉的还包括环下游的点，见第 3 章；函数图的环没有下游。）
+
+\textbf{B：剥的同时 DP}。$\text{depth}[v]$ = 从树上走进 $v$ 的最长链有几个点（不含 $v$）。剥掉 $u$ 时
+\[
+\text{depth}[f(u)] = \max\big(\text{depth}[f(u)],\ \text{depth}[u] + 1\big)
+\]
+$u$ 出队时走进 $u$ 的点都已剥完，$\text{depth}[u]$ 已是终值。环上的点不入队，但 depth 照样被更新。
+
+\textbf{C：倒着剥的顺序}。剥的顺序里 $u$ 总在 $f(u)$ 前面，\textbf{倒着}扫，$f(u)$ 的答案就先算好了。
+2876：环上的点答案 = 环长；树上 \code{ans[u] = ans[f(u)] + 1}。
+
+例 \code{favorite = [2,2,1,2]}（0、1、3 都指向 2，2 指向 1）：
+
+\begin{center}\small
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+\textbf{步} & \textbf{剥} & \textbf{indeg} & \textbf{depth}\\
+\midrule
+初始 & — & [0, 1, 3, 0] & [0, 0, 0, 0]\\
+1 & 0 & [0, 1, 2, 0] & [0, 0, 1, 0]\\
+2 & 3 & [0, 1, 1, 0] & [0, 0, 1, 0]（3 的链也是 1，不变大）\\
+结束 & 1、2 剥不掉 & 2-环 $1 \leftrightarrow 2$ & $\text{depth}[2] = 1,\ \text{depth}[1] = 0$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{剥完以后按环长分情况（2127）}
+
+圆桌，每个人都要坐在 \code{favorite[i]} 旁边，最多请几人？建图 $i \to \text{favorite}[i]$，按环长只有两种桌子：
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+& \textbf{为什么} & \textbf{怎么算}\\
+\midrule
+环长 $\ge 3$ & 环上每人挨着下一个人，这 $m$ 对「挨着」自己就围满一圈，\textbf{谁也插不进来} & 只能挑一个，取最大\\
+环长 $= 2$ & $a \leftrightarrow b$ 互相满足；$a$、$b$ 外侧各接一条走进来的链，两头还空着，多段能首尾相接 & \textbf{全部加起来}\\
+\bottomrule
+\end{tabularx}
+
+\vspace{2pt}
+\begin{center}
+\begin{BVerbatim}[fontsize=\small]
+x_k ... x_2 x_1  a  b  y_1 y_2 ... y_l
+\end{BVerbatim}
+\qquad
+$\text{答案} = \max\Big(\max\limits_{|C| \ge 3} |C|,\ \ \sum\limits_{a \leftrightarrow b} \big(2 + \text{depth}[a] + \text{depth}[b]\big)\Big)$
+\end{center}
+上面的例子：$2 + 0 + 1 = 3$，坐法 \code{0 2 1}。3 也喜欢 2，但每侧只能接一条链，所以 depth 取的是 max。
+
+\subsection{时间戳：不剥，一遍找出所有环（D）}
+
+从每个没来过的点出发往下走，按顺序编号 \code{first\_seen}，这一轮从时刻 \code{round\_begin} 开始。停下只有三种情况：
+
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{停在哪} & \textbf{说明}\\
+\midrule
+$-1$ & 走到头，这一轮没环\\
+以前几轮的点（\code{first\_seen < round\_begin}） & 接上旧路，那个环（如果有）早算过了\\
+\textbf{这一轮的点}（\code{first\_seen >= round\_begin}） & 自己绕回来，新环，长 = \code{clock - first\_seen}\\
+\bottomrule
+\end{tabularx}
+
+\textbf{反例：只看「来没来过」}。2360 的 \code{[3,3,4,2,3]}：第一轮 $0(1) \to 3(2) \to 2(3) \to 4(4)$，撞上 3，$2 \ge 1$，环长 $5-2=3$。
+第二轮从 1 出发（\code{round\_begin} $=5$），一步就撞上旧的 3；不比 \code{round\_begin} 就会当成新环，还算成 $6-2=4$。
+「这一轮的号」就是三色 DFS（第 3 章）的灰，「以前几轮的号」就是黑；每个点一条出边，DFS 退化成一条直线，不用栈。
+
+\subsection{\texorpdfstring{倍增：走 $k$ 步，$k$ 到 $10^{10}$（E）}{倍增：走 k 步，k 到 10^10（E）}}
+
+一步一步走太慢。和第 1 章快速幂同一个想法：快速幂存 $x^{2^j}$，倍增存「从每个点走 $2^j$ 步到哪」；
+快速幂靠平方从 $j-1$ 推到 $j$，倍增靠跳两次 $2^{j-1}$；查询都是「$k$ 的第 $j$ 位是 1 就乘进去 / 跳过去」。
+要累加沿路点权，再开一张 total：
+\[
+\text{jump}[j][i] = \text{jump}[j-1]\big[\underbrace{\text{jump}[j-1][i]}_{\text{mid}}\big],\qquad
+\text{total}[j][i] = \text{total}[j-1][i] + \text{total}[j-1][\text{mid}]
+\]
+
+\begin{minipage}{0.3\linewidth}\small
+\begin{tabular}{@{}c l l@{}}
+\toprule
+$j$ & jump$[j]$ & total$[j]$\\
+\midrule
+0 & [2, 0, 1] & [2, 0, 1]\\
+1 & [1, 2, 0] & [3, 2, 1]\\
+2 & [2, 0, 1] & [5, 3, 4]\\
+\bottomrule
+\end{tabular}
+\end{minipage}\hfill
+\begin{minipage}{0.67\linewidth}
+2836 的 \code{receiver = [2,0,1]}，$k = 4 = 100_2$：从 2 出发只跳一次 $2^2$，累加 $\text{total}[2][2] = 4$（$1+0+2+1$），
+得分 $2 + 4 = 6$。预处理 $O(n \log k)$，$\log_2 10^{10} \approx 34$ 层。
+不用倍增也能做（尾巴 + 整圈 + 余数，环上前缀和），但边界多；倍增不管图长什么样都是同一套。
+\end{minipage}
+
+\subsection{模板}
+
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+from collections import deque
+
+def peel(nxt):              # A + B
+    n = len(nxt)
+    indeg = [0] * n
+    for v in nxt:
+        indeg[v] += 1
+    depth = [0] * n
+    q = deque(u for u in range(n)
+              if indeg[u] == 0)
+    order = []              # C 倒着扫它
+    while q:
+        u = q.popleft()
+        order.append(u)
+        v = nxt[u]
+        depth[v] = max(depth[v], depth[u] + 1)
+        indeg[v] -= 1       # 先减
+        if indeg[v] == 0:   # 再判
+            q.append(v)
+    on_cycle = [d > 0 for d in indeg]
+    return on_cycle, order, depth
+
+def cycles_of(nxt, on_cycle):  # 剥完再量环
+    left, res = on_cycle[:], []
+    for s in range(len(nxt)):
+        cyc, v = [], s
+        while left[v]:          # 当 visited 用
+            left[v] = False
+            cyc.append(v)
+            v = nxt[v]
+        if cyc:
+            res.append(cyc)
+    return res
+\end{lstlisting}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.49\linewidth}
+\begin{lstlisting}
+def longest_cycle(nxt):     # D: 时间戳
+    seen_at = [0] * len(nxt)    # 0 = 没来过
+    clock, best = 1, -1
+    for s in range(len(nxt)):
+        if seen_at[s]:
+            continue
+        begin, v = clock, s     # round_begin
+        while v != -1 and not seen_at[v]:
+            seen_at[v] = clock
+            clock += 1
+            v = nxt[v]
+        if v != -1 and seen_at[v] >= begin:
+            best = max(best, clock - seen_at[v])
+    return best
+
+def build_jump(nxt, k):     # E: 每个点要有出边
+    n = len(nxt)
+    jump, total = [nxt[:]], [nxt[:]]
+    for _ in range(1, max(1, k.bit_length())):
+        pj, pt = jump[-1], total[-1]
+        jump.append([pj[pj[i]] for i in range(n)])
+        total.append([pt[i] + pt[pj[i]]
+                      for i in range(n)])
+    return jump, total
+
+def walk(jump, total, s, k):  # 骨架同快速幂
+    acc, j = 0, 0
+    while k:
+        if k & 1:           # 第 j 位是 1: 跳 2^j 步
+            acc += total[j][s]
+            s = jump[j][s]
+        k >>= 1
+        j += 1
+    return s, acc           # 终点, 落脚点之和
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X l@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+2360 最长环 & 每块至多一个环，求最长的；有 $-1$ & D\\
+2876 能走到几个点 & 环上 = 环长；树上 \code{ans[u] = ans[f(u)] + 1} & A + C\\
+\textbf{2127} 圆桌请人 & max(最大的长环, 所有 2-环的 $2 + \text{depth}[a] + \text{depth}[b]$ 之和) & A + B\\
+2836 传球 $k$ 次 & 每个起点 $x$：$x$ + 走 $k$ 步的落脚点之和，取 max & E（jump + total）\\
+\bottomrule
+\end{tabularx}
+
+\begin{mynote}
+\textbf{2127}：前两版修一个样例坏一个、开始调 $\pm 1$ 凑答案（说明是结构错了），后来按「剥 / 量 / 算」三段重写
+\begin{itemize}
+\item \code{if indeg[nxt] - 1 == 0} 没真的减；把 \code{-= 1} 挪进 if 里还是只有「减完为 0」才减，入度 $\ge 2$ 的点剥不掉 $\to$ \textbf{先减，再判}
+\item 注释写「function graph 只有 1 个环」：是\textbf{每个连通块}一个环，\code{[1,2,0,4,3]} 就有两个
+\item 想在剥叶子的循环里顺手量环长：环上的点永远不入队，层号一直是 $-1$，算出来的只是 BFS 层数 $\to$ 剥完\textbf{以后}再量
+\item \code{return loopsize + 1} 假设「环外还能再接一个人」：长环一个人都插不进；2-环两侧的链不止 1 个人，要用 depth
+\item 「没有入度 0 的点就 \code{return n}」：多个环时不对（\code{[1,2,0,4,3]} 答 3），也没必要，剥叶子什么都不做，后两段照样对
+\end{itemize}
+\end{mynote}
+
+\subsection{坑}
+\begin{itemize}
+\item 有 $-1$ 的图：倍增表的 \code{pj[pj[i]]} 下标会非法，要先特判走到头；\code{peel} 数入度和剥的时候都要跳过 $-1$
+\item 2836 的得分包括起点 $x$ 自己，\code{walk} 返回的只是落脚点之和
+\item 2876 要\textbf{倒着}扫剥的顺序；正着扫时 \code{ans[f(u)]} 还没算
+\item depth 不含自己；2127 里 $b$ 在环上、不会被剥，所以 \code{depth[a]} 不会把 $b$ 算进去
+\end{itemize}

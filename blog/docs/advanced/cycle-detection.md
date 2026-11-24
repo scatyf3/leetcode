@@ -20,6 +20,8 @@ related: [/paradigms/dfs, /paradigms/bfs, /structures/graph]
 
 建在 L3 的：[DFS](../paradigms/dfs) · [BFS](../paradigms/bfs) · [图](../structures/graph)
 
+在 [图的形状](./graph-shapes) 的思维导图里，这一页讲的是一般有向图、一般无向图和基环树三片叶子；出度 ≤ 1 的图走 [函数图](./functional-graph)。
+
 ## 题单
 
 加粗的是代表题。

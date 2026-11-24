@@ -1,7 +1,7 @@
 ---
 title: 状压 DP
 status: draft
-order: 6
+order: 7
 alias: []
 related: [/paradigms/bit-manipulation, /paradigms/1d-dp]
 ---

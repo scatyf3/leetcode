@@ -1,8 +1,14 @@
 {
-  "structures": [],
-  "paradigms": [],
+  "structures": [
+    "string",
+    "hash-table"
+  ],
+  "paradigms": [
+    "sliding-window",
+    "counting"
+  ],
   "techniques": [],
   "difficulty": "medium",
-  "status": "todo",
+  "status": "solved",
   "familiarity": 2
 }

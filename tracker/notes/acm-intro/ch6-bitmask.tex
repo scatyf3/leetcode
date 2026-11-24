@@ -1,0 +1,187 @@
+% 第 6 章：状压 DP。素材：blog/docs/advanced/bitmask-dp.md
+\section{状压 DP}
+
+\subsection{总览：工具链 + 三种状态设计}
+
+\begin{overview}
+mask ──► dp[mask] ──► total[mask]      子集 = 整数；mask 从小到大填；子集和
+            │
+            ├─ O(2^n * n)     n ≤ 20   一次加一个元素
+            ├─ O(3^n)         n ≤ 14   一次拿掉一组 sub（枚举子集）
+            └─ O(2^n * n^2)   TSP      要排顺序，状态多带一维 last
+
+前置（L3）：位运算 + 一维 DP
+后续（第 7 章）：压的不是「用过哪些」，而是「一列 / 最近 n 格」
+\end{overview}
+
+共同点：有一维只有十几（$n \le 20$），而且「哪些东西已经处理过」会影响后面。把 $n$ 个东西分组、排顺序、两两配对，都是这个味道。按转移怎么拿元素，分三种状态设计：
+
+\begin{tabularx}{\linewidth}{@{}l l l X@{}}
+\toprule
+\textbf{设计} & \textbf{状态} & \textbf{复杂度} & \textbf{什么时候用}\\
+\midrule
+逐个加 & \code{dp[mask]} & $O(2^n n)$ & 加一个元素的代价只看 mask（或 mask 里能带的一点信息）\\
+整组拿 & \code{dp[mask]} & $O(3^n)$ & 「最后一组装哪些」：枚举 mask 的子集 sub\\
+带终点 & \code{dp[mask][last]} & $O(2^n n^2)$ & 要排顺序，代价看相邻两个（旅行商 TSP）\\
+\bottomrule
+\end{tabularx}
+
+\subsection{子集 = 一个整数}
+
+$n$ 个元素编号 $0 \dots n-1$，子集写成 $n$ 位二进制：第 $i$ 位是 1 表示元素 $i$ 在里面。最右边是第 0 位。
+
+例：$n=4$，$\{0, 1, 3\} \to$ \code{1011} $= 11$。所有子集正好是 $0 \dots 2^n-1$，空集 0，全集 $2^n-1$，数组下标直接用 mask。
+
+\textbf{位运算速查}（Python）
+
+\begin{tabularx}{\linewidth}{@{}X l l@{}}
+\toprule
+\textbf{想做的事} & \textbf{写法} & \textbf{例：mask = \code{1011}}\\
+\midrule
+元素 $i$ 在不在 & \code{(mask >> i) \& 1} & $i=2 \to 0$\\
+加入元素 $i$ & \code{mask | (1 << i)} & $i=2 \to$ \code{1111}\\
+去掉元素 $i$（已知在） & \code{mask \^{} (1 << i)} & $i=0 \to$ \code{1010}\\
+全集 / 补集 & \code{full = (1 << n) - 1}，\code{full \^{} mask} & \code{1111} / \code{0100}\\
+最低位的 1 / 它是第几位 & \code{low = mask \& -mask}，\code{low.bit\_length() - 1} & \code{0001} / 0\\
+元素个数 & \code{bin(mask).count('1')}（3.10+ 有 \code{mask.bit\_count()}） & 3\\
+\code{sub} 是不是 \code{mask} 的子集 & \code{(sub \& mask) == sub} & \\
+\bottomrule
+\end{tabularx}
+
+\subsection{在 mask 上做 DP：从小到大填就对}
+
+\textbf{状态}：\code{dp[mask]} = 只考虑 mask 里那些元素时的最优值 / 方案数。\textbf{转移}：从 mask 里拿掉一部分 $T$，落到更小的 mask：
+\[
+\mathrm{dp}[\mathrm{mask}] = \min_{T \subseteq \mathrm{mask}} \big(\mathrm{dp}[\mathrm{mask} \setminus T] + \mathrm{cost}(T)\big)
+\]
+
+\textbf{填表顺序}：拿掉若干个 1，整数一定变小（$\mathrm{mask} \setminus T = \mathrm{mask} - T$）。所以 mask 从 0 到 $2^n-1$ 顺着填，用到的格子都已经填好，整数大小天然就是拓扑序。
+
+\textbf{最小的例子：子集和}。拿掉最低位那个元素，\code{total[mask] = total[mask \^{} low] + nums[idx(low)]}，每个 mask $O(1)$，$O(2^n)$ 得到所有子集的和。很多题第一步就是它。
+
+\begin{principle}
+数据范围里某一维 $\le 20$ $\to$ 把「这一维里哪些用过」压成 mask。$2^{20} \approx 10^6$ 个状态，刚好能跑；$n = 30$ 就不行了（$2^{30}$ 个格子先把内存撑爆）。
+\end{principle}
+
+\subsection{\texorpdfstring{枚举子集的子集：为什么是 $3^n$}{枚举子集的子集：为什么是 3^n}}
+
+一次要拿掉「一组」时，要枚举 mask 的所有非空子集：
+\par\noindent\begin{minipage}{\linewidth}
+\begin{lstlisting}
+sub = mask
+while sub > 0:
+    ...                      # 处理 sub
+    sub = (sub - 1) & mask   # mask 的位上，比 sub 小的最大子集
+\end{lstlisting}
+\end{minipage}
+
+\textbf{为什么不重不漏}：\code{sub - 1} 把最低位的 1 变 0、它右边全变 1；再 \code{\& mask} 清掉不属于 mask 的位。所以它从 mask 开始，从大到小走遍每个子集。
+
+\begin{center}
+\begin{tabular}{@{}l ccccccc@{}}
+\toprule
+mask = \code{1011} & 1 & 2 & 3 & 4 & 5 & 6 & 7\\
+\midrule
+sub & \code{1011} & \code{1010} & \code{1001} & \code{1000} & \code{0011} & \code{0010} & \code{0001}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{总次数}：外层所有 mask $\times$ 内层它的子集。每个元素三种情况：不在 mask / 在 mask 不在 sub / 在 sub，所以 (mask, sub) 对一共 $3^n$ 个。二项式算也一样：$\sum_k \binom{n}{k} 2^k = 3^n$。
+
+\begin{principle}
+$n \le 14$ 左右 $\to$ 多半是让你枚举子集（$3^{14} \approx 4.8 \times 10^6$）。$n = 20$ 时 $3^{20} \approx 3.5 \times 10^9$，跑不动，得换成逐个加。
+\end{principle}
+
+\subsection{mask 不够用：多带一点信息}
+
+只记「用过哪些」不够时，把下一步代价依赖的那个量也放进状态。
+
+\textbf{带终点（TSP）}：从 A 走到 B 的代价看上一站是谁 $\to$ \code{dp[mask][last]} = 访问过 mask、停在 last 的最小代价。转移：下一站 nxt 不在 mask 里，\code{dp[mask | 1<<nxt][nxt] = min(., dp[mask][last] + dist[last][nxt])}。$2^n \cdot n$ 个状态 $\times$ $n$ 种出边。对比暴力 $n!$（$20! \approx 2.4 \times 10^{18}$）：省掉的是「同一个集合、同一个终点，前面怎么排的不重要」。
+
+\textbf{带 (段数, 最后一段用时)（1986 写法二）}：一个一个加任务，状态存一个二元组，按字典序取最小。加任务 $i$ 时，塞得进最后一段就 $(s, u + t_i)$，否则新开 $(s+1, t_i)$。
+
+为什么字典序最小就够：同一个 mask 的 $(s, u)$ 和 $(s', u')$，若 $s < s'$，前者随时新开一段变 $(s+1, 0)$，不比后者差；若 $s = s'$、$u < u'$，前者最后一段剩得更多。所以只留最小的那个不会丢最优解。
+
+\begin{center}
+\begin{tabular}{@{}lllllll@{}}
+\toprule
+\multicolumn{7}{@{}l}{\small 1986 手推：\code{tasks = [1, 2, 3]}，\code{sessionTime = 3}；mask 从右往左是任务 0、1、2}\\
+\midrule
+mask & \code{001} & \code{011} & \code{100} & \code{101} & \code{110} & \code{111}\\
+写法一 dp（段数） & 1 & 1 & 1 & 2 & 2 & \textbf{2}\\
+写法二 dp & (1,1) & (1,3) & (1,3) & (2,1) & (2,2) & \textbf{(2,3)}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+写法一 $3^{14} \approx 4.8 \times 10^6$，写法二 $2^{14} \cdot 14 \approx 2.3 \times 10^5$，快一个数量级；写法一的好处是正确性一眼能看出来。
+
+\subsection{模板}
+
+\textbf{整组拿：子集和 + 枚举子集}（1986 写法一）
+\begin{lstlisting}
+def min_sessions(tasks, T):
+    n = len(tasks)
+    total = [0] * (1 << n)                    # 子集和
+    for mask in range(1, 1 << n):
+        low = mask & -mask                    # 最低位的 1
+        total[mask] = total[mask ^ low] + tasks[low.bit_length() - 1]
+    dp = [float('inf')] * (1 << n)
+    dp[0] = 0
+    for mask in range(1, 1 << n):             # 从小到大填
+        sub = mask
+        while sub > 0:                        # 最后一段做 sub
+            if total[sub] <= T:
+                dp[mask] = min(dp[mask], dp[mask ^ sub] + 1)
+            sub = (sub - 1) & mask
+    return dp[(1 << n) - 1]
+\end{lstlisting}
+
+\par\noindent\begin{minipage}{\linewidth}
+\textbf{带终点：\code{dp[mask][last]}}（从 0 出发、每点一次、回到 0）
+\begin{lstlisting}
+def tsp(dist):
+    n = len(dist)
+    if n == 1:
+        return 0
+    INF = float('inf')
+    dp = [[INF] * n for _ in range(1 << n)]
+    dp[1][0] = 0                              # 只访问了 0，停在 0
+    for mask in range(1 << n):
+        for last in range(n):
+            cur = dp[mask][last]
+            if cur == INF:                    # 不可达（也挡掉 last 不在 mask 里）
+                continue
+            for nxt in range(n):
+                if (mask >> nxt) & 1:         # 去过了
+                    continue
+                nm = mask | (1 << nxt)
+                dp[nm][nxt] = min(dp[nm][nxt], cur + dist[last][nxt])
+    full = (1 << n) - 1
+    return min(dp[full][last] + dist[last][0] for last in range(n))
+\end{lstlisting}
+\end{minipage}
+
+\subsection{Usage}
+
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{题} & \textbf{化成什么} & \textbf{用到}\\
+\midrule
+1986 写法一 & \code{dp[mask]} = 做完 mask 最少几段；最后一段做 sub，要求 \code{total[sub] <= T} & 子集和 + 枚举子集，$3^n$\\
+1986 写法二 & \code{dp[mask]} = (段数, 最后一段用时)，字典序最小 & 逐个加，$2^n n$\\
+TSP（经典） & \code{dp[mask][last]} & 带终点，$2^n n^2$\\
+1931 / 1659 & 第 7 章：一列 / 最近 $n$ 格压成一个数（3 进制） & 同一个「压」的想法\\
+\bottomrule
+\end{tabularx}
+
+\subsection{坑}
+\begin{itemize}
+\item \code{1 << n - 1} 是 $2^{n-1}$：\code{-} 比 \code{<<} 优先。全集要写 \code{(1 << n) - 1}
+\item Python 的 \code{\textasciitilde{}mask} 是负数（无限长的 1），补集用 \code{full \^{} mask}
+\item \code{while sub > 0} 不含空集；转移要用到空集时单独处理
+\item 1986 写法二的初值是 \code{dp[0] = (1, 0)}：已经开了 1 段、用了 0。写成 \code{(0, 0)}，第一个任务会塞进一个不存在的段，答案少 1
+\item TSP 的 \code{dp[mask][last]} 要求 last 在 mask 里；只有从可达状态往外推，才不会用到这种假状态
+\item $O(2^n n^2)$ 在 $n = 20$ 时约 4 亿次，Python 过不了；先看能不能换成 $2^n n$ 的设计
+\end{itemize}

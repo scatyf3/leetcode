@@ -1,0 +1,99 @@
+% 封面 + 目录 + 导读
+\begin{titlepage}
+\vspace*{5cm}
+\begin{center}
+{\Huge\bfseries 算法竞赛风格题入门}\par\vspace{10pt}
+{\Large LeetCode 上的竞赛味题目：从 L3 套路往上走一层}\par\vspace{24pt}
+{\large 快速幂与取模 · 组合计数 · 图的形状 · 判环 · 函数图 · 建图 · 状压 DP · 轮廓线 DP · 搜索剪枝 · 构造}\par
+\vfill
+{\color{note} 2026-11-20 整理自 blog/docs/advanced 与 tracker 笔记\\
+每章同一个组织方式：总览 $\to$ 构件（直觉 / 规则 / 例子）$\to$ 模板 $\to$ Usage 表 $\to$ 坑}
+\end{center}
+\end{titlepage}
+
+\tableofcontents
+\clearpage
+
+\section*{导读}
+\addcontentsline{toc}{section}{导读}
+
+L3 的面试套路熟了以后，再往上走一层。这里的题都来自看板上的 \textbf{ACM 进阶}题单，是 LeetCode 上竞赛味比较重的题。
+每章还是 L3 那个形状（怎么认 $\to$ 模板 $\to$ 栽过的坑），只是认题的信号变了。
+
+\subsection*{和面试题的核心区别}
+
+\begin{tabularx}{\linewidth}{@{}>{\bfseries}l X X@{}}
+\toprule
+& \textbf{L3 面试题} & \textbf{竞赛题}\\
+\midrule
+第一眼看什么 & 题面：给了树 / 区间 / 字符串 & \textbf{数据范围}：$n$ 多大，直接决定能用什么复杂度\\
+题面和结构 & 题面直接告诉你是什么结构 & 题面是个故事，\textbf{先翻译成}图、函数图或计数模型，才轮得到套路\\
+答案 & 构造出答案本身（一条路径、一个子数组） & 常常「对 $10^9+7$ 取模」：答案大到没法枚举，只能\textbf{数}出来\\
+结构 & NeetCode 那十几类 & 多出几种面试基本见不到的：函数图、轮廓线、组合恒等式\\
+构造题 & 几乎没有 & 有：没有搜索空间，靠观察直接给出一个合法答案\\
+对错 & 思路对、能讲清楚就有分 & 只有 AC 和不 AC，边界、溢出、常数（Python 尤其）都得对\\
+\bottomrule
+\end{tabularx}
+
+\subsection*{1. 数据范围就是提示}
+
+竞赛题的数据范围是\textbf{故意卡的}，基本可以从它倒推出要用的算法：
+
+\begin{center}
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+\textbf{$n$ 的上限} & \textbf{能跑的复杂度} & \textbf{通常意味着} & \textbf{本书哪章}\\
+\midrule
+$\le 10 \sim 12$ & $O(n!)$ & 全排列暴搜 & 第 8 章\\
+$\le 15 \sim 20$ & $O(2^n \cdot n)$ & \textbf{状压}：集合当成一个整数 & 第 6 章\\
+某一维 $\le 5$ & $O(\text{长维} \cdot 3^m \cdots)$ & 把小的那维压成状态 & 第 7 章\\
+$\le 500$ & $O(n^3)$ & 区间 DP、Floyd & —\\
+$\le 5000$ & $O(n^2)$ & 二维 DP、杨辉三角 & 第 1 章\\
+$\le 2 \cdot 10^5$ & $O(n \log n)$ & 排序、堆、二分、线段树 & —\\
+$\le 10^9$ & $O(\sqrt n)$ 或 $O(\log n)$ & 二分答案、数学 & —\\
+$\le 10^{18}$ & $O(\log n)$ & \textbf{快速幂}、矩阵快速幂、倍增 & 第 1、2 章\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{principle}
+面试题也给数据范围，但很少靠它出题。到了这一层，\textbf{先看数据范围再读题}。
+\end{principle}
+
+\subsection*{2. 「取模」等于「这是计数题」}
+
+题目要求答案取模，说明答案是指数级的，不可能一个一个列出来。能走的路只有两条：
+组合数学直接算，或者计数 DP 一层一层数。模意义下加、减、乘都可以随时取模，
+\textbf{除法不行}，要换成乘逆元。这一套在第 1 章。
+
+\subsection*{3. 建模比套模板难}
+
+L3 的难点在于「认出是哪个套路」，这一层的难点在\textbf{前面那一步}：
+把「石头」「员工」「颜色」翻译成点、边和状态。
+翻译完通常就落回 L3 的东西了（并查集、拓扑排序、DP），所以每章都会标它建在哪个 L3 套路上。
+
+\subsection*{全书路线图}
+
+\begin{tabularx}{\linewidth}{@{}c >{\bfseries}l X l l@{}}
+\toprule
+\textbf{章} & \textbf{主题} & \textbf{认题信号} & \textbf{建在 L3 的} & \textbf{代表题}\\
+\midrule
+1 & 快速幂、取模、组合计数 & 「对 $10^9+7$ 取模」「有多少种方式」；指数非常大 & 位运算、计数 DP & 372、2400\\
+2 & 图的形状（图论总览） & 题目和环有关：先按方向 / 出度选支，再按每块的边数或有向环定形状 & DFS、BFS、并查集 & 思维导图\\
+3 & 判环 & 「是否有环」「最短环多长」「哪些点永远走不进环」 & DFS、BFS & 802\\
+4 & 函数图 & 输入是 \code{edges[i]} / \code{favorite[i]}：每个点恰好一条出边 & DFS、图 & 2127\\
+5 & 建图：行和列当点 & 题面是网格、石头、约束，问的却是连通 / 先后顺序 & 并查集、拓扑 & 947\\
+6 & 状压 DP & $n \le 20$；状态是「一个子集」 & 位运算、一维 DP & 1986\\
+7 & 铺砖 / 轮廓线 DP & 网格铺砖、涂色，有一维 $\le 5$ & 状压 DP、二维 DP & 1931\\
+8 & 搜索 + 剪枝 & 数据小得反常，想不出 DP 状态，贪心有反例 & 回溯 & 1240\\
+9 & 构造 & 「返回任意一个满足条件的数组」 & 靠观察 & 932\\
+\bottomrule
+\end{tabularx}
+
+\subsection*{怎么读}
+\begin{itemize}
+\item 每章开头的\textbf{总览图}先看：它说明这一章的工具谁是谁的前置，以及题目分成哪几种「化法」。
+\item 构件按「直觉 $\to$ 规则 $\to$ 例子」写；蓝框是可以迁移到别的题的原则。
+\item 每章的 \textbf{Usage 表}是题单：题 $\to$ 化成什么 $\to$ 用到哪个构件。时间不够就只做代表题。
+\item 灰框「你踩过的坑」来自 tracker 里自己做题的笔记，只有做过的题才有。
+\end{itemize}
